@@ -18,19 +18,20 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with  any library licensed under the Apache Software License, 
- * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
- * (or with modified versions of the above that use the same license as the above), 
- * and distribute linked combinations including the two.  You must obey the 
- * GNU General Public License in all respects for all of the code used other than 
- * the above mentioned libraries.  If you modify this file, you may extend this 
- * exception to your version of the file, but you are not obligated to do so.  
+ * the code of this program with  any library licensed under the Apache Software License,
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library
+ * (or with modified versions of the above that use the same license as the above),
+ * and distribute linked combinations including the two.  You must obey the
+ * GNU General Public License in all respects for all of the code used other than
+ * the above mentioned libraries.  If you modify this file, you may extend this
+ * exception to your version of the file, but you are not obligated to do so.
  * If you do not wish to do so, delete this exception statement from your version.
  */
 package mircoders.module;
 
 import mir.log.LoggerWrapper;
-import mir.module.AbstractModule;
+import mir.module.*;
+import mir.util.*;
 import mir.storage.StorageObject;
 
 public class ModuleArticleType extends AbstractModule {
@@ -43,4 +44,14 @@ public class ModuleArticleType extends AbstractModule {
 
     this.theStorage = theStorage;
   }
+
+  public String articleTypeIdForName(String aName) throws ModuleExc, ModuleFailure {
+    try {
+      return theStorage.executeFreeSingleValueSql("select id from article_type where name = '" + JDBCStringRoutines.escapeStringLiteral(aName) + "'");
+    }
+    catch (Throwable t) {
+      throw new ModuleFailure(t);
+    }
+  }
+
 }

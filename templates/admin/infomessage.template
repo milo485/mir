@@ -6,19 +6,19 @@
 <body>
 <include "head.template">
 <table width="100%" border="0" align="center">
-	<tr>
-		<td>
-			<p>
-			  <b>${lang("infomessage."+message, argument1, argument2)}<b>
-			<p>
-			<p>
-				<br>
-				<a class="link-box" href="${config.actionRoot}">[&lt;&lt;&lt;] ${lang("head.start")}</a>&nbsp;&nbsp;&nbsp;
-				
-			</p>
-			
-		</td>
-	</tr>
+  <tr>
+    <td>
+      <p>
+        <b>${lang("infomessage."+message, argument1, argument2)}<b>
+      <p>
+      <p>
+        <br>
+        <a class="link-box" href="${config.actionRoot}">[&lt;&lt;&lt;] ${lang("head.start")}</a>&nbsp;&nbsp;&nbsp;
+        
+      </p>
+      
+    </td>
+  </tr>
 </table>
 <include "foot.template">
 </body>

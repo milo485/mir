@@ -71,12 +71,10 @@ import mircoders.storage.DatabaseUsers;
 import mircoders.storage.DatabaseVideo;
 
 public class MirBasicDataModelLocalizer implements MirDataModelLocalizer {
-  private EntityAdapterModel model;
   protected LoggerWrapper logger;
   protected MirPropertiesConfiguration configuration;
 
   public MirBasicDataModelLocalizer() throws MirLocalizerFailure, MirLocalizerExc {
-    model=null;
     logger = new LoggerWrapper("Localizer.DataModel");
 
     try {
@@ -87,14 +85,7 @@ public class MirBasicDataModelLocalizer implements MirDataModelLocalizer {
     }
   }
 
-  public EntityAdapterModel adapterModel() throws MirLocalizerFailure {
-    if (model==null)
-      model = buildModel();
-
-    return model;
-  };
-
-  protected void constructContentAdapterDefinition(EntityAdapterDefinition anEntityAdapterDefinition) throws MirLocalizerFailure {
+  protected void constructContentAdapterDefinition(EntityAdapterDefinition anEntityAdapterDefinition) throws MirLocalizerFailure, MirLocalizerExc {
     try {
       anEntityAdapterDefinition.addDBDateField("creationdate", "webdb_create");
       anEntityAdapterDefinition.addDBDateField("changedate", "webdb_lastchange");
@@ -164,7 +155,7 @@ public class MirBasicDataModelLocalizer implements MirDataModelLocalizer {
     }
   }
 
-  protected EntityAdapterModel buildModel() throws MirLocalizerFailure {
+  public EntityAdapterModel adapterModel() throws MirLocalizerFailure, MirLocalizerExc {
     EntityAdapterModel result = new EntityAdapterModel();
 
     try {

@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with  any library licensed under the Apache Software License, 
- * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
- * (or with modified versions of the above that use the same license as the above), 
- * and distribute linked combinations including the two.  You must obey the 
- * GNU General Public License in all respects for all of the code used other than 
- * the above mentioned libraries.  If you modify this file, you may extend this 
- * exception to your version of the file, but you are not obligated to do so.  
+ * the code of this program with  any library licensed under the Apache Software License,
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library
+ * (or with modified versions of the above that use the same license as the above),
+ * and distribute linked combinations including the two.  You must obey the
+ * GNU General Public License in all respects for all of the code used other than
+ * the above mentioned libraries.  If you modify this file, you may extend this
+ * exception to your version of the file, but you are not obligated to do so.
  * If you do not wish to do so, delete this exception statement from your version.
  */
 
@@ -35,17 +35,22 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-
+import javax.media.jai.ImageLayout;
 import javax.media.jai.InterpolationBilinear;
 import javax.media.jai.JAI;
 import javax.media.jai.ParameterBlockJAI;
 import javax.media.jai.PlanarImage;
 
-import mir.log.LoggerWrapper;
+import java.awt.RenderingHints;
+import java.awt.image.ColorModel;
+import java.awt.image.DataBuffer;
+import java.awt.image.PixelInterleavedSampleModel;
 
 import com.sun.media.jai.codec.ByteArraySeekableStream;
 import com.sun.media.jai.codec.FileSeekableStream;
 import com.sun.media.jai.codec.SeekableStream;
+
+import mir.log.LoggerWrapper;
 
 /**
  *
@@ -66,22 +71,46 @@ public class ImageProcessor {
   private byte[] imageData;
   private int iconWidth;
   private int iconHeight;
-  private String imageType;
 
-//  public ImageScaler(
+  public ImageProcessor(SeekableStream anImageStream) throws IOException {
+    PlanarImage tempImage = JAI.create("stream", anImageStream);
+    ParameterBlockJAI params = new ParameterBlockJAI("format");
+    int bands[];
+    int nrComponents;
 
-  public ImageProcessor(SeekableStream anImageStream, String anImageType) throws IOException {
-    image = JAI.create("stream", anImageStream);
+
+    params.addSource(tempImage);
+    params.setParameter("dataType", DataBuffer.TYPE_BYTE);
+
+    ImageLayout layout = new ImageLayout();
+    nrComponents = tempImage.getColorModel().getNumColorComponents();
+
+    bands = new int[nrComponents];
+    for (int i=0; i<nrComponents; i++)
+      bands[i]=i;
+
+    layout.setColorModel(ColorModel.getRGBdefault());
+    layout.setSampleModel(
+        new PixelInterleavedSampleModel(DataBuffer.TYPE_BYTE,
+        tempImage.getWidth(),
+        tempImage.getHeight(),
+        nrComponents,
+        nrComponents*tempImage.getWidth(),
+        bands));
+
+    RenderingHints hints = new RenderingHints(JAI.KEY_IMAGE_LAYOUT, layout);
+
+    image = JAI.create("format", params, hints);
+
     scaledImage = image;
-    imageType = anImageType;
   }
 
-  public ImageProcessor(File aFile, String anImageType) throws IOException {
-    this(new FileSeekableStream(aFile), anImageType);
+  public ImageProcessor(File aFile) throws IOException {
+    this(new FileSeekableStream(aFile));
   }
 
-  public ImageProcessor(byte[] anImageData, String anImageType) throws IOException {
-    this(new ByteArraySeekableStream(anImageData), anImageType);
+  public ImageProcessor(byte[] anImageData) throws IOException {
+    this(new ByteArraySeekableStream(anImageData));
   }
 
   public void descaleImage(int aMaxSize) throws java.io.IOException {
@@ -163,17 +192,37 @@ public class ImageProcessor {
     return scaledImage.getHeight();
   }
 
-  public void writeScaledData(OutputStream aStream) {
-    JAI.create("encode", scaledImage, aStream, imageType, null);
+  public void writeScaledData(OutputStream aStream, String anImageType) {
+    JAI.create("encode", scaledImage, aStream, anImageType, null);
   }
 
-  public byte[] getScaledData() {
+  public byte[] getScaledData(String anImageType) {
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-    writeScaledData(outputStream);
+    writeScaledData(outputStream, anImageType);
     return outputStream.toByteArray();
   }
 
-  public void writeScaledData(File aFile) throws IOException {
-    writeScaledData(new FileOutputStream(aFile));
+  public void writeScaledData(File aFile, String anImageType) throws IOException {
+    writeScaledData(new FileOutputStream(aFile), anImageType);
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -10,10 +10,10 @@
 <include "head.template">
 
 <form method="post" action="${config.actionRoot}">
-	<input type=hidden name=module value=Mediafolder>
-	<input type="hidden" name="id" value="${data.id}">
-	<if data.new> <input type="hidden" name="do" value="insert">
-	<else>	 <input type="hidden" name="do" value="update"></if>
+  <input type=hidden name=module value=Mediafolder>
+  <input type="hidden" name="id" value="${data.id}">
+  <if data.new> <input type="hidden" name="do" value="insert">
+  <else>   <input type="hidden" name="do" value="update"></if>
 
 <table border="0" cellspacing="2" cellpadding="2">
 <call TextInputTableRow (lang("mediafolder.date"), 8, 8, "date", data.date)>
@@ -25,9 +25,9 @@
 
   <tr>
     <td colspan="4" align="right" class="table-foot"> 
-		<if data.new> <input type="submit" name="save" value="${lang("insert")}">
-    	<else>   <input type="submit" name="save" value="${lang("save")}"></if>
-		
+    <if data.new> <input type="submit" name="save" value="${lang("insert")}">
+      <else>   <input type="submit" name="save" value="${lang("save")}"></if>
+    
     </td>
   </tr>
 </table>
@@ -36,7 +36,7 @@
     <p>      
       <a class="link-box" href="${config.actionRoot}?module=Mediafolder&do=list">[&lt;] ${lang("list")} </a> &nbsp;
       <a class="link-box" href="${config.actionRoot}">[&lt;&lt;&lt;] ${lang("head.start")}</a>
-	</p>
+  </p>
 
 <include "foot.template">
 </body>

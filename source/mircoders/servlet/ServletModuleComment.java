@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with  any library licensed under the Apache Software License, 
- * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
- * (or with modified versions of the above that use the same license as the above), 
- * and distribute linked combinations including the two.  You must obey the 
- * GNU General Public License in all respects for all of the code used other than 
- * the above mentioned libraries.  If you modify this file, you may extend this 
- * exception to your version of the file, but you are not obligated to do so.  
+ * the code of this program with  any library licensed under the Apache Software License,
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library
+ * (or with modified versions of the above that use the same license as the above),
+ * and distribute linked combinations including the two.  You must obey the
+ * GNU General Public License in all respects for all of the code used other than
+ * the above mentioned libraries.  If you modify this file, you may extend this
+ * exception to your version of the file, but you are not obligated to do so.
  * If you do not wish to do so, delete this exception statement from your version.
  */
 
@@ -35,7 +35,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -46,6 +45,7 @@ import mir.log.LoggerWrapper;
 import mir.servlet.ServletModule;
 import mir.servlet.ServletModuleExc;
 import mir.servlet.ServletModuleFailure;
+import mir.servlet.ServletModuleUserExc;
 import mir.util.CachingRewindableIterator;
 import mir.util.HTTPRequestParser;
 import mir.util.JDBCStringRoutines;
@@ -86,6 +86,13 @@ public class ServletModuleComment extends ServletModule
     catch (Exception e) {
       logger.error("servletmodule comment could not be initialized:" + e.getMessage());
     }
+  }
+
+  public void delete(HttpServletRequest req, HttpServletResponse res) throws ServletModuleExc, ServletModuleUserExc, ServletModuleFailure {
+    if (!configuration.getString("Mir.Localizer.Admin.AllowDeleteArticle", "0").equals("1"))
+      throw new ServletModuleExc("Operation not permitted");
+
+    super.delete(req, res);
   }
 
   public void edit(HttpServletRequest req, HttpServletResponse res) throws ServletModuleExc

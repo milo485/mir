@@ -1,18 +1,18 @@
 <a name="top"></a>
 
 <table class="table-head" width="100%" cellspacing="0" cellpadding="0">
-	<tr>
-		<td>
-			<img src="${config.docRoot}/img/logo_small.gif" border="0" align="middle">&nbsp;
-			${config["Mir.Name"]}
-		</td>
-		<td align="right">
-			<if returnurl>
-				<a href="${config.actionRoot}?${returnurl}"><span class="table-head">[ &lt; ] ${lang("back")}</span></a>&nbsp;&nbsp;|
-			</if>
-			<a href="${config.actionRoot}"><span class="table-head">${lang("head.start")}</span></a> |
-			<a href="${config.actionRoot}?module=logout"><span class="table-head">${lang("head.logout")}</span></a>
-		</td>
-	</tr>
+  <tr>
+    <td>
+      <img src="${config.docRoot}/img/logo_small.gif" border="0" align="middle">&nbsp;
+      ${config["Mir.Name"]}
+    </td>
+    <td align="right">
+      <if returnurl>
+        <a href="${config.actionRoot}?${returnurl}"><span class="table-head">[ &lt; ] ${lang("back")}</span></a>&nbsp;&nbsp;|
+      </if>
+      <a href="${config.actionRoot}"><span class="table-head">${lang("head.start")}</span></a> |
+      <a href="${config.actionRoot}?module=logout"><span class="table-head">${lang("head.logout")}</span></a>
+    </td>
+  </tr>
 </table>
 <hr>

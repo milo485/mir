@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with  any library licensed under the Apache Software License, 
- * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
- * (or with modified versions of the above that use the same license as the above), 
- * and distribute linked combinations including the two.  You must obey the 
- * GNU General Public License in all respects for all of the code used other than 
- * the above mentioned libraries.  If you modify this file, you may extend this 
- * exception to your version of the file, but you are not obligated to do so.  
+ * the code of this program with  any library licensed under the Apache Software License,
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library
+ * (or with modified versions of the above that use the same license as the above),
+ * and distribute linked combinations including the two.  You must obey the
+ * GNU General Public License in all respects for all of the code used other than
+ * the above mentioned libraries.  If you modify this file, you may extend this
+ * exception to your version of the file, but you are not obligated to do so.
  * If you do not wish to do so, delete this exception statement from your version.
  */
 
@@ -47,7 +47,7 @@ import mircoders.servlet.ServletModuleOpenIndy;
  *  OpenMir.java - main servlet for open posting and comment feature to articles
  *
  *  @author RK 1999-2001, the mir-coders group
- *  @version $Id: OpenMir.java,v 1.34 2003/04/21 12:42:46 idfx Exp $
+ *  @version $Id: OpenMir.java,v 1.35 2003/05/01 01:42:11 zapata Exp $
  *
  */
 
@@ -113,7 +113,7 @@ public class OpenMir extends AbstractServlet {
     String requestLanguage = aRequest.getParameter("language");
     String sessionLanguage = (String) aSession.getAttribute("language");
     String acceptLanguage = aRequest.getLocale().getLanguage();
-    String defaultLanguage = MirGlobal.config().getString("Mir.Login.DefaultLanguage", "en");
+    String defaultLanguage = configuration.getString("Mir.Login.DefaultLanguage", "en");
 
     String language = requestLanguage;
 

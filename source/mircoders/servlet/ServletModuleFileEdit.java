@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with  any library licensed under the Apache Software License, 
- * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
- * (or with modified versions of the above that use the same license as the above), 
- * and distribute linked combinations including the two.  You must obey the 
- * GNU General Public License in all respects for all of the code used other than 
- * the above mentioned libraries.  If you modify this file, you may extend this 
- * exception to your version of the file, but you are not obligated to do so.  
+ * the code of this program with  any library licensed under the Apache Software License,
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library
+ * (or with modified versions of the above that use the same license as the above),
+ * and distribute linked combinations including the two.  You must obey the
+ * GNU General Public License in all respects for all of the code used other than
+ * the above mentioned libraries.  If you modify this file, you may extend this
+ * exception to your version of the file, but you are not obligated to do so.
  * If you do not wish to do so, delete this exception statement from your version.
  */
 
@@ -36,12 +36,11 @@ import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Vector;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -51,6 +50,7 @@ import mir.servlet.ServletModuleExc;
 import mir.servlet.ServletModuleFailure;
 import mir.util.FileFunctions;
 import mir.util.HTTPRequestParser;
+import mir.util.StringRoutines;
 import mir.util.URLBuilder;
 
 /*
@@ -58,8 +58,8 @@ import mir.util.URLBuilder;
  *  Allows one to do a basic edit of a file in a directory specified
  *  in the config file.
  *
- * @author $Author: idfx $
- * @version $Revision: 1.10 $ $Date: 2003/04/21 12:42:51 $
+ * @author $Author: zapata $
+ * @version $Revision: 1.12 $ $Date: 2003/04/28 01:57:14 $
  *
  */
 
@@ -68,20 +68,74 @@ public class ServletModuleFileEdit extends ServletModule
   private static ServletModuleFileEdit instance = new ServletModuleFileEdit();
   public static ServletModule getInstance() { return instance; }
 
-  private File rootDirectory;
-  private FilenameFilter filter;
+  private Map directories;
+  private List directoryNames;
+
   private FilenameFilter dirFilter;
-  private boolean recurse;
+
+  private class FileEditDirectory {
+    private String name;
+    private FileFunctions.RegExpFileFilter filter;
+    private File rootDirectory;
+    private boolean recursive;
+
+    public FileEditDirectory(String aName, String aRootDirectory, String aFilter, boolean aRecursive) {
+      name = aName;
+      rootDirectory = new File(aRootDirectory);
+      filter = new FileFunctions.RegExpFileFilter(aFilter);
+      recursive = aRecursive;
+    }
+
+    public String getName() {
+      return name;
+    }
+
+    public FileFunctions.RegExpFileFilter getFilter() {
+      return filter;
+    }
+
+    public File getRootDirectory() {
+      return rootDirectory;
+    }
+
+    public boolean getRecursive() {
+      return recursive;
+    }
+  }
 
   private ServletModuleFileEdit() {
     super();
 
     logger = new LoggerWrapper("ServletModule.FileEdit");
 
-    rootDirectory = new File(configuration.getString("ServletModule.FileEdit.FileDirectory"));
-    recurse = configuration.getString("ServletModule.FileEdit.Recursive", "").equals("1");
+    directories = new HashMap();
+    directoryNames = new Vector();
 
-    filter = new FileFunctions.RegExpFileFilter(configuration.getString("ServletModule.FileEdit.ExtFilter"));
+    String settings[] = configuration.getStringArray("ServletModule.FileEdit.Configuration");
+
+    if (settings!=null) {
+      for (int i = 0; i < settings.length; i++) {
+        String setting = settings[i].trim();
+
+        if (setting.length() > 0) {
+          List parts = StringRoutines.splitString(setting, ":");
+          if (parts.size() != 4) {
+            logger.error("config error: " + settings[i] + ", 4 parts expected");
+          }
+          else {
+            String name = (String) parts.get(0);
+            String directory = (String) parts.get(1);
+            String filter = (String) parts.get(2);
+            String recursive = (String) parts.get(3);
+
+            directories.put(name, new FileEditDirectory(name, directory, filter,
+                recursive.equals("1") || recursive.toLowerCase().equals("y")));
+            directoryNames.add(name);
+          }
+        }
+      }
+    }
+
     dirFilter = new FileFunctions.DirectoryFilter();
 
     templateListString =configuration.getString("ServletModule.FileEdit.ListTemplate");
@@ -89,22 +143,35 @@ public class ServletModuleFileEdit extends ServletModule
     templateConfirmString =configuration.getString("ServletModule.FileEdit.ConfirmTemplate");
   }
 
+  public List getEntries() {
+    return directoryNames;
+  }
+
+  public FileEditDirectory getDirectory(HttpServletRequest aRequest) throws ServletModuleExc {
+    FileEditDirectory result = (FileEditDirectory) directories.get(aRequest.getParameter("entry"));
+    if (result == null)
+      throw new ServletModuleExc("Unknown entry: " + aRequest.getParameter("entry"));
+
+    return result;
+  }
+
   public void list(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc
   {
-    listSubDirectory("/", aRequest, aResponse);
+    listSubDirectory(getDirectory(aRequest), "/", aRequest, aResponse);
   }
 
   public void edit(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc
   {
     try {
       HTTPRequestParser requestParser = new HTTPRequestParser(aRequest);
+
       String filename = requestParser.getParameter("filename");
       String subDirectory = requestParser.getParameterWithDefault("subdirectory", "");
 
       if (filename == null)
         throw new ServletModuleExc("No filename  specified");
 
-      editFile(filename, subDirectory, aRequest, aResponse);
+      editFile(getDirectory(aRequest), filename, subDirectory, aRequest, aResponse);
     }
     catch (Throwable e) {
       throw new ServletModuleFailure(e);
@@ -115,28 +182,32 @@ public class ServletModuleFileEdit extends ServletModule
   {
     try {
       HTTPRequestParser requestParser = new HTTPRequestParser(aRequest);
+
       String directoryName = requestParser.getParameter("directory");
       String subDirectoryName = requestParser.getParameter("subdirectory");
 
       if (directoryName==null | subDirectoryName==null)
         throw new ServletModuleExc("No directory/subDirectory specified");
 
-      listSubDirectory(subDirectoryName+File.separator+directoryName, aRequest, aResponse);
+      listSubDirectory(getDirectory(aRequest), subDirectoryName+File.separator+directoryName, aRequest, aResponse);
     }
     catch (Throwable e) {
       throw new ServletModuleFailure(e);
     }
   }
+
   public void update(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc
   {
-    String filename = aRequest.getParameter("filename");
-    String subDirectory = aRequest.getParameter("subdirectory");
-    String text = aRequest.getParameter("text");
+    HTTPRequestParser requestParser = new HTTPRequestParser(aRequest);
+    String filename = requestParser.getParameter("filename");
+    String subDirectory = requestParser.getParameter("subdirectory");
+    String text = requestParser.getParameter("text");
+    FileEditDirectory directory = getDirectory(aRequest);
 
     try {
-      File f = new File(new File(rootDirectory, subDirectory), filename);
+      File f = new File(new File(directory.getRootDirectory(), subDirectory), filename);
 
-      if (validateDirectory(f)) {
+      if (validateDirectory(directory, f)) {
         StringReader in = new StringReader(text);
         FileWriter out = new FileWriter(f);
 
@@ -146,7 +217,7 @@ public class ServletModuleFileEdit extends ServletModule
         in.close();
         out.close();
 
-        editFile(filename, subDirectory, aRequest, aResponse);
+        editFile(directory, filename, subDirectory, aRequest, aResponse);
       }
     }
     catch (Throwable e) {
@@ -154,25 +225,25 @@ public class ServletModuleFileEdit extends ServletModule
     }
   }
 
-  public void listSubDirectory(String aSubDirectory, HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc
+  public void listSubDirectory(FileEditDirectory aDirectory, String aSubDirectory, HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc
   {
     try {
       Map responseData = ServletHelper.makeGenerationData(new Locale[] { getLocale(aRequest), getFallbackLocale(aRequest)});
-      File dir = new File(rootDirectory, aSubDirectory);
+      File dir = new File(aDirectory.getRootDirectory(), aSubDirectory);
 
-      if (!validateDirectory(dir) || !dir.isDirectory()) {
-        dir = rootDirectory;
+      if (!validateDirectory(aDirectory, dir) || !dir.isDirectory()) {
+        dir = aDirectory.getRootDirectory();
         aSubDirectory = "";
       }
 
-      responseData.put("filelist", Arrays.asList(dir.list(filter)));
+      responseData.put("filelist", FileFunctions.getDirectoryContentsAsList(dir, aDirectory.getFilter()));
 
-      if (recurse) {
+      if (aDirectory.getRecursive()) {
         List dirs = new Vector();
-        if (!dir.getCanonicalPath().equals(rootDirectory.getCanonicalPath()))
+        if (!dir.getCanonicalPath().equals(aDirectory.getRootDirectory().getCanonicalPath()))
           responseData.put("updir", new File(aSubDirectory).getParent());
 
-        dirs.addAll(Arrays.asList(dir.list(dirFilter)));
+        dirs.addAll(FileFunctions.getDirectoryContentsAsList(dir, dirFilter));
 
         responseData.put("dirlist", dirs);
       }
@@ -182,6 +253,7 @@ public class ServletModuleFileEdit extends ServletModule
       }
 
       responseData.put("subdirectory", aSubDirectory);
+      responseData.put("entry", aDirectory.getName());
 
       ServletHelper.generateResponse(aResponse.getWriter(), responseData, templateListString);
     }
@@ -190,13 +262,13 @@ public class ServletModuleFileEdit extends ServletModule
     }
   }
 
-  public void editFile(String aFileName, String aSubDirectory, HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc
+  public void editFile(FileEditDirectory aDirectory, String aFileName, String aSubDirectory, HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc
   {
     try {
-      File f = new File(new File(rootDirectory, aSubDirectory), aFileName);
+      File f = new File(new File(aDirectory.getRootDirectory(), aSubDirectory), aFileName);
 
-      if (!validateDirectory(f) || f.isDirectory() || !validateFile(f)) {
-        listSubDirectory("", aRequest, aResponse);
+      if (!validateDirectory(aDirectory, f) || f.isDirectory() || !validateFile(aDirectory, f)) {
+        listSubDirectory(aDirectory, "", aRequest, aResponse);
       }
       else {
         Map responseData = ServletHelper.makeGenerationData(new Locale[] { getLocale(aRequest), getFallbackLocale(aRequest)});
@@ -204,6 +276,7 @@ public class ServletModuleFileEdit extends ServletModule
 
         urlBuilder.setValue("module", "FileEdit");
         urlBuilder.setValue("do", "enter");
+        urlBuilder.setValue("entry", aDirectory.getName());
         urlBuilder.setValue("directory", "");
         urlBuilder.setValue("subdirectory", aSubDirectory);
 
@@ -216,6 +289,7 @@ public class ServletModuleFileEdit extends ServletModule
         in.close();
         out.close();
 
+        responseData.put("entry", aDirectory.getName());
         responseData.put("text", out.toString());
         responseData.put("filename", aFileName);
         responseData.put("subdirectory", aSubDirectory);
@@ -229,18 +303,18 @@ public class ServletModuleFileEdit extends ServletModule
     }
   }
 
-  protected boolean validateDirectory(File aFile) {
+  protected boolean validateDirectory(FileEditDirectory aDirectory, File aFile) {
     try {
-      return (aFile.getCanonicalPath().startsWith(rootDirectory.getCanonicalPath()));
+      return (aFile.getCanonicalPath().startsWith(aDirectory.getRootDirectory().getCanonicalPath()));
     }
     catch (Throwable t) {
       return false;
     }
   }
 
-  protected boolean validateFile(File aFile) {
+  protected boolean validateFile(FileEditDirectory aDirectory, File aFile) {
     try {
-      return filter.accept(aFile.getParentFile(), aFile.getName());
+      return aDirectory.getFilter().accept(aFile.getParentFile(), aFile.getName());
     }
     catch (Throwable t) {
       return false;

@@ -35,10 +35,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.*;
+import java.util.Vector;
 
 import mir.config.MirPropertiesConfiguration;
-import mir.entity.Entity;
 import mir.log.LoggerWrapper;
 import mir.session.Request;
 import mir.session.Response;
@@ -49,13 +48,8 @@ import mir.session.SessionHandler;
 import mir.session.UploadedFile;
 import mir.storage.StorageObject;
 import mir.util.ExceptionFunctions;
-import mircoders.entity.EntityComment;
 import mircoders.global.MirGlobal;
-import mircoders.media.MediaUploadProcessor;
-import mircoders.module.ModuleComment;
-import mircoders.storage.DatabaseComment;
-import mircoders.storage.DatabaseCommentToMedia;
-import mircoders.storage.DatabaseContent;
+import mircoders.module.ModuleMediaType;
 
 /**
  *
@@ -71,6 +65,12 @@ public abstract class MirBasicPostingSessionHandler implements SessionHandler {
   protected LoggerWrapper logger;
   protected MirPropertiesConfiguration configuration;
 
+  private String normalResponseGenerator;
+  private String dupeResponseGenerator;
+  private String unsupportedMediaTypeResponseGenerator;
+  private String finalResponseGenerator;
+
+
   public MirBasicPostingSessionHandler() {
     logger = new LoggerWrapper("Localizer.OpenPosting");
     try {
@@ -83,13 +83,31 @@ public abstract class MirBasicPostingSessionHandler implements SessionHandler {
     }
   }
 
+  protected void setNormalResponseGenerator(String aGenerator) {
+    normalResponseGenerator = aGenerator;
+  }
+
+  protected void setResponseGenerators(String aNormalResponseGenerator, String aDupeResponseGenerator,
+        String anUnsupportedMediaTypeResponseGenerator, String aFinalResponseGenerator) {
+    setNormalResponseGenerator(aNormalResponseGenerator);
+    dupeResponseGenerator = aDupeResponseGenerator;
+    unsupportedMediaTypeResponseGenerator = anUnsupportedMediaTypeResponseGenerator;
+    finalResponseGenerator = aFinalResponseGenerator;
+  }
+
   public void processRequest(Request aRequest, Session aSession, Response aResponse) throws SessionExc, SessionFailure {
-    if (aSession.getAttribute("initialRequest")==null) {
-      initialRequest(aRequest, aSession, aResponse);
-      aSession.setAttribute("initialRequest", "no");
+    if (MirGlobal.abuse().getOpenPostingDisabled()) {
+      makeOpenPostingDisabledResponse(aRequest, aSession, aResponse);
+      aSession.terminate();
     }
     else {
-      subsequentRequest(aRequest, aSession, aResponse);
+      if (aSession.getAttribute("initialRequest") == null) {
+        initialRequest(aRequest, aSession, aResponse);
+        aSession.setAttribute("initialRequest", "no");
+      }
+      else {
+        subsequentRequest(aRequest, aSession, aResponse);
+      }
     }
   };
 
@@ -170,9 +188,38 @@ public abstract class MirBasicPostingSessionHandler implements SessionHandler {
     aResponse.setResponseValue("errors", null);
   }
 
-  protected abstract void makeInitialResponse(Request aRequest, Session aSession, Response aResponse) throws SessionExc, SessionFailure;
-  protected abstract void makeResponse(Request aRequest, Session aSession, Response aResponse, List anErrors) throws SessionExc, SessionFailure;
-  protected abstract void makeFinalResponse(Request aRequest, Session aSession, Response aResponse) throws SessionExc, SessionFailure;
+  protected void makeInitialResponse(Request aRequest, Session aSession, Response aResponse) throws SessionExc, SessionFailure {
+    aResponse.setResponseGenerator(normalResponseGenerator);
+  };
+
+  protected void makeResponse(Request aRequest, Session aSession, Response aResponse, List anErrors) throws SessionExc, SessionFailure {
+    aResponse.setResponseValue("errors", anErrors);
+    aResponse.setResponseGenerator(normalResponseGenerator);
+  };
+
+  protected void makeFinalResponse(Request aRequest, Session aSession, Response aResponse) throws SessionExc, SessionFailure {
+    aResponse.setResponseGenerator(finalResponseGenerator);
+  };
+
+  protected void makeErrorResponse(Request aRequest, Session aSession, Response aResponse, Throwable anError) throws SessionExc, SessionFailure {
+    anError.printStackTrace();
+    Throwable rootCause = ExceptionFunctions.traceCauseException(anError);
+
+    if (rootCause instanceof DuplicatePostingExc)
+      aResponse.setResponseGenerator(dupeResponseGenerator);
+    if (rootCause instanceof ModuleMediaType.UnsupportedMimeTypeExc) {
+      aResponse.setResponseValue("mimetype", ((ModuleMediaType.UnsupportedMimeTypeExc) rootCause).getMimeType());
+      aResponse.setResponseGenerator(unsupportedMediaTypeResponseGenerator);
+    }
+    else {
+      aResponse.setResponseValue("errorstring", anError.getMessage());
+      aResponse.setResponseGenerator(configuration.getString("Localizer.OpenSession.ErrorTemplate"));
+    }
+  };
+
+  protected void makeOpenPostingDisabledResponse(Request aRequest, Session aSession, Response aResponse) {
+    aResponse.setResponseGenerator(configuration.getString("ServletModule.OpenIndy.PostingDisabledTemplate"));
+  }
 
   protected void preProcessRequest(Request aRequest, Session aSession) throws SessionExc, SessionFailure {
   };
@@ -200,12 +247,16 @@ public abstract class MirBasicPostingSessionHandler implements SessionHandler {
   }
 
   protected void validate(List aResults, Request aRequest, Session aSession) throws SessionExc, SessionFailure {
-  }
+    String password = (String) aSession.getAttribute("password");
 
-  protected void makeErrorResponse(Request aRequest, Session aSession, Response aResponse, Throwable anError) throws SessionExc, SessionFailure {
-    aResponse.setResponseValue("errorstring", anError.getMessage());
-    aResponse.setResponseGenerator(configuration.getString("Localizer.OpenSession.ErrorTemplate"));
-  };
+    if (password!=null) {
+      String submittedPassword= aRequest.getParameter("password").trim();
+
+      if (!password.equals(submittedPassword)) {
+        aResults.add(new ValidationError("password", "passwordmismatch"));
+      }
+    }
+  }
 
   /**
    * Class that represents a validation error
@@ -362,6 +413,12 @@ public abstract class MirBasicPostingSessionHandler implements SessionHandler {
     }
 
     return result;
+  }
+
+  protected static class DuplicatePostingExc extends SessionExc {
+    public DuplicatePostingExc(String aMessage) {
+      super(aMessage);
+    }
   }
 
 }

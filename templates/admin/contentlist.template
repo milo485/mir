@@ -3,17 +3,17 @@
 </comment>
 
 <if selectarticleurl!="">
-	<assign showsearch="1">
-	<assign showactions="0">
+  <assign showsearch="1">
+  <assign showactions="0">
 <else>
-	<assign showactions="1">
-	<assign showsearch="0">
+  <assign showactions="1">
+  <assign showsearch="0">
 </if>
 
 <html>
 <head>
-	<title>${config["Mir.Name"]} | ${lang("contentlist.htmltitle")} </title>
-	<link rel="stylesheet" type="text/css" href="${config.docRoot}/style/admin.css">
+  <title>${config["Mir.Name"]} | ${lang("contentlist.htmltitle")} </title>
+  <link rel="stylesheet" type="text/css" href="${config.docRoot}/style/admin.css">
 </head>
 
 <body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
@@ -21,108 +21,110 @@
 <include "head.template">
 
 <if showsearch=="1">
-	<call ContentSearch ("layouted")>
+  <call ContentSearch ("layouted")>
 </if>
 
 <if articles>
 
 <if showactions=="1">
-	<if config["Mir.Localizer.Admin.ListOperationsFlavor"]!="0">
-		<form method="post" action="${config.actionRoot}">
-			<input type="hidden" name="module" value="Localizer">
-			<input type="hidden" name="do" value="articleoperationbatch">
-			<input type="hidden" name="returnurl" value="${utility.encodeHTML(thisurl)}">
-			<p class="box">
-				<input type="submit" name="save" value="${lang("save")}"> &nbsp; (${lang("commentlist.activate")})
-			</p>
-	</if>    
+  <if config["Mir.Localizer.Admin.ListOperationsFlavor"]!="0">
+    <form method="post" action="${config.actionRoot}">
+      <input type="hidden" name="module" value="Localizer">
+      <input type="hidden" name="do" value="articleoperationbatch">
+      <input type="hidden" name="returnurl" value="${utility.encodeHTML(thisurl)}">
+      <p class="box">
+        <input type="submit" name="save" value="${lang("save")}"> &nbsp; (${lang("commentlist.activate")})
+      </p>
+  </if>    
 </if>
 
 <call PrevNext ("right")>
 
 <table border="0" width="100%" cellspacing="3" cellpadding="2">
-	<tr>
-		<td class="table-head" valign="top">
-			<span class="small">	  
-			${lang("content.creationdate")}<br>
-			${lang("content.modificationdate")}<br>
-			${lang("content.status")}
-			</span>
-		</td>
-		<td class="table-head" valign="top">
-			${lang("content.type")} - ${lang("content.title")} <br>
-			${lang("content.creator")}
-		</td>
-		<td class="table-head" valign="top">
-			${lang("content.comment")}
-		</td>
-		<td class="table-head" valign="top">&nbsp;</td>
-	</tr>
+  <tr>
+    <td class="table-head" valign="top">
+      <span class="small">    
+      ${lang("content.creationdate")}<br>
+      ${lang("content.modificationdate")}<br>
+      ${lang("content.status")}
+      </span>
+    </td>
+    <td class="table-head" valign="top">
+      ${lang("content.type")} - ${lang("content.title")} <br>
+      ${lang("content.creator")}
+    </td>
+    <td class="table-head" valign="top">
+      ${lang("content.comment")}
+    </td>
+    <td class="table-head" valign="top">&nbsp;</td>
+  </tr>
 
 <assign grey="0">
 
-	<list articles as entry>
-		<tr <if grey=="1"><assign grey="0">class="listrow1"<else>class="listrow2"<assign grey="1"></if>>
-			<td class="x-small">
-					${entry.creationdate.formatted["dd.MM.yyyy HH:mm"]}<br>
-					${entry.changedate.formatted["dd.MM.yyyy HH:mm"]}<br>
-					<if entry.is_published!="0">Pub.<else>-</if> <if entry.is_html!="0">HTML<else>-</if>
-			</td>
-			<td>
-				<b>${entry.title}</b><br>
-				${lang("by")}: ${entry.creator}<br>
-				(${lang("articletypes." + entry.article_type.name)}) 
-				<if showactions=="1">
-					<if config["Mir.Localizer.Admin.ListOperationsFlavor"]=="0">
-						<list entry.operations as op>
-							[ <a href="${config.actionRoot}?module=Localizer&do=articleoperation&operation=${op}&articleid=${entry.id}&returnurl=${utility.encodeURI(thisurl)}">${lang("content.operation."+op)}</a> ]
-						</list>
-					</if>
-				<if config["Mir.Localizer.Admin.ListOperationsFlavor"]=="1">
-					<list entry.operations as op>
-						[ <input type="checkbox" name="operation" value="${entry.id};${op}"> ${lang("content.operation."+op)} ]
-					</list>
-				</if>
-					<if config["Mir.Localizer.Admin.ListOperationsFlavor"]=="2">
-						<select name="operation">
-							<option value="" selected>&nbsp;</option>
-							<list entry.operations as op>
-								<option value="${entry.id};${op}">${lang("content.operation."+op)}</option>
-							</list>
-						</select>
-					</if>
-					<if entry.operations> | </if>
-					<a href="${config.actionRoot}?module=Content&do=edit&id=${entry.id}&returnurl=${utility.encodeURI(thisurl)}">${lang("edit")}</a> |
-					<a href="${config.actionRoot}?module=Comment&do=articlecomments&articleid=${entry.id}&returnurl=${utility.encodeURI(thisurl)}">${lang("contentlist.comments")}</a> (${entry.commentcount})
-				<else>
-					<span class="text">
-					<a href="${config.actionRoot}?${selectarticleurl}&id=${entry.id}">${lang("contentlist.select")}</a>
-				</if>
-			</td>
-			<td width="25%"  <if grey=="1">class="listrow3"<else>class="listrow4"</if> valign="top">
-				<span class="small">${entry.comment}&nbsp;</span>
-			</td>
-			<td valign="top" class="listcommand">
-				<if showactions=="1">
-					<a href="${config.actionRoot}?module=Content&do=delete&id=${entry.id}&where=${utility.encodeURI(where)}&order=${utility.encodeURI(order)}&offset=${utility.encodeURI(offset)}">[${lang("delete")}]</a>
-				</if>
-			</td>
-	</tr>
+  <list articles as entry>
+    <tr <if grey=="1"><assign grey="0">class="listrow1"<else>class="listrow2"<assign grey="1"></if>>
+      <td class="x-small">
+          ${entry.creationdate.formatted["dd.MM.yyyy HH:mm"]}<br>
+          ${entry.changedate.formatted["dd.MM.yyyy HH:mm"]}<br>
+          <if entry.is_published!="0">Pub.<else>-</if> <if entry.is_html!="0">HTML<else>-</if>
+      </td>
+      <td>
+        <b>${entry.title}</b><br>
+        ${lang("by")}: ${entry.creator}<br>
+        (${lang("articletypes." + entry.article_type.name)}) 
+        <if showactions=="1">
+          <if config["Mir.Localizer.Admin.ListOperationsFlavor"]=="0">
+            <list entry.operations as op>
+              [ <a href="${config.actionRoot}?module=Localizer&do=articleoperation&operation=${op}&articleid=${entry.id}&returnurl=${utility.encodeURI(thisurl)}">${lang("content.operation."+op)}</a> ]
+            </list>
+          </if>
+        <if config["Mir.Localizer.Admin.ListOperationsFlavor"]=="1">
+          <list entry.operations as op>
+            [ <input type="checkbox" name="operation" value="${entry.id};${op}"> ${lang("content.operation."+op)} ]
+          </list>
+        </if>
+          <if config["Mir.Localizer.Admin.ListOperationsFlavor"]=="2">
+            <select name="operation">
+              <option value="" selected>&nbsp;</option>
+              <list entry.operations as op>
+                <option value="${entry.id};${op}">${lang("content.operation."+op)}</option>
+              </list>
+            </select>
+          </if>
+          <if entry.operations> | </if>
+          <a href="${config.actionRoot}?module=Content&do=edit&id=${entry.id}&returnurl=${utility.encodeURI(thisurl)}">${lang("edit")}</a> |
+          <a href="${config.actionRoot}?module=Comment&do=articlecomments&articleid=${entry.id}&returnurl=${utility.encodeURI(thisurl)}">${lang("contentlist.comments")}</a> (${entry.commentcount})
+        <else>
+          <span class="text">
+          <a href="${config.actionRoot}?${selectarticleurl}&id=${entry.id}">${lang("contentlist.select")}</a>
+        </if>
+      </td>
+      <td width="25%"  <if grey=="1">class="listrow3"<else>class="listrow4"</if> valign="top">
+        <span class="small">${entry.comment}&nbsp;</span>
+      </td>
+      <td valign="top" class="listcommand">
+        <if showactions=="1">
+          <if config["Mir.Localizer.Admin.AllowDeleteArticle"]=="1">
+            <a href="${config.actionRoot}?module=Content&do=delete&id=${entry.id}&where=${utility.encodeURI(where)}&order=${utility.encodeURI(order)}&offset=${utility.encodeURI(offset)}">[${lang("delete")}]</a>
+          </if>
+        </if>
+      </td>
+  </tr>
 </list>
-	<tr>
-		<td colspan="4" class="table-foot">
-			${count} ${lang("records")} / ${lang("show_from_to", from, to)}
-		</td>
-	</tr>
+  <tr>
+    <td colspan="4" class="table-foot">
+      ${count} ${lang("records")} / ${lang("show_from_to", from, to)}
+    </td>
+  </tr>
 </table>
 
 <if showactions=="1">
-	<if config["Mir.Localizer.Admin.ListOperationsFlavor"]!="0">
-		<p class="box">
-			<input class="majorbutton" type="submit" name="save" value="${lang("save")}"> &nbsp; ( ${lang("commentlist.activate")})
-		</p>
-	</form> 
-	</if>  
+  <if config["Mir.Localizer.Admin.ListOperationsFlavor"]!="0">
+    <p class="box">
+      <input class="majorbutton" type="submit" name="save" value="${lang("save")}"> &nbsp; ( ${lang("commentlist.activate")})
+    </p>
+  </form> 
+  </if>  
 </if>
 
 
@@ -131,7 +133,7 @@
 
 
 <else>
-<p align="center" class="box">${lang("no-matches_found")}</p>
+<p align="center" class="box">${lang("no_matches_found")}</p>
 </if>
 
 <include "foot.template">

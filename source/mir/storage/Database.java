@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with  any library licensed under the Apache Software License, 
- * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
- * (or with modified versions of the above that use the same license as the above), 
- * and distribute linked combinations including the two.  You must obey the 
- * GNU General Public License in all respects for all of the code used other than 
- * the above mentioned libraries.  If you modify this file, you may extend this 
- * exception to your version of the file, but you are not obligated to do so.  
+ * the code of this program with  any library licensed under the Apache Software License,
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library
+ * (or with modified versions of the above that use the same license as the above),
+ * and distribute linked combinations including the two.  You must obey the
+ * GNU General Public License in all respects for all of the code used other than
+ * the above mentioned libraries.  If you modify this file, you may extend this
+ * exception to your version of the file, but you are not obligated to do so.
  * If you do not wish to do so, delete this exception statement from your version.
  */
 package mir.storage;
@@ -44,8 +44,13 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.Map;
+
+import com.codestudio.util.SQLManager;
+
+import freemarker.template.SimpleHash;
+import freemarker.template.SimpleList;
 
 import mir.config.MirPropertiesConfiguration;
 import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
@@ -62,11 +67,6 @@ import mir.storage.store.StoreIdentifier;
 import mir.storage.store.StoreUtil;
 import mir.util.JDBCStringRoutines;
 
-import com.codestudio.util.SQLManager;
-
-import freemarker.template.SimpleHash;
-import freemarker.template.SimpleList;
-
 
 /**
  * Diese Klasse implementiert die Zugriffsschicht auf die Datenbank.
@@ -76,7 +76,7 @@ import freemarker.template.SimpleList;
  * Treiber, Host, User und Passwort, ueber den der Zugriff auf die
  * Datenbank erfolgt.
  *
- * @version $Id: Database.java,v 1.39 2003/04/21 12:42:47 idfx Exp $
+ * @version $Id: Database.java,v 1.42 2003/05/03 00:21:22 zapata Exp $
  * @author rk
  *
  */
@@ -109,7 +109,6 @@ public class Database implements StorageObject {
   protected ArrayList metadataNotNullFields;
   protected int[] metadataTypes;
   protected Class theEntityClass;
-  protected StorageObject myselfDatabase;
   protected SimpleList popupCache = null;
   protected boolean hasPopupCache = false;
   protected SimpleHash hashCache = null;
@@ -205,7 +204,8 @@ public class Database implements StorageObject {
   public String getCoreTable() {
     if (theCoreTable != null) {
       return theCoreTable;
-    } else {
+    }
+    else {
       return theTable;
     }
   }
@@ -263,107 +263,107 @@ public class Database implements StorageObject {
     if (rs != null) {
       try {
         switch (aType) {
-        case java.sql.Types.BIT:
-          outValue = (rs.getBoolean(valueIndex) == true) ? "1" : "0";
+          case java.sql.Types.BIT:
+            outValue = (rs.getBoolean(valueIndex) == true) ? "1" : "0";
 
-          break;
+            break;
 
-        case java.sql.Types.INTEGER:
-        case java.sql.Types.SMALLINT:
-        case java.sql.Types.TINYINT:
-        case java.sql.Types.BIGINT:
+          case java.sql.Types.INTEGER:
+          case java.sql.Types.SMALLINT:
+          case java.sql.Types.TINYINT:
+          case java.sql.Types.BIGINT:
 
-          int out = rs.getInt(valueIndex);
+            int out = rs.getInt(valueIndex);
 
-          if (!rs.wasNull()) {
-            outValue = new Integer(out).toString();
-          }
+            if (!rs.wasNull()) {
+              outValue = new Integer(out).toString();
+            }
 
-          break;
+            break;
 
-        case java.sql.Types.NUMERIC:
+          case java.sql.Types.NUMERIC:
 
-          /** @todo Numeric can be float or double depending upon
-           *  metadata.getScale() / especially with oracle */
-          long outl = rs.getLong(valueIndex);
+            /** @todo Numeric can be float or double depending upon
+             *  metadata.getScale() / especially with oracle */
+            long outl = rs.getLong(valueIndex);
 
-          if (!rs.wasNull()) {
-            outValue = new Long(outl).toString();
-          }
+            if (!rs.wasNull()) {
+              outValue = new Long(outl).toString();
+            }
 
-          break;
+            break;
 
-        case java.sql.Types.REAL:
+          case java.sql.Types.REAL:
 
-          float tempf = rs.getFloat(valueIndex);
+            float tempf = rs.getFloat(valueIndex);
 
-          if (!rs.wasNull()) {
-            tempf *= 10;
-            tempf += 0.5;
+            if (!rs.wasNull()) {
+              tempf *= 10;
+              tempf += 0.5;
 
-            int tempf_int = (int) tempf;
-            tempf = (float) tempf_int;
-            tempf /= 10;
-            outValue = "" + tempf;
-            outValue = outValue.replace('.', ',');
-          }
+              int tempf_int = (int) tempf;
+              tempf = (float) tempf_int;
+              tempf /= 10;
+              outValue = "" + tempf;
+              outValue = outValue.replace('.', ',');
+            }
 
-          break;
+            break;
 
-        case java.sql.Types.DOUBLE:
+          case java.sql.Types.DOUBLE:
 
-          double tempd = rs.getDouble(valueIndex);
+            double tempd = rs.getDouble(valueIndex);
 
-          if (!rs.wasNull()) {
-            tempd *= 10;
-            tempd += 0.5;
+            if (!rs.wasNull()) {
+              tempd *= 10;
+              tempd += 0.5;
 
-            int tempd_int = (int) tempd;
-            tempd = (double) tempd_int;
-            tempd /= 10;
-            outValue = "" + tempd;
-            outValue = outValue.replace('.', ',');
-          }
+              int tempd_int = (int) tempd;
+              tempd = (double) tempd_int;
+              tempd /= 10;
+              outValue = "" + tempd;
+              outValue = outValue.replace('.', ',');
+            }
 
-          break;
+            break;
 
-        case java.sql.Types.CHAR:
-        case java.sql.Types.VARCHAR:
-        case java.sql.Types.LONGVARCHAR:
-          outValue = rs.getString(valueIndex);
+          case java.sql.Types.CHAR:
+          case java.sql.Types.VARCHAR:
+          case java.sql.Types.LONGVARCHAR:
+            outValue = rs.getString(valueIndex);
 
-          break;
+            break;
 
-        case java.sql.Types.LONGVARBINARY:
-          outValue = rs.getString(valueIndex);
+          case java.sql.Types.LONGVARBINARY:
+            outValue = rs.getString(valueIndex);
 
-          break;
+            break;
 
-        case java.sql.Types.TIMESTAMP:
+          case java.sql.Types.TIMESTAMP:
 
-          // it's important to use Timestamp here as getting it
-          // as a string is undefined and is only there for debugging
-          // according to the API. we can make it a string through formatting.
-          // -mh
-          Timestamp timestamp = (rs.getTimestamp(valueIndex));
+            // it's important to use Timestamp here as getting it
+            // as a string is undefined and is only there for debugging
+            // according to the API. we can make it a string through formatting.
+            // -mh
+            Timestamp timestamp = (rs.getTimestamp(valueIndex));
 
-          if (!rs.wasNull()) {
-            java.util.Date date = new java.util.Date(timestamp.getTime());
-            outValue = _dateFormatterOut.format(date);
-            _cal.setTime(date);
+            if (!rs.wasNull()) {
+              java.util.Date date = new java.util.Date(timestamp.getTime());
+              outValue = _dateFormatterOut.format(date);
+              _cal.setTime(date);
 
-            int offset =
-              _cal.get(Calendar.ZONE_OFFSET) + _cal.get(Calendar.DST_OFFSET);
-            String tzOffset =
-              StringUtil.zeroPaddingNumber(offset / _millisPerHour, 2, 2);
-            outValue = outValue + "+" + tzOffset;
-          }
+              int offset =
+                  _cal.get(Calendar.ZONE_OFFSET) + _cal.get(Calendar.DST_OFFSET);
+              String tzOffset =
+                  StringUtil.zeroPaddingNumber(offset / _millisPerHour, 2, 2);
+              outValue = outValue + "+" + tzOffset;
+            }
 
-          break;
+            break;
 
-        default:
-          outValue = "<unsupported value>";
-          logger.warn( "Unsupported Datatype: at " + valueIndex + " (" + aType + ")");
+          default:
+            outValue = "<unsupported value>";
+            logger.warn("Unsupported Datatype: at " + valueIndex + " (" + aType + ")");
         }
       } catch (SQLException e) {
         throw new StorageObjectFailure("Could not get Value out of Resultset -- ",
@@ -476,8 +476,7 @@ public class Database implements StorageObject {
    * @return EntityList mit den gematchten Entities
    * @exception StorageObjectException
    */
-  public EntityList selectByWhereClause(String where)
-    throws StorageObjectFailure {
+  public EntityList selectByWhereClause(String where) throws StorageObjectFailure {
     return selectByWhereClause(where, 0);
   }
 
@@ -490,8 +489,7 @@ public class Database implements StorageObject {
    * @return EntityList mit den gematchten Entities
    * @exception StorageObjectException
    */
-  public EntityList selectByWhereClause(String whereClause, int offset)
-    throws StorageObjectFailure {
+  public EntityList selectByWhereClause(String whereClause, int offset) throws StorageObjectFailure {
     return selectByWhereClause(whereClause, null, offset);
   }
 
@@ -505,8 +503,7 @@ public class Database implements StorageObject {
    * @return EntityList mit den gematchten Entities
    * @exception StorageObjectException
    */
-  public EntityList selectByWhereClause(String where, String order)
-    throws StorageObjectFailure {
+  public EntityList selectByWhereClause(String where, String order) throws StorageObjectFailure {
     return selectByWhereClause(where, order, 0);
   }
 
@@ -520,29 +517,28 @@ public class Database implements StorageObject {
    * @return EntityList mit den gematchten Entities
    * @exception StorageObjectException
    */
-  public EntityList selectByWhereClause(String whereClause, String orderBy,
-    int offset) throws StorageObjectFailure {
+  public EntityList selectByWhereClause(String whereClause, String orderBy, int offset) throws StorageObjectFailure {
     return selectByWhereClause(whereClause, orderBy, offset, defaultLimit);
   }
 
   /**
    * select-Operator liefert eine EntityListe mit den gematchten Datens?tzen zur?ck.
-   * @param wc where-Clause
-   * @param ob orderBy-Clause
+   * @param aWhereClause where-Clause
+   * @param anOrderByClause orderBy-Clause
    * @param offset ab welchem Datensatz
    * @param limit wieviele Datens?tze
    * @return EntityList mit den gematchten Entities
    * @exception StorageObjectException
    */
-  public EntityList selectByWhereClause(String wc, String ob, int offset,
-    int limit) throws StorageObjectFailure {
+  public EntityList selectByWhereClause(String aWhereClause, String anOrderByClause,
+            int offset, int limit) throws StorageObjectFailure {
+
     // check o_store for entitylist
     if (StoreUtil.implementsStorableObject(theEntityClass)) {
       StoreIdentifier search_sid =
-        new StoreIdentifier(theEntityClass,
-          StoreContainerType.STOC_TYPE_ENTITYLIST,
-          StoreUtil.getEntityListUniqueIdentifierFor(theTable, wc, ob, offset,
-            limit));
+          new StoreIdentifier(
+            theEntityClass, StoreContainerType.STOC_TYPE_ENTITYLIST,
+            StoreUtil.getEntityListUniqueIdentifierFor(theTable, aWhereClause, anOrderByClause, offset, limit));
       EntityList hit = (EntityList) o_store.use(search_sid);
 
       if (hit != null) {
@@ -564,8 +560,8 @@ public class Database implements StorageObject {
 
     /** @todo count sql string should only be assembled if we really count
      *  see below at the end of method //rk */
-    if ((wc != null) && (wc.trim().length() == 0)) {
-      wc = null;
+    if ((aWhereClause != null) && (aWhereClause.trim().length() == 0)) {
+      aWhereClause = null;
     }
 
     StringBuffer countSql =
@@ -573,13 +569,13 @@ public class Database implements StorageObject {
     StringBuffer selectSql =
       new StringBuffer("select * from ").append(theTable);
 
-    if (wc != null) {
-      selectSql.append(" where ").append(wc);
-      countSql.append(" where ").append(wc);
+    if (aWhereClause != null) {
+      selectSql.append(" where ").append(aWhereClause);
+      countSql.append(" where ").append(aWhereClause);
     }
 
-    if ((ob != null) && !(ob.trim().length() == 0)) {
-      selectSql.append(" order by ").append(ob);
+    if ((anOrderByClause != null) && !(anOrderByClause.trim().length() == 0)) {
+      selectSql.append(" order by ").append(anOrderByClause);
     }
 
     if (theAdaptor.hasLimit()) {
@@ -644,8 +640,8 @@ public class Database implements StorageObject {
 
         theReturnList.setCount(count);
         theReturnList.setOffset(offset);
-        theReturnList.setWhere(wc);
-        theReturnList.setOrder(ob);
+        theReturnList.setWhere(aWhereClause);
+        theReturnList.setOrder(anOrderByClause);
         theReturnList.setStorage(this);
         theReturnList.setLimit(limit);
 
@@ -728,7 +724,7 @@ public class Database implements StorageObject {
       if (theEntityClass != null) {
         returnEntity = (Entity) theEntityClass.newInstance();
         returnEntity.setValues(theResultHash);
-        returnEntity.setStorage(myselfDatabase);
+        returnEntity.setStorage(this);
 
         if (returnEntity instanceof StorableObject) {
           logger.debug("CACHE: ( in) " + returnEntity.getId() + " :" + theTable);
@@ -737,13 +733,17 @@ public class Database implements StorageObject {
       } else {
         throwStorageObjectException("Internal Error: theEntityClass not set!");
       }
-    } catch (IllegalAccessException e) {
+    }
+    catch (IllegalAccessException e) {
       throwStorageObjectException("No access! -- " + e.getMessage());
-    } catch (IOException e) {
+    }
+    catch (IOException e) {
       throwStorageObjectException("IOException! -- " + e.getMessage());
-    } catch (InstantiationException e) {
+    }
+    catch (InstantiationException e) {
       throwStorageObjectException("No Instatiation! -- " + e.getMessage());
-    } catch (SQLException sqe) {
+    }
+    catch (SQLException sqe) {
       throwSQLException(sqe, "makeEntityFromResultSet");
 
       return null;
@@ -753,8 +753,7 @@ public class Database implements StorageObject {
   }
 
   /**
-   * insert-Operator: f?gt eine Entity in die Tabelle ein. Eine Spalte WEBDB_CREATE
-   * wird automatisch mit dem aktuellen Datum gefuellt.
+   * Inserts an entity into the database.
    *
    * @param theEntity
    * @return der Wert des Primary-keys der eingef?gten Entity
@@ -794,7 +793,8 @@ public class Database implements StorageObject {
           if (aField.equals("webdb_create") ||
               aField.equals("webdb_lastchange")) {
             aValue = "NOW()";
-          } else {
+          }
+          else {
             if ((streamedInput != null) && streamedInput.contains(aField)) {
               aValue = "?";
             } else {
@@ -850,9 +850,7 @@ public class Database implements StorageObject {
         return null;
       }
 
-      pstmt =
-        con.prepareStatement(theAdaptor.getLastInsertSQL(
-            (Database) myselfDatabase));
+      pstmt = con.prepareStatement(theAdaptor.getLastInsertSQL(this));
 
       ResultSet rs = pstmt.executeQuery();
       rs.next();
@@ -877,8 +875,7 @@ public class Database implements StorageObject {
   }
 
   /**
-   * update-Operator: aktualisiert eine Entity. Eine Spalte WEBDB_LASTCHANGE
-   * wird automatisch mit dem aktuellen Datum gefuellt.
+   * Updates an entity in the database
    *
    * @param theEntity
    */
@@ -974,9 +971,8 @@ public class Database implements StorageObject {
     }
 
     sql.append(" where id=").append(id);
+    logger.debug("UPDATE: " + sql);
 
-    //theLog.printInfo("UPDATE: " + sql);
-    // execute sql
     try {
       con = getPooledCon();
       con.setAutoCommit(false);
@@ -991,12 +987,15 @@ public class Database implements StorageObject {
       }
 
       pstmt.executeUpdate();
-    } catch (SQLException sqe) {
+    }
+    catch (SQLException sqe) {
       throwSQLException(sqe, "update");
-    } finally {
+    }
+    finally {
       try {
         con.setAutoCommit(true);
-      } catch (Exception e) {
+      }
+      catch (Exception e) {
         ;
       }
 
@@ -1231,6 +1230,84 @@ public class Database implements StorageObject {
     return rs;
   }
 
+  public ResultSet executeSql(String sql) throws StorageObjectFailure, SQLException {
+    long startTime = System.currentTimeMillis();
+
+    try {
+      Connection connection = getPooledCon();
+      Statement statement = connection.createStatement();
+      ResultSet result;
+
+      result = statement.executeQuery(sql);
+
+      logger.debug((System.currentTimeMillis() - startTime) + "ms. for: " + sql);
+      return result;
+    }
+    catch (Throwable e) {
+      logger.error(e.getMessage() +"\n" + (System.currentTimeMillis() - startTime) + "ms. for: " + sql);
+      throw new StorageObjectFailure(e);
+    }
+  }
+
+  private Map processRow(ResultSet aResultSet) throws StorageObjectFailure, StorageObjectExc {
+    try {
+      Map result = new HashMap();
+      ResultSetMetaData metaData = aResultSet.getMetaData();
+      int nrColumns = metaData.getColumnCount();
+      for (int i=0; i<nrColumns; i++) {
+        result.put(metaData.getColumnName(i+1), getValueAsString(aResultSet, i+1, metaData.getColumnType(i+1)));
+      }
+
+      return result;
+    }
+    catch (Throwable e) {
+      throw new StorageObjectFailure(e);
+    }
+  }
+
+  public List executeFreeSql(String sql, int aLimit) throws StorageObjectFailure, StorageObjectExc {
+    try {
+      ResultSet resultset = executeSql(sql);
+      List result = new Vector();
+
+      while (resultset.next() && result.size() < aLimit) {
+        result.add(processRow(resultset));
+      }
+
+      return result;
+    }
+    catch (Throwable e) {
+      throw new StorageObjectFailure(e);
+    }
+  };
+
+  public Map executeFreeSingleRowSql(String sql) throws StorageObjectFailure, StorageObjectExc {
+    try {
+      ResultSet resultset = executeSql(sql);
+
+      if (resultset.next())
+        return processRow(resultset);
+      else
+        return null;
+    }
+    catch (Throwable t) {
+      throw new StorageObjectFailure(t);
+    }
+  };
+
+  public String executeFreeSingleValueSql(String sql) throws StorageObjectFailure, StorageObjectExc {
+    Map row = executeFreeSingleRowSql(sql);
+
+    if (row==null)
+      return null;
+
+    Iterator i = row.values().iterator();
+    if (i.hasNext())
+      return (String) i.next();
+    else
+      return null;
+  };
+
   /**
    * returns the number of rows in the table
    */
@@ -1238,7 +1315,7 @@ public class Database implements StorageObject {
     long startTime = System.currentTimeMillis();
     String sql = "SELECT Count(*) FROM " + theTable;
 
-    if ((where != null) && !(where.length() == 0)) {
+    if ((where != null) && (where.length() != 0)) {
       sql = sql + " where " + where;
     }
 
@@ -1280,7 +1357,7 @@ public class Database implements StorageObject {
       logger.debug((System.currentTimeMillis() - startTime) + "ms. for: " + sql);
     }
     catch (SQLException e) {
-      logger.debug("Failed: " + (System.currentTimeMillis() - startTime) + "ms. for: " + sql);
+      logger.error("Failed: " + (System.currentTimeMillis() - startTime) + "ms. for: " + sql);
       throw e;
     }
 
@@ -1404,8 +1481,7 @@ public class Database implements StorageObject {
    * @param wo Funktonsname, in der die SQLException geworfen wurde
    * @exception StorageObjectException
    */
-  protected void throwSQLException(SQLException sqe, String aFunction)
-    throws StorageObjectFailure {
+  protected void throwSQLException(SQLException sqe, String aFunction) throws StorageObjectFailure {
     String state = "";
     String message = "";
     int vendor = 0;

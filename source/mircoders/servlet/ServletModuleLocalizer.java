@@ -18,18 +18,18 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with  any library licensed under the Apache Software License, 
- * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
- * (or with modified versions of the above that use the same license as the above), 
- * and distribute linked combinations including the two.  You must obey the 
- * GNU General Public License in all respects for all of the code used other than 
- * the above mentioned libraries.  If you modify this file, you may extend this 
- * exception to your version of the file, but you are not obligated to do so.  
+ * the code of this program with  any library licensed under the Apache Software License,
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library
+ * (or with modified versions of the above that use the same license as the above),
+ * and distribute linked combinations including the two.  You must obey the
+ * GNU General Public License in all respects for all of the code used other than
+ * the above mentioned libraries.  If you modify this file, you may extend this
+ * exception to your version of the file, but you are not obligated to do so.
  * If you do not wish to do so, delete this exception statement from your version.
  */
 package mircoders.servlet;
 
-import java.util.List;
+import java.util.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -40,7 +40,7 @@ import mir.log.LoggerWrapper;
 import mir.servlet.ServletModule;
 import mir.servlet.ServletModuleExc;
 import mir.servlet.ServletModuleFailure;
-import mir.util.StringRoutines;
+import mir.util.*;
 import mircoders.entity.EntityComment;
 import mircoders.entity.EntityContent;
 import mircoders.entity.EntityUsers;
@@ -57,17 +57,43 @@ public class ServletModuleLocalizer extends ServletModule {
 
   private ModuleContent contentModule;
   private ModuleComment commentModule;
+  private List administerOperations;
 
   private ServletModuleLocalizer() {
     try {
+      logger = new LoggerWrapper("ServletModule.Localizer");
+
       contentModule = new ModuleContent(DatabaseContent.getInstance());
       commentModule = new ModuleComment(DatabaseComment.getInstance());
 
-      logger = new LoggerWrapper("ServletModule.Localizer");
+      administerOperations = new Vector();
+
+      String settings[] = configuration.getStringArray("Mir.Localizer.Admin.AdministerOperations");
+
+      if (settings!=null) {
+        for (int i = 0; i < settings.length; i++) {
+          String setting = settings[i].trim();
+
+          if (setting.length() > 0) {
+            List parts = StringRoutines.splitString(setting, ":");
+            if (parts.size() != 2) {
+              logger.error("config error: " + settings[i] + ", 2 parts expected");
+            }
+            else {
+              Map entry = new HashMap();
+              entry.put("name", (String) parts.get(0));
+              entry.put("url", (String) parts.get(1));
+              administerOperations.add(entry);
+            }
+          }
+        }
+      }
     }
     catch (Exception e) {
       logger.error("ServletModuleLocalizer could not be initialized: " + e.getMessage());
     }
+
+
   }
 
   private EntityAdapter getActiveUser(HttpServletRequest aRequest) throws ServletModuleExc {
@@ -95,7 +121,9 @@ public class ServletModuleLocalizer extends ServletModule {
         operation.perform(aUser, comment);
         logger.info("Operation " + anOperation + " successfully performed on comment " + anId);
       }
-      logger.error("Error while performing " + anOperation + " on comment " + anId + ": comment is null");
+      else {
+        logger.error("Error while performing " + anOperation + " on comment " + anId + ": comment is null");
+      }
     }
     catch (Throwable e) {
       logger.error("Error while performing " + anOperation + " on comment " + anId + ": " + e.getMessage());
@@ -153,7 +181,9 @@ public class ServletModuleLocalizer extends ServletModule {
         operation.perform(aUser, article);
         logger.info("Operation " + anOperation + " successfully performed on article " + anId);
       }
-      logger.error("Error while performing " + anOperation + " on article " + anId + ": article is null");
+      else {
+        logger.error("Error while performing " + anOperation + " on article " + anId + ": article is null");
+      }
     }
     catch (Throwable e) {
       logger.error("Error while performing " + anOperation + " on article " + anId + ": " + e.getMessage());
@@ -193,4 +223,7 @@ public class ServletModuleLocalizer extends ServletModule {
     redirect(aResponse, returnUrlString);
   }
 
+  public List getAdministerOperations() throws ServletModuleExc {
+    return administerOperations;
+  }
 }

@@ -1,7 +1,7 @@
 <html>
 <head>
-	<title>${config["Mir.Name"]} | ${lang("abuse.htmltitle")}</title>
-	<link rel="stylesheet" type="text/css" href="${config.docRoot}/style/admin.css">
+  <title>${config["Mir.Name"]} | ${lang("abuse.htmltitle")}</title>
+  <link rel="stylesheet" type="text/css" href="${config.docRoot}/style/admin.css">
 </head>
 
 <body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
@@ -9,7 +9,7 @@
 <include "FUNCTIONS.template">
 <include "head.template">
 <p>
-	<a class="link-box"  href="${config.actionRoot}?module=Admin&do=superusermenu">[ &lt; ] ${lang("back")}</a>
+  <a class="link-box"  href="${config.actionRoot}?module=Admin&do=superusermenu">[ &lt; ] ${lang("back")}</a>
 </p>
 
 <table cellspacing="15">
@@ -17,46 +17,46 @@
 <td valign="top">
 
 <form method="post" action="${config.actionRoot}">
-	<input type="hidden" name="module" value="Abuse">
-	<input type="hidden" name="do" value="savesettings">
+  <input type="hidden" name="module" value="Abuse">
+  <input type="hidden" name="do" value="savesettings">
 
-	<table border="0" cellpadding="2" cellspacing="3">
-		<tr>
-			<td class="table-head"><b>${lang("abuse.setting")}</b></td>
-			<td class="table-head"><b>${lang("abuse.value")}</b></td>
-		</tr>
+  <table border="0" cellpadding="2" cellspacing="3">
+    <tr>
+      <td class="table-head"><b>${lang("abuse.setting")}</b></td>
+      <td class="table-head"><b>${lang("abuse.value")}</b></td>
+    </tr>
 
     <call CheckboxTableRow (lang("abuse.disableopenpostings"), "disableop", disableop)>
     <call CheckboxTableRow (lang("abuse.openpostingpassword"), "passwordop", passwordop)>
-		
-		<tr class="x-small"><td colspan="2">&nbsp;</td></tr>
+    
+    <tr class="x-small"><td colspan="2">&nbsp;</td></tr>
 
     <call CheckboxTableRow (lang("abuse.logpostings"), "logenabled", logenabled)>
     <call TextInputTableRow (lang("abuse.logsize"), 10, 10, "logsize", logsize)>
-		
-		<tr class="x-small"><td colspan="2">&nbsp;</td></tr>		
-		
+    
+    <tr class="x-small"><td colspan="2">&nbsp;</td></tr>    
+    
     <call CheckboxTableRow (lang("abuse.cookies"), "usecookies", usecookies)>
-		
-		<tr class="x-small"><td colspan="2">&nbsp;</td></tr>		
+    
+    <tr class="x-small"><td colspan="2">&nbsp;</td></tr>    
 
     <call PulldownTableRow (lang("abuse.articleaction"), "articleaction", articleactions, "identifier", "resource", articleaction, "content.operation.")>
     <call PulldownTableRow (lang("abuse.commentaction"), "commentaction", commentactions, "identifier", "resource", commentaction, "comment.operation.")>
 
-		<tr>
-			<td colspan="2" class="table-foot">
-				<input class="majorbutton" type="submit" name="submit" value="${lang("save")}">
-			</td>
-		</tr>
-	</table>
+    <tr>
+      <td colspan="2" class="table-foot">
+        <input class="majorbutton" type="submit" name="submit" value="${lang("save")}">
+      </td>
+    </tr>
+  </table>
 </form>
 
 </td>
 <td valign="top">
 
 <p class="box">
-	&gt; <a href="${config.actionRoot}?module=Abuse&do=showlog">${lang("abuse.showlog")}</a><br>
-	&gt; <a href="${config.actionRoot}?module=Abuse&do=showfilters">${lang("abuse.showfilters")}</a>
+  &gt; <a href="${config.actionRoot}?module=Abuse&do=showlog">${lang("abuse.showlog")}</a><br>
+  &gt; <a href="${config.actionRoot}?module=Abuse&do=showfilters">${lang("abuse.showfilters")}</a>
 </p>
 
 </td>
@@ -66,10 +66,10 @@
 
 
 <p>
-	<a class="link-box"  href="${config.actionRoot}?module=Admin&do=superusermenu">[ &lt; ] ${lang("back")}</a>
+  <a class="link-box"  href="${config.actionRoot}?module=Admin&do=superusermenu">[ &lt; ] ${lang("back")}</a>
 </p>
 
-	<include "foot.template">
+  <include "foot.template">
 </body>
 </html>
 

@@ -2,53 +2,53 @@
 <function ListTable(contentlist, data_keys, column_head_texts, column_head_CSS, listrow1CSS, listrow2CSS, footer_css, module_name)>
 
 <table cellspacing="2" border="0">
-	
-	<tr>
-		<list column_head_texts as indexVariable>
-			<td class="${column_head_CSS}">
-				<b>${indexVariable}</b>	
-			</td>
-		</list>
-			<td class="${column_head_CSS}">
-				&nbsp;
-			</td>	
-	</tr>
+  
+  <tr>
+    <list column_head_texts as indexVariable>
+      <td class="${column_head_CSS}">
+        <b>${indexVariable}</b> 
+      </td>
+    </list>
+      <td class="${column_head_CSS}">
+        &nbsp;
+      </td> 
+  </tr>
 
-	
+  
 <list contentlist as entry>
-	<if grey=="1">
-		<assign grey="0">
-		<tr class="${listrow1CSS}">
-	<else>
-		<assign grey="1"> 
-		<tr class="${listrow2CSS}">
-	</if>
-		
-	<list data_keys as indexVariable>		
-			<td>
-				${entry[indexVariable]}
-			</td>
-	</list>
-		<td>
-			<a class="listcommand" href="${config.actionRoot}?module=${module_name}&do=delete&id=${entry.id}">${lang("delete")}</a>
-			| <a class="listcommand" href="${config.actionRoot}?module=${module_name}&do=edit&id=${entry.id}">${lang("edit")}</a>
-		</td>
-	</tr>
+  <if grey=="1">
+    <assign grey="0">
+    <tr class="${listrow1CSS}">
+  <else>
+    <assign grey="1"> 
+    <tr class="${listrow2CSS}">
+  </if>
+    
+  <list data_keys as indexVariable>   
+      <td>
+        ${entry[indexVariable]}
+      </td>
+  </list>
+    <td>
+      <a class="listcommand" href="${config.actionRoot}?module=${module_name}&do=delete&id=${entry.id}">${lang("delete")}</a>
+      | <a class="listcommand" href="${config.actionRoot}?module=${module_name}&do=edit&id=${entry.id}">${lang("edit")}</a>
+    </td>
+  </tr>
 </list>
-	
-	
-	<tr>		
-		<td colspan="${column_nr}" class="table-foot">
-			${data.count} ${lang("records")} / ${lang("show_from_to", data.from, data.to)}
-		</td>
-	</tr>
+  
+  
+  <tr>    
+    <td colspan="${column_nr}" class="table-foot">
+      ${data.count} ${lang("records")} / ${lang("show_from_to", data.from, data.to)}
+    </td>
+  </tr>
 
 </table>
 </function>
 
 <comment>creates browse links, only called if necessary</comment>
 <function PrevNextPage(module_name)>
-	<p>
+  <p>
       <if (data.prev || data.next)>
         <form method="post" action="${config.actionRoot}">
           <input type="hidden" name="module" value="${module_name}">
@@ -65,7 +65,7 @@
           </if>
         </form>
       </if>
-	</p>
+  </p>
 </function>
 
 <comment>extra navigation</comment>
@@ -74,7 +74,7 @@
       <a class="link-box" href="${config.actionRoot}?module=${module_name}&do=add">[+] ${lang("add")}</a> &nbsp;
       <a class="link-box" href="${config.actionRoot}?module=${module_jumpback}&do=${do_jumpback}">[&lt;] ${lang("back")} </a> &nbsp;
       <a class="link-box" href="${config.actionRoot}">[&lt;&lt;&lt;] ${lang("head.start")}</a>
-	</p>
+  </p>
 </function>
 
 
@@ -98,72 +98,72 @@
 
 <comment>4 functions to create Table rows with input-fields</comment>
 <function TextInputTableRow (label, size, maxlength, fieldname, fieldcontent)>
-	<tr>
-		<td align="right" class="table-left">
-			<b>${label}:</b>
-		</td>
-		
-		<td class="listrow2">
-			<input type="text" size="${size}" maxlength="${maxlength}" name="${fieldname}" value="${utility.encodeHTML(fieldcontent)}">
-		</td>
-	</tr>
+  <tr>
+    <td align="right" class="table-left">
+      <b>${label}:</b>
+    </td>
+    
+    <td class="listrow2">
+      <input type="text" size="${size}" maxlength="${maxlength}" name="${fieldname}" value="${utility.encodeHTML(fieldcontent)}">
+    </td>
+  </tr>
 </function>
 
 <function TextInputTableRowLight (label, size, maxlength, fieldname, fieldcontent)>
-	<tr>
-		<td align="right" class="table-left-light">
-			<b>${label}:</b>
-		</td>
-		
-		<td class="listrow1">
-			<input type="text" size="${size}" maxlength="${maxlength}" name="${fieldname}" value="${utility.encodeHTML(fieldcontent)}">
-		</td>
-	</tr>
+  <tr>
+    <td align="right" class="table-left-light">
+      <b>${label}:</b>
+    </td>
+    
+    <td class="listrow1">
+      <input type="text" size="${size}" maxlength="${maxlength}" name="${fieldname}" value="${utility.encodeHTML(fieldcontent)}">
+    </td>
+  </tr>
 </function>
 
 <function CheckboxTableRow (label, fieldname, fieldcontent )>
-	<tr>
-		<td align="right" valign="top" class="table-left">
-			<b>${label}:</b>
-		</td>
-		
-		<td class="listrow2">
-			<input type="checkbox" name="${fieldname}" value="1"<if fieldcontent=="1"> checked</if>>&nbsp;&nbsp;
-		</td>
-	</tr>
-</function>	
+  <tr>
+    <td align="right" valign="top" class="table-left">
+      <b>${label}:</b>
+    </td>
+    
+    <td class="listrow2">
+      <input type="checkbox" name="${fieldname}" value="1"<if fieldcontent=="1"> checked</if>>&nbsp;&nbsp;
+    </td>
+  </tr>
+</function> 
 
 <function TextAreaTableRow (label, hint, cols, rows, fieldname, fieldcontent )>
-	<tr>
-		<td align="right" valign="top" class="table-left">
-			<b>${label}:</b>
-			<if hint>
+  <tr>
+    <td align="right" valign="top" class="table-left">
+      <b>${label}:</b>
+      <if hint>
         <br>
-        <span class="small">${hint}</span>			
+        <span class="small">${hint}</span>      
       </if>
-		</td>
-		
-		<td class="listrow2">
-			<textarea cols="${cols}" rows="${rows}" name="${fieldname}" wrap="virtual">${utility.encodeHTML(fieldcontent)}</textarea>
-		</td>
-	</tr>
+    </td>
+    
+    <td class="listrow2">
+      <textarea cols="${cols}" rows="${rows}" name="${fieldname}" wrap="virtual">${utility.encodeHTML(fieldcontent)}</textarea>
+    </td>
+  </tr>
 </function>
 
 
 <function TextAreaTableRowLight (label, hint, cols, rows, fieldname, fieldcontent )>
-	<tr>
-		<td align="right" valign="top" class="table-left-light">
-			<b>${label}:</b>
-			<if hint>
+  <tr>
+    <td align="right" valign="top" class="table-left-light">
+      <b>${label}:</b>
+      <if hint>
         <br>
-        <span class="small">${hint}</span>			
+        <span class="small">${hint}</span>      
       </if>
-		</td>
-		
-		<td class="listrow1">
-			<textarea cols="${cols}" rows="${rows}" name="${fieldname}" wrap="virtual">${utility.encodeHTML(fieldcontent)}</textarea>
-		</td>
-	</tr>
+    </td>
+    
+    <td class="listrow1">
+      <textarea cols="${cols}" rows="${rows}" name="${fieldname}" wrap="virtual">${utility.encodeHTML(fieldcontent)}</textarea>
+    </td>
+  </tr>
 </function>
 
 <comment>complete search-form for contenentries, not sure if it works from everywhere</comment>
@@ -181,12 +181,12 @@
             <td <if layout>class="table-head"<else>class="small bg-neutral"</if> valign="bottom"> ${lang("contentsearch.publishedstate")}</td>
             <td <if layout>class="table-head"<else>class="small bg-neutral"</if> valign="bottom"> ${lang("contentsearch.articletype")}</td>
             <td <if layout>class="table-head"<else>class="small bg-neutral"</if> valign="bottom"> ${lang("contentsearch.order")}</td>
-			<td <if layout>class="table_head"<else>class="small bg_neutral"</if> valign="bottom"> &nbsp;</td>
+      <td <if layout>class="table_head"<else>class="small bg_neutral"</if> valign="bottom"> &nbsp;</td>
           </tr>
           <tr>
             <td <if layout>class="listrow2"</if>><input type="text" size="10" maxlength="20" name="searchvalue" value="${searchvalue}"></td>
             <td <if layout>class="listrow2"</if>>
-        	      <select name="searchfield">
+                <select name="searchfield">
                   <option value="title"<if searchfield=="title"> selected</if>>${lang("contentsearch.field.title")}</option>
                   <option value="creator"<if searchfield=="creator"> selected</if>>${lang("contentsearch.field.creator")}</option>
                   <option value="contents"<if searchfield=="content"> selected</if>>${lang("contentsearch.field.contents")}</option>
@@ -226,44 +226,44 @@
 
 <comment>browse function, only called if necessary</comment>
 <function PrevNext (align)>
-	<if prevurl || nexturl>      
-		<p align="${align}">
-		<if prevurl>
-			<a class="link-box" href="${config.actionRoot}?${prevurl}"> [ &lt; ] ${lang("list.previous")}</a>&nbsp;&nbsp; 
-		</if>
-		<if nexturl>
-			<a  class="link-box" href="${config.actionRoot}?${nexturl}">   ${lang("list.next")} [ &gt; ]</a>
-		</if>
-		</p>
-	</if>
+  <if prevurl || nexturl>      
+    <p align="${align}">
+    <if prevurl>
+      <a class="link-box" href="${config.actionRoot}?${prevurl}"> [ &lt; ] ${lang("list.previous")}</a>&nbsp;&nbsp; 
+    </if>
+    <if nexturl>
+      <a  class="link-box" href="${config.actionRoot}?${nexturl}">   ${lang("list.next")} [ &gt; ]</a>
+    </if>
+    </p>
+  </if>
 </function>
 
 <comment>multifunctional help - popup or not - big or small designs</comment>
 <function Help (HelpUrl, popup, big )>
-	<if popup>
-		
-		<Script Language="JavaScript">
-			<!-- 
-			function openwindowlink() {
-			newwin = window.open("${HelpUrl}","windowname","height=320,width=320,top=200,left=300, scrollbars,resizable")
-			}
-			// end hiding -->
-		</Script>
-		
-		<a href="JavaScript: openwindowlink()">
-			<if big><span class="link-help"><else><span class="link-help-small"></if>
-				<if big> [ ? ] ${lang("help")}<else>[?]</if>
-			</span>
-		</a>		
-	
-	<else>
-		
-		<if big>
-			<a href="${HelpUrl}" target="_blank"><span class="link-help"> [ ? ] ${lang("help")}</span></a>
-		<else>
-			<a href="${HelpUrl}" target="_blank"><span class="link-help-small">[?]</span></a>		
-		</if>
-	</if>
+  <if popup>
+    
+    <Script Language="JavaScript">
+      <!-- 
+      function openwindowlink() {
+      newwin = window.open("${HelpUrl}","windowname","height=320,width=320,top=200,left=300, scrollbars,resizable")
+      }
+      // end hiding -->
+    </Script>
+    
+    <a href="JavaScript: openwindowlink()">
+      <if big><span class="link-help"><else><span class="link-help-small"></if>
+        <if big> [ ? ] ${lang("help")}<else>[?]</if>
+      </span>
+    </a>    
+  
+  <else>
+    
+    <if big>
+      <a href="${HelpUrl}" target="_blank"><span class="link-help"> [ ? ] ${lang("help")}</span></a>
+    <else>
+      <a href="${HelpUrl}" target="_blank"><span class="link-help-small">[?]</span></a>   
+    </if>
+  </if>
 </function>
 
 
@@ -287,93 +287,93 @@
   </if>
 
   <table cellspacing="2" cellpadding="2">
-		<tr>
-			<td class="table-head" colspan="2">
-				${lang("content.attachments")}
-			</td>
-		</tr>
+    <tr>
+      <td class="table-head" colspan="2">
+        ${lang("content.attachments")}
+      </td>
+    </tr>
 
-		<tr>
-			<td align=right valign=top class="table-left">
-				${lang("content.images")}: 
-			</td>
-			<td align="left" valign="top" class="listrow2">
-				<a href="${config.actionRoot}?module=Images&do=list&${objectKey}=${anObject.id}">[+] ${lang("content.addimage")}</a> |
-				<a href="${config.actionRoot}?module=Images&do=add&${objectKey}=${anObject.id}">${lang("content.uploadimage")}</a>
-			</td>
-		</tr>
-		<list anObject.to_all_media_images as m>
-			<tr>
-			<td align=right valign=top>
-				<a href="${config.actionRoot}?module=Images&do=edit&id=${m["id"]}"><img src="${config.actionRoot}?module=Images&do=getIcon&id=${m["id"]}" alt="edit" border="0"></a>&nbsp;
-			</td>
-			<td align="left" valign="top">
-				<a href="${config.actionRoot}?module=${objectModule}&do=dettach&${objectKey}=${anObject.id}&mid=${m["id"]}">[-] ${lang("delete")}</a>
-			</td>
-			</tr>
-		</list>
-		
+    <tr>
+      <td align=right valign=top class="table-left">
+        ${lang("content.images")}: 
+      </td>
+      <td align="left" valign="top" class="listrow2">
+        <a href="${config.actionRoot}?module=Images&do=list&${objectKey}=${anObject.id}">[+] ${lang("content.addimage")}</a> |
+        <a href="${config.actionRoot}?module=Images&do=add&${objectKey}=${anObject.id}">${lang("content.uploadimage")}</a>
+      </td>
+    </tr>
+    <list anObject.to_all_media_images as m>
+      <tr>
+      <td align=right valign=top>
+        <a href="${config.actionRoot}?module=Images&do=edit&id=${m["id"]}"><img src="${config.actionRoot}?module=Images&do=getIcon&id=${m["id"]}" alt="edit" border="0"></a>&nbsp;
+      </td>
+      <td align="left" valign="top">
+        <a href="${config.actionRoot}?module=${objectModule}&do=dettach&${objectKey}=${anObject.id}&mid=${m["id"]}">[-] ${lang("delete")}</a>
+      </td>
+      </tr>
+    </list>
+    
 
-		<tr>
-			<td align=right valign=top class="table-left">
-			${lang("content.audio")}:
-			</td>
-			<td align="left" valign="top" class="listrow2">
-				<a href="${config.actionRoot}?module=Audio&do=list&${objectKey}=${anObject.id}">[+] ${lang("content.addaudio")}</a> |
-				<a href="${config.actionRoot}?module=Audio&do=add&${objectKey}=${anObject.id}">${lang("content.uploadaudio")}</a>
-			</td>
-		</tr>
-		<list anObject.to_all_media_audio as m>
-			<tr>
-			<td align=right valign=top>
-				<a href="${config.actionRoot}?module=Audio&do=edit&id=${m["id"]}"><img src="${config.docRoot}/img/${m["big_icon"]}" alt="edit" border="0"></a>&nbsp;
-			</td>
-			<td align="left" valign="top">
-				<a href="${config.actionRoot}?module=${objectModule}&do=dettach&${objectKey}=${anObject.id}&mid=${m["id"]}">[-] ${lang("delete")}</a>
-			</td>
-			</tr>
-		</list>
-		
+    <tr>
+      <td align=right valign=top class="table-left">
+      ${lang("content.audio")}:
+      </td>
+      <td align="left" valign="top" class="listrow2">
+        <a href="${config.actionRoot}?module=Audio&do=list&${objectKey}=${anObject.id}">[+] ${lang("content.addaudio")}</a> |
+        <a href="${config.actionRoot}?module=Audio&do=add&${objectKey}=${anObject.id}">${lang("content.uploadaudio")}</a>
+      </td>
+    </tr>
+    <list anObject.to_all_media_audio as m>
+      <tr>
+      <td align=right valign=top>
+        <a href="${config.actionRoot}?module=Audio&do=edit&id=${m["id"]}"><img src="${config.docRoot}/img/${m["big_icon"]}" alt="edit" border="0"></a>&nbsp;
+      </td>
+      <td align="left" valign="top">
+        <a href="${config.actionRoot}?module=${objectModule}&do=dettach&${objectKey}=${anObject.id}&mid=${m["id"]}">[-] ${lang("delete")}</a>
+      </td>
+      </tr>
+    </list>
+    
 
-		<tr>
-			<td align=right valign=top class="table-left">
-				${lang("content.video")}:
-			</td>
-			<td  align="left" valign="top" class="listrow2">
-				<a href="${config.actionRoot}?module=Video&do=list&${objectKey}=${anObject.id}">[+] ${lang("content.addvideo")}</a> |
-				<a href="${config.actionRoot}?module=Video&do=add&${objectKey}=${anObject.id}">${lang("content.uploadvideo")}</a>
-			</td>
-		</tr>
-		<list anObject.to_all_media_video as m>
-			<tr>
-			<td align=right valign=top>
-				<a href="${config.actionRoot}?module=Video&do=edit&id=${m["id"]}"><img src="${config.docRoot}/img/${m["big_icon"]}" alt="edit" border="0"></a>&nbsp;				
-			</td>
-			<td align="left" valign="top">
-				<a href="${config.actionRoot}?module=${objectModule}&do=dettach&${objectKey}=${anObject.id}&mid=${m["id"]}">[-] ${lang("delete")}</a>
-			</td>
-			</tr>
-		</list>
-		
-		<tr>
-			<td align=right valign=top class="table-left">
-				${lang("content.other")}:
-			</td>
-			<td align="left" valign="top" class="listrow2">
-			<a href="${config.actionRoot}?module=OtherMedia&do=list&${objectKey}=${anObject.id}">[+] ${lang("content.addother")}</a> |
-			<a href="${config.actionRoot}?module=OtherMedia&do=add&${objectKey}=${anObject.id}">${lang("content.uploadother")}</a>
-			</td>
-		</tr>
-		<list anObject.to_all_media_other as m>
-			<tr>
-			<td align=right valign=top">
-			<a href="${config.actionRoot}?module=Video&do=edit&id=${m["id"]}"><img src="${config.docRoot}/img/${m["big_icon"]}" alt="edit" border="0"></a>&nbsp;	
-			</td>
-			<td align="left" valign="top">
-				<a href="${config.actionRoot}?module=${objectModule}&do=dettach&${objectKey}=${anObject.id}&mid=${m["id"]}">[-] ${lang("delete")}</a>
-			</td>
-			</tr>
-		</list>
+    <tr>
+      <td align=right valign=top class="table-left">
+        ${lang("content.video")}:
+      </td>
+      <td  align="left" valign="top" class="listrow2">
+        <a href="${config.actionRoot}?module=Video&do=list&${objectKey}=${anObject.id}">[+] ${lang("content.addvideo")}</a> |
+        <a href="${config.actionRoot}?module=Video&do=add&${objectKey}=${anObject.id}">${lang("content.uploadvideo")}</a>
+      </td>
+    </tr>
+    <list anObject.to_all_media_video as m>
+      <tr>
+      <td align=right valign=top>
+        <a href="${config.actionRoot}?module=Video&do=edit&id=${m["id"]}"><img src="${config.docRoot}/img/${m["big_icon"]}" alt="edit" border="0"></a>&nbsp;        
+      </td>
+      <td align="left" valign="top">
+        <a href="${config.actionRoot}?module=${objectModule}&do=dettach&${objectKey}=${anObject.id}&mid=${m["id"]}">[-] ${lang("delete")}</a>
+      </td>
+      </tr>
+    </list>
+    
+    <tr>
+      <td align=right valign=top class="table-left">
+        ${lang("content.other")}:
+      </td>
+      <td align="left" valign="top" class="listrow2">
+      <a href="${config.actionRoot}?module=OtherMedia&do=list&${objectKey}=${anObject.id}">[+] ${lang("content.addother")}</a> |
+      <a href="${config.actionRoot}?module=OtherMedia&do=add&${objectKey}=${anObject.id}">${lang("content.uploadother")}</a>
+      </td>
+    </tr>
+    <list anObject.to_all_media_other as m>
+      <tr>
+      <td align=right valign=top">
+      <a href="${config.actionRoot}?module=Video&do=edit&id=${m["id"]}"><img src="${config.docRoot}/img/${m["big_icon"]}" alt="edit" border="0"></a>&nbsp;  
+      </td>
+      <td align="left" valign="top">
+        <a href="${config.actionRoot}?module=${objectModule}&do=dettach&${objectKey}=${anObject.id}&mid=${m["id"]}">[-] ${lang("delete")}</a>
+      </td>
+      </tr>
+    </list>
   </table>
 </function>  
 

@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with  any library licensed under the Apache Software License, 
- * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
- * (or with modified versions of the above that use the same license as the above), 
- * and distribute linked combinations including the two.  You must obey the 
- * GNU General Public License in all respects for all of the code used other than 
- * the above mentioned libraries.  If you modify this file, you may extend this 
- * exception to your version of the file, but you are not obligated to do so.  
+ * the code of this program with  any library licensed under the Apache Software License,
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library
+ * (or with modified versions of the above that use the same license as the above),
+ * and distribute linked combinations including the two.  You must obey the
+ * GNU General Public License in all respects for all of the code used other than
+ * the above mentioned libraries.  If you modify this file, you may extend this
+ * exception to your version of the file, but you are not obligated to do so.
  * If you do not wish to do so, delete this exception statement from your version.
  */
 package  mir.media;
@@ -79,7 +79,7 @@ import freemarker.template.SimpleList;
  * ) and just override the things that need to be specific. see MediaHandlerAudio
  *
  * @author <mh@nadir.org>, the Mir-coders group
- * @version $Id: MirMedia.java,v 1.17 2003/04/21 12:42:46 idfx Exp $
+ * @version $Id: MirMedia.java,v 1.18 2003/04/29 02:36:50 zapata Exp $
  */
 
 public interface  MirMedia{
@@ -121,7 +121,17 @@ public interface  MirMedia{
    */
   public abstract InputStream getIcon (Entity ent) throws MediaExc, MediaFailure;
 
-        /**
+
+  /**
+   *
+   * @param ent
+   * @return
+   * @throws MediaExc
+   * @throws MediaFailure
+   */
+  public abstract String getIconMimeType (Entity aMediaEntity, Entity aMediaType) throws MediaExc, MediaFailure;
+
+  /**
    * gets the final content representation for the media
    * in the form of a URL (String) that allows someone to
    * download, look at or listen to the media. (HREF, img src

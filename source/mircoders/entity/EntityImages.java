@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with  any library licensed under the Apache Software License, 
- * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
- * (or with modified versions of the above that use the same license as the above), 
- * and distribute linked combinations including the two.  You must obey the 
- * GNU General Public License in all respects for all of the code used other than 
- * the above mentioned libraries.  If you modify this file, you may extend this 
- * exception to your version of the file, but you are not obligated to do so.  
+ * the code of this program with  any library licensed under the Apache Software License,
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library
+ * (or with modified versions of the above that use the same license as the above),
+ * and distribute linked combinations including the two.  You must obey the
+ * GNU General Public License in all respects for all of the code used other than
+ * the above mentioned libraries.  If you modify this file, you may extend this
+ * exception to your version of the file, but you are not obligated to do so.
  * If you do not wish to do so, delete this exception statement from your version.
  */
 
@@ -39,27 +39,32 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import mir.config.MirPropertiesConfiguration;
-import mir.log.LoggerWrapper;
-import mir.misc.FileUtil;
-import mir.misc.WebdbImage;
-import mir.storage.StorageObject;
-import mir.storage.StorageObjectFailure;
-
 import org.postgresql.largeobject.BlobInputStream;
 import org.postgresql.largeobject.LargeObject;
 import org.postgresql.largeobject.LargeObjectManager;
+
+import mir.config.MirPropertiesConfiguration;
+import mir.log.LoggerWrapper;
+import mir.misc.FileUtil;
+import mir.storage.StorageObject;
+import mir.storage.StorageObjectFailure;
+import mircoders.media.ImageProcessor;
 
 /**
  * Diese Klasse enth?lt die Daten eines MetaObjekts
  *
  * @author RK, mh, mir-coders
- * @version $Id: EntityImages.java,v 1.20 2003/04/21 12:42:53 idfx Exp $
+ * @version $Id: EntityImages.java,v 1.21 2003/04/30 00:37:27 zapata Exp $
  */
 
 
 public class EntityImages extends EntityUploadedMedia
 {
+  private int maxImageSize = configuration.getInt("Producer.Image.MaxSize");
+  private int maxIconSize = configuration.getInt("Producer.Image.MaxIconSize");
+  private float minDescaleRatio = configuration.getFloat("Producer.Image.MinDescalePercentage")/100;
+  private int minDescaleReduction = configuration.getInt("Producer.Image.MinDescaleReduction");
+
 
   public EntityImages()
   {
@@ -127,53 +132,54 @@ public class EntityImages extends EntityUploadedMedia
     return img_in;
   }
 
-  public void setImage(InputStream in, String type)
-        throws StorageObjectFailure {
+  public void setImage(InputStream in, String type) throws StorageObjectFailure {
 
     if (in != null) {
+
       Connection con = null;
       PreparedStatement pstmt = null;
       File f = null;
       try {
         logger.debug("EntityImages.settimage :: making internal representation of image");
 
-        File tempDir = new File(MirPropertiesConfiguration.instance().getString("TempDir"));
-        f = File.createTempFile("mir", ".tmp", tempDir);
+        f = File.createTempFile("mir", ".tmp",
+                new File(MirPropertiesConfiguration.instance().getString("TempDir")));
         FileUtil.write(f, in);
-        WebdbImage webdbImage= new WebdbImage(f, type);
-        logger.debug("EntityImages.settimage :: made internal representation of image");
+        ImageProcessor processor = new ImageProcessor(f);
 
         con = theStorageObject.getPooledCon();
         con.setAutoCommit(false);
-        logger.debug("EntityImages.settimage :: trying to insert image");
-
-        // setting values
         LargeObjectManager lom;
-        java.sql.Connection jCon;
-        jCon = ((com.codestudio.sql.PoolManConnectionHandle)con)
-             .getNativeConnection();
+        java.sql.Connection connection;
+        connection = ((com.codestudio.sql.PoolManConnectionHandle)con).getNativeConnection();
 
-        lom = ((org.postgresql.Connection) jCon).getLargeObjectAPI();
+        lom = ((org.postgresql.Connection) connection).getLargeObjectAPI();
 
         int oidImage = lom.create();
-        int oidIcon = lom.create();
         LargeObject lobImage = lom.open(oidImage);
-        LargeObject lobIcon = lom.open(oidIcon);
-        webdbImage.setImage(lobImage.getOutputStream());
-        webdbImage.setIcon(lobIcon.getOutputStream());
+        processor.descaleImage(maxImageSize, minDescaleRatio, minDescaleReduction);
+        processor.writeScaledData(lobImage.getOutputStream(), type);
         lobImage.close();
+        setValueForProperty("img_height", new Integer(processor.getScaledHeight()).toString());
+        setValueForProperty("img_width", new Integer(processor.getScaledWidth()).toString());
+
+        int oidIcon = lom.create();
+        LargeObject lobIcon = lom.open(oidIcon);
+        processor.descaleImage(maxIconSize, minDescaleRatio, minDescaleReduction);
+        processor.writeScaledData(lobIcon.getOutputStream(), type);
         lobIcon.close();
 
-        setValueForProperty("img_height", new Integer(webdbImage.getImageHeight()).toString());
-        setValueForProperty("img_width", new Integer(webdbImage.getImageWidth()).toString());
-        setValueForProperty("icon_height", new Integer(webdbImage.getIconHeight()).toString());
-        setValueForProperty("icon_width", new Integer(webdbImage.getIconWidth()).toString());
+        setValueForProperty("icon_height", new Integer(processor.getScaledHeight()).toString());
+        setValueForProperty("icon_width", new Integer(processor.getScaledWidth()).toString());
+
         setValueForProperty("image_data", new Integer(oidImage).toString());
         setValueForProperty("icon_data", new Integer(oidIcon).toString());
         update();
-      } catch (Exception e) {
+      }
+      catch (Exception e) {
         throwStorageObjectFailure(e, "settimage :: setImage gescheitert: ");
-      } finally {
+      }
+      finally {
         try {
           if (con!=null)
             con.setAutoCommit(true);

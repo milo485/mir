@@ -7,11 +7,11 @@
   <body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
     <include "head.template">
     
-	<p>
-		<a class="link-box" href="${config.actionRoot}?module=Abuse"> [ &lt; ] ${lang("back")}</a>&nbsp;&nbsp;
-		<a class="link-box" href="${config.actionRoot}?module=Abuse&do=showfilters">${lang("abuse.showfilters")}</a>
-		<br>
-	</p>
+  <p>
+    <a class="link-box" href="${config.actionRoot}?module=Abuse"> [ &lt; ] ${lang("back")}</a>&nbsp;&nbsp;
+    <a class="link-box" href="${config.actionRoot}?module=Abuse&do=showfilters">${lang("abuse.showfilters")}</a>
+    <br>
+  </p>
     <table border="0" cellpadding="2" cellspacing="3">
       <tr class="darkgrey">
         <td class="table-head">${lang("abuse.log.time")}</td>
@@ -35,14 +35,14 @@
           <td>${l.browser}</td>
         </tr>
       </list>
-	  <tr>
-	  	<td colspan="4" class="table-foot">&nbsp;</td>
-	  </tr>
+    <tr>
+      <td colspan="4" class="table-foot">&nbsp;</td>
+    </tr>
     </table>
 
     <p>
       <a class="link-box" href="${config.actionRoot}?module=Abuse"> [ &lt; ] ${lang("back")}</a>&nbsp;&nbsp;
-	  <a class="link-box" href="${config.actionRoot}?module=Abuse&do=showfilters">${lang("abuse.showfilters")}</a>
+    <a class="link-box" href="${config.actionRoot}?module=Abuse&do=showfilters">${lang("abuse.showfilters")}</a>
     </p>
 
     <include "foot.template">

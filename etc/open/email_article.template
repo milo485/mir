@@ -1,4 +1,4 @@
-Subject: MIR-FORWARD::${article.title}
+Subject: MIR-FORWARD::${data.article.title}
 Mime-Version: 1.0
 Content-Type: multipart/alternative; boundary="bboouunnddaarryy"
 
@@ -8,25 +8,25 @@ Content-type: text/plain;
 ${lang("general.htmltitle")} Email Forward
 ------------------------------------------------------------ 
 
-${article.title}
+${data.article.title}
 					
-${article.creator}, ${article.creationdate.formatted["dd.MM.yyyy HH:mm"]}
+${data.article.creator}, ${data.article.creationdate.formatted["dd.MM.yyyy HH:mm"]}
 
-${article.description}
+${data.article.description}
 	
-${article.content_data}
+${data.article.content_data}
 				
-<if article.creator_main_url || article.creator_email>						
-<if article.creator_email>
-${lang("article.email.prefix")}: ${article.creator_email}
+<if data.article.creator_main_url || data.article.creator_email>						
+<if data.article.creator_email>
+${lang("article.email.prefix")}: ${data.article.creator_email}
 </if>
-<if article.creator_main_url>
-${lang("article.homepage.prefix")}: ${article.creator_main_url} 
+<if data.article.creator_main_url>
+${lang("article.homepage.prefix")}: ${data.article.creator_main_url} 
 </if>
 </if>
 
 Source of this emailed article:
-${config["Producer.ProductionHost"]}/${config["Producer.DocRoot"]}/${language.code}/${article.creationdate.formatted["yyyy/MM"]}/${article.id}.shtml
+${config["Producer.ProductionHost"]}/${config["Producer.DocRoot"]}/${data.languagecode}/${data.article.creationdate.formatted["yyyy/MM"]}/${data.article.id}.shtml
 
 !COMMENT!
 --bboouunnddaarryy
@@ -37,27 +37,27 @@ Content-type: text/html;charset="utf-8";
 <h1>${lang("general.htmltitle")}::Forwarded Article </h1>
 <table cellpadding="30" cellspacing="0" border="0" width="80%"><tr><td>
         <br>
-        <h2>${article.title}(<a href="${config["Producer.ProductionHost"]}/${config["Producer.DocRoot"]}/${language.code}/${article.creationdate.formatted["yyyy/MM"]}/${article.id}.shtml">original location here</a>)</h2>
+        <h2>${data.article.title}(<a href="${config["Producer.ProductionHost"]}/${config["Producer.DocRoot"]}/${data.languagecode}/${data.article.creationdate.formatted["yyyy/MM"]}/${data.article.id}.shtml">original location here</a>)</h2>
 				
-	<p><i><font size="-1">${article.creator}, ${article.creationdate.formatted["dd.MM.yyyy HH:mm"]}</font></i></p>
+	<p><i><font size="-1">${data.article.creator}, ${data.article.creationdate.formatted["dd.MM.yyyy HH:mm"]}</font></i></p>
         <br>
-	<p>${article.description_parsed}</p>
+	<p>${data.article.description_parsed}</p>
 	<!-- media -->
-	<list article.to_media_audio as media>
+	<list data.article.to_media_audio as media>
 	<p>
 	<a href="${media["publish_server"]}${media["publish_path"]}">
 	${media["title"]} - ${media["media_descr"]} ${media["human_readable_size"]}
 	</a>
 	</p>
 	</list>
-	<list article.to_media_video as media>
+	<list data.article.to_media_video as media>
 	<p>
 	<img src="../../../img/${media["big_icon"]}" border="0" alt="">
 	<a href="${media["publish_server"]}${media["publish_path"]}">
 	${media["title"]} - ${media["media_descr"]} ${media["human_readable_size"]}</a>
 	</p>
 	</list>
-	<list article.to_media_other as media>
+	<list data.article.to_media_other as media>
 	<p>
 	<img src="../../../img/${media["big_icon"]}" border="0" alt="">
 	<a href="${media["publish_server"]}${media["publish_path"]}">
@@ -65,7 +65,7 @@ Content-type: text/html;charset="utf-8";
 	</p>
 	</list>
 			
-	<list article.to_media_images as image>
+	<list data.article.to_media_images as image>
 	<p>
 	<img src="${image["publish_server"]}${image["publish_path"]}"
 	border="0" width="${image["img_width"]}"
@@ -74,16 +74,16 @@ Content-type: text/html;charset="utf-8";
 	</p>
 	</list>
 	<br>
-	<p><font size="-1">${article.content_data_parsed}</font></p>
+	<p><font size="-1">${data.article.content_data_parsed}</font></p>
 	<br>
-	<if article.creator_main_url || article.creator_email>
+	<if data.article.creator_main_url || data.article.creator_email>
 	<p>
 		<font size="-1">
-		<if article.creator_email>
+		<if data.article.creator_email>
 			<img src="../../../img/mail_small.gif" width="12" height="10" border="0" alt="-"> ${lang("article.email.prefix")}: <a href="mailto:${article.creator_email}">${article.creator_email}</a><br>
 		</if>
-		<if article.creator_main_url>
-			<img src="../../../img/link_small.gif" width="12" height="10" border="0" alt=""> ${lang("article.homepage.prefix")}: <a href="${article.creator_main_url}" target="extern">${article.creator_main_url}</a><br>
+		<if data.article.creator_main_url>
+			<img src="../../../img/link_small.gif" width="12" height="10" border="0" alt=""> ${lang("article.homepage.prefix")}: <a href="${article.creator_main_url}" target="extern">${data.article.creator_main_url}</a><br>
 		</if>
 	</font>
 	</p>

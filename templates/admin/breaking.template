@@ -11,16 +11,16 @@
 
 
 <form action="${config.actionRoot}" method="post">
-	<input type="hidden" name="module" value="Breaking">
-	<input type="hidden" name="id" value="${data.id}">
-	<if data.new><input type="hidden" name="do" value="insert">
-	<else><input type="hidden" name="do" value="update"></if>
+  <input type="hidden" name="module" value="Breaking">
+  <input type="hidden" name="id" value="${data.id}">
+  <if data.new><input type="hidden" name="do" value="insert">
+  <else><input type="hidden" name="do" value="update"></if>
 <table border="0">
   
   <tr>
     <td align="right" class="table-left">
-	 <B>${lang("breaking.date")}:</B>
-	</td>
+   <B>${lang("breaking.date")}:</B>
+  </td>
     <td class="listrow2">
       ${data.webdb_create_formatted}
     </td>
@@ -30,19 +30,19 @@
   
   <tr>
     <td align="right" class="table-left">
-	<B>${lang("breaking.text")}:</B><br> ${lang("breaking.textinfo")}</td>
+  <B>${lang("breaking.text")}:</B><br> ${lang("breaking.textinfo")}</td>
     <td class="listrow2">
-	 <textarea cols="50" rows="5" name="text" wrap=virtual>${data.text}</textarea>
+   <textarea cols="50" rows="5" name="text" wrap=virtual>${data.text}</textarea>
     </td>
   </tr>
 
   <tr>
     <td colspan="2" align="right" class="table-foot">
-		<if data.new>
-			<input type="submit" name="save" value="${lang("insert")}">
-		<else>
-			<input type="submit" name="save" value="${lang("save")}">
-		</if> 
+    <if data.new>
+      <input type="submit" name="save" value="${lang("insert")}">
+    <else>
+      <input type="submit" name="save" value="${lang("save")}">
+    </if> 
     </td>
 </table>
 </form>

@@ -65,6 +65,17 @@ public class MirBasicCommentPostingHandler extends MirBasicPostingSessionHandler
   protected ModuleComment commentModule = new ModuleComment(DatabaseComment.getInstance());
   protected DatabaseCommentToMedia commentToMedia = DatabaseCommentToMedia.getInstance();
 
+
+  public MirBasicCommentPostingHandler() {
+    super();
+
+    setResponseGenerators(
+      configuration.getString("Localizer.OpenSession.comment.EditTemplate"),
+      configuration.getString("Localizer.OpenSession.comment.DupeTemplate"),
+      configuration.getString("Localizer.OpenSession.comment.UnsupportedMediaTemplate"),
+      configuration.getString("Localizer.OpenSession.comment.DoneTemplate"));
+  }
+
   protected void initializeResponseData(Request aRequest, Session aSession, Response aResponse) throws SessionExc, SessionFailure {
     super.initializeResponseData(aRequest, aSession, aResponse);
 
@@ -76,6 +87,8 @@ public class MirBasicCommentPostingHandler extends MirBasicPostingSessionHandler
   }
 
   public void validate(List aResults, Request aRequest, Session aSession) throws SessionExc, SessionFailure {
+    super.validate(aResults, aRequest, aSession);
+
     testFieldEntered(aRequest, "title", "validationerror.missing", aResults);
     testFieldEntered(aRequest, "description", "validationerror.missing", aResults);
     testFieldEntered(aRequest, "creator", "validationerror.missing", aResults);
@@ -86,7 +99,7 @@ public class MirBasicCommentPostingHandler extends MirBasicPostingSessionHandler
 
     String articleId = aRequest.getParameter("to_media");
     if (articleId==null)
-      throw new SessionExc("initializeCommentPosting: article id not set!");
+      throw new SessionExc("initializeSession: article id not set!");
 
     aSession.setAttribute("to_media", articleId);
   };
@@ -95,6 +108,7 @@ public class MirBasicCommentPostingHandler extends MirBasicPostingSessionHandler
     aComment.setValueForProperty("is_published", "1");
     aComment.setValueForProperty("to_comment_status", "1");
     aComment.setValueForProperty("is_html","0");
+    aComment.setValueForProperty("to_media", (String) aSession.getAttribute("to_media"));
   }
 
   public void preProcessRequest(Request aRequest, Session aSession) throws SessionExc, SessionFailure {
@@ -104,7 +118,6 @@ public class MirBasicCommentPostingHandler extends MirBasicPostingSessionHandler
 
       EntityComment comment = (EntityComment) commentModule.createNew();
       comment.setValues(values);
-      comment.setValueForProperty("to_media", (String) aSession.getAttribute("to_media"));
       finalizeComment(aRequest, aSession, comment);
       id = comment.insert();
       if (id == null) {
@@ -146,33 +159,6 @@ public class MirBasicCommentPostingHandler extends MirBasicPostingSessionHandler
     }
     DatabaseContent.getInstance().setUnproduced("id=" + comment.getValue("to_media"));
     logger.info("Comment posted");
-  };
-
-  protected void makeInitialResponse(Request aRequest, Session aSession, Response aResponse) throws SessionExc, SessionFailure {
-    aResponse.setResponseGenerator(configuration.getString("Localizer.OpenSession.comment.EditTemplate"));
-  };
-
-  protected void makeResponse(Request aRequest, Session aSession, Response aResponse, List anErrors) throws SessionExc, SessionFailure {
-    aResponse.setResponseValue("errors", anErrors);
-    aResponse.setResponseGenerator(configuration.getString("Localizer.OpenSession.comment.EditTemplate"));
-  };
-
-  protected void makeFinalResponse(Request aRequest, Session aSession, Response aResponse) throws SessionExc, SessionFailure {
-    aResponse.setResponseGenerator(configuration.getString("Localizer.OpenSession.comment.DoneTemplate"));
-  };
-
-  protected void makeErrorResponse(Request aRequest, Session aSession, Response aResponse, Throwable anError) throws SessionExc, SessionFailure {
-    anError.printStackTrace();
-    Throwable rootCause = ExceptionFunctions.traceCauseException(anError);
-
-    if (rootCause instanceof DuplicateCommentExc)
-      aResponse.setResponseGenerator(configuration.getString("Localizer.OpenSession.comment.DupeTemplate"));
-    if (rootCause instanceof ModuleMediaType.UnsupportedMimeTypeExc) {
-      aResponse.setResponseValue("mimetype", ((ModuleMediaType.UnsupportedMimeTypeExc) rootCause).getMimeType());
-      aResponse.setResponseGenerator(configuration.getString("Localizer.OpenSession.comment.UnsupportedMediaTemplate"));
-    }
-    else
-      super.makeErrorResponse(aRequest, aSession, aResponse, anError);
   };
 
   protected static class DuplicateCommentExc extends SessionExc {

@@ -18,22 +18,23 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with  any library licensed under the Apache Software License, 
- * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
- * (or with modified versions of the above that use the same license as the above), 
- * and distribute linked combinations including the two.  You must obey the 
- * GNU General Public License in all respects for all of the code used other than 
- * the above mentioned libraries.  If you modify this file, you may extend this 
- * exception to your version of the file, but you are not obligated to do so.  
+ * the code of this program with  any library licensed under the Apache Software License,
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library
+ * (or with modified versions of the above that use the same license as the above),
+ * and distribute linked combinations including the two.  You must obey the
+ * GNU General Public License in all respects for all of the code used other than
+ * the above mentioned libraries.  If you modify this file, you may extend this
+ * exception to your version of the file, but you are not obligated to do so.
  * If you do not wish to do so, delete this exception statement from your version.
  */
+
 package mircoders.localizer.basic;
 
 import java.text.SimpleDateFormat;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Vector;
 
 import mir.entity.Entity;
@@ -138,18 +139,19 @@ public class MirBasicAdminInterfaceLocalizer implements MirAdminInterfaceLocaliz
       }
     };
 
-    public void perform(EntityAdapter aUser, EntityAdapter anEntity) {
+    public void perform(EntityAdapter aUser, EntityAdapter anEntity) throws MirLocalizerExc, MirLocalizerFailure {
       Entity entity = anEntity.getEntity();
       try {
         performModification(aUser, entity);
         entity.update();
       }
       catch (Throwable t) {
+        throw new MirLocalizerFailure(t);
       }
     };
 
     protected abstract boolean isAvailable(Entity anEntity) throws StorageObjectFailure ;
-    protected abstract void performModification(EntityAdapter aUser, Entity anEntity) throws StorageObjectFailure ;
+    protected abstract void performModification(EntityAdapter aUser, Entity anEntity)  throws MirLocalizerExc, MirLocalizerFailure ;
   }
 
   public static abstract class CommentModifyingOperation extends EntityModifyingOperation {
@@ -296,19 +298,22 @@ public class MirBasicAdminInterfaceLocalizer implements MirAdminInterfaceLocaliz
 
   protected static class ChangeArticleFieldOperation extends ArticleModifyingOperation {
     private String field;
-    private String oldValue;
+    private Set oldValues;
     private String newValue;
 
-    public ChangeArticleFieldOperation(String aName, String aField, String anOldValue, String aNewValue, boolean aLogOperation) {
+    public ChangeArticleFieldOperation(String aName, String aField, String anOldValues[], String aNewValue, boolean aLogOperation) {
       super(aName, aLogOperation);
 
       field = aField;
       newValue = aNewValue;
-      oldValue = anOldValue;
+      oldValues = new HashSet(Arrays.asList(anOldValues));
+    }
+    public ChangeArticleFieldOperation(String aName, String aField, String anOldValue, String aNewValue, boolean aLogOperation) {
+      this(aName, aField, new String[] {anOldValue}, aNewValue, aLogOperation);
     }
 
     protected boolean isAvailable(EntityContent anArticle) {
-      return anArticle.getValue(field) != null && anArticle.getValue(field).equals(oldValue);
+      return anArticle.getValue(field) != null && oldValues.contains(anArticle.getValue(field));
     }
 
     protected void performModification(EntityAdapter aUser, EntityContent anArticle) throws StorageObjectFailure {

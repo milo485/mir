@@ -27,6 +27,7 @@
  * exception to your version of the file, but you are not obligated to do so.
  * If you do not wish to do so, delete this exception statement from your version.
  */
+
 package mircoders.localizer.basic;
 
 import java.util.GregorianCalendar;
@@ -68,6 +69,16 @@ public class MirBasicArticlePostingHandler extends MirBasicPostingSessionHandler
   protected DatabaseContentToMedia contentToMedia = DatabaseContentToMedia.getInstance();
   protected DatabaseContent contentDatabase = DatabaseContent.getInstance();
 
+  public MirBasicArticlePostingHandler() {
+    super();
+
+    setResponseGenerators(
+      configuration.getString("Localizer.OpenSession.article.EditTemplate"),
+      configuration.getString("Localizer.OpenSession.article.DupeTemplate"),
+      configuration.getString("Localizer.OpenSession.article.UnsupportedMediaTemplate"),
+      configuration.getString("Localizer.OpenSession.article.DoneTemplate"));
+  }
+
   protected void initializeResponseData(Request aRequest, Session aSession, Response aResponse) throws SessionExc, SessionFailure {
     super.initializeResponseData(aRequest, aSession, aResponse);
 
@@ -80,20 +91,22 @@ public class MirBasicArticlePostingHandler extends MirBasicPostingSessionHandler
   }
 
   public void validate(List aResults, Request aRequest, Session aSession) throws SessionExc, SessionFailure {
+    super.validate(aResults, aRequest, aSession);
+
     testFieldEntered(aRequest, "title", "validationerror.missing", aResults);
     testFieldEntered(aRequest, "description", "validationerror.missing", aResults);
     testFieldEntered(aRequest, "creator", "validationerror.missing", aResults);
     testFieldEntered(aRequest, "content_data", "validationerror.missing", aResults);
   }
 
-  public void finalizeArticle(Request aRequest, Session aSession, EntityContent aContent) throws SessionExc, SessionFailure {
-    aContent.setValueForProperty("is_published", "1");
-    aContent.setValueForProperty("is_produced", "0");
-    aContent.setValueForProperty("date", StringUtil.date2webdbDate(new GregorianCalendar()));
-    aContent.setValueForProperty("is_html","0");
-    aContent.setValueForProperty("publish_path", StringUtil.webdbDate2path(aContent.getValue("date")));
-    aContent.setValueForProperty("to_article_type", "1");
-    aContent.setValueForProperty("to_publisher", "1");
+  public void finalizeArticle(Request aRequest, Session aSession, EntityContent anArticle) throws SessionExc, SessionFailure {
+    anArticle.setValueForProperty("is_published", "1");
+    anArticle.setValueForProperty("is_produced", "0");
+    anArticle.setValueForProperty("date", StringUtil.date2webdbDate(new GregorianCalendar()));
+    anArticle.setValueForProperty("is_html","0");
+    anArticle.setValueForProperty("publish_path", StringUtil.webdbDate2path(anArticle.getValue("date")));
+    anArticle.setValueForProperty("to_article_type", "1");
+    anArticle.setValueForProperty("to_publisher", "1");
   }
 
   public void setArticleTopics(Request aRequest, Session aSession, EntityContent aContent) throws SessionExc, SessionFailure {
@@ -122,7 +135,7 @@ public class MirBasicArticlePostingHandler extends MirBasicPostingSessionHandler
       id = article.insert();
       if (id == null) {
         logger.info("Duplicate article rejected");
-        throw new DuplicateArticleExc("Duplicate article rejected");
+        throw new DuplicatePostingExc("Duplicate article rejected");
       }
       aSession.setAttribute("content", article);
 
@@ -165,36 +178,4 @@ public class MirBasicArticlePostingHandler extends MirBasicPostingSessionHandler
     logger.info("article posted");
   };
 
-  protected void makeInitialResponse(Request aRequest, Session aSession, Response aResponse) throws SessionExc, SessionFailure {
-    aResponse.setResponseGenerator(configuration.getString("Localizer.OpenSession.article.EditTemplate"));
-  };
-
-  protected void makeResponse(Request aRequest, Session aSession, Response aResponse, List anErrors) throws SessionExc, SessionFailure {
-    aResponse.setResponseValue("errors", anErrors);
-    aResponse.setResponseGenerator(configuration.getString("Localizer.OpenSession.article.EditTemplate"));
-  };
-
-  protected void makeFinalResponse(Request aRequest, Session aSession, Response aResponse) throws SessionExc, SessionFailure {
-    aResponse.setResponseGenerator(configuration.getString("Localizer.OpenSession.article.DoneTemplate"));
-  };
-
-  protected void makeErrorResponse(Request aRequest, Session aSession, Response aResponse, Throwable anError) throws SessionExc, SessionFailure {
-    anError.printStackTrace();
-    Throwable rootCause = ExceptionFunctions.traceCauseException(anError);
-
-    if (rootCause instanceof DuplicateArticleExc)
-      aResponse.setResponseGenerator(configuration.getString("Localizer.OpenSession.article.DupeTemplate"));
-    if (rootCause instanceof ModuleMediaType.UnsupportedMimeTypeExc) {
-      aResponse.setResponseValue("mimetype", ((ModuleMediaType.UnsupportedMimeTypeExc) rootCause).getMimeType());
-      aResponse.setResponseGenerator(configuration.getString("Localizer.OpenSession.article.UnsupportedMediaTemplate"));
-    }
-    else
-      super.makeErrorResponse(aRequest, aSession, aResponse, anError);
-  };
-
-  protected static class DuplicateArticleExc extends SessionExc {
-    public DuplicateArticleExc(String aMessage) {
-      super(aMessage);
-    }
-  }
 }

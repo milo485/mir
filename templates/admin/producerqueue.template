@@ -1,6 +1,6 @@
 <html>
 <head>
-	<title>${config["Mir.Name"]} | ${lang("producerqueue.htmltitle")}</title>
+  <title>${config["Mir.Name"]} | ${lang("producerqueue.htmltitle")}</title>
 <link rel="stylesheet" type="text/css" href="${config.docRoot}/style/admin.css">
 </head>
 
@@ -12,33 +12,33 @@
 <p class="box"><b>${lang("producer.producerlist.title")}</b></p>
 
 <table border="0" cellspacing="3" cellpadding="2">
-	<tr>
-		<td class="box_head" colspan="2"><b>${lang("producer.verb.name")}</b></td>
-		<td class="box_head" colspan="2"><b>${lang("producer.verb.description")}</b></td>
-		
-	</tr>
+  <tr>
+    <td class="box_head" colspan="2"><b>${lang("producer.verb.name")}</b></td>
+    <td class="box_head" colspan="2"><b>${lang("producer.verb.description")}</b></td>
+    
+  </tr>
 
-	<assign grey="0">
-	<list producers as p>
-		<tr>
-			<td colspan="4" class="table-head"><b>${p.name}</b></td>
-		</tr>
+  <assign grey="0">
+  <list producers as p>
+    <tr>
+      <td colspan="4" class="table-head"><b>${p.name}</b></td>
+    </tr>
 
-		<list p.verbs as v>
-		<tr <if grey=="1">class="listrow2"<else>class="listrow2"</if>>
-			<td width="25"></td>
-			<if v.name=="all">
-				<td class="small text-alert">${v.name} [!]</td>
-			<else>
-				<td class="small">${v.name}</td>
-			</if>
-			<td class="small">${v.description}</td>
-			<td class="small"><a href="${config.actionRoot}?module=Producer&do=enqueue&producer=${utility.encodeURI(p.name)}&verb=${utility.encodeURI(v.name)}">${lang("producer.verb.enqueue")}</a>&nbsp;</td>
-		</tr>
-		<if grey=="1"><assign grey="0"><else><assign grey="1"></if>
-		</list>
-		
-	</list>
+    <list p.verbs as v>
+    <tr <if grey=="1">class="listrow2"<else>class="listrow2"</if>>
+      <td width="25"></td>
+      <if v.name=="all">
+        <td class="small text-alert">${v.name} [!]</td>
+      <else>
+        <td class="small">${v.name}</td>
+      </if>
+      <td class="small">${v.description}</td>
+      <td class="small"><a href="${config.actionRoot}?module=Producer&do=enqueue&producer=${utility.encodeURI(p.name)}&verb=${utility.encodeURI(v.name)}">${lang("producer.verb.enqueue")}</a>&nbsp;</td>
+    </tr>
+    <if grey=="1"><assign grey="0"><else><assign grey="1"></if>
+    </list>
+    
+  </list>
 </table>
 
 
@@ -51,46 +51,46 @@
 <p class="box" align="left"><b>${lang("producer.jobqueue.title")}</b></p>
 
 <table border="0" cellspacing="3" cellpadding="2">
-	<tr >
-		<td class="bg-neutral" colspan="2"><b>${lang("producer.job.name")}</b></td>
-		<td class="bg-neutral" ><b>${lang("producer.job.status")}</b></td>
-		<td class="bg-neutral small" ><b>${lang("producer.job.date")}</b></td>
-		<comment>    
-		<td class="box-head" >&nbsp;</td>
-		</comment>    
-	</tr>
+  <tr >
+    <td class="bg-neutral" colspan="2"><b>${lang("producer.job.name")}</b></td>
+    <td class="bg-neutral" ><b>${lang("producer.job.status")}</b></td>
+    <td class="bg-neutral small" ><b>${lang("producer.job.date")}</b></td>
+    <comment>    
+    <td class="box-head" >&nbsp;</td>
+    </comment>    
+  </tr>
 
-	<if queue>
-		<assign grey="1">
-		<list queue as q>
-			<tr <if grey=="1">class="listrow1"<else>class="listrow2"</if>>
-				<td class="small">${q.factory}</td>
-				<td class="small">(${q.verb})</td>
-				
-				<if q.status=="pending">
-					<td class="text-alert small">${q.status}</td>
-				<else>
-					<td class="small">${q.status}</td>
-				</if>
-				
-				<td class="small">${q.lastchange["HH:mm:ss"]}</td>
-				<comment> ML: needs to be implemented       
-					<td><a href="${config.actionRoot}?module=Producer&do=abort">${lang("producer.job.cancel")}</a></td>
-				</comment>        
-			</tr>
-			<if grey=="1"><assign grey="0"><else><assign grey="1"></if>
-		</list>
-	<else>
-		<tr class="list2">
-			<td colspan="5" align="center">${lang("producer.job.empty")}</td>
-		</tr>
-	</if>
-	<tr>
-		<td colspan="5" class="table-foot">
-			<br>
-			<a class="link-box"  href="${config.actionRoot}?${thisurl}">${lang("producer.jobqueue.refresh")}</a>
-		</td>
-	</tr>
+  <if queue>
+    <assign grey="1">
+    <list queue as q>
+      <tr <if grey=="1">class="listrow1"<else>class="listrow2"</if>>
+        <td class="small">${q.factory}</td>
+        <td class="small">(${q.verb})</td>
+        
+        <if q.status=="pending">
+          <td class="text-alert small">${q.status}</td>
+        <else>
+          <td class="small">${q.status}</td>
+        </if>
+        
+        <td class="small">${q.lastchange["HH:mm:ss"]}</td>
+        <comment> ML: needs to be implemented       
+          <td><a href="${config.actionRoot}?module=Producer&do=abort">${lang("producer.job.cancel")}</a></td>
+        </comment>        
+      </tr>
+      <if grey=="1"><assign grey="0"><else><assign grey="1"></if>
+    </list>
+  <else>
+    <tr class="list2">
+      <td colspan="5" align="center">${lang("producer.job.empty")}</td>
+    </tr>
+  </if>
+  <tr>
+    <td colspan="5" class="table-foot">
+      <br>
+      <a class="link-box"  href="${config.actionRoot}?${thisurl}">${lang("producer.jobqueue.refresh")}</a>
+    </td>
+  </tr>
 </table>
 
 </td></tr></table>

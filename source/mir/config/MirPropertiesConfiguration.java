@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with  any library licensed under the Apache Software License, 
- * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
- * (or with modified versions of the above that use the same license as the above), 
- * and distribute linked combinations including the two.  You must obey the 
- * GNU General Public License in all respects for all of the code used other than 
- * the above mentioned libraries.  If you modify this file, you may extend this 
- * exception to your version of the file, but you are not obligated to do so.  
+ * the code of this program with  any library licensed under the Apache Software License,
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library
+ * (or with modified versions of the above that use the same license as the above),
+ * and distribute linked combinations including the two.  You must obey the
+ * GNU General Public License in all respects for all of the code used other than
+ * the above mentioned libraries.  If you modify this file, you may extend this
+ * exception to your version of the file, but you are not obligated to do so.
  * If you do not wish to do so, delete this exception statement from your version.
  */
 package mir.config;
@@ -72,8 +72,8 @@ public class MirPropertiesConfiguration extends ExtendedProperties {
     //loading the defaults-config
     super(ctx.getRealPath("/WEB-INF/") + "/default.properties");
     //loading the user-config
-    ExtendedProperties userConfig = 
-    	new ExtendedProperties(ctx.getRealPath("/WEB-INF/etc/") + "/config.properties");
+    ExtendedProperties userConfig =
+      new ExtendedProperties(ctx.getRealPath("/WEB-INF/etc/") + "/config.properties");
     //merging them to one config while overriding the defaults
     this.combine(userConfig);
     addProperty("Home", ctx.getRealPath("/WEB-INF/") + "/");
@@ -90,8 +90,9 @@ public class MirPropertiesConfiguration extends ExtendedProperties {
 
       try {
         instance = new MirPropertiesConfiguration(context, contextPath);
-      } catch (IOException e) {
-        e.printStackTrace();
+      }
+      catch (IOException e) {
+        throw new RuntimeException(e.toString());
       }
     }
 
@@ -179,28 +180,28 @@ public class MirPropertiesConfiguration extends ExtendedProperties {
    * @see org.apache.commons.configuration.Configuration#getString(java.lang.String)
    */
   public String getString(String key) {
-  	return getString(key, "");
+    return getString(key, "");
   }
-  
-  
-  /** 
+
+
+  /**
    * @return the value of this property as String
    * @param key the key of the property
    * @param defaultValue the default value of this property if it is null
    * @see org.apache.commons.collections.ExtendedProperties#getString(java.lang.String, java.lang.String)
    */
   public String getString(String key, String defaultValue) {
-		Object object = getProperty(key);  	
-		if(object == null){
-			if (defaultValue == null) {
-				return new String();
-			}
-		  return defaultValue;
-		} 			
-		if (object instanceof String) {
-			return (String)object;
-		}
-		return object.toString();
+    Object object = getProperty(key);
+    if(object == null){
+      if (defaultValue == null) {
+        return new String();
+      }
+      return defaultValue;
+    }
+    if (object instanceof String) {
+      return (String)object;
+    }
+    return object.toString();
   }
 
   /**
@@ -216,7 +217,7 @@ public class MirPropertiesConfiguration extends ExtendedProperties {
 
     return super.getProperty(key);
   }
-  
+
   /**
    * @author idefix
    */

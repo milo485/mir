@@ -76,7 +76,7 @@ import freemarker.template.SimpleList;
  *  ServletModuleBilder -
  *  liefert HTML fuer Bilder
  *
- * @version $Id: ServletModuleUploadedMedia.java,v 1.27 2003/04/26 00:42:22 zapata Exp $
+ * @version $Id: ServletModuleUploadedMedia.java,v 1.28 2003/04/29 02:36:51 zapata Exp $
  * @author RK, the mir-coders group
  */
 
@@ -391,17 +391,17 @@ public abstract class ServletModuleUploadedMedia
     String idParam = req.getParameter("id");
     if (idParam!=null && !idParam.equals("")) {
       try {
-        EntityUploadedMedia ent = (EntityUploadedMedia)mainModule.getById(idParam);
+        EntityUploadedMedia ent = (EntityUploadedMedia) mainModule.getById(idParam);
         Entity mediaType = ent.getMediaType();
         MirMedia mediaHandler;
-
-        ServletContext ctx = MirPropertiesConfiguration.getContext();
-        String fName = ent.getId()+"."+mediaType.getValue("name");
 
         mediaHandler = MediaHelper.getHandler(mediaType);
         InputStream in = mediaHandler.getIcon(ent);
 
-        res.setContentType(ctx.getMimeType(fName));
+        if (in==null)
+          throw new ServletModuleExc("no icon available");
+
+        res.setContentType(mediaHandler.getIconMimeType(ent, mediaType));
         //important that before calling this res.getWriter was not called first
         ServletOutputStream out = res.getOutputStream();
 

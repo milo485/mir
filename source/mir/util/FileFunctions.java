@@ -18,24 +18,27 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with  any library licensed under the Apache Software License, 
- * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
- * (or with modified versions of the above that use the same license as the above), 
- * and distribute linked combinations including the two.  You must obey the 
- * GNU General Public License in all respects for all of the code used other than 
- * the above mentioned libraries.  If you modify this file, you may extend this 
- * exception to your version of the file, but you are not obligated to do so.  
+ * the code of this program with  any library licensed under the Apache Software License,
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library
+ * (or with modified versions of the above that use the same license as the above),
+ * and distribute linked combinations including the two.  You must obey the
+ * GNU General Public License in all respects for all of the code used other than
+ * the above mentioned libraries.  If you modify this file, you may extend this
+ * exception to your version of the file, but you are not obligated to do so.
  * If you do not wish to do so, delete this exception statement from your version.
  */
 package mir.util;
-
-import gnu.regexp.RE;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Vector;
+
+import gnu.regexp.RE;
 
 public class FileFunctions {
   protected static final int FILE_COPY_BUFFER_SIZE = 65536;
@@ -134,5 +137,14 @@ public class FileFunctions {
     }
 
   }
+
+  public static List getDirectoryContentsAsList(File aDirectory, FilenameFilter aFilter) {
+    Object[] contents = aDirectory.list(aFilter);
+    if (contents==null)
+      return new Vector();
+    else
+      return Arrays.asList(contents);
+  }
+
 
 }

@@ -28,50 +28,35 @@
  * If you do not wish to do so, delete this exception statement from your version.
  */
 
-package mircoders.storage;
+package mircoders.localizer.basic;
 
-/**
- * Title:        Mir
- * Description:  Ihre Beschreibung
- * Copyright:    Copyright (c) 1999
- * Company:
- * @author
- * @version
- */
-
-import mir.log.LoggerWrapper;
-import mir.storage.Database;
-import mir.storage.StorageObject;
-import mir.storage.StorageObjectFailure;
-import freemarker.template.SimpleList;
+import mir.session.*;
+import mircoders.entity.*;
 
 
-
-public class DatabaseMediafolder extends Database implements StorageObject{
-
-  private static DatabaseMediafolder instance;
-
-  // the following *has* to be sychronized cause this static method
-  // could get preemted and we could end up with 2 instances of DatabaseFoo..
-  // see the "Singletons with needles and thread" article at JavaWorld -mh
-  public synchronized static DatabaseMediafolder getInstance() {
-    if (instance == null) {
-      instance = new DatabaseMediafolder();
-    }
-    return instance;
-  }
-
-  private DatabaseMediafolder() {
+public class MirBasicChildArticlePostingHandler extends MirBasicArticlePostingHandler {
+  public MirBasicChildArticlePostingHandler() {
     super();
 
-    logger = new LoggerWrapper("Database.Mediafolder");
-
-    hasTimestamp = false;
-    theTable="media_folder";
+    setNormalResponseGenerator(configuration.getString("Localizer.OpenSession.article.EditTemplate"));
   }
 
-  public SimpleList getPopupData() throws StorageObjectFailure {
-    return getPopupData("name",true);
+  public void finalizeArticle(Request aRequest, Session aSession, EntityContent anArticle) throws SessionExc, SessionFailure {
+    super.finalizeArticle(aRequest, aSession, anArticle);
+
+    anArticle.setValueForProperty("to_content", (String) aSession.getAttribute("to_content"));
   }
+
+  protected void initializeSession(Request aRequest, Session aSession) throws SessionExc, SessionFailure {
+    super.initializeSession(aRequest, aSession);
+
+    String parentId = aRequest.getParameter("to_content");
+    if (parentId==null)
+      throw new SessionExc("initializeSession: parent id not set!");
+
+    aSession.setAttribute("to_content", parentId);
+  };
+
+
 
 }

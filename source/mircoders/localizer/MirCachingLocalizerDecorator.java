@@ -18,17 +18,21 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with  any library licensed under the Apache Software License, 
- * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
- * (or with modified versions of the above that use the same license as the above), 
- * and distribute linked combinations including the two.  You must obey the 
- * GNU General Public License in all respects for all of the code used other than 
- * the above mentioned libraries.  If you modify this file, you may extend this 
- * exception to your version of the file, but you are not obligated to do so.  
+ * the code of this program with  any library licensed under the Apache Software License,
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library
+ * (or with modified versions of the above that use the same license as the above),
+ * and distribute linked combinations including the two.  You must obey the
+ * GNU General Public License in all respects for all of the code used other than
+ * the above mentioned libraries.  If you modify this file, you may extend this
+ * exception to your version of the file, but you are not obligated to do so.
  * If you do not wish to do so, delete this exception statement from your version.
  */
 
 package mircoders.localizer;
+
+import mir.generator.Generator;
+import mir.generator.WriterEngine;
+import mir.entity.adapter.*;
 
 public class MirCachingLocalizerDecorator implements MirLocalizer {
   private MirLocalizer localizer;
@@ -53,7 +57,7 @@ public class MirCachingLocalizerDecorator implements MirLocalizer {
 
   public MirGeneratorLocalizer generators() throws MirLocalizerFailure, MirLocalizerExc {
     if (generatorLocalizer==null) {
-      generatorLocalizer = localizer.generators();
+      generatorLocalizer = new MirCachingGeneratorLocalizer(localizer.generators());
     }
 
     return generatorLocalizer;
@@ -77,7 +81,7 @@ public class MirCachingLocalizerDecorator implements MirLocalizer {
 
   public MirDataModelLocalizer dataModel() throws MirLocalizerFailure, MirLocalizerExc {
     if (dataModelLocalizer==null) {
-      dataModelLocalizer = localizer.dataModel();
+      dataModelLocalizer = new MirCachingDatamodelLocalizer(localizer.dataModel());
     }
 
     return dataModelLocalizer;
@@ -91,5 +95,67 @@ public class MirCachingLocalizerDecorator implements MirLocalizer {
     return adminInterfaceLocalizer;
   };
 
+  private static class MirCachingDatamodelLocalizer implements MirDataModelLocalizer {
+    private MirDataModelLocalizer master;
+    private EntityAdapterModel adapterModel;
+
+    public MirCachingDatamodelLocalizer(MirDataModelLocalizer aMaster) {
+      master = aMaster;
+      adapterModel = null;
+    }
+
+    public EntityAdapterModel adapterModel() throws MirLocalizerExc, MirLocalizerFailure {
+      if (adapterModel==null) {
+        adapterModel = master.adapterModel();
+      }
+
+      return adapterModel;
+    };
+
+  }
+
+  private static class MirCachingGeneratorLocalizer implements MirGeneratorLocalizer {
+    private MirGeneratorLocalizer master;
+    private WriterEngine writerEngine;
+    private Generator.GeneratorLibrary producerGeneratorLibrary;
+    private Generator.GeneratorLibrary adminGeneratorLibrary;
+    private Generator.GeneratorLibrary openPostingGeneratorLibrary;
+
+    public MirCachingGeneratorLocalizer(MirGeneratorLocalizer aMaster) {
+      master = aMaster;
+    }
+
+    public WriterEngine makeWriterEngine() throws MirLocalizerExc, MirLocalizerFailure {
+      if (writerEngine==null) {
+        writerEngine = master.makeWriterEngine();
+      }
+
+      return writerEngine;
+    };
+
+    public Generator.GeneratorLibrary makeProducerGeneratorLibrary() throws MirLocalizerExc, MirLocalizerFailure {
+      if (producerGeneratorLibrary==null) {
+        producerGeneratorLibrary = master.makeProducerGeneratorLibrary();
+      }
+
+      return producerGeneratorLibrary;
+    };
+
+    public Generator.GeneratorLibrary makeAdminGeneratorLibrary() throws MirLocalizerExc, MirLocalizerFailure {
+      if (adminGeneratorLibrary==null) {
+        adminGeneratorLibrary = master.makeAdminGeneratorLibrary();
+      }
+
+      return adminGeneratorLibrary;
+    };
+
+    public Generator.GeneratorLibrary makeOpenPostingGeneratorLibrary() throws MirLocalizerExc, MirLocalizerFailure {
+      if (openPostingGeneratorLibrary==null) {
+        openPostingGeneratorLibrary = master.makeOpenPostingGeneratorLibrary();
+      }
+
+      return openPostingGeneratorLibrary;
+    };
+  }
 
 }

@@ -181,32 +181,41 @@ public class Abuse {
     return false;
   }
 
+  public boolean checkRequest(Request aRequest, HttpServletResponse aResponse, String anId, boolean anIsComment) {
+    String address = "0.0.0.0";
+    String browser = "unknown";
+    List cookies = null;
+
+    HttpServletRequest request = null;
+
+    if (aRequest instanceof HTTPAdapters.HTTPParsedRequestAdapter) {
+      request = ((HTTPAdapters.HTTPParsedRequestAdapter) aRequest).getRequest();
+    }
+    else if (aRequest instanceof HTTPAdapters.HTTPRequestAdapter) {
+      request = ((HTTPAdapters.HTTPRequestAdapter) aRequest).getRequest();
+    }
+    if (request!=null) {
+      browser = (String) request.getHeader("User-Agent");
+      address = request.getRemoteAddr();
+      cookies = Arrays.asList(request.getCookies());
+    }
+
+    if (anIsComment)
+      logComment(address, anId , new Date(), browser);
+    else
+      logArticle(address, anId , new Date(), browser);
+
+    return checkCookie(cookies) || checkIpFilter(address);
+  }
+
   public void checkComment(EntityComment aComment, Request aRequest, HttpServletResponse aResponse) {
     try {
       long time = System.currentTimeMillis();
-      String address = "0.0.0.0";
-      String browser = "unknown";
-      Cookie[] cookies = {};
-
-      HttpServletRequest request = null;
-
-      if (aRequest instanceof HTTPAdapters.HTTPParsedRequestAdapter) {
-        request = ((HTTPAdapters.HTTPParsedRequestAdapter) aRequest).getRequest();
-      }
-      else if (aRequest instanceof HTTPAdapters.HTTPRequestAdapter) {
-        request = ((HTTPAdapters.HTTPRequestAdapter) aRequest).getRequest();
-      }
-      if (request!=null) {
-        browser = (String) request.getHeader("User-Agent");
-        address = request.getRemoteAddr();
-        cookies = request.getCookies();
-      }
-
-      logComment(address, aComment.getId(), new Date(), browser);
 
       MirAdminInterfaceLocalizer.MirSimpleEntityOperation operation = MirGlobal.localizer().adminInterface().simpleCommentOperationForName(commentBlockAction);
 
-      if (checkCookie(Arrays.asList(cookies)) || checkIpFilter(address) || checkRegExpFilter(aComment)) {
+      if (checkRequest(aRequest, aResponse, aComment.getId(), true) || checkRegExpFilter(aComment)) {
+        logger.debug("performing operation " + operation.getName());
         operation.perform(null, MirGlobal.localizer().dataModel().adapterModel().makeEntityAdapter("comment", aComment));
         setCookie(aResponse);
       }
@@ -214,6 +223,7 @@ public class Abuse {
       logger.info("checkComment: " + (System.currentTimeMillis()-time) + "ms");
     }
     catch (Throwable t) {
+      t.printStackTrace(logger.asPrintWriter(logger.DEBUG_MESSAGE));
       logger.error("Abuse.checkComment: " + t.toString());
     }
   }
@@ -221,29 +231,11 @@ public class Abuse {
   public void checkArticle(EntityContent anArticle, Request aRequest, HttpServletResponse aResponse) {
     try {
       long time = System.currentTimeMillis();
-      String address = "0.0.0.0";
-      String browser = "unknown";
-      Cookie[] cookies = {};
 
-      HttpServletRequest request = null;
+      MirAdminInterfaceLocalizer.MirSimpleEntityOperation operation = MirGlobal.localizer().adminInterface().simpleArticleOperationForName(articleBlockAction);
 
-      if (aRequest instanceof HTTPAdapters.HTTPParsedRequestAdapter) {
-        request = ((HTTPAdapters.HTTPParsedRequestAdapter) aRequest).getRequest();
-      }
-      else if (aRequest instanceof HTTPAdapters.HTTPRequestAdapter) {
-        request = ((HTTPAdapters.HTTPRequestAdapter) aRequest).getRequest();
-      }
-      if (request!=null) {
-        browser = (String) request.getHeader("User-Agent");
-        address = request.getRemoteAddr();
-        cookies = request.getCookies();
-      }
-
-      logArticle(address, anArticle.getId(), new Date(), browser);
-
-      MirAdminInterfaceLocalizer.MirSimpleEntityOperation operation = MirGlobal.localizer().adminInterface().simpleCommentOperationForName(commentBlockAction);
-
-      if (checkCookie(Arrays.asList(cookies)) || checkIpFilter(address) || checkRegExpFilter(anArticle)) {
+      if (checkRequest(aRequest, aResponse, anArticle.getId(), false) || checkRegExpFilter(anArticle)) {
+        logger.debug("performing operation " + operation.getName());
         operation.perform(null, MirGlobal.localizer().dataModel().adapterModel().makeEntityAdapter("content", anArticle));
         setCookie(aResponse);
       }
@@ -251,6 +243,7 @@ public class Abuse {
       logger.info("checkArticle: " + (System.currentTimeMillis()-time) + "ms");
     }
     catch (Throwable t) {
+      t.printStackTrace(logger.asPrintWriter(logger.DEBUG_MESSAGE));
       logger.error("Abuse.checkArticle: " + t.toString());
     }
   }

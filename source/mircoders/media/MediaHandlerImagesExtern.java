@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with  any library licensed under the Apache Software License, 
- * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
- * (or with modified versions of the above that use the same license as the above), 
- * and distribute linked combinations including the two.  You must obey the 
- * GNU General Public License in all respects for all of the code used other than 
- * the above mentioned libraries.  If you modify this file, you may extend this 
- * exception to your version of the file, but you are not obligated to do so.  
+ * the code of this program with  any library licensed under the Apache Software License,
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library
+ * (or with modified versions of the above that use the same license as the above),
+ * and distribute linked combinations including the two.  You must obey the
+ * GNU General Public License in all respects for all of the code used other than
+ * the above mentioned libraries.  If you modify this file, you may extend this
+ * exception to your version of the file, but you are not obligated to do so.
  * If you do not wish to do so, delete this exception statement from your version.
  */
 package mircoders.media;
@@ -78,27 +78,27 @@ public class MediaHandlerImagesExtern extends MediaHandlerGeneric
       String date = anImageEntity.getValue("date");
       String datePath = StringUtil.webdbDate2path(date);
       String ext = "." + mediaTypeEnt.getValue("name");
-      String filePath = datePath + anImageEntity.getId() + ext;
-      String iconFilePath = MirPropertiesConfiguration.instance().getString("Producer.StorageRoot") + getIconStoragePath() + filePath;
+      String fileBasePath = datePath + anImageEntity.getId();
+      String filePath = fileBasePath + ext;
+      String iconPath = getIconStoragePath() + fileBasePath + ".jpg";
+      String iconStoragePath = configuration.getString("Producer.StorageRoot") + iconPath;
       String imageFilePath = getStoragePath() + File.separator + filePath;
 
       File imageFile = new File(imageFilePath);
-      File iconFile = new File(iconFilePath);
+      File iconFile = new File(iconStoragePath);
 
       if (!imageFile.exists()) {
         throw new MediaExc("error in MediaHandlerImagesExtern.produce(): " + filePath + " does not exist!");
       }
       else {
-        ImageProcessor processor = new ImageProcessor(imageFile, "JPEG");
+        ImageProcessor processor = new ImageProcessor(imageFile);
 
         processor.descaleImage(maxIconSize, minDescaleRatio, minDescaleReduction);
         File dir = new File(iconFile.getParent());
           if (dir!=null && !dir.exists()){
             dir.mkdirs();
         }
-        processor.writeScaledData(iconFile);
-
-        logger.info(processor.getWidth()+"x"+processor.getHeight());
+        processor.writeScaledData(iconFile, "JPEG");
 
         anImageEntity.setValueForProperty("img_height", new Integer(processor.getHeight()).toString());
         anImageEntity.setValueForProperty("img_width", new Integer(processor.getWidth()).toString());
@@ -106,7 +106,7 @@ public class MediaHandlerImagesExtern extends MediaHandlerGeneric
         anImageEntity.setValueForProperty("icon_height", new Integer(processor.getScaledHeight()).toString());
         anImageEntity.setValueForProperty("icon_width", new Integer(processor.getScaledWidth()).toString());
 
-        anImageEntity.setValueForProperty("icon_path", getIconStoragePath()+filePath);
+        anImageEntity.setValueForProperty("icon_path", iconPath);
         anImageEntity.setValueForProperty("publish_path", filePath);
 
         anImageEntity.update();
@@ -122,20 +122,20 @@ public class MediaHandlerImagesExtern extends MediaHandlerGeneric
 
   public InputStream getIcon(Entity anImageEntity) throws MediaExc, MediaFailure {
     try {
-      Entity mediaType = DatabaseUploadedMedia.getInstance().getMediaType(
-          anImageEntity);
+      String filePath =
+          configuration.getString("Producer.StorageRoot") + anImageEntity.getValue("icon_path");
 
-      String date = anImageEntity.getValue("date");
-      String datePath = StringUtil.webdbDate2path(date);
-      String ext = "." + mediaType.getValue("name");
-      String filePath = MirPropertiesConfiguration.instance().getString("Producer.StorageRoot") +
-          getIconStoragePath() + datePath + anImageEntity.getId() + ext;
+      logger.info(filePath);
 
       return new FileInputStream(new File(filePath));
     }
     catch (Throwable t) {
-      throw new MediaFailure(t);
+      return null;
     }
+  }
+
+  public String getIconMimeType(Entity anImageEntity, Entity aMediaType) {
+    return "image/jpeg";
   }
 
   public String getStoragePath()

@@ -1,6 +1,6 @@
 <html>
 <head>
-	<title>${config["Mir.Name"]} | ${lang("fileedit.htmltitle")}</title>
+  <title>${config["Mir.Name"]} | ${lang("fileedit.htmltitle")}</title>
   <link rel="stylesheet" type="text/css" href="${config.docRoot}/style/admin.css">
 </head>
 
@@ -9,24 +9,25 @@
 <include "head.template">
 
 <p>
-	<b>${lang("fileedit.filename")} :</b> ${filename}<br>
-	<b>${lang("fileedit.subdirectory")} :</b> ${subdirectory}
+  <b>${lang("fileedit.filename")} :</b> ${filename}<br>
+  <b>${lang("fileedit.subdirectory")} :</b> ${subdirectory}
 </p>
 
 <br>
 
 <form action="${config.actionRoot}" method="post">
-	<input type="hidden" name="module" value="FileEdit">
-	<input type="hidden" name="filename" value="${filename}">
-	<input type="hidden" name="subdirectory" value="${subdirectory}">
-	<input type="hidden" name="do" value="update">
-	<input type="submit" name="save" value="${lang("save")}"> &nbsp;
-	<input type="reset" value="${lang("reset")}">
-	<br><br>	
-	<textarea cols="120" rows="40" name="text" wrap=virtual>${utility.encodeHTML(text)}</textarea>
-	<br><br>
-	<input type="submit" name="save" value="${lang("save")}"> &nbsp;
-	<input type="reset" value="${lang("reset")}">
+  <input type="hidden" name="module" value="FileEdit">
+  <input type="hidden" name="filename" value="${filename}">
+  <input type="hidden" name="entry" value="${entry}">
+  <input type="hidden" name="subdirectory" value="${subdirectory}">
+  <input type="hidden" name="do" value="update">
+  <input type="submit" name="save" value="${lang("save")}"> &nbsp;
+  <input type="reset" value="${lang("reset")}">
+  <br><br>  
+  <textarea cols="120" rows="40" name="text" wrap=virtual>${utility.encodeHTML(text)}</textarea>
+  <br><br>
+  <input type="submit" name="save" value="${lang("save")}"> &nbsp;
+  <input type="reset" value="${lang("reset")}">
 </form>
 <br>
 <br>

@@ -33,28 +33,64 @@ package mir.producer;
 import java.util.Map;
 
 import mir.log.LoggerWrapper;
+import mir.storage.Database;
 import mir.util.ParameterExpander;
 
-public class EvaluatedAssignmentProducerNode implements ProducerNode {
-  private String key;
-  private String bundleIdentifier;
-  private String value;
+public class FreeQueryProducerNode implements ProducerNode {
+  public static final int QUERY_TYPE_SET = 1;
+  public static final int QUERY_TYPE_ROW = 2;
+  public static final int QUERY_TYPE_VALUE = 3;
 
-  public EvaluatedAssignmentProducerNode(String aKey, String aValue) {
+  private Database database = new Database();
+  private String key;
+  private String query;
+  private String limitExpression;
+  private int type;
+
+  public FreeQueryProducerNode(String aKey, String aQuery, String aLimit, int aType) {
     key = aKey;
-    value = aValue;
+    query = aQuery;
+    limitExpression = aLimit;
+    type = aType;
   }
 
   public void produce(Map aValueMap, String aVerb, LoggerWrapper aLogger) throws ProducerFailure {
-    try {
-      ParameterExpander.setValueForKey(
-         aValueMap,
-         ParameterExpander.expandExpression( aValueMap, key ),
-         ParameterExpander.evaluateExpression( aValueMap, value ));
+    Object result = null;
 
+    try {
+      switch (type) {
+        case QUERY_TYPE_VALUE:
+          result = database.executeFreeSingleValueSql(ParameterExpander.expandExpression(aValueMap, query));
+          break;
+
+        case QUERY_TYPE_ROW:
+          result = database.executeFreeSingleRowSql(ParameterExpander.expandExpression(aValueMap, query));
+          break;
+
+        case QUERY_TYPE_SET:
+          int limit=10;
+          if (limitExpression!=null)
+            limit=ParameterExpander.evaluateIntegerExpression(aValueMap, limitExpression);
+
+          result = database.executeFreeSql(
+            ParameterExpander.expandExpression( aValueMap, query ),
+            limit);
+          break;
+      }
     }
     catch (Throwable t) {
-      aLogger.error("key " + key + " could not be set to " + value + ": " + t.getMessage());
+      aLogger.error("Error while executing free query: " + t.toString());
+    }
+
+    try {
+      ParameterExpander.setValueForKey(
+          aValueMap,
+          ParameterExpander.expandExpression(aValueMap, key),
+          result);
+    }
+    catch (Throwable t) {
+      aLogger.error("Error while setting key " + key + ": " + t.toString());
     }
   };
+
 }

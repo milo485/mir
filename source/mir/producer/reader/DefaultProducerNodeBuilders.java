@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with  any library licensed under the Apache Software License, 
- * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
- * (or with modified versions of the above that use the same license as the above), 
- * and distribute linked combinations including the two.  You must obey the 
- * GNU General Public License in all respects for all of the code used other than 
- * the above mentioned libraries.  If you modify this file, you may extend this 
- * exception to your version of the file, but you are not obligated to do so.  
+ * the code of this program with  any library licensed under the Apache Software License,
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library
+ * (or with modified versions of the above that use the same license as the above),
+ * and distribute linked combinations including the two.  You must obey the
+ * GNU General Public License in all respects for all of the code used other than
+ * the above mentioned libraries.  If you modify this file, you may extend this
+ * exception to your version of the file, but you are not obligated to do so.
  * If you do not wish to do so, delete this exception statement from your version.
  */
 package mir.producer.reader;
@@ -53,7 +53,7 @@ import mir.producer.GeneratingProducerNode;
 import mir.producer.LoggingProducerNode;
 import mir.producer.LoopProducerNode;
 import mir.producer.ProducerNode;
-import mir.producer.RSSProducerNode;
+import mir.producer.*;
 import mir.producer.ResourceBundleProducerNode;
 import mir.producer.ScriptCallingProducerNode;
 import mir.util.XMLReader;
@@ -78,6 +78,8 @@ public class DefaultProducerNodeBuilders {
     aBuilderLibrary.registerBuilder("While", LoopProducerNodeBuilder.class);
 
     aBuilderLibrary.registerBuilder("RSS", RSSProducerNodeBuilder.class);
+
+    aBuilderLibrary.registerBuilder("FreeQuery", FreeQueryProducerNodeBuilder.class);
 
     aBuilderLibrary.registerFactory("Enumerate", new EnumeratingProducerNodeBuilder.factory(aModel));
     aBuilderLibrary.registerFactory("List", new ListProducerNodeBuilder.factory(aModel));
@@ -361,6 +363,56 @@ public class DefaultProducerNodeBuilders {
 
     public ProducerNode constructNode() {
       return new LoggingProducerNode(message, type);
+    };
+  }
+
+////////////////////////////////////////////////////////////////////////////////
+
+  public static class FreeQueryProducerNodeBuilder extends AbstractProducerNodeBuilder {
+    private final static String   FREEQUERY_KEY_ATTRIBUTE = KEY_ATTRIBUTE;
+    private final static String   FREEQUERY_LIMIT_ATTRIBUTE = LIMIT_ATTRIBUTE;
+    private final static String   FREEQUERY_QUERY_ATTRIBUTE = "query";
+    private final static String   FREEQUERY_TYPE_ATTRIBUTE = "type";
+    private final static String[] FREEQUERY_REQUIRED_ATTRIBUTES = { KEY_ATTRIBUTE, FREEQUERY_QUERY_ATTRIBUTE };
+    private final static String[] FREEQUERY_OPTIONAL_ATTRIBUTES = { LIMIT_ATTRIBUTE, FREEQUERY_TYPE_ATTRIBUTE };
+    private final static String[] FREEQUERY_SUBNODES = {};
+
+    private String key;
+    private String query;
+    private String limit;
+    private int type;
+
+    public FreeQueryProducerNodeBuilder() {
+      super(FREEQUERY_SUBNODES);
+    }
+
+    public void setAttributes(Map anAttributes) throws ProducerConfigExc, XMLReader.XMLReaderExc {
+      String typeString;
+
+      XMLReaderTool.checkAttributes(anAttributes, FREEQUERY_REQUIRED_ATTRIBUTES, FREEQUERY_OPTIONAL_ATTRIBUTES);
+
+      key = (String) anAttributes.get(FREEQUERY_KEY_ATTRIBUTE);
+      query = (String) anAttributes.get(FREEQUERY_QUERY_ATTRIBUTE);
+      limit = (String) anAttributes.get(FREEQUERY_LIMIT_ATTRIBUTE);
+
+      if (anAttributes.containsKey(FREEQUERY_TYPE_ATTRIBUTE)) {
+        typeString = ((String) anAttributes.get( FREEQUERY_TYPE_ATTRIBUTE ));
+
+        if (typeString.toLowerCase().equals("set"))
+          type = FreeQueryProducerNode.QUERY_TYPE_SET;
+        else if (typeString.toLowerCase().equals("row"))
+          type = FreeQueryProducerNode.QUERY_TYPE_ROW;
+        else if (typeString.toLowerCase().equals("value"))
+          type = FreeQueryProducerNode.QUERY_TYPE_VALUE;
+        else
+          throw new ProducerConfigExc("unknown query type: " + typeString + " (allowed are set, row and value)");
+      }
+      else
+        type = FreeQueryProducerNode.QUERY_TYPE_SET;
+    };
+
+    public ProducerNode constructNode() {
+      return new FreeQueryProducerNode(key, query, limit, type);
     };
   }
 

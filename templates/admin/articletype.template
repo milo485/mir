@@ -8,37 +8,37 @@
 <include "head.template">
 <form action="${config.actionRoot}" method="post">
 
-	<input type="hidden" name="module" value="ArticleType">
-	<input type="hidden" name="id" value="${data.id}">
-	<if data.new>
-		<input type="hidden" name="do" value="insert">
-	<else>
-		<input type="hidden" name="do" value="update">
-	</if>
+  <input type="hidden" name="module" value="ArticleType">
+  <input type="hidden" name="id" value="${data.id}">
+  <if data.new>
+    <input type="hidden" name="do" value="insert">
+  <else>
+    <input type="hidden" name="do" value="update">
+  </if>
     
-	<table border="0">
-		<tr>
-			<td align="right" class="table-left">
-				<B>${lang("articletype.id")}: </B>
-			</td>
-			<td class="listrow2">
-				${data.id}
-			</td>
-		</tr>
+  <table border="0">
+    <tr>
+      <td align="right" class="table-left">
+        <B>${lang("articletype.id")}: </B>
+      </td>
+      <td class="listrow2">
+        ${data.id}
+      </td>
+    </tr>
 
-		<call TextInputTableRow (lang("articletype.name"), 40, 255, "name", data.name)>
+    <call TextInputTableRow (lang("articletype.name"), 40, 255, "name", data.name)>
 
 
-		<tr>
-			<td colspan="2" align="right" class="table-foot">
-				<if data.new>
-					<input type="submit" name="save" value="${lang("insert")}">
-				<else>
-					<input type="submit" name="save" value="${lang("save")}">
-				</if> 
-			</td>
-		</tr>
-	</table>
+    <tr>
+      <td colspan="2" align="right" class="table-foot">
+        <if data.new>
+          <input type="submit" name="save" value="${lang("insert")}">
+        <else>
+          <input type="submit" name="save" value="${lang("save")}">
+        </if> 
+      </td>
+    </tr>
+  </table>
 
 </form>
 

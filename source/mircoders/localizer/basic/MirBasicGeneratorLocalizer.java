@@ -47,7 +47,6 @@ public class MirBasicGeneratorLocalizer implements MirGeneratorLocalizer {
     repository = new GeneratorLibraryRepository();
     logger = new LoggerWrapper("Localizer.Basic.Generator");
 
-
     buildRepository(repository);
   }
 

@@ -39,12 +39,8 @@ function openWin(url) {
   	<list data.contentlist as entry>
   	<tr <if grey=="1"><assign grey="0">class="listrow1"<else>class="listrow2"<assign grey="1"> </if>>
 		<td>
-  	  		<if entry.icon_data!="" && entry.icon_data!="0">
-  				
 				<a href="JavaScript:openWin('${config.actionRoot}?module=Images&do=getMedia&id=${entry.id}')">
 	  			<img src="${config.actionRoot}?module=Images&do=getIcon&id=${entry.id}" border=0></a>
-				
-			</if>
 		</td>
   		<td>
 			${entry.title}&nbsp;
@@ -94,7 +90,7 @@ function openWin(url) {
 	</tr>
 
 <else>
-  <tr><td align="center" class="box" colspan="7">${lang("no-matches_found")}</td></tr>
+  <tr><td align="center" class="box" colspan="7">${lang("no_matches_found")}</td></tr>
 </if>
 </table>
 

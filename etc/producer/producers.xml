@@ -53,9 +53,8 @@
               <Generate 
                 generator="/article.template" 
                 destination="${config.storageRoot}/${pathprefix}/${article.date.formatted.yyyy}/${article.date.formatted.MM}/${article.id}.shtml"/>
-              <Generate 
-                generator="/emailThisArticle.template" 
-                destination="${config.storageRoot}/${pathprefix}/${article.date.formatted.yyyy}/${article.date.formatted.MM}/${article.id}.txt"/>
+
+		<!--
               <PDFPreFormat 
                 key="article" 
                 numLinesBetweenImages="3" 
@@ -70,7 +69,7 @@
               <PDFGenerate
                 generator="${config.storageRoot}/${pathprefix}/${article.date.formatted.yyyy}/${article.date.formatted.MM}/${article.id}.fo"
                 destination="${config.storageRoot}/${pathprefix}/${article.date.formatted.yyyy}/${article.date.formatted.MM}/${article.id}.pdf"
-                stylesheet="${config['Producer.HTML2FOStyleSheet']}" />
+                stylesheet="${config['Producer.HTML2FOStyleSheet']}" /> -->
              </Language>
              <IndexContent key="article" pathToIndex="${config['IndexPath']}"/>
           </then>

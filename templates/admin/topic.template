@@ -6,8 +6,8 @@
 
   <body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
     <include "FUNCTIONS.template">
-	
-	<include "head.template">
+  
+  <include "head.template">
 
     <form action="${config.actionRoot}" method="post">
       <input type=hidden name=module value=Topics>
@@ -19,11 +19,11 @@
       </if>
 
       <table border="0">
-		<call TextInputTableRow (lang("topic.title"), 40, 255, "title", data.title)>
-		<call TextAreaTableRow (lang("topic.description"), "", 40, 3, "description", data.description)>
-		<call TextInputTableRow (lang("topic.filename"), 20, 255, "filename", data.filename)>
-		<call TextInputTableRow (lang("topic.main_url"), 40, 255, "main_url", data.main_url)>
-		<call TextInputTableRow (lang("topic.archive_url"), 40, 255, "archiv_url", data.archiv_url)>
+    <call TextInputTableRow (lang("topic.title"), 40, 255, "title", data.title)>
+    <call TextAreaTableRow (lang("topic.description"), "", 40, 3, "description", data.description)>
+    <call TextInputTableRow (lang("topic.filename"), 20, 255, "filename", data.filename)>
+    <call TextInputTableRow (lang("topic.main_url"), 40, 255, "main_url", data.main_url)>
+    <call TextInputTableRow (lang("topic.archive_url"), 40, 255, "archiv_url", data.archiv_url)>
 
           <td class="table-foot" colspan="2" align="right"> 
           <if data.new>
@@ -33,9 +33,9 @@
           </if> 
           </td>
         </tr>
-      </table>	  
+      </table>    
     </form>
-	<p><a class="link-box" href="${config.actionRoot}?module=Topics&do=list">[&lt;] ${lang("back")} </a> &nbsp;</p>
+  <p><a class="link-box" href="${config.actionRoot}?module=Topics&do=list">[&lt;] ${lang("back")} </a> &nbsp;</p>
     <include "foot.template">
   </body>
 </html>

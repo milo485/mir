@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with  any library licensed under the Apache Software License, 
- * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
- * (or with modified versions of the above that use the same license as the above), 
- * and distribute linked combinations including the two.  You must obey the 
- * GNU General Public License in all respects for all of the code used other than 
- * the above mentioned libraries.  If you modify this file, you may extend this 
- * exception to your version of the file, but you are not obligated to do so.  
+ * the code of this program with  any library licensed under the Apache Software License,
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library
+ * (or with modified versions of the above that use the same license as the above),
+ * and distribute linked combinations including the two.  You must obey the
+ * GNU General Public License in all respects for all of the code used other than
+ * the above mentioned libraries.  If you modify this file, you may extend this
+ * exception to your version of the file, but you are not obligated to do so.
  * If you do not wish to do so, delete this exception statement from your version.
  */
 
@@ -38,12 +38,17 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Vector;
-
 import javax.servlet.ServletException;
 import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
+import org.apache.struts.util.MessageResources;
+import freemarker.template.SimpleHash;
+import freemarker.template.SimpleList;
+import freemarker.template.SimpleScalar;
+import freemarker.template.TemplateModel;
 
 import mir.config.MirPropertiesConfiguration;
 import mir.entity.adapter.EntityIteratorAdapter;
@@ -64,14 +69,9 @@ import mircoders.global.MirGlobal;
 import mircoders.module.ModuleMessage;
 import mircoders.module.ModuleUsers;
 import mircoders.servlet.ServletHelper;
+import mircoders.servlet.ServletModuleFileEdit;
+import mircoders.servlet.ServletModuleLocalizer;
 import mircoders.storage.DatabaseUsers;
-
-import org.apache.struts.util.MessageResources;
-
-import freemarker.template.SimpleHash;
-import freemarker.template.SimpleList;
-import freemarker.template.SimpleScalar;
-import freemarker.template.TemplateModel;
 
 
 
@@ -79,8 +79,8 @@ import freemarker.template.TemplateModel;
 /**
  * Mir.java - main servlet, that dispatches to servletmodules
  *
- * @author $Author: idfx $
- * @version $Id: Mir.java,v 1.45 2003/04/21 12:42:46 idfx Exp $
+ * @author $Author: zapata $
+ * @version $Id: Mir.java,v 1.48 2003/05/01 01:42:11 zapata Exp $
  *
  */
 public class Mir extends AbstractServlet {
@@ -179,33 +179,23 @@ public class Mir extends AbstractServlet {
 
     if (aRequest.getServerPort() == 443) {
       http = "https";
-    } else {
+    }
+    else {
       http = "http";
     }
 
-    //make sure client browsers don't cache anything
     setNoCaching(aResponse);
 
-    //FIXME: this seems kind of hackish and only here because we can have
-    // default other than the one that the browser is set to.
     Locale locale = new Locale(getDefaultLanguage(aRequest), "");
-    String htmlcharset = "UTF-8";
-    try {
-      htmlcharset = MirPropertiesConfiguration.instance().getString("Mir.DefaultHTMLCharset");
-    }
-    catch (Throwable t) {
-    }
 
-    aResponse.setContentType("text/html; charset=" + htmlcharset);
+    aResponse.setContentType("text/html; charset=" +
+        configuration.getString("Mir.DefaultHTMLCharset", "UTF-8"));
 
     String moduleName = aRequest.getParameter("module");
     checkLanguage(session, aRequest);
 
-
-
     // Authentication
-    if (((moduleName != null) && moduleName.equals("login")) ||
-        (userEntity == null)) {
+    if (((moduleName != null) && moduleName.equals("login")) || (userEntity == null)) {
       String user = aRequest.getParameter("login");
       String passwd = aRequest.getParameter("password");
       logger.debug("--login: evaluating for user: " + user);
@@ -269,8 +259,6 @@ public class Mir extends AbstractServlet {
       logger.info("--logout");
       session.invalidate();
 
-      //session = aRequest.getSession(true);
-      //checkLanguage(session, aRequest);
       _sendLoginPage(aResponse, aRequest, aResponse.getWriter());
 
       return;
@@ -282,9 +270,8 @@ public class Mir extends AbstractServlet {
       String redirectString = aRequest.getRequestURI();
       String queryString = aRequest.getQueryString();
 
-      if ((queryString != null) && !queryString.equals("")) {
+      if ((queryString != null) && queryString.length()!=0) {
         redirectString += ("?" + aRequest.getQueryString());
-        logger.debug("STORING: " + redirectString);
         session.setAttribute("login.target", redirectString);
       }
 
@@ -295,14 +282,12 @@ public class Mir extends AbstractServlet {
 
     // If no module is specified goto standard startpage
     if ((moduleName == null) || moduleName.equals("")) {
-      logger.debug("no module: redirect to standardpage");
+//      logger.debug("no module: redirect to standardpage");
       _sendStartPage(aResponse, aRequest, aResponse.getWriter(), userEntity);
 
       return;
     }
 
-    // end of auth
-    // From now on regular dispatching...
     try {
       // get servletmodule by parameter and continue with dispacher
       ServletModule smod = getServletModuleForName(moduleName);
@@ -386,8 +371,8 @@ public class Mir extends AbstractServlet {
           fallbackLocale);
       out.close();
     }
-    catch (Exception e) {
-      logger.error("Error in UserErrorTemplate");
+    catch (Throwable e) {
+      logger.error("Error handling user error" + e.toString());
     }
 
   }
@@ -405,8 +390,8 @@ public class Mir extends AbstractServlet {
           modelRoot,null,out, getLocale(aRequest), getFallbackLocale());
       out.close();
     }
-    catch (Exception e) {
-      logger.error("Error in ErrorTemplate");
+    catch (Throwable e) {
+      logger.error("Error handling error: " + e.toString());
     }
   }
 
@@ -462,6 +447,10 @@ public class Mir extends AbstractServlet {
              new CachingRewindableIterator(
                new EntityIteratorAdapter( "", "webdb_create desc", 10,
                  MirGlobal.localizer().dataModel().adapterModel(), "internalMessage", 10, 0)));
+
+      mergeData.put("fileeditentries", ((ServletModuleFileEdit) ServletModuleFileEdit.getInstance()).getEntries());
+      mergeData.put("administeroperations", ((ServletModuleLocalizer) ServletModuleLocalizer.getInstance()).getAdministerOperations());
+
       mergeData.put("searchvalue", null);
       mergeData.put("searchfield", null);
       mergeData.put("searchispublished", null);
@@ -469,7 +458,7 @@ public class Mir extends AbstractServlet {
       mergeData.put("searchorder", null);
       mergeData.put("selectarticleurl", null);
 
-      ServletHelper.generateResponse(aResponse.getWriter(), mergeData, startTemplate);
+      ServletHelper.generateResponse(out, mergeData, startTemplate);
     }
     catch (Exception e) {
       e.printStackTrace(logger.asPrintWriter(LoggerWrapper.DEBUG_MESSAGE));

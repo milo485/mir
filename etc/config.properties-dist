@@ -47,7 +47,6 @@ Mir.Public-email.address=mir-coders@lists.indymedia.org
 Mir.Public-email.name=mir-coders mailinglist
 
 Mir.Version=1.1beta
-StandardLanguage=de
 DirectOpenposting=yes
 
 #where to put the lucene index
@@ -70,8 +69,10 @@ Mir.Localizer.ProducerConfigFile=etc/producer/producers.xml
 # If the default language is left empty, it will set the accept-language of
 # the client browser as the default.
 Mir.Login.DefaultLanguage=en
-Mir.Login.Languages=en;nl;de;qu;tr;ay;es;eu
+Mir.Login.Languages=en;de;fr;nl;es;pt;eu;sv;tr;zh;gz
 
+# For missing values, the FallbackLanguage is used as default
+Mir.Admin.FallbackLanguage=en
 
 # the templates
 Mir.Localizer.Producer.GeneratorLibrary= default=freemarker(etc/producer/)
@@ -90,13 +91,18 @@ Mir.Localizer.Admin.TopicListFlavor=1
 # For the checkboxes flavour, how many columns should there be?
 Mir.Localizer.Admin.TopicListColumns=3
 
+# In which order should the topic appear?
+Mir.Localizer.Admin.TopicListOrder=title
+
+# enable deletion of comments/articles?
+Mir.Localizer.Admin.AllowDeleteComment=1
+Mir.Localizer.Admin.AllowDeleteArticle=1
+
+
 # Article Preview Link URL (Link to produced articles from within admin) 
 ContentList.ArticleLink=http://production.indy.code-foo.org/en/${date.formatted.yyyy}/${date.formatted.MM}/${id}.shtml
 CommentList.ArticleLink=http://production.indy.code-foo.org/en/${co_content.date.formatted.yyyy}/${to_content.date.formatted.MM}/${to_content.id}.shtml
 
-
-# In which order should the topic appear?
-Mir.Localizer.Admin.TopicListOrder=title
 
 # Which producers need to be called after an article (resp. a comment) is posted
 Mir.Localizer.OpenPosting.ContentProducers= media.new;articles.changed;startpage.generate;synchronization.run
@@ -138,12 +144,13 @@ Producer.ProductionHost=http://indy.code-fu.de
 # the generated HTML pages will be stored
 Producer.StorageRoot=/pub/Dokumente/Indymedia/de-tech/Mir/produced
 
-# for FileEdit module
-#
-# where do we find the files? absolute path
-ServletModule.FileEdit.FileDirectory=/pub/Dokumente/Indymedia/de-tech/Mir/produced
-ServletModule.FileEdit.ExtFilter=.*\.inc$
-ServletModule.FileEdit.Recursive=1
+# FileEdit module
+#   a list of directories to edit
+#   format:
+#      <name>:<path>:<file filter>:<0|1 (recursion off or on)> [, ....]
+ServletModule.FileEdit.Configuration= \
+  includes:/pub/Dokumente/Indymedia/de-tech/Mir/produced/inc:.*\\.inc:1
+
 
 #
 #

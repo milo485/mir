@@ -5,25 +5,25 @@
   <head>
 
   <body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
-	
-	<include "FUNCTIONS.template">
+  
+  <include "FUNCTIONS.template">
     <include "head.template">
       
     <form method="post" action="${config.actionRoot}">
-    	<input type="hidden" name="module" value="Comment">
-    	<input type="hidden" name="id" value="${utility.encodeHTML(comment.id)}">
-    	<if new=="1"> 
-    	  <input type="hidden" name="do" value="insert">
-    	<else>	 
-    	  <input type="hidden" name="do" value="update">
-    	</if>
+      <input type="hidden" name="module" value="Comment">
+      <input type="hidden" name="id" value="${utility.encodeHTML(comment.id)}">
+      <if new=="1"> 
+        <input type="hidden" name="do" value="insert">
+      <else>   
+        <input type="hidden" name="do" value="update">
+      </if>
     
-    	<table border="0">  	
-      	
-		<tr><td colspan="2" class="table-head">${lang("comment.htmltitle")}</td></tr>
-		
-		
-		<tr> 
+      <table border="0">    
+        
+    <tr><td colspan="2" class="table-head">${lang("comment.htmltitle")}</td></tr>
+    
+    
+    <tr> 
           <td align="right" class="table-left">
             ${lang("comment.date")}
           </td>
@@ -35,13 +35,13 @@
 
     <call PulldownTableRow (lang("comment.status"), "to_comment_status", commentstatuses, "id", "name", comment.to_comment_status, "commentstatus.")>
 
-		<call TextInputTableRow (lang("comment.title"), 40, 255, "title", comment.title)>
-		<call TextInputTableRow (lang("comment.creator"), 40, 80, "creator", comment.creator)>
-		<call TextInputTableRow (lang("comment.url"), 40, 255, "main_url", comment.main_url)>
-		<call TextInputTableRow (lang("comment.email"), 40, 80, "email", comment.email)>
-		<call TextInputTableRow (lang("comment.phone"), 40, 80, "phone", comment.phone)>
-		<call TextInputTableRow (lang("comment.address"), 40, 80, "address", comment.address)>
-		
+    <call TextInputTableRow (lang("comment.title"), 40, 255, "title", comment.title)>
+    <call TextInputTableRow (lang("comment.creator"), 40, 80, "creator", comment.creator)>
+    <call TextInputTableRow (lang("comment.url"), 40, 255, "main_url", comment.main_url)>
+    <call TextInputTableRow (lang("comment.email"), 40, 80, "email", comment.email)>
+    <call TextInputTableRow (lang("comment.phone"), 40, 80, "phone", comment.phone)>
+    <call TextInputTableRow (lang("comment.address"), 40, 80, "address", comment.address)>
+    
     <call PulldownTableRow (lang("comment.language"), "to_language", languages, "id", "name", comment.to_language, "")>
     <call CheckboxTableRow       (lang("comment.html"), "is_html", comment.is_html )>
     <call TextAreaTableRow       (lang("comment.text"), "", 70, 15, "description", comment.description)>
@@ -49,8 +49,8 @@
         <tr>
           <td colspan="2" align="right" class="table-foot" > 
             <span class="text">
-      	      ${lang("comment.published")} <input type="checkbox" name="is_published" value="1" <if comment.is_published=="1"> checked</if>>
-      	      <if new=="1">
+              ${lang("comment.published")} <input type="checkbox" name="is_published" value="1" <if comment.is_published=="1"> checked</if>>
+              <if new=="1">
                 <input type="submit" name="save" value="${lang("insert")}">
               <else>
                 <input type="submit" name="save" value="${lang("save")}">
@@ -68,34 +68,34 @@
 <comment>
 <td align="left" valign="top">
 <table cellspacing="3" cellpadding="2">
-	<tr>
-		<td class="table-head" colspan="2">
-			${lang("content.family")}
-		</td>
-	</tr>
-		
-	<tr>
-		<td align=right valign=top class="table-left">
-			${lang("content.parent")}:
-		</td>
-		<td align="left" valign="top" class="listrow2">
-			<if article.parent>
-				<b>${utility.encodeHTML(article.parent.title)}</b><br>
-				<a href="${config.actionRoot}?module=Content&do=edit&id=${article.parent.id}&returnurl=${utility.encodeURI(thisurl)}">${lang("content.viewparent")}</a> |
-				<a href="${config.actionRoot}?module=Content&do=clearparent&id=${article.id}&returnurl=${utility.encodeURI(thisurl)}">${lang("content.clearparent")}</a> |
-			</if>    
-				&nbsp;<a href="${config.actionRoot}?module=Content&do=selectparent&id=${article.id}&returnurl=${utility.encodeURI(thisurl)}">${lang("content.selectparent")}</a>
-		</td>
-	</tr>
-		
-	<tr>
-		<td align=right valign=top class="table-left">
-			${lang("content.children")}:
-		</td>
-		<td align="left" valign="top" class="listrow2">
-			<a href="${config.actionRoot}?module=Content&do=listchildren&article_id=${article.id}">${lang("content.viewchildren")}</a>
-		</td>
-	</tr>
+  <tr>
+    <td class="table-head" colspan="2">
+      ${lang("content.family")}
+    </td>
+  </tr>
+    
+  <tr>
+    <td align=right valign=top class="table-left">
+      ${lang("content.parent")}:
+    </td>
+    <td align="left" valign="top" class="listrow2">
+      <if article.parent>
+        <b>${utility.encodeHTML(article.parent.title)}</b><br>
+        <a href="${config.actionRoot}?module=Content&do=edit&id=${article.parent.id}&returnurl=${utility.encodeURI(thisurl)}">${lang("content.viewparent")}</a> |
+        <a href="${config.actionRoot}?module=Content&do=clearparent&id=${article.id}&returnurl=${utility.encodeURI(thisurl)}">${lang("content.clearparent")}</a> |
+      </if>    
+        &nbsp;<a href="${config.actionRoot}?module=Content&do=selectparent&id=${article.id}&returnurl=${utility.encodeURI(thisurl)}">${lang("content.selectparent")}</a>
+    </td>
+  </tr>
+    
+  <tr>
+    <td align=right valign=top class="table-left">
+      ${lang("content.children")}:
+    </td>
+    <td align="left" valign="top" class="listrow2">
+      <a href="${config.actionRoot}?module=Content&do=listchildren&article_id=${article.id}">${lang("content.viewchildren")}</a>
+    </td>
+  </tr>
 </table>
 
 </td>
@@ -109,12 +109,12 @@
 </if>          
 
     </form>
-	
-	 <p>
+  
+   <p>
       <a class="link-box" href="${config.actionRoot}?module=Comment&do=list">[&lt;] ${lang("list")} </a> &nbsp;
       <a class="link-box" href="${config.actionRoot}">[&lt;&lt;&lt;] ${lang("head.start")}</a>
-	</p>
-	
+  </p>
+  
     <include "foot.template">
   </body>
 </html>

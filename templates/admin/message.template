@@ -10,19 +10,19 @@
 
 
 <form action="${config.actionRoot}" method="post">
-	<input type="hidden" name="module" value="Message">
-	<input type="hidden" name="id" value="${data.id}">
-	<if data.new>
-		<input type="hidden" name="do" value="insert">
-	<else>
-		<input type="hidden" name="do" value="update">
-	</if>
-	
+  <input type="hidden" name="module" value="Message">
+  <input type="hidden" name="id" value="${data.id}">
+  <if data.new>
+    <input type="hidden" name="do" value="insert">
+  <else>
+    <input type="hidden" name="do" value="update">
+  </if>
+  
 <table border="0">
   
   <tr>
     <td align="right" class="table-left">
-	${lang("message.date")}:</td>
+  ${lang("message.date")}:</td>
     <td>
       ${data.date}
     </td>
@@ -37,14 +37,14 @@
 
   <tr>
     <td class="table-foot">
-	${lang("message.textinfo")}
-	</td>
-	
-	<td align="right" class="table-foot"> 
-	<if new>
-		<input type="submit" name="save" value="${lang("insert")}">
+  ${lang("message.textinfo")}
+  </td>
+  
+  <td align="right" class="table-foot"> 
+  <if new>
+    <input type="submit" name="save" value="${lang("insert")}">
     <else>
-		<input type="submit" name="save" value="${lang("save")}">
+    <input type="submit" name="save" value="${lang("save")}">
     </if> 
     </td>
   </tr>
@@ -55,7 +55,7 @@
       
       <a class="link-box" href="${config.actionRoot}?module=Message&do=list">[&lt;] ${lang("back")} </a> &nbsp;
       <a class="link-box" href="${config.actionRoot}">[&lt;&lt;&lt;] ${lang("head.start")}</a>
-	</p>
+  </p>
 
 
 <include "foot.template">

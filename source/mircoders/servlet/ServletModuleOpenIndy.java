@@ -91,6 +91,7 @@ import mir.util.HTTPRequestParser;
 import mir.util.StringRoutines;
 import mircoders.entity.EntityComment;
 import mircoders.entity.EntityContent;
+import mircoders.global.CacheKey;
 import mircoders.global.MirGlobal;
 import mircoders.media.MediaUploadProcessor;
 import mircoders.module.ModuleComment;
@@ -122,7 +123,7 @@ import mircoders.storage.DatabaseTopics;
  *    open-postings to the newswire
  *
  * @author mir-coders group
- * @version $Id: ServletModuleOpenIndy.java,v 1.83 2003/04/26 15:42:17 zapata Exp $
+ * @version $Id: ServletModuleOpenIndy.java,v 1.86 2003/05/04 12:56:33 john Exp $
  *
  */
 
@@ -132,7 +133,7 @@ public class ServletModuleOpenIndy extends ServletModule
   private String        commentFormTemplate, commentFormDoneTemplate, commentFormDupeTemplate;
   private String        postingFormTemplate, postingFormDoneTemplate, postingFormDupeTemplate;
   private String        searchResultsTemplate;
-  private String        prepareMailTemplate,sentMailTemplate;
+  private String        prepareMailTemplate,sentMailTemplate,emailAnArticleTemplate;
   private ModuleContent contentModule;
   private ModuleComment commentModule;
   private ModuleImages  imageModule;
@@ -157,6 +158,7 @@ public class ServletModuleOpenIndy extends ServletModule
 
       searchResultsTemplate = configuration.getString("ServletModule.OpenIndy.SearchResultsTemplate");
       prepareMailTemplate = configuration.getString("ServletModule.OpenIndy.PrepareMailTemplate");
+      emailAnArticleTemplate = configuration.getString("ServletModule.OpenIndy.MailableArticleTemplate");
       sentMailTemplate = configuration.getString("ServletModule.OpenIndy.SentMailTemplate");
       directOp = configuration.getString("DirectOpenposting").toLowerCase();
       commentModule = new ModuleComment(DatabaseComment.getInstance());
@@ -614,40 +616,35 @@ public class ServletModuleOpenIndy extends ServletModule
       if (from.indexOf('\n') != -1 || from.indexOf('\r') != -1 || from.indexOf(',') != -1 ) {
         throw new ServletModuleUserExc("email.error.invalidfromaddress", new String[] {from});
       }
+      
+      CacheKey theCacheKey=new CacheKey("email",aid+mail_language);
+      String theEmailText;
+      
+      if (MirGlobal.mruCache().hasObject(theCacheKey)){
+	logger.info("fetching email text for article "+aid+" from cache");
+	theEmailText = (String) MirGlobal.mruCache().getObject(theCacheKey);
+      }
+      else {
+	EntityContent contentEnt;
+	try{
+	  contentEnt = (EntityContent)contentModule.getById(aid);
+	  StringWriter theEMailTextWriter=new StringWriter();
+	  PrintWriter dest = new PrintWriter(theEMailTextWriter);
+	  Map articleData = new HashMap();
+	  articleData.put("article",mir.generator.FreemarkerGenerator.makeAdapter(contentEnt));
+	  articleData.put("languagecode",mail_language);
+	  deliver(dest,req, res, articleData, null, emailAnArticleTemplate,mail_language);
+	  theEmailText=theEMailTextWriter.toString();
+	  MirGlobal.mruCache().storeObject(theCacheKey,theEmailText);
+	}
+	catch (Throwable e){
+	  throw new ServletModuleFailure("Couldn't get content for article "+aid + mail_language + ": " + e.getMessage(), e);
+	}
+      }
+            
+      String content = theEmailText;
 
 
-      EntityContent contentEnt;
-      try{
-        contentEnt = (EntityContent)contentModule.getById(aid);
-      }
-      catch (Throwable e){
-        throw new ServletModuleFailure("Couldn't get content for article "+aid + ": " + e.getMessage(), e);
-      }
-      String producerStorageRoot=configuration.getString("Producer.StorageRoot");
-      String producerDocRoot=configuration.getString("Producer.DocRoot");
-      String publishPath = contentEnt.getValue("publish_path");
-      String txtFilePath = producerStorageRoot + producerDocRoot + "/" + mail_language +
-                                                                                                         publishPath + "/" + aid + ".txt";
-
-
-      File inputFile = new File(txtFilePath);
-      String content;
-
-      try{
-        FileReader in = new FileReader(inputFile);
-        StringWriter out = new StringWriter();
-        int c;
-        while ((c = in.read()) != -1)
-          out.write(c);
-        in.close();
-        content= out.toString();
-      }
-      catch (FileNotFoundException e){
-        throw new ServletModuleFailure("No text file found in " + txtFilePath, e);
-      }
-      catch (IOException e){
-        throw new ServletModuleFailure("Problem reading file in " + txtFilePath, e);
-      }
       // add some headers
       content = "To: " + to + "\nReply-To: "+ from + "\n" + content;
       // put in the comment where it should go
@@ -702,350 +699,374 @@ public class ServletModuleOpenIndy extends ServletModule
 
 
 
+  /**
+   * Method for querying a lucene index
+   *
+   * @param req
+   * @param res
+   * @throws ServletModuleExc
+   * @throws ServletModuleUserExc
+   * @throws ServletModuleFailure
+   */
 
-    /**
-     * Method for querying a lucene index
-     *
-     * @param req
-     * @param res
-     * @throws ServletModuleExc
-     * @throws ServletModuleUserExc
-     * @throws ServletModuleFailure
-     */
+  public void search(HttpServletRequest req, HttpServletResponse res) throws ServletModuleExc, ServletModuleUserExc, ServletModuleFailure {
+    try {
+      final String[] search_variables = {
+          "search_content", "search_boolean", "search_creator",
+          "search_topic", "search_hasImages", "search_hasAudio", "search_hasVideo", "search_sort",
+          "search_submit", "search_back", "search_forward"};
+      HTTPRequestParser requestParser = new HTTPRequestParser(req);
 
-    public void search(HttpServletRequest req, HttpServletResponse res)
-        throws ServletModuleExc, ServletModuleUserExc, ServletModuleFailure {
+      int increment = 10;
+
+      HttpSession session = req.getSession(false);
+
+      String queryString = "";
+
+      Map mergeData = new HashMap();
+
+      KeywordSearchTerm dateTerm = new KeywordSearchTerm("date_formatted", "search_date", "webdb_create_formatted", "webdb_create_formatted", "webdb_create_formatted");
+      UnIndexedSearchTerm whereTerm = new UnIndexedSearchTerm("", "", "", "where", "where");
+      TextSearchTerm creatorTerm = new TextSearchTerm("creator", "search_creator", "creator", "creator", "creator");
+      TextSearchTerm titleTerm = new TextSearchTerm("title", "search_content", "title", "title", "title");
+      TextSearchTerm descriptionTerm = new TextSearchTerm("description", "search_content", "description", "description", "description");
+      ContentSearchTerm contentTerm = new ContentSearchTerm("content_data", "search_content", "content", "", "");
+      TopicSearchTerm topicTerm = new TopicSearchTerm();
+      ImagesSearchTerm imagesTerm = new ImagesSearchTerm();
+      AudioSearchTerm audioTerm = new AudioSearchTerm();
+      VideoSearchTerm videoTerm = new VideoSearchTerm();
+
+      //make the query available to subsequent iterations
+
+      Iterator j = Arrays.asList(search_variables).iterator();
+      while (j.hasNext()) {
+        String variable = (String) j.next();
+
+        mergeData.put(variable, requestParser.getParameter(variable));
+      }
+
       try {
-        final String[] search_variables = { "search_content", "search_boolean", "search_creator",
-            "search_topic", "search_hasImages", "search_hasAudio", "search_hasVideo", "search_sort",
-            "search_submit", "search_back", "search_forward" };
-        HTTPRequestParser requestParser = new HTTPRequestParser(req);
+        mergeData.put("topics", topicsModule.getTopicsAsSimpleList());
+      }
+      catch (Throwable e) {
+        logger.debug("Can't get topics: " + e.toString());
+      }
 
-        int increment=10;
+      String searchBackValue = req.getParameter("search_back");
+      String searchForwardValue = req.getParameter("search_forward");
 
-        HttpSession session = req.getSession(false);
-
-        String queryString="";
-
-        Map mergeData = new HashMap();
-
-        KeywordSearchTerm dateTerm = new KeywordSearchTerm("date_formatted","search_date","webdb_create_formatted","webdb_create_formatted","webdb_create_formatted");
-        UnIndexedSearchTerm whereTerm = new UnIndexedSearchTerm("","","","where","where");
-        TextSearchTerm creatorTerm = new TextSearchTerm("creator","search_creator","creator","creator","creator");
-        TextSearchTerm titleTerm = new TextSearchTerm("title","search_content","title","title","title");
-        TextSearchTerm descriptionTerm =  new TextSearchTerm("description","search_content","description","description","description");
-        ContentSearchTerm contentTerm = new ContentSearchTerm("content_data","search_content","content","","");
-        TopicSearchTerm topicTerm = new TopicSearchTerm();
-        ImagesSearchTerm imagesTerm = new ImagesSearchTerm();
-        AudioSearchTerm audioTerm = new AudioSearchTerm();
-        VideoSearchTerm videoTerm = new VideoSearchTerm();
-
-        //make the query available to subsequent iterations
-
-        Iterator j = Arrays.asList(search_variables).iterator();
-        while (j.hasNext()) {
-          String variable = (String) j.next();
-
-          mergeData.put(variable, requestParser.getParameter(variable));
-        }
-
-        try{
-          mergeData.put("topics", topicsModule.getTopicsAsSimpleList());
-        }
-        catch(Throwable e) {
-          logger.debug("Can't get topics: " + e.toString());
-        }
-
-        String searchBackValue = req.getParameter("search_back");
-        String searchForwardValue = req.getParameter("search_forward");
-
-        if (searchBackValue != null){
-          int totalHits = ((Integer) session.getAttribute("numberOfHits")).intValue();
-          int newPosition=((Integer)session.getAttribute("positionInResults")).intValue()-increment;
-          if (newPosition<0)
-            newPosition=0;
+      if (searchBackValue != null) {
+        int totalHits = ( (Integer) session.getAttribute("numberOfHits")).intValue();
+        int newPosition = ( (Integer) session.getAttribute("positionInResults")).intValue() - increment;
+        if (newPosition < 0)
+          newPosition = 0;
+        if (newPosition >= totalHits)
+          newPosition = totalHits - 1;
+        session.setAttribute("positionInResults", new Integer(newPosition));
+      }
+      else {
+        if (searchForwardValue != null) {
+          int totalHits = ( (Integer) session.getAttribute("numberOfHits")).intValue();
+          int newPosition = ( (Integer) session.getAttribute("positionInResults")).intValue() + increment;
+          if (newPosition < 0)
+            newPosition = 0;
           if (newPosition >= totalHits)
-            newPosition=totalHits-1;
-          session.setAttribute("positionInResults",new Integer(newPosition));
+            newPosition = totalHits - 1;
+
+          session.setAttribute("positionInResults", new Integer(newPosition));
         }
         else {
-          if (searchForwardValue != null){
-            int totalHits = ((Integer) session.getAttribute("numberOfHits")).intValue();
-            int newPosition=((Integer)session.getAttribute("positionInResults")).intValue()+increment;
-            if (newPosition<0)
-              newPosition=0;
-            if (newPosition >= totalHits)
-              newPosition=totalHits-1;
+          String indexPath = configuration.getString("IndexPath");
 
-            session.setAttribute("positionInResults",new Integer(newPosition));
+          String creatorFragment = creatorTerm.makeTerm(req);
+          if (creatorFragment != null) {
+            queryString = queryString + " +" + creatorFragment;
+          }
+
+          // search title, description, and content for something
+          // the contentTerm uses param "search_boolean" to combine its terms
+          String contentFragment = contentTerm.makeTerm(req);
+          if (contentFragment != null) {
+            logger.debug("contentFragment: " + contentFragment);
+            queryString = queryString + " +" + contentFragment;
+          }
+
+          String topicFragment = topicTerm.makeTerm(req);
+          if (topicFragment != null) {
+            queryString = queryString + " +" + topicFragment;
+          }
+
+          String imagesFragment = imagesTerm.makeTerm(req);
+          if (imagesFragment != null) {
+            queryString = queryString + " +" + imagesFragment;
+          }
+
+          String audioFragment = audioTerm.makeTerm(req);
+          if (audioFragment != null) {
+            queryString = queryString + " +" + audioFragment;
+          }
+
+          String videoFragment = videoTerm.makeTerm(req);
+          if (videoFragment != null) {
+            queryString = queryString + " +" + videoFragment;
+          }
+
+          if (queryString == null || queryString == "") {
+            queryString = "";
           }
           else {
-            String indexPath=configuration.getString("IndexPath");
-
-
-            String creatorFragment = creatorTerm.makeTerm(req);
-            if (creatorFragment != null){
-              queryString = queryString + " +" + creatorFragment;
-            }
-
-            // search title, description, and content for something
-            // the contentTerm uses param "search_boolean" to combine its terms
-            String contentFragment = contentTerm.makeTerm(req);
-            if (contentFragment != null){
-              logger.debug("contentFragment: " + contentFragment);
-              queryString = queryString + " +" + contentFragment;
-            }
-
-            String topicFragment = topicTerm.makeTerm(req);
-            if (topicFragment != null){
-              queryString = queryString + " +" + topicFragment;
-            }
-
-            String imagesFragment = imagesTerm.makeTerm(req);
-            if (imagesFragment != null){
-              queryString = queryString + " +" + imagesFragment;
-            }
-
-            String audioFragment = audioTerm.makeTerm(req);
-            if (audioFragment != null){
-              queryString = queryString + " +" + audioFragment;
-            }
-
-            String videoFragment = videoTerm.makeTerm(req);
-            if (videoFragment != null){
-              queryString = queryString + " +" + videoFragment;
-            }
-
-            if (queryString == null || queryString == ""){
-              queryString = "";
-            }
-            else{
-              try{
-                Searcher searcher = null;
-                try {
-                  searcher = new IndexSearcher(indexPath);
-                }
-                catch(IOException e) {
-                  logger.debug("Can't open indexPath: " + indexPath);
-                  throw new ServletModuleExc("Problem with Search Index! : "+ e.toString());
-                }
-
-                Query query = null;
-                try {
-                  query = QueryParser.parse(queryString, "content", new StandardAnalyzer());
-                }
-                catch(Exception e) {
-                  searcher.close();
-                  logger.debug("Query don't parse: " + queryString);
-                  throw new ServletModuleExc("Problem with Query String! (was '"+queryString+"')");
-                }
-
-                Hits hits = null;
-                try {
-                  hits = searcher.search(query);
-                }
-                catch(IOException e) {
-                  searcher.close();
-                  logger.debug("Can't get hits: " + e.toString());
-                  throw new ServletModuleExc("Problem getting hits!");
-                }
-
-                int start = 0;
-                int end = hits.length();
-
-                String sortBy=req.getParameter("search_sort");
-                if (sortBy == null || sortBy.equals("")){
-                  throw new ServletModuleExc("Please let me sort by something!(missing search_sort)");
-                }
-
-                // here is where the documents will go for storage across sessions
-                ArrayList theDocumentsSorted = new ArrayList();
-
-                if (sortBy.equals("score")){
-                  for(int i = start; i < end; i++) {
-                    theDocumentsSorted.add(hits.doc(i));
-                  }
-                }
-                else{
-                  // then we'll sort by date!
-                  Map dateToPosition = new HashMap(end,1.0F); //we know how big it will be
-                  for(int i = start; i < end; i++) {
-                    String creationDate=(hits.doc(i)).get("creationDate");
-                    // do a little dance in case two contents created at the same second!
-                    if (dateToPosition.containsKey(creationDate)){
-                      ((ArrayList) (dateToPosition.get(creationDate))).add(new Integer(i));
-                    }
-                    else{
-                      ArrayList thePositions = new ArrayList();
-                      thePositions.add(new Integer(i));
-                      dateToPosition.put(creationDate,thePositions);
-                    }
-                  }
-                  Set keys = dateToPosition.keySet();
-                  ArrayList keyList= new ArrayList(keys);
-                  Collections.sort(keyList);
-                  if (sortBy.equals("date_desc")){
-                    Collections.reverse(keyList);
-                  }
-                  else{
-                    if (!sortBy.equals("date_asc")){
-                      throw new ServletModuleExc("don't know how to sort by: "+ sortBy);
-                    }
-                  }
-                  ListIterator keyTraverser = keyList.listIterator();
-                  while (keyTraverser.hasNext()){
-                    ArrayList positions = (ArrayList)dateToPosition.get((keyTraverser.next()));
-                    ListIterator positionsTraverser=positions.listIterator();
-                    while (positionsTraverser.hasNext()){
-                      theDocumentsSorted.add(hits.doc(((Integer)(positionsTraverser.next())).intValue()));
-                    }
-                  }
-                }
-
-                try{
-                  searcher.close();
-                }
-                catch (IOException e){
-                  logger.debug("Can't close searcher: " + e.toString());
-                  throw new ServletModuleFailure("Problem closing searcher(normal):" + e.getMessage(), e);
-                }
-
-
-                session.removeAttribute("numberOfHits");
-                session.removeAttribute("theDocumentsSorted");
-                session.removeAttribute("positionInResults");
-
-                session.setAttribute("numberOfHits",new Integer(end));
-                session.setAttribute("theDocumentsSorted",theDocumentsSorted);
-                session.setAttribute("positionInResults",new Integer(0));
-
+            try {
+              Searcher searcher = null;
+              try {
+                searcher = new IndexSearcher(indexPath);
               }
-              catch (IOException e){
+              catch (IOException e) {
+                logger.debug("Can't open indexPath: " + indexPath);
+                throw new ServletModuleExc("Problem with Search Index! : " + e.toString());
+              }
+
+              Query query = null;
+              try {
+                query = QueryParser.parse(queryString, "content", new StandardAnalyzer());
+              }
+              catch (Exception e) {
+                searcher.close();
+                logger.debug("Query don't parse: " + queryString);
+                throw new ServletModuleExc("Problem with Query String! (was '" + queryString + "')");
+              }
+
+              Hits hits = null;
+              try {
+                hits = searcher.search(query);
+              }
+              catch (IOException e) {
+                searcher.close();
+                logger.debug("Can't get hits: " + e.toString());
+                throw new ServletModuleExc("Problem getting hits!");
+              }
+
+              int start = 0;
+              int end = hits.length();
+
+              String sortBy = req.getParameter("search_sort");
+              if (sortBy == null || sortBy.equals("")) {
+                throw new ServletModuleExc("Please let me sort by something!(missing search_sort)");
+              }
+
+              // here is where the documents will go for storage across sessions
+              ArrayList theDocumentsSorted = new ArrayList();
+
+              if (sortBy.equals("score")) {
+                for (int i = start; i < end; i++) {
+                  theDocumentsSorted.add(hits.doc(i));
+                }
+              }
+              else {
+                // then we'll sort by date!
+                Map dateToPosition = new HashMap(end, 1.0F); //we know how big it will be
+                for (int i = start; i < end; i++) {
+                  String creationDate = (hits.doc(i)).get("creationDate");
+                  // do a little dance in case two contents created at the same second!
+                  if (dateToPosition.containsKey(creationDate)) {
+                    ( (ArrayList) (dateToPosition.get(creationDate))).add(new Integer(i));
+                  }
+                  else {
+                    ArrayList thePositions = new ArrayList();
+                    thePositions.add(new Integer(i));
+                    dateToPosition.put(creationDate, thePositions);
+                  }
+                }
+                Set keys = dateToPosition.keySet();
+                ArrayList keyList = new ArrayList(keys);
+                Collections.sort(keyList);
+                if (sortBy.equals("date_desc")) {
+                  Collections.reverse(keyList);
+                }
+                else {
+                  if (!sortBy.equals("date_asc")) {
+                    throw new ServletModuleExc("don't know how to sort by: " + sortBy);
+                  }
+                }
+                ListIterator keyTraverser = keyList.listIterator();
+                while (keyTraverser.hasNext()) {
+                  ArrayList positions = (ArrayList) dateToPosition.get( (keyTraverser.next()));
+                  ListIterator positionsTraverser = positions.listIterator();
+                  while (positionsTraverser.hasNext()) {
+                    theDocumentsSorted.add(hits.doc( ( (Integer) (positionsTraverser.next())).intValue()));
+                  }
+                }
+              }
+
+              try {
+                searcher.close();
+              }
+              catch (IOException e) {
                 logger.debug("Can't close searcher: " + e.toString());
-                throw new ServletModuleFailure("Problem closing searcher: " + e.getMessage(), e);
+                throw new ServletModuleFailure("Problem closing searcher(normal):" + e.getMessage(), e);
               }
+
+              session.removeAttribute("numberOfHits");
+              session.removeAttribute("theDocumentsSorted");
+              session.removeAttribute("positionInResults");
+
+              session.setAttribute("numberOfHits", new Integer(end));
+              session.setAttribute("theDocumentsSorted", theDocumentsSorted);
+              session.setAttribute("positionInResults", new Integer(0));
+
+            }
+            catch (IOException e) {
+              logger.debug("Can't close searcher: " + e.toString());
+              throw new ServletModuleFailure("Problem closing searcher: " + e.getMessage(), e);
             }
           }
         }
-
-        try {
-          ArrayList theDocs = (ArrayList)session.getAttribute("theDocumentsSorted");
-          if (theDocs != null){
-
-            mergeData.put("numberOfHits", ((Integer)session.getAttribute("numberOfHits")).toString());
-            List theHits = new Vector();
-            int pIR=((Integer)session.getAttribute("positionInResults")).intValue();
-            int terminus;
-            int numHits=((Integer)session.getAttribute("numberOfHits")).intValue();
-
-            if (!(pIR+increment>=numHits)){
-              mergeData.put("hasNext","y");
-            }
-            else {
-              mergeData.put("hasNext", null);
-            }
-            if (pIR>0){
-              mergeData.put("hasPrevious","y");
-            }
-            else {
-              mergeData.put("hasPrevious", null);
-            }
-
-            if ((pIR+increment)>numHits){
-              terminus=numHits;
-            }
-            else {
-              terminus=pIR+increment;
-            }
-            for(int i = pIR; i < terminus; i++) {
-              Map h = new HashMap();
-              Document theHit = (Document)theDocs.get(i);
-              whereTerm.returnMeta(h,theHit);
-              creatorTerm.returnMeta(h,theHit);
-              titleTerm.returnMeta(h,theHit);
-              descriptionTerm.returnMeta(h,theHit);
-              dateTerm.returnMeta(h,theHit);
-              imagesTerm.returnMeta(h,theHit);
-              audioTerm.returnMeta(h,theHit);
-              videoTerm.returnMeta(h,theHit);
-              theHits.add(h);
-            }
-            mergeData.put("hits",theHits);
-          }
-        }
-        catch (Throwable e) {
-          logger.error("Can't iterate over hits: " + e.toString());
-
-          throw new ServletModuleFailure("Problem getting hits: " + e.getMessage(), e);
-        }
-
-        mergeData.put("queryString",queryString);
-
-        deliver(req, res, mergeData, null, searchResultsTemplate);
       }
-      catch (NullPointerException n){
-        throw new ServletModuleFailure("Null Pointer: "+n.toString(), n);
-      }
-    }
 
-    /*
-     * Method for dynamically generating a pdf using iText
-     */
-
-
-    public void getpdf(HttpServletRequest req, HttpServletResponse res)
-        throws ServletModuleExc, ServletModuleUserExc, ServletModuleFailure {
-      String ID_REQUEST_PARAM = "id";
       try {
-          String idParam = req.getParameter(ID_REQUEST_PARAM);
-          if (idParam != null) {
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            PDFGenerator pdfMaker = new PDFGenerator(out);
+        ArrayList theDocs = (ArrayList) session.getAttribute("theDocumentsSorted");
+        if (theDocs != null) {
 
-            RE re = new RE("[0-9]+");
+          mergeData.put("numberOfHits", ( (Integer) session.getAttribute("numberOfHits")).toString());
+          List theHits = new Vector();
+          int pIR = ( (Integer) session.getAttribute("positionInResults")).intValue();
+          int terminus;
+          int numHits = ( (Integer) session.getAttribute("numberOfHits")).intValue();
 
-
-            REMatch[] idMatches=re.getAllMatches(idParam);
-
-            if (idMatches.length > 1){
-              pdfMaker.addLine();
-              for (int i = 0; i < idMatches.length; i++){
-                REMatch aMatch = idMatches[i];
-                String id=aMatch.toString();
-                EntityContent contentEnt = (EntityContent)contentModule.getById(id);
-                pdfMaker.addIndexItem(contentEnt);
-
-              }
-            }
-
-            for (int i = 0; i < idMatches.length; i++){
-              REMatch aMatch = idMatches[i];
-
-              String id=aMatch.toString();
-
-              EntityContent contentEnt = (EntityContent)contentModule.getById(id);
-              pdfMaker.add(contentEnt);
-
-            }
-
-            pdfMaker.stop();
-            res.setContentType("application/pdf");
-            byte[] content = out.toByteArray();
-            res.setContentLength(content.length);
-            res.getOutputStream().write(content);
-            res.getOutputStream().flush();
-
+          if (! (pIR + increment >= numHits)) {
+            mergeData.put("hasNext", "y");
           }
           else {
-            throw new ServletModuleExc("Missing id.");
+            mergeData.put("hasNext", null);
           }
+          if (pIR > 0) {
+            mergeData.put("hasPrevious", "y");
+          }
+          else {
+            mergeData.put("hasPrevious", null);
+          }
+
+          if ( (pIR + increment) > numHits) {
+            terminus = numHits;
+          }
+          else {
+            terminus = pIR + increment;
+          }
+          for (int i = pIR; i < terminus; i++) {
+            Map h = new HashMap();
+            Document theHit = (Document) theDocs.get(i);
+            whereTerm.returnMeta(h, theHit);
+            creatorTerm.returnMeta(h, theHit);
+            titleTerm.returnMeta(h, theHit);
+            descriptionTerm.returnMeta(h, theHit);
+            dateTerm.returnMeta(h, theHit);
+            imagesTerm.returnMeta(h, theHit);
+            audioTerm.returnMeta(h, theHit);
+            videoTerm.returnMeta(h, theHit);
+            theHits.add(h);
+          }
+          mergeData.put("hits", theHits);
+        }
       }
-      catch (Throwable t) {
-        logger.error(t.toString());
-        throw new ServletModuleFailure(t);
+      catch (Throwable e) {
+        logger.error("Can't iterate over hits: " + e.toString());
+
+        throw new ServletModuleFailure("Problem getting hits: " + e.getMessage(), e);
       }
 
+      mergeData.put("queryString", queryString);
+
+      deliver(req, res, mergeData, null, searchResultsTemplate);
     }
+    catch (NullPointerException n) {
+      throw new ServletModuleFailure("Null Pointer: " + n.toString(), n);
+    }
+  }
+
+  /*
+   * Method for dynamically generating a pdf using iText
+   */
+
+  public void getpdf(HttpServletRequest req, HttpServletResponse res)
+    throws ServletModuleExc, ServletModuleUserExc, ServletModuleFailure {
+    long starttime=System.currentTimeMillis();
+    String ID_REQUEST_PARAM = "id";
+    int maxArticlesInNewsleter = 15; // it is nice not to be dos'ed
+    try {
+      String idParam = req.getParameter(ID_REQUEST_PARAM);
+      if (idParam != null) {
+          
+
+	RE re = new RE("[0-9]+");
+          
+          
+	REMatch[] idMatches=re.getAllMatches(idParam);
+          
+	String cacheSelector="";
+          
+	for (int i = 0; i < idMatches.length; i++){
+	  cacheSelector=   cacheSelector + "," + idMatches[i].toString();
+	}
+          
+	String cacheType="pdf";
+          
+	CacheKey theCacheKey = new CacheKey(cacheType,cacheSelector);
+          
+	byte[] thePDF;
+          
+	if (MirGlobal.mruCache().hasObject(theCacheKey)){
+	  logger.info("fetching pdf from cache");
+	  thePDF = (byte[]) MirGlobal.mruCache().getObject(theCacheKey);
+	}
+	else {
+	  logger.info("generating pdf and caching it");
+	  ByteArrayOutputStream out = new ByteArrayOutputStream();
+	  PDFGenerator pdfMaker = new PDFGenerator(out);
+            
+	  if (idMatches.length > 1){
+	    pdfMaker.addLine();
+	    for (int i = 0; i < idMatches.length  && i < maxArticlesInNewsleter; i++){
+	      REMatch aMatch = idMatches[i];
+	      String id=aMatch.toString();
+	      EntityContent contentEnt = (EntityContent)contentModule.getById(id);
+	      pdfMaker.addIndexItem(contentEnt);
+	    }
+	  }
+            
+	  for (int i = 0; i < idMatches.length; i++){
+	    REMatch aMatch = idMatches[i];
+	    String id=aMatch.toString();
+	    EntityContent contentEnt = (EntityContent)contentModule.getById(id);
+              
+	    pdfMaker.add(contentEnt);
+	  }
+            
+	  pdfMaker.stop();
+	  thePDF  = out.toByteArray();
+            
+	  //and save all our hard work!
+	  MirGlobal.mruCache().storeObject(theCacheKey,thePDF);
+	}
+          
+	res.setContentType("application/pdf");
+	res.setContentLength(thePDF.length);
+	res.getOutputStream().write(thePDF);
+	res.getOutputStream().flush();
+	String elapsedtime=(new Long(System.currentTimeMillis()-starttime)).toString();
+	logger.info("pdf retireval took "+elapsedtime + " milliseconds"  );
+
+      }
+      else {
+	throw new ServletModuleExc("Missing id.");
+      }
+    }
+    catch (Throwable t) {
+      logger.error(t.toString());
+      throw new ServletModuleFailure(t);
+    }
+
+  }
+  
+
   public String generateOnetimePassword() {
     Random r = new Random();
     int random = r.nextInt();
@@ -1061,8 +1082,7 @@ public class ServletModuleOpenIndy extends ServletModule
     return returnString.substring(5);
   }
 
-  public void deliver(HttpServletRequest aRequest, HttpServletResponse aResponse, Map aData, Map anExtra, String aGenerator)
-      throws ServletModuleFailure {
+  public void deliver(HttpServletRequest aRequest, HttpServletResponse aResponse, Map aData, Map anExtra, String aGenerator) throws ServletModuleFailure {
     try {
       deliver(aResponse.getWriter(), aRequest, aResponse, aData, anExtra, aGenerator);
     }
@@ -1090,6 +1110,27 @@ public class ServletModuleOpenIndy extends ServletModule
       throw new ServletModuleFailure(e);
     }
   }
+
+  public void deliver(PrintWriter anOutputWriter, HttpServletRequest aRequest, HttpServletResponse aResponse, Map aData, Map anExtra, String aGenerator,String aLocaleString)
+      throws ServletModuleFailure {
+    try {
+      Map responseData = ServletHelper.makeGenerationData(new Locale[] { new Locale(aLocaleString,""), getFallbackLocale(aRequest)}, "bundles.open");
+      responseData.put("data", aData);
+      responseData.put("extra", anExtra);
+
+
+      Generator generator = MirGlobal.localizer().generators().makeOpenPostingGeneratorLibrary().makeGenerator(aGenerator);
+      generator.generate(anOutputWriter, responseData, logger);
+
+      anOutputWriter.close();
+    }
+    catch (Throwable e) {
+      logger.error("Error while generating " + aGenerator + ": " + e.getMessage());
+
+      throw new ServletModuleFailure(e);
+    }
+  }
+
 
   public void handleError(HttpServletRequest aRequest, HttpServletResponse aResponse,PrintWriter out, Throwable anException) {
     try {

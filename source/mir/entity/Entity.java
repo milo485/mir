@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with  any library licensed under the Apache Software License, 
- * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
- * (or with modified versions of the above that use the same license as the above), 
- * and distribute linked combinations including the two.  You must obey the 
- * GNU General Public License in all respects for all of the code used other than 
- * the above mentioned libraries.  If you modify this file, you may extend this 
- * exception to your version of the file, but you are not obligated to do so.  
+ * the code of this program with  any library licensed under the Apache Software License,
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library
+ * (or with modified versions of the above that use the same license as the above),
+ * and distribute linked combinations including the two.  You must obey the
+ * GNU General Public License in all respects for all of the code used other than
+ * the above mentioned libraries.  If you modify this file, you may extend this
+ * exception to your version of the file, but you are not obligated to do so.
  * If you do not wish to do so, delete this exception statement from your version.
  */
 package  mir.entity;
@@ -51,7 +51,7 @@ import freemarker.template.TemplateModelRoot;
  * an entity. Entities are used to represent rows of a database table.<p>
  * Interfacing TemplateHashModel and TemplateModelRoot to be freemarker compliant
  *
- * @version $Id: Entity.java,v 1.20 2003/04/21 12:42:46 idfx Exp $
+ * @version $Id: Entity.java,v 1.21 2003/05/03 00:21:22 zapata Exp $
  * @author rk
  *
  */
@@ -60,7 +60,6 @@ public class Entity implements TemplateHashModel, TemplateModelRoot
 {
   protected static MirPropertiesConfiguration configuration;
 
-  private boolean changed;
   protected Map theValuesHash; // tablekey / value
   protected StorageObject theStorageObject;
   protected List streamedInput = null;
@@ -77,8 +76,6 @@ public class Entity implements TemplateHashModel, TemplateModelRoot
 
   public Entity() {
     logger = new LoggerWrapper("Entity");
-
-    this.changed = false;
   }
 
   /**
@@ -98,7 +95,7 @@ public class Entity implements TemplateHashModel, TemplateModelRoot
   }
 
   /**
-   * Sets the values of the Entity.
+   * Sets the values of the Entity. (Only to be called by the Storage Object)
    * @param theStringValues Map containing the new values of the Entity
    */
 
@@ -113,14 +110,6 @@ public class Entity implements TemplateHashModel, TemplateModelRoot
   }
 
   /**
-   * Returns whether the content of the Entity has changed.
-   * @return true wenn ja, sonst false
-   */
-  public boolean changed() {
-    return changed;
-  }
-
-  /**
    * Returns the primary key of the Entity.
    * @return String Id
    */
@@ -129,7 +118,7 @@ public class Entity implements TemplateHashModel, TemplateModelRoot
   }
 
   /**
-   * Defines the primary key of the Entity
+   * Defines the primary key of the Entity (only to be set by the StorageObject)
    * @param id
    */
   public void setId(String id) {
@@ -173,7 +162,7 @@ public class Entity implements TemplateHashModel, TemplateModelRoot
   public String insert() throws StorageObjectExc {
     logger.debug("Entity: trying to insert ...");
     if (theStorageObject != null) {
-      return theStorageObject.insert( (Entity)this);
+      return theStorageObject.insert(this);
     }
     else
       throw new StorageObjectExc("theStorageObject == null!");
@@ -184,7 +173,7 @@ public class Entity implements TemplateHashModel, TemplateModelRoot
    * @exception StorageObjectException
    */
   public void update() throws StorageObjectFailure {
-    theStorageObject.update( (Entity)this);
+    theStorageObject.update(this);
   }
 
   /**
@@ -196,13 +185,11 @@ public class Entity implements TemplateHashModel, TemplateModelRoot
    */
   public void setValueForProperty(String theProp, String theValue) throws
       StorageObjectFailure {
-    this.changed = true;
     if (isField(theProp))
       theValuesHash.put(theProp, theValue);
     else {
       logger.warn("Entity.setValueForProperty: Property not found: " + theProp + " (" + theValue + ")");
     }
-
   }
 
   /**
@@ -232,18 +219,6 @@ public class Entity implements TemplateHashModel, TemplateModelRoot
     return theStorageObject.getLabels();
   }
 
-  /**
-   * Returns a Map with all values of the Entity.
-   * @return Map with field name as key and the corresponding values
-   *
-       * @deprecated This method is deprecated and will be deleted in the next release.
-   *  Entity interfaces freemarker.template.TemplateHashModel now and can
-   *  be used in the same way as SimpleHash.
-   */
-  public Map getValues() {
-    logger.warn("using deprecated Entity.getValues() - a waste of resources");
-    return theValuesHash;
-  }
 
   /**
    * Returns an ArrayList with all database fields that can
@@ -270,8 +245,7 @@ public class Entity implements TemplateHashModel, TemplateModelRoot
     return theStorageObject.getFields().contains(fieldName);
   }
 
-  protected void throwStorageObjectFailure(Throwable e, String wo) throws
-      StorageObjectFailure {
+  protected void throwStorageObjectFailure(Throwable e, String wo) throws StorageObjectFailure {
     logger.error(e.toString() + " function: " + wo);
     e.printStackTrace(logger.asPrintWriter(LoggerWrapper.DEBUG_MESSAGE));
 
