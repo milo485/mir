@@ -48,13 +48,13 @@ import mir.config.MirPropertiesConfiguration;
 import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
 import mir.core.model.MirUser;
 import mir.core.service.storage.UserService;
+import mir.core.ui.action.DispatchAction;
 import mir.core.ui.servlet.ServletConstants;
 import mir.util.StringRoutines;
 import mircoders.global.MirGlobal;
 import multex.Failure;
 import net.sf.hibernate.SessionFactory;
 
-import org.apache.struts.action.Action;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
@@ -65,9 +65,9 @@ import org.apache.struts.util.MessageResources;
 /**
  * AuthenticationAction
  * @author idefix
- * @version $Id: AuthenticationAction.java,v 1.1 2003/09/07 16:55:00 idfx Exp $
+ * @version $Id: AuthenticationAction.java,v 1.2 2003/09/10 20:58:27 idfx Exp $
  */
-public class AuthenticationAction extends Action {
+public class AuthenticationAction extends DispatchAction {
 	private MirPropertiesConfiguration _configuration;
 	
 	public AuthenticationAction(){
@@ -76,23 +76,6 @@ public class AuthenticationAction extends Action {
 		} catch (PropertiesConfigExc e) {
 			throw new Failure("could not load config", e);
 		}
-	}
-	
-	/**
-	 * @see org.apache.struts.action.Action#execute(org.apache.struts.action.ActionMapping, org.apache.struts.action.ActionForm, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
-	 */
-	public ActionForward execute(ActionMapping actionMapping, ActionForm actionForm, 
-		HttpServletRequest request, HttpServletResponse response)
-		throws Exception {
-
-		String param = actionMapping.getParameter();
-		if(param.equals("logon")){
-			return logon(actionMapping, actionForm, request, response);	
-		}
-		if(param.equals("logoff")){
-			return logoff(actionMapping, actionForm, request, response);	
-		}
-		return null;
 	}
 	
 	private ActionForward logon(ActionMapping actionMapping, ActionForm actionForm, 

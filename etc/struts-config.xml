@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.1//EN" "http://jakarta.apache.org/struts/dtds/struts-config_1_1.dtd">
+<struts-config>
+    <data-sources />
+    <form-beans />
+    <global-exceptions />
+    <global-forwards />
+    <action-mappings />
+    <controller
+        bufferSize="4096"
+        contentType="text/html"
+        debug="0"
+        locale="false"
+        maxFileSize="250M"
+        multipartClass="org.apache.struts.upload.CommonsMultipartRequestHandler"
+        nocache="false"
+        processorClass="org.apache.struts.action.RequestProcessor"
+        inputForward="false" />
+    <message-resources
+        factory="org.apache.struts.util.PropertyMessageResourcesFactory"
+        key="org.apache.struts.action.MESSAGE"
+        null="true"
+        parameter="mir.core.ui.action.ApplicationResources" />
+	<plug-in className="mir.core.ui.plugin.HibernatePlugin" />
+	<plug-in className="mir.core.ui.plugin.ConfigurationPlugin" />
+</struts-config>
+

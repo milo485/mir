@@ -49,187 +49,316 @@ import org.postgresql.largeobject.LargeObjectManager;
  * 
  * Image
  * @author idefix
- * @version $Id: Image.java,v 1.4 2003/08/19 00:41:54 idfx Exp $
+ * @version $Id: Image.java,v 1.5 2003/09/10 20:56:25 idfx Exp $
  */
-public class Image extends UploadedMedia 
+public class Image
+	extends UploadedMedia
 	implements Serializable, Lifecycle, IImage {
 
-    /** nullable persistent field */
-    private int imageData;
+	/** nullable persistent field */
+	private int imageData;
 
-    /** nullable persistent field */
-    private int iconData;
+	/** nullable persistent field */
+	private int iconData;
 
-    /** nullable persistent field */
-    private String year;
+	/** nullable persistent field */
+	private String year;
 
-    /** nullable persistent field */
-    private short imgWidth;
+	/** nullable persistent field */
+	private short imgWidth;
 
-    /** nullable persistent field */
-    private short imgHeight;
+	/** nullable persistent field */
+	private short imgHeight;
 
-    /** persistent field */
-    private short imgFormat;
+	/** persistent field */
+	private short imgFormat;
 
-    /** persistent field */
-    private short imgLayout;
+	/** persistent field */
+	private short imgLayout;
 
-    /** persistent field */
-    private short imgType;
+	/** persistent field */
+	private short imgType;
 
-    /** persistent field */
-    private short imgColor;
+	/** persistent field */
+	private short imgColor;
 
-    /** nullable persistent field */
-    private short iconWidth;
+	/** nullable persistent field */
+	private short iconWidth;
 
-    /** nullable persistent field */
-    private short iconHeight;
+	/** nullable persistent field */
+	private short iconHeight;
 
-    /** default constructor */
-    public Image() {
-    }
+	private byte[] image;
 
-    public int getImageData() {
-        return this.imageData;
-    }
+	private byte[] icon;
 
-    public void setImageData(int imageData) {
-        this.imageData = imageData;
-    }
+	/** default constructor */
+	public Image() {
+	}
 
-    public int getIconData() {
-        return this.iconData;
-    }
+	public int getImageData() {
+		return this.imageData;
+	}
 
-    public void setIconData(int iconData) {
-        this.iconData = iconData;
-    }
+	public void setImageData(int imageData) {
+		this.imageData = imageData;
+	}
 
-    public java.lang.String getYear() {
-        return this.year;
-    }
+	public int getIconData() {
+		return this.iconData;
+	}
 
-    public void setYear(java.lang.String year) {
-        this.year = year;
-    }
+	public void setIconData(int iconData) {
+		this.iconData = iconData;
+	}
 
-    public short getImgWidth() {
-        return this.imgWidth;
-    }
+	public java.lang.String getYear() {
+		return this.year;
+	}
 
-    public void setImgWidth(short imgWidth) {
-        this.imgWidth = imgWidth;
-    }
+	public void setYear(java.lang.String year) {
+		this.year = year;
+	}
 
-    public short getImgHeight() {
-        return this.imgHeight;
-    }
+	public short getImgWidth() {
+		return this.imgWidth;
+	}
 
-    public void setImgHeight(short imgHeight) {
-        this.imgHeight = imgHeight;
-    }
+	public void setImgWidth(short imgWidth) {
+		this.imgWidth = imgWidth;
+	}
 
-    public short getImgFormat() {
-        return this.imgFormat;
-    }
+	public short getImgHeight() {
+		return this.imgHeight;
+	}
 
-    public void setImgFormat(short imgFormat) {
-        this.imgFormat = imgFormat;
-    }
+	public void setImgHeight(short imgHeight) {
+		this.imgHeight = imgHeight;
+	}
 
-    public short getImgLayout() {
-        return this.imgLayout;
-    }
+	public short getImgFormat() {
+		return this.imgFormat;
+	}
 
-    public void setImgLayout(short imgLayout) {
-        this.imgLayout = imgLayout;
-    }
+	public void setImgFormat(short imgFormat) {
+		this.imgFormat = imgFormat;
+	}
 
-    public short getImgType() {
-        return this.imgType;
-    }
+	public short getImgLayout() {
+		return this.imgLayout;
+	}
 
-    public void setImgType(short imgType) {
-        this.imgType = imgType;
-    }
+	public void setImgLayout(short imgLayout) {
+		this.imgLayout = imgLayout;
+	}
 
-    public short getImgColor() {
-        return this.imgColor;
-    }
+	public short getImgType() {
+		return this.imgType;
+	}
 
-    public void setImgColor(short imgColor) {
-        this.imgColor = imgColor;
-    }
+	public void setImgType(short imgType) {
+		this.imgType = imgType;
+	}
 
-    public short getIconWidth() {
-        return this.iconWidth;
-    }
+	public short getImgColor() {
+		return this.imgColor;
+	}
 
-    public void setIconWidth(short iconWidth) {
-        this.iconWidth = iconWidth;
-    }
+	public void setImgColor(short imgColor) {
+		this.imgColor = imgColor;
+	}
 
-    public short getIconHeight() {
-        return this.iconHeight;
-    }
+	public short getIconWidth() {
+		return this.iconWidth;
+	}
 
-    public void setIconHeight(short iconHeight) {
-        this.iconHeight = iconHeight;
-    }
+	public void setIconWidth(short iconWidth) {
+		this.iconWidth = iconWidth;
+	}
 
-    public String toString() {
-        return new ToStringBuilder(this)
-            .append("id", getId())
-            .toString();
-    }
+	public short getIconHeight() {
+		return this.iconHeight;
+	}
 
-		/* (non-Javadoc)
-		 * @see net.sf.hibernate.Lifecycle#onSave(net.sf.hibernate.Session)
-		 */
-		public boolean onSave(Session arg0) throws CallbackException {
-			// TODO Auto-generated method stub
+	public void setIconHeight(short iconHeight) {
+		this.iconHeight = iconHeight;
+	}
+
+	/**
+	 * @return
+	 */
+	public byte[] getIcon() {
+		return icon;
+	}
+
+	/**
+	 * @return
+	 */
+	public byte[] getImage() {
+		return image;
+	}
+
+	/**
+	 * @param bs
+	 */
+	public void setIcon(byte[] bs) {
+		icon = bs;
+	}
+
+	/**
+	 * @param bs
+	 */
+	public void setImage(byte[] bs) {
+		image = bs;
+	}
+
+	public String toString() {
+		return new ToStringBuilder(this).append("id", getId()).toString();
+	}
+
+	//====================================================
+
+	/**
+	 * @see net.sf.hibernate.Lifecycle#onSave(net.sf.hibernate.Session)
+	 */
+	public boolean onSave(Session session) throws CallbackException {
+		LargeObject imageObj = null;
+		LargeObject iconObj = null;
+		try {
+			Connection connection = session.connection();
+			if (connection instanceof PGConnection) {
+				PGConnection pgcon = (PGConnection) connection;
+				LargeObjectManager largeObjectManager = pgcon.getLargeObjectAPI();
+				
+				int imageOID = largeObjectManager.create(LargeObjectManager.READWRITE);
+				imageObj = largeObjectManager.open(imageOID, LargeObjectManager.READ);
+				imageObj.write(image, 0, image.length);
+				setImageData(imageOID);
+
+				int iconOID = largeObjectManager.create(LargeObjectManager.READWRITE);
+				iconObj = largeObjectManager.open(iconOID, LargeObjectManager.READ);
+				iconObj.write(image, 0, image.length);
+				setImageData(iconOID);
+			}
+		} catch (HibernateException e) {
+			e.printStackTrace();
 			return false;
-		}
-
-		/* (non-Javadoc)
-		 * @see net.sf.hibernate.Lifecycle#onUpdate(net.sf.hibernate.Session)
-		 */
-		public boolean onUpdate(Session arg0) throws CallbackException {
-			// TODO Auto-generated method stub
+		} catch (SQLException e) {
+			e.printStackTrace();
 			return false;
-		}
-
-		/* (non-Javadoc)
-		 * @see net.sf.hibernate.Lifecycle#onDelete(net.sf.hibernate.Session)
-		 */
-		public boolean onDelete(Session arg0) throws CallbackException {
-			// TODO Auto-generated method stub
-			return false;
-		}
-
-		/* (non-Javadoc)
-		 * @see net.sf.hibernate.Lifecycle#onLoad(net.sf.hibernate.Session, java.io.Serializable)
-		 */
-		public void onLoad(Session session, Serializable arg1) {
-			// TODO Auto-generated method stub
-			System.out.println("hello: ");
+		} finally {
 			try {
-				Connection connection = session.connection();
-				if(connection instanceof PGConnection){
-					PGConnection pgcon = (PGConnection)connection;
-					LargeObjectManager largeObjectManager = pgcon.getLargeObjectAPI();
-					LargeObject image = largeObjectManager.open(getImageData());
-					System.out.println("juppii" + image.size()  + " " + this.getMediaType().getId());
-				}
-			} catch (HibernateException e) {
-				// TODO Auto-generated catch block
+				imageObj.close();
+				iconObj.close();
+				return true;
+			} catch (Throwable e) {
 				e.printStackTrace();
+				return false;
+			}
+		}
+	}
+
+	/**
+	 * @see net.sf.hibernate.Lifecycle#onUpdate(net.sf.hibernate.Session)
+	 */
+	public boolean onUpdate(Session session) throws CallbackException {
+		LargeObject imageObj = null;
+		LargeObject iconObj = null;
+		try {
+			Connection connection = session.connection();
+			if (connection instanceof PGConnection) {
+				PGConnection pgcon = (PGConnection) connection;
+				LargeObjectManager largeObjectManager = pgcon.getLargeObjectAPI();
+				
+				imageObj = largeObjectManager.open(getImageData(), LargeObjectManager.READ);
+				imageObj.write(image, 0, image.length);
+
+				iconObj = largeObjectManager.open(getIconData(), LargeObjectManager.READ);
+				iconObj.write(image, 0, image.length);
+			}
+		} catch (HibernateException e) {
+			e.printStackTrace();
+			return false;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		} finally {
+			try {
+				imageObj.close();
+				iconObj.close();
+				return true;
+			} catch (Throwable e) {
+				e.printStackTrace();
+				return false;
+			}
+		}
+	}
+
+	/**
+	 * @see net.sf.hibernate.Lifecycle#onDelete(net.sf.hibernate.Session)
+	 */
+	public boolean onDelete(Session session) throws CallbackException {
+		try {
+			Connection connection = session.connection();
+			if (connection instanceof PGConnection) {
+				PGConnection pgcon = (PGConnection) connection;
+				LargeObjectManager largeObjectManager = pgcon.getLargeObjectAPI();
+				
+				largeObjectManager.delete(getImageData());
+				setImageData(0);
+				
+				largeObjectManager.delete(getIconData());
+				setIconData(0);
+				
+				return true;
+			}
+			return false;
+		} catch (HibernateException e) {
+			e.printStackTrace();
+			return false;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		} 
+	}
+
+	/**
+	 * @see net.sf.hibernate.Lifecycle#onLoad(net.sf.hibernate.Session, java.io.Serializable)
+	 */
+	public void onLoad(Session session, Serializable arg1) {
+		LargeObject imageObj = null;
+		LargeObject iconObj = null;
+		try {
+			Connection connection = session.connection();
+			if (connection instanceof PGConnection) {
+				PGConnection pgcon = (PGConnection) connection;
+				LargeObjectManager largeObjectManager = pgcon.getLargeObjectAPI();
+
+				imageObj =
+					largeObjectManager.open(getImageData(), LargeObjectManager.READ);
+				image = new byte[imageObj.size()];
+				imageObj.read(image, 0, imageObj.size());
+
+				iconObj =
+					largeObjectManager.open(getIconData(), LargeObjectManager.READ);
+				icon = new byte[iconObj.size()];
+				iconObj.read(icon, 0, iconObj.size());
+			}
+		} catch (HibernateException e) {
+			e.printStackTrace();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (imageObj != null) {
+					imageObj.close();
+				}
+				if (iconObj != null) {
+					iconObj.close();
+				}
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
-
+	}
 }

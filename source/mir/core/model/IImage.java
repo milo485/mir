@@ -34,7 +34,7 @@ package mir.core.model;
 /**
  * IImage
  * @author idefix
- * @version $Id: IImage.java,v 1.1 2003/08/19 00:41:54 idfx Exp $
+ * @version $Id: IImage.java,v 1.2 2003/09/10 20:56:25 idfx Exp $
  */
 public interface IImage extends IUploadedMedia {
 	public abstract int getImageData();
@@ -59,4 +59,8 @@ public interface IImage extends IUploadedMedia {
 	public abstract void setIconWidth(short iconWidth);
 	public abstract short getIconHeight();
 	public abstract void setIconHeight(short iconHeight);
+	public abstract byte[] getIcon();
+	public abstract byte[] getImage();
+	public abstract void setIcon(byte[] bs);
+	public abstract void setImage(byte[] bs);
 }

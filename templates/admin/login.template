@@ -32,7 +32,7 @@
   <div class="box">
     
     
-      <form method="post" action="${config.actionRoot}">
+      <form method="post" action="${config.docRoot}/admin/logon.do">
         
     <input type="hidden" name="module" value="login">
 

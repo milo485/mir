@@ -42,117 +42,221 @@ import net.sf.hibernate.Session;
 import net.sf.hibernate.SessionFactory;
 import net.sf.hibernate.Transaction;
 import net.sf.hibernate.expression.Expression;
+import net.sf.hibernate.expression.Order;
 
 /**
  * 
  * StorageService
  * @author idefix
- * @version $Id: StorageService.java,v 1.4 2003/09/07 16:55:00 idfx Exp $
+ * @version $Id: StorageService.java,v 1.5 2003/09/10 20:57:17 idfx Exp $
  */
 public abstract class StorageService {
+	private final int defaultLimit;
 	private Class objectClass;
 	private SessionHolder sessionHolder;
 	protected MirPropertiesConfiguration _configuration;
 
-	public StorageService(Class objectClass, SessionFactory factory){
+	protected StorageService(final Class objectClass, 
+		final SessionFactory factory){
 		this.objectClass = objectClass;
 		sessionHolder = new SessionHolder(factory);
+		int limit = 30;
 		try {
 			_configuration = MirPropertiesConfiguration.instance();
+			limit = 
+				_configuration.getInt("ServletModule.Default.ListSize");
 		} catch (PropertiesConfigExc e) {
-			throw new multex.Failure("could not get the config", e);
+			e.printStackTrace();
 		}
+		defaultLimit = limit;
 	}
 	
-	public List list(int offset, int limit){
+	public List list(final int offset, final int limit){
 		return list(offset, limit, null);
 	}
 	
-	public List list(int offset){
-		int limit = _configuration.getInt("ServletModule.Default.ListSize");
-		return list(offset, limit, null);
+	public List list(final int offset){
+		return list(offset, defaultLimit, null);
 	}
 		
-	public List list(int offset, Expression expression){
-		int limit = _configuration.getInt("ServletModule.Default.ListSize");
-		return list(offset, limit, expression);
+	public List list(final int offset, final Expression expression){
+		return list(offset, defaultLimit, expression);
 	}	
-	public List list(int offset, int limit, Expression expression){
-		try {
-			Session session = sessionHolder.currentSession();
-			Transaction transaction = session.beginTransaction();
-			Criteria criteria = session.createCriteria(objectClass);
-			if(expression != null){
-				System.out.println(expression.toString());
-				criteria = criteria.add(expression);
-			}	
-			criteria.setFirstResult(offset)
-				.setMaxResults(limit);
-			List returnList = criteria.list();
-			transaction.commit();
-			sessionHolder.closeSession();
-			return returnList;
-		} catch (HibernateException e) {
-			throw new StorageServiceFailure(e);
-		} 
-	}
 	
-	public Object load(Integer id){
-		try {
-			Session session = sessionHolder.currentSession();
-			Transaction transaction = session.beginTransaction();
-			Object returnObject = session.load(objectClass, id);
-			initializeLazyCollections(returnObject);
-			transaction.commit();
-			sessionHolder.closeSession();
-			return returnObject;
-		} catch (HibernateException e) {
-			throw new StorageServiceFailure(e);
-		}	
+	public List list(final int offset, final int limit, 
+		final Expression expression) {
+		return list(offset, limit, expression, null);
 	}
 	
 	/**
-	 * @param returnObject
+	 * Load a list of Objects from the database
+	 * @param offset an offset of the list
+	 * @param limit the limit number of Objects to be loaded
+	 * @param expression a Expression object which describes the 
+	 * constraints of the objects in the list
+	 * @param order a Order object which describes the order of 
+	 * the list
+	 * @see Expression
+	 * @see Order
+	 * @return a list of Objects
 	 */
-	protected abstract void initializeLazyCollections(Object returnObject) 
-		throws HibernateException;
-	
-	public Integer add(Object newObject){
+	public List list(final int offset, final int limit, 
+		final Expression expression, final Order order) {
 		try {
-			Session session = sessionHolder.currentSession();
-			Transaction transaction = session.beginTransaction();
-			Integer newid = (Integer)session.save(newObject);
-			transaction.commit();
-			return newid;
-		} catch (HibernateException e) {
+			Session session = null;
+			Transaction transaction = null;
+			try {
+				session = sessionHolder.currentSession();
+				transaction = session.beginTransaction();
+				Criteria criteria = session.createCriteria(objectClass);
+				if(expression != null){
+					criteria = criteria.add(expression);
+				}	
+				if(order != null){
+					criteria.addOrder(order);
+				}
+				criteria.setFirstResult(offset)
+					.setMaxResults(limit);
+				List returnList = criteria.list();
+				transaction.commit();
+				return returnList;
+			} catch (HibernateException e) {
+				if(transaction != null){
+					transaction.rollback();
+				}
+				throw new StorageServiceFailure(e);
+			} finally {
+				if (session != null) {
+					sessionHolder.closeSession();
+				}
+			}
+		} catch (Exception e){
+			throw new StorageServiceFailure(e);
+		}
+	}
+	
+	/**
+	 * Load a Object with the given unique identifier
+	 * @param id the identifer of the Object to be loaded
+	 * @return the Object according to the id
+	 */
+	public Object load(final Integer id){
+		try {
+			Session session = null;
+			Transaction transaction = null;
+			try {
+				session = sessionHolder.currentSession();
+				transaction = session.beginTransaction();
+				Object returnObject = session.load(objectClass, id);
+				initializeLazyCollections(returnObject);
+				transaction.commit();
+				return returnObject;
+			} catch (HibernateException e) {
+				if(transaction != null){
+					transaction.rollback();
+				}
+				throw new StorageServiceFailure(e);
+			}	finally {
+				if(session != null){
+					sessionHolder.closeSession();
+				}
+			}
+		} catch (Exception e) {
+			throw new StorageServiceFailure(e);
+		}
+	}
+		
+	/**
+	 * Save a new Object in the database
+	 * @param newObject the Object to be saved
+	 * @return
+	 */
+	public Integer save(final Object newObject){
+		try {
+			Session session = null;
+			Transaction transaction = null;
+			try {
+				session = sessionHolder.currentSession();
+				transaction = session.beginTransaction();
+				Integer newid = (Integer)session.save(newObject);
+				transaction.commit();
+				return newid;
+			} catch (HibernateException e) {
+				if(transaction != null){
+					transaction.rollback();
+				}
+				throw new StorageServiceFailure(e);
+			}	finally {
+				if(session != null){
+					sessionHolder.closeSession();
+				}
+			}
+		} catch (Exception e) {
 			throw new StorageServiceFailure(e);
 		}			
 	}
 	
-	public void update(Object toUpdate){
+	/**
+	 * Update a given Object
+	 * @param toUpdate the Object to be updated
+	 */
+	public void update(final Object toUpdate){
 		try {
-			Session session = sessionHolder.currentSession();
-			Transaction transaction = session.beginTransaction();
-			session.update(toUpdate);
-			transaction.commit();
-		} catch (HibernateException e) {
+			Session session = null;
+			Transaction transaction = null;
+			try {
+				session = sessionHolder.currentSession();
+				transaction = session.beginTransaction();
+				session.update(toUpdate);
+				transaction.commit();
+			} catch (HibernateException e) {
+				if(transaction != null){
+					transaction.rollback();
+				}
+				throw new StorageServiceFailure(e);
+			}	finally {
+				if(session != null){
+					sessionHolder.closeSession();
+				}
+			}
+		} catch (Exception e) {
 			throw new StorageServiceFailure(e);
-		}			
+		}					
 	}
 	
-	public void delete(Object toDelete){
+	/**
+	 * Delete a given Object from the database
+	 * @param toDelete the Object to be deleted
+	 */
+	public void delete(final Object toDelete){
 		try {
-			Session session = sessionHolder.currentSession();
-			Transaction transaction = session.beginTransaction();
-			session.delete(toDelete);
-			transaction.commit();
-		} catch (HibernateException e) {
+			Session session = null;
+			Transaction transaction = null;
+			try {
+				session = sessionHolder.currentSession();
+				transaction = session.beginTransaction();
+				session.delete(toDelete);
+				transaction.commit();
+			} catch (HibernateException e) {
+				if(transaction != null){
+					transaction.rollback();
+				}
+				throw new StorageServiceFailure(e);
+			}	finally {
+				if(session != null){
+					sessionHolder.closeSession();
+				}
+			}
+		} catch (Exception e) {
 			throw new StorageServiceFailure(e);
-		}			
+		}				
 	}
 	
-	public void finalize() throws Throwable {
-		sessionHolder.closeSession();
-		super.finalize();	
-	}
+	/**
+	 * Initialize all the lazy loaded collections 
+	 * of an object loaded from the database
+	 * @param object the object to be initialized
+	 */
+	protected abstract void initializeLazyCollections(
+		final Object object) throws HibernateException;
 }
