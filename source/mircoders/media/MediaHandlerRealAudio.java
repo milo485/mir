@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001, 2002 The Mir-coders group
+ * Copyright (C) 2001, 2002  The Mir-coders group
  *
  * This file is part of Mir.
  *
@@ -18,28 +18,29 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with  any library licensed under the Apache Software License, 
- * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
- * (or with modified versions of the above that use the same license as the above), 
- * and distribute linked combinations including the two.  You must obey the 
- * GNU General Public License in all respects for all of the code used other than 
- * the above mentioned libraries.  If you modify this file, you may extend this 
- * exception to your version of the file, but you are not obligated to do so.  
- * If you do not wish to do so, delete this exception statement from your version.
+ * the code of this program with the com.oreilly.servlet library, any library
+ * licensed under the Apache Software License, The Sun (tm) Java Advanced
+ * Imaging library (JAI), The Sun JIMI library (or with modified versions of
+ * the above that use the same license as the above), and distribute linked
+ * combinations including the two.  You must obey the GNU General Public
+ * License in all respects for all of the code used other than the above
+ * mentioned libraries.  If you modify this file, you may extend this exception
+ * to your version of the file, but you are not obligated to do so.  If you do
+ * not wish to do so, delete this exception statement from your version.
  */
+
 package  mircoders.media;
 
+import java.util.*;
 import java.io.StringReader;
 
-import mir.entity.Entity;
-import mir.log.LoggerWrapper;
-import mir.media.MediaExc;
-import mir.media.MediaFailure;
-import mir.media.MirMedia;
-import mir.misc.FileUtil;
-import mir.misc.StringUtil;
-import freemarker.template.SimpleHash;
 import freemarker.template.SimpleList;
+import freemarker.template.SimpleHash;
+
+import mir.media.*;
+import mir.entity.*;
+import mir.misc.*;
+import mir.storage.*;
 
 
 
@@ -51,17 +52,15 @@ import freemarker.template.SimpleList;
  * @see mir.media.MediaHandlerGeneric
  * @see mir.media.MirMedia
  * @author john <john@manifestor.org>, mh <heckmann@hbe.ca>
- * @version $Id: MediaHandlerRealAudio.java,v 1.19 2003/04/21 12:42:48 idfx Exp $
+ * @version 11.10.2001
  */
 
 
-public class MediaHandlerRealAudio extends MediaHandlerAudio implements MirMedia
+public class MediaHandlerRealAudio extends MediaHandlerAudio implements
+  MirMedia
 {
-  public MediaHandlerRealAudio() {
-    logger = new LoggerWrapper("Media.Audio.Real");
-  }
-
-  public void produce (Entity ent, Entity mediaTypeEnt ) throws MediaExc, MediaFailure {
+  public void produce (Entity ent, Entity mediaTypeEnt )
+    throws MirMediaException {
 
     // first see if the file exists
     super.produce(ent, mediaTypeEnt);
@@ -69,8 +68,8 @@ public class MediaHandlerRealAudio extends MediaHandlerAudio implements MirMedia
     String baseName = ent.getId();
     String date = ent.getValue("date");
     String datePath = StringUtil.webdbDate2path(date);
-    String rtspDir = configuration.getString("Producer.RealMedia.Path");
-    String rtspMediaHost = configuration.getString("Producer.RealMedia.Host");
+    String rtspDir = MirConfig.getProp("Producer.RealMedia.Path");
+    String rtspMediaHost = MirConfig.getProp("Producer.RealMedia.Host");
 
     String RealMediaPointer = rtspMediaHost+ent.getValue("publish_path");
     String RealMediaFile = datePath+ent.getId()+".ram";
@@ -78,10 +77,9 @@ public class MediaHandlerRealAudio extends MediaHandlerAudio implements MirMedia
       //write an rm (ram?. -mh) file
       FileUtil.write(super.getStoragePath()+"/"+RealMediaFile,
                       new StringReader(RealMediaPointer), "US-ASCII");
-    }
-    catch (Throwable e) {
-      logger.error("MediaHandlerRealAudio.produce: " + e.toString());
-      throw new MediaFailure(e);
+    } catch (Exception e) {
+      theLog.printError(e.toString());
+      throw new MirMediaException(e.toString());
     }
   }
 
@@ -92,7 +90,7 @@ public class MediaHandlerRealAudio extends MediaHandlerAudio implements MirMedia
     //String stringSize = ent.getValue("size");
     //int size = Integer.parseInt(stringSize, 10)/1024;
     theList.add(ent);
-
+   
     String basePath=StringUtil.regexpReplace(ent.getValue("publish_path"),
                                             ".ra$","");
 
@@ -100,16 +98,17 @@ public class MediaHandlerRealAudio extends MediaHandlerAudio implements MirMedia
     // somehow
     SimpleHash ramHash = new SimpleHash();
     ramHash.put("publish_path", basePath+".ram");
-    ramHash.put("publish_server", configuration.getString("Producer.Media.Host"));
+    ramHash.put("publish_server", MirConfig.getProp("Producer.Media.Host"));
     ramHash.put("title", "stream URL");
     theList.add(ramHash);
 
     return theList;
+
   }
 
   public String getStoragePath()
   {
-    return configuration.getString("Producer.RealMedia.Path");
+    return MirConfig.getProp("Producer.RealMedia.Path");
   }
 
   public String getDescr(Entity mediaType)
@@ -119,10 +118,10 @@ public class MediaHandlerRealAudio extends MediaHandlerAudio implements MirMedia
 
   public String getPublishHost()
   {
-    return StringUtil.removeSlash(configuration.getString("Producer.RealMedia.Host"));
+    return StringUtil.removeSlash(MirConfig.getProp("Producer.RealMedia.Host"));
   }
 
 }
-
-
+        
+        
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001, 2002 The Mir-coders group
+ * Copyright (C) 2001, 2002  The Mir-coders group
  *
  * This file is part of Mir.
  *
@@ -18,20 +18,22 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with  any library licensed under the Apache Software License, 
- * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
- * (or with modified versions of the above that use the same license as the above), 
- * and distribute linked combinations including the two.  You must obey the 
- * GNU General Public License in all respects for all of the code used other than 
- * the above mentioned libraries.  If you modify this file, you may extend this 
- * exception to your version of the file, but you are not obligated to do so.  
- * If you do not wish to do so, delete this exception statement from your version.
+ * the code of this program with the com.oreilly.servlet library, any library
+ * licensed under the Apache Software License, The Sun (tm) Java Advanced
+ * Imaging library (JAI), The Sun JIMI library (or with modified versions of
+ * the above that use the same license as the above), and distribute linked
+ * combinations including the two.  You must obey the GNU General Public
+ * License in all respects for all of the code used other than the above
+ * mentioned libraries.  If you modify this file, you may extend this exception
+ * to your version of the file, but you are not obligated to do so.  If you do
+ * not wish to do so, delete this exception statement from your version.
  */
+
 package mir.entity;
 
-import mir.storage.StorageObject;
-import mir.storage.StorageObjectExc;
-import mir.storage.StorageObjectFailure;
+import mir.storage.*;
+import mir.misc.*;
+import freemarker.template.*;
 
 public class EntityRelation {
 
@@ -66,7 +68,7 @@ public class EntityRelation {
    *           null.
    */
 
-  public Entity getOne(Entity entity) throws StorageObjectExc {
+  public Entity getOne(Entity entity) throws StorageObjectException {
     if (type==TO_ONE) {
       return storage.selectById(entity.getValue(fromId));
     }
@@ -79,7 +81,7 @@ public class EntityRelation {
    *           null.
    */
 
-  public EntityList getMany(Entity entity) throws StorageObjectFailure{
+  public EntityList getMany(Entity entity) throws StorageObjectException{
     if (type==TO_MANY) {
       return storage.selectByFieldValue(toId, entity.getValue(fromId));
     }
@@ -92,7 +94,7 @@ public class EntityRelation {
    *           null.
    */
 
-  public EntityList getMany(Entity entity, String order) throws StorageObjectFailure{
+  public EntityList getMany(Entity entity, String order) throws StorageObjectException{
     if (type==TO_MANY) {
       return storage.selectByWhereClause(toId+"="+entity.getValue(fromId), order,-1);
     }
@@ -105,7 +107,7 @@ public class EntityRelation {
    *           null.
    */
 
-  public EntityList getMany(Entity entity, String order, String whereClause) throws StorageObjectFailure{
+  public EntityList getMany(Entity entity, String order, String whereClause) throws StorageObjectException{
     if (type==TO_MANY) {
       return storage.selectByWhereClause(toId + "=" + entity.getValue(fromId) + " and " + whereClause, order,-1);
     }

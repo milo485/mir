@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001, 2002 The Mir-coders group
+ * Copyright (C) 2001, 2002  The Mir-coders group
  *
  * This file is part of Mir.
  *
@@ -18,19 +18,22 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with  any library licensed under the Apache Software License,
- * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library
- * (or with modified versions of the above that use the same license as the above),
- * and distribute linked combinations including the two.  You must obey the
- * GNU General Public License in all respects for all of the code used other than
- * the above mentioned libraries.  If you modify this file, you may extend this
- * exception to your version of the file, but you are not obligated to do so.
- * If you do not wish to do so, delete this exception statement from your version.
+ * the code of this program with the com.oreilly.servlet library, any library
+ * licensed under the Apache Software License, The Sun (tm) Java Advanced
+ * Imaging library (JAI), The Sun JIMI library (or with modified versions of
+ * the above that use the same license as the above), and distribute linked
+ * combinations including the two.  You must obey the GNU General Public
+ * License in all respects for all of the code used other than the above
+ * mentioned libraries.  If you modify this file, you may extend this exception
+ * to your version of the file, but you are not obligated to do so.  If you do
+ * not wish to do so, delete this exception statement from your version.
  */
+
+
 package mircoders.media;
 
+import mir.media.*;
 import mir.entity.Entity;
-import mir.media.MirMedia;
 
 /**
  * This class handles saving, fetching creating representations
@@ -42,7 +45,7 @@ import mir.media.MirMedia;
  * @see mir.media.MirMedia
  * @see mircoders.media.MediaHandlerImages
  * @author mh ,mir-coders
- * @version $Id: MediaHandlerImagesPng.java,v 1.7 2003/04/29 02:36:50 zapata Exp $
+ * @version $Id: MediaHandlerImagesPng.java,v 1.1.4.2 2002/11/27 06:52:47 mh Exp $
  */
 
 
@@ -52,11 +55,9 @@ public class MediaHandlerImagesPng extends MediaHandlerImages implements MirMedi
     return PNG;
   }
 
-  public String getDescr(Entity mediaType) {
-    return "image/png";
+  public String getDescr(Entity mediaType)
+  {
+      return "image/png";
   }
 
-  public String getIconMimeType(Entity aMedia, Entity aMediaType) {
-    return "image/png";
-  }
 }

@@ -1,0 +1,148 @@
+<html>
+<head>
+<title>${lang("producer.startpage.htmltitle")}</title>
+<meta http-equiv="Content-Type" content="text/html; charset=${config.defEncoding}">
+<link rel="stylesheet" href="/style/mir.css" type="text/css">
+</head>
+
+<body bgcolor="#CCCCCC">
+<table width="760" border="0" cellpadding="0" cellspacing="1" align="center" bgcolor="#000000">
+  <tr bgcolor="#FFFFFF"> 
+    <td valign="top" align="left" width="150" bgcolor="#666666"> 
+      <table width="150" border="0" cellspacing="0" cellpadding="0">
+        <tr> 
+          <td width="140">
+            <img src="images/mirlogo.jpg" width="150" height="205">
+          </td>
+        </tr>
+        <tr valign="top"> 
+          <td width="140" bgcolor="#666666"> 
+            <table width="100%" border="0" cellspacing="2" cellpadding="0">
+              <tr> 
+                <td> 
+		<!--#include virtual="navigation.inc" -->
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </td>
+    <td align="left" valign="top" colspan="2" height="100%">
+      <table width="100%" border="0" cellspacing="0" cellpadding="0">
+        <tr> 
+          <td colspan="3">
+            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+              <tr> 
+                <td valign="top">
+                  <img src="images/mirfont.gif" width="600" height="68">
+                </td>
+              </tr>
+            </table>
+			</td>
+        </tr>
+        <tr bgcolor="#000000"> 
+          <td colspan="3" height="1"><img src="images/1pixel.gif" width="1" height="1"></td>
+        </tr>
+        <tr> 
+          <td align="left" valign="top"> 
+            <table width="457" border="0" cellpadding="0" cellspacing="2" height="100%">
+              <tr> 
+                <td width="457" valign="top"> 
+		<!--- start-special ---> 
+		<list data.startspecial as s> 
+                  <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                    <tr> 
+                      <td> 
+                        <h3>${s.title}</h3>
+                        <h4><i>${s.creator}, ${s.webdb_create_formatted}</i></h4>
+                        <p>			 
+                        <if s.to_media_audio > 
+                          <img src="/img/${s.to_media_audio[0]["big_icon"]}">
+                        </if> 
+                        <if s.to_media_video > 
+                          <img src="/img/${s.to_media_video[0]["big_icon"]}">
+                        </if> 
+                        <if s.to_media_other > 
+                          <img src="/img/${s.to_media_other[0]["big_icon"]}">
+                        </if> 
+                        <p>
+                        <if s.to_media_images >
+                          <img src="${s.to_media_images[0]["icon_path"]}"
+                            width="${s.to_media_images[0]["icon_width"]}"
+                            height="${s.to_media_images[0]["icon_height"]}"
+                            border=0 alt="${s.to_media_images[0]["title"]}">
+                        </if> 
+			${s.description_parsed} </p>
+                        <p align="right">[<a href="${config.producerDocRoot}${s.publish_path}${s.id}.shtml">read</a>]</p>
+                      </td>
+                    </tr>
+                  </table>
+                  </list> 
+		  <!--- start-special ---> 
+		  <br>
+                  <!--- features ---> 
+		  <list data.features as i> 
+                  <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                    <tr> 
+                      <td> 
+                        <h3>${i.title}</h3>
+                        <h4><i>${i.creator}, ${i.webdb_create_formatted}</i></h4>
+                        <p>			 
+                        <if i.to_media_audio > 
+                          <img src="/img/${i.to_media_audio[0]["big_icon"]}">
+                        </if> 
+                        <if i.to_media_video > 
+                          <img src="/img/${i.to_media_video[0]["big_icon"]}">
+                        </if> 
+                        <if i.to_media_other > 
+                          <img src="/img/${i.to_media_other[0]["big_icon"]}">
+                        </if> 
+                        <p>
+                        <if i.to_media_images >
+                          <img src="${i.to_media_images[0]["icon_path"]}"
+                            width="${i.to_media_images[0]["icon_width"]}"
+                            height="${i.to_media_images[0]["icon_height"]}"
+                            border=0 alt="${i.to_media_images[0]["title"]}">
+                        </if> 
+                          ${i.description_parsed} </p>
+                        <p align="right">[<a href="${config.producerDocRoot}${i.publish_path}${i.id}.shtml">read</a>]</p>
+                      </td>
+                    </tr>
+                  </table>
+                  <br>
+                  </list> 
+		  <!--- features ---> 
+		  </td>
+              </tr>
+            </table>
+          </td>
+          <td width=1 bgcolor="#000000">
+	     <img src="images/1pixel.gif" width="1" height="1">
+	  </td>
+          <td width="150" bgcolor="#666666" valign="top" align="left"> 
+            <table width="150" border="0" cellspacing="2" cellpadding="0">
+              <tr> 
+                <td> 
+		  <!-- newswire --> 
+                  <p> 
+		    <list data.newswire as n>
+		    <img alt=${n.to_media_icon["icon_alt"]} border="0" height="10"
+src="${n.to_media_icon["tiny_icon"]}" width="12"> 
+                    <a href="${config.producerDocRoot}${n.publish_path}${n.id}.shtml"><b>${n.title}</b></a><br>
+                    <font size="-2"><b></b>${n.webdb_create_formatted}</font><br>
+                    <br>
+                    </list> 
+		    <!-- newswire -->
+		   </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+</body>
+</html>

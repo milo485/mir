@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Where the installed system resides
-INSTDIR=bin/mir
+INSTDIR=../Mir
 
 # The group all files belong to
 GROUP=www-data
@@ -41,8 +41,9 @@ function grant()
 	umask $UMASK
 }
 
-chgrp $GROUP $INSTDIR -R #> /dev/null 2>&1
+chgrp $GROUP $INSTDIR -R > /dev/null 2>&1
 grant 775 664 $INSTDIR > /dev/null 2>&1
-grant 750 640 $INSTDIR/WEB-INF/etc/config.properties
+grant 750 640 $INSTDIR/WEB-INF/classes/config.properties
+grant 740 640 $INSTDIR/src/config.properties
 
 echo "Permissions set."

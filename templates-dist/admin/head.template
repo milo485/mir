@@ -1,0 +1,10 @@
+<a name="top">
+<table width="100%" cellspacing="0" cellpadding="0">
+<tr bgcolor="#006600"><td><img src="${config.docRoot}/img/head_small.gif" border="0" align="middle">&nbsp;<font face="Verdana, Arial, Helvetica, sans-serif" size="-1" color="white">
+	<b>${lang("imc.name")}</b></font></td></tr>
+<tr><td align="right"><font face="Verdana, Arial, Helvetica, sans-serif" size="-1" color="#663399">
+	<a href="${config.actionRoot}"><font color="#663399">${lang("head.start")}</font></a> |
+	<a href="${config.actionRoot}?module=logout"><font color="#663399">${lang("head.logout")}</font></a> |
+	<a href="${config.docRoot}/help/help.html"><font color="#663399">${lang("head.help")}</font></a> | ${lang("head.search")}</font></td></tr>
+<tr><td><hr></td></tr>
+</table>

@@ -1,0 +1,65 @@
+<html>
+<head>
+<title>
+${lang("feature.htmltitle")}
+</title>
+<head>
+
+<body bgcolor="#FFFFFF">
+<include "admin/head.template">
+
+<table border="0">
+  <form method="post" action="${config.actionRoot}">
+    <input type="hidden" name="module" value="Schwerpunkt">
+    <input type="hidden" name="where" value="${encodeHTML(data.where)}">
+    <input type="hidden" name="offset" value="${encodeHTML(data.offset)}">
+    <input type="hidden" name="order" value="${encodeHTML(data.order)}">
+    <if data.new>
+    <input type="hidden" name="do" value="insert">
+    <else>
+    <input type="hidden" name="do" value="update">
+    </if>
+    <input type="hidden" name="id" value="${data.id}">
+    <tr>
+      <td align="right" valign="top" bgcolor="#006600"><font color="#ffffff"><B>${lang("feature.title")}:</B></font></td>
+      <td>
+        <input type="text" size="40" name="title" value="${encodeHTML(data.title)}">
+        <select name="is_published">
+			<option value="1"<if data.is_published!="0">selected</if>>${lang("feature.is_published")}</option>
+			<option value="0" <if data.is_published=="0">selected</if>>${lang("feature.is_not_published")}</option>
+        </select>
+      </td>
+    </tr>
+
+    <tr>
+      <td align="right" valign="top" bgcolor="#006600"><font color="#ffffff"><B>${lang("feature.filename")}:</B></font></td>
+      <td>
+         <input type="text" size="20" name="filename" value="${encodeHTML(data.filename)}">
+      </td>
+    </tr>
+
+    <tr>
+      <td align="right" valign="top" bgcolor="#006600"><font color="#ffffff"><B>${lang("feature.abstract")}:</B></font></td>
+      <td>
+        <textarea cols="40" rows="3" name="description">${encodeHTML(data.description)}</textarea>
+      </td>
+    </tr>
+
+    <tr>
+      <td align="right" valign="top" bgcolor="#006600"><font color="#ffffff"><B>${lang("feature.link")}:</B></font></td>
+      <td>
+        <input type="text" size="40" name="main_url" value="${encodeHTML(data.main_url)}">
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2" align="right" valign="top" bgcolor="#ffffff"> <font color="#ffffff"><if new>
+        <input type="submit" name="save" value="${lang("insert")}">
+        <else>
+        <input type="submit" name="save" value="${lang("save")}">
+        </if></font></td>
+    </tr>
+  </form>
+</table>
+<include "admin/foot.template">
+</body>
+</html>

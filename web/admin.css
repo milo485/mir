@@ -1,0 +1,159 @@
+<!-- style interne masken -->
+<STYLE TYPE="text/css">
+<!--
+
+a:link {color:#2222FF; text-decoration:none;font-size:10pt;
+   		font-family:Verdana,Arial,Helvetica,sans-serif;}
+a:visited {color:#2222FF; text-decoration:none;font-size:10pt;
+   		font-family:Verdana,Arial,Helvetica,sans-serif;}
+
+
+option {
+  		margin-bottom:0px;
+  		font-weight:bold;
+   		font-size:10pt;
+   		font-family:Verdana,Arial,Helvetica,sans-serif;
+   		background-color: #FFFFFF;
+   		}
+
+a.help {
+		font-weight:bold;
+		color:#FF0000;
+		font-size:14pt;
+		font-family:Verdana,Arial,Helvetica,sans-serif;
+		}
+
+a.bg {
+	        text-align:center;
+		font-weight:normal;
+		color:#FF0000;
+		font-size:10pt;
+		font-family:Verdana,Arial,Helvetica,sans-serif;
+		}
+
+
+p.headline {
+		margin-bottom:0px;
+		border-style:none;border-width:thick;
+		width:10em;
+		font-weight: normal;
+   		font-size: 12pt;
+	  	font-family: Verdana, Arial, Helvetica, sans-serif;
+	   	background-color: #DDDDDD;
+		}
+p.small {
+		font-weight: normal;
+   		font-size: 10pt;
+	  	font-family: Verdana, Arial, Helvetica, sans-serif;
+	   	color:#000000;
+		}
+
+p.head {
+		text-align:left;
+		font-weight: bold;
+   		font-size: 10pt;
+	  	font-family: Verdana, Arial, Helvetica, sans-serif;
+		}
+
+div.headline {
+		margin-bottom:0px;
+		border-style:none;border-width:thick;
+		width:10em;
+		font-weight: bold;
+   		font-size: 10pt;
+	  	font-family: Verdana, Arial, Helvetica, sans-serif;
+	   	background-color: #DDDDDD;
+		}
+
+div.sorry {
+		color:#FF0000;
+		text-align:center;
+		margin-bottom:0px;
+		border-style:none;border-width:thick;
+		width:8em;;
+		font-weight: bold;
+   		font-size: 9pt;
+	  	font-family: Verdana, Arial, Helvetica, sans-serif;
+	   	background-color: #DDDDDD;
+		}
+
+div.inverse {
+		margin-bottom:0px;
+		border-style:none;border-width:thick;
+		width:10em;
+		font-family: Verdana, Arial, Helvetica, sans-serif;
+	   	background-color: #FEFFE1;
+		}
+
+p.inverse {
+		margin-bottom:0px;
+		border-style:none;border-width:thick;
+		width:6em;
+		font-weight: bold;
+   		font-size: 10pt;
+	  	font-family: Verdana, Arial, Helvetica, sans-serif;
+	   	background-color: #FEFFE1;
+		}
+
+
+tr.head {
+		background-color: Blue;
+		background-position: top left;
+		font-family: Verdana, Arial, Helvetica, sans-serif;
+		}
+
+tr.list1 {
+		background-color: #FEFFE1;
+		background-position: top left;
+		}
+
+tr.list2 {
+		background-color: #DDDDDD;
+		background-position: top left;
+		}
+
+td.desc {
+	 	background-color: #000000;
+		font-weight: bold;
+   		text-align: right;
+	   	font-family: Verdana, Arial, Helvetica, sans-serif;
+	   	background-position: top left;
+		}
+
+td.listhead {
+		color:#ffffff;
+		background-color: #000000;
+	   	font-family: Verdana, Arial, Helvetica, sans-serif;
+	   	background-position: top left;
+		}
+
+td.list {
+	   	font-size:10pt;
+	   	font-family:Verdana, Arial, Helvetica, sans-serif;
+	   	background-position:top left;
+	   	background-color:#AADDDD;
+		}
+
+td.element {
+		vertical-align:top;
+		background-color: #AAAAAA;
+		text-align:right;
+		font-family:Verdana, Arial, Helvetica, sans-serif;
+		}
+
+td.data {
+		vertical-align:top;
+		background-position:top left;
+		font-size:10pt;
+		text-align:left;
+		font-family:Verdana, Arial, Helvetica, sans-serif;
+	    	}
+
+body {
+ 	  	background-color: #FEFFE1;
+ 	  	font-family: Verdana, Arial, Helvetica, sans-serif;
+	 	}
+
+  -->
+
+</STYLE>

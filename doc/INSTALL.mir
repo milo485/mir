@@ -1,6 +1,6 @@
 MIR INSTALLATION HOWTO
 
-Last updated: $Date: 2003/01/18 08:44:09 $
+Last updated: $Date: 2002/07/08 16:20:32 $
 ----------------------------------------------------------------
 
 Here is a short installation-howto of Mir.
@@ -18,7 +18,7 @@ prerequisites:
 - jaxp-1.1 (a SAX 2.0 compliant XML parser, comes with ant >= 1.4)
 - the JAI image framework (Java Advanced Imaging) versin 1.1.1 . get it from 
   java.sun.com. ** NOTE: because JAI uses a native acceration library (a .so)
-  it must be placed in tomcat's "lib" (i.e $TOMCAT_HOME/common/lib) directory and
+  it must be placed in tomcat's "lib" (i.e $TOMCAT_HOME/lib) directory and
   not under the default webapps/Mir/WEB-INF/lib directory **
 - A good reading of Tomcat, Apache and Postgresql documentation if you are not
   familiar with any of them. The documentation is available at:
@@ -39,7 +39,7 @@ CVS CHECKOUT:
 
 2. customize the config: 
 
-	cd mir/etc
+	cd mir/source 
 	cp config.properties-dist config.properties 
 
 now customize config.properties for your needs.
@@ -259,10 +259,8 @@ JkMount /Mir/* ajp13
 </IfModule>
 
 
-13. configure apache for the static site
+13. configure apache
 
-* Make sure that if you are using a non standard character set enconding that 
-  Apache doesn't accidentally send the wrong encoding in the HTTP headers.
 edit http.conf:
 * set the document root to the same directory as in the mir config file
 * enable shtml includes:
@@ -323,4 +321,4 @@ You can give these a try if anything goes wrong:
 
 ----------------------------------------------------------------
 
-$Date: 2003/01/18 08:44:09 $ - the Mir coders
+$Date: 2002/07/08 16:20:32 $ - the Mir coders

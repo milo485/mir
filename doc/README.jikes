@@ -1,5 +1,0 @@
-Last update: $Date: 2002/12/28 03:39:17 $
-
-As of this writing the IBM Jikes compiler up to and including version 1.15 does
-not work with mir. Jikes version 1.18 does work. We have not yet tested Jikes
-V1.16 and V1.17. It is possible that they may work.

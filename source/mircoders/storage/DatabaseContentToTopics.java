@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001, 2002 The Mir-coders group
+ * Copyright (C) 2001, 2002  The Mir-coders group
  *
  * This file is part of Mir.
  *
@@ -18,34 +18,31 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with  any library licensed under the Apache Software License,
- * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library
- * (or with modified versions of the above that use the same license as the above),
- * and distribute linked combinations including the two.  You must obey the
- * GNU General Public License in all respects for all of the code used other than
- * the above mentioned libraries.  If you modify this file, you may extend this
- * exception to your version of the file, but you are not obligated to do so.
- * If you do not wish to do so, delete this exception statement from your version.
+ * the code of this program with the com.oreilly.servlet library, any library
+ * licensed under the Apache Software License, The Sun (tm) Java Advanced
+ * Imaging library (JAI), The Sun JIMI library (or with modified versions of
+ * the above that use the same license as the above), and distribute linked
+ * combinations including the two.  You must obey the GNU General Public
+ * License in all respects for all of the code used other than the above
+ * mentioned libraries.  If you modify this file, you may extend this exception
+ * to your version of the file, but you are not obligated to do so.  If you do
+ * not wish to do so, delete this exception statement from your version.
  */
 
 package mircoders.storage;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Vector;
+import java.lang.*;
+import java.sql.*;
+import java.io.*;
+import java.util.*;
 
-import mir.entity.EntityList;
-import mir.log.LoggerWrapper;
-import mir.storage.Database;
-import mir.storage.StorageObject;
-import mir.storage.StorageObjectFailure;
-import mircoders.entity.EntityContent;
-import mircoders.entity.EntityTopics;
+import freemarker.template.*;
+
+import mir.storage.*;
+import mir.entity.*;
+import mir.misc.*;
+
+import mircoders.entity.*;
 
 /**
  * <b>This class implements the 1-n-relation between
@@ -57,21 +54,27 @@ public class DatabaseContentToTopics extends Database implements StorageObject{
 
   private static DatabaseContentToTopics instance;
 
-  public synchronized static DatabaseContentToTopics getInstance() {
+  // the following *has* to be sychronized cause this static method
+  // could get preemted and we could end up with 2 instances of DatabaseFoo.
+  // see the "Singletons with needles and thread" article at JavaWorld -mh
+  public synchronized static DatabaseContentToTopics getInstance()
+    throws StorageObjectException {
     if (instance == null) {
       instance = new DatabaseContentToTopics();
+      instance.myselfDatabase = instance;
     }
     return instance;
   }
 
-  private DatabaseContentToTopics() {
+  private DatabaseContentToTopics()
+    throws StorageObjectException {
+
     super();
+    this.hasTimestamp = false;
+    this.theTable="content_x_topic";
+    try { this.theEntityClass = Class.forName("mir.entity.GenericEntity"); }
+    catch (Exception e) { throw new StorageObjectException(e.toString()); }
 
-    logger = new LoggerWrapper("Database.ContentToTopics");
-
-    hasTimestamp = false;
-    theTable="content_x_topic";
-    theEntityClass = mir.entity.GenericEntity.class;
   }
 
   /**
@@ -88,9 +91,8 @@ public class DatabaseContentToTopics extends Database implements StorageObject{
 
       try {
         returnList = DatabaseTopics.getInstance().selectByWhereClause(subselect,-1);
-      }
-      catch (Exception e) {
-        logger.error("-- get topics failed " + e.toString());
+      } catch (Exception e) {
+        theLog.printDebugInfo("-- get topics failed " + e.toString());
       }
     }
     return returnList;
@@ -100,10 +102,9 @@ public class DatabaseContentToTopics extends Database implements StorageObject{
    * Returns a ArrayList of Integer-Objects from a content-id.
    * @returns ArrayList
    */
-  public List getTopicsOfContent(String contentId)
-    throws StorageObjectFailure {
+  public ArrayList getTopicsOfContent(String contentId)
+    throws StorageObjectException {
     ArrayList returnList = new ArrayList();
-
     if (contentId != null) {
       String sql = "select topic_id from " + theTable + " where content_id=" + contentId;
       Connection con=null;Statement stmt=null;
@@ -117,112 +118,119 @@ public class DatabaseContentToTopics extends Database implements StorageObject{
             returnList.add(new Integer(rs.getInt("topic_id")));
           }
         }
-      }
-      catch (Exception e) {
-        logger.error("DatabaseContentToTopics.getTopicsOfContent: " + e.getMessage());
-      }
-      finally {
+      } catch (Exception e) {
+        theLog.printError(e.toString());
+        theLog.printError("-- get topicsofcontent failed");
+      } finally {
         freeConnection(con,stmt);
       }
     }
     return returnList;
   }
 
-  private String getIdListExpression(List aList) {
-    String result = "";
-
-    Iterator i = aList.iterator();
-
-    while (i.hasNext()) {
-      result = result + i.next().toString();
-      if (i.hasNext())
-        result = result + ", ";
+  /**
+   * Set new topics
+   */
+  public void setTopics(String contentId, String[] topicId)
+    throws StorageObjectException {
+    if (contentId == null){
+      return;
     }
-    return result;
-  }
-
-  public void setTopics(String anArticleId, String [] aTopics) throws StorageObjectFailure {
-    if (aTopics==null)
-      setTopics(anArticleId, (List) null);
-    else
-      setTopics(anArticleId, Arrays.asList(aTopics));
-  }
-
-  public void setTopics(String anArticleId, List aTopics) throws StorageObjectFailure {
-    List newTopics = new Vector();
-    if (aTopics!=null) {
-      Iterator i = aTopics.iterator();
-
-      while (i.hasNext()) {
-        newTopics.add(new Integer(Integer.parseInt((String) i.next())));
-      }
+    if (topicId==null || topicId[0]==null) {
+      return;
     }
+    //first check which topics this article has
+    Collection hasTopics = getTopicsOfContent(contentId);
+    Collection toSet = new ArrayList();
+    Collection toDelete = new ArrayList();
 
-    List currentTopics = getTopicsOfContent(anArticleId);
-    logger.debug("New topics = " + newTopics.toString());
-    logger.debug("Current topics = " + currentTopics.toString());
-    List topicsToDelete = new Vector(currentTopics);
-    topicsToDelete.removeAll(newTopics);
-    List topicsToAdd = new Vector(newTopics);
-    topicsToAdd.removeAll(currentTopics);
-    logger.debug("to delete = " + topicsToDelete.toString());
-    logger.debug("to add = " + topicsToAdd.toString());
-
-
-    if (!topicsToDelete.isEmpty()) {
-      String sql =
-          "delete from " + theTable + " " +
-          "where content_id=" + anArticleId +
-          "        and topic_id in (" + getIdListExpression(topicsToDelete) + ")";
-
-      Connection connection=null;
-      Statement statement=null;
-      try {
-        connection = getPooledCon();
-        statement = connection.createStatement();
-        int rs = executeUpdate(statement, sql);
-      }
-      catch (Exception e) {
-        logger.error("-- deleting topics failed");
-      }
-      finally {
-        try {
-          freeConnection(connection, statement);
+    if(hasTopics!=null && hasTopics.size()>0){
+      //now we check if there are new topics and copy them to an array.
+      for(int i = 0; i< topicId.length;i++){
+        boolean set=false;
+        int whichTopic = 0;
+        for(Iterator it=hasTopics.iterator();it.hasNext();){
+          Integer topic = (Integer)it.next();
+          if(topicId[i].equals(topic.toString())){
+            set=true;
+          } else {
+            whichTopic = i;
+          }
         }
-        catch (Throwable t) {
+        if(set==false){
+          toSet.add(topicId[i]);
+          theLog.printDebugInfo("to set: "+ topicId[i]);
         }
       }
+      //now we check if we have to delete topics
+      for(Iterator it=hasTopics.iterator();it.hasNext();){
+        boolean delete=true;
+        int whichTopic = 0;
+        Integer topic = (Integer)it.next();
+        for(int i = 0; i< topicId.length;i++){
+          if(topicId[i].equals(topic.toString())){
+            delete=false;
+          } else {
+            whichTopic = i;
+          }
+        }
+        if(delete==true){
+          toDelete.add(topic.toString());
+          theLog.printDebugInfo("to delete: "+ topic.toString());
+        }
+      }
+    } else {
+      //all the topics has to be set, so we copy all to the array
+			for (int i = 0; i < topicId.length; i++){
+				toSet.add(topicId[i]);
+			}
     }
 
-    Iterator i = topicsToAdd.iterator();
-    while (i.hasNext()) {
-      Integer topicId = (Integer) i.next();
-      String sql =
-          "insert into " + theTable + " (content_id, topic_id) "+
-          "values (" + anArticleId + "," + topicId + ")";
-      Connection connection=null;
-      Statement statement=null;
+    //first delete all row with content_id=contentId
+    String sql = "delete from "+ theTable +" where content_id=" + contentId
+                + " and topic_id in (";
+    boolean first=false;
+    for(Iterator it = toDelete.iterator(); it.hasNext();){
+      if(first==false){
+        first=true;
+      } else {
+        sql+=",";
+      }
+      sql+= (String)it.next();
+    }
+    sql+=")";
+    Connection con=null;Statement stmt=null;
+    try {
+      con = getPooledCon();
+      // should be a preparedStatement because is faster
+      stmt = con.createStatement();
+      int rs = executeUpdate(stmt,sql);
+    } catch (Exception e) {
+      theLog.printDebugInfo("-- deleting topics failed");
+    } finally {
+      freeConnection(con,stmt);
+    }
+
+    //now insert
+    //first delete all row with content_id=contentId
+    for (Iterator it = toSet.iterator(); it.hasNext();) {
+      sql = "insert into "+ theTable +" (content_id,topic_id) values ("
+            + contentId + "," + (String)it.next() + ")";
       try {
-        connection = getPooledCon();
+        con = getPooledCon();
         // should be a preparedStatement because is faster
-        statement = connection.createStatement();
-        int rs = executeUpdate(statement, sql);
-      }
-      catch (Exception e) {
-        logger.error("-- adding topics failed");
-      }
-      finally {
-        try {
-          freeConnection(connection, statement);
-        }
-        catch (Throwable t) {
-        }
+        stmt = con.createStatement();
+        int rs = executeUpdate(stmt,sql);
+      } catch (Exception e) {
+        theLog.printDebugInfo("-- set topics failed -- insert laenge topicId" + topicId.length);
+      } finally {
+        freeConnection(con,stmt);
       }
     }
   }
 
   public void deleteByContentId(String contentId)
-    throws StorageObjectFailure {
+    throws StorageObjectException {
     if (contentId == null) {
       //theLog.printDebugInfo("-- delete topics failed -- no content id");
       return;
@@ -244,7 +252,7 @@ public class DatabaseContentToTopics extends Database implements StorageObject{
   }
 
   public void deleteByTopicId(String topicId)
-    throws StorageObjectFailure {
+    throws StorageObjectException {
     if (topicId == null) {
       //theLog.printDebugInfo("-- delete topics failed -- no topic id");
       return;
@@ -258,18 +266,16 @@ public class DatabaseContentToTopics extends Database implements StorageObject{
       // should be a preparedStatement because is faster
       stmt = con.createStatement();
       ResultSet rs = executeSql(stmt,sql);
-    }
-    catch (Exception e) {
-      logger.error("-- delete topics failed ");
-    }
-    finally {
+    } catch (Exception e) {
+      theLog.printDebugInfo("-- delete topics failed ");
+    } finally {
       freeConnection(con,stmt);
     }
   }
 
 
   public EntityList getContent(EntityTopics topic)
-    throws StorageObjectFailure {
+    throws StorageObjectException {
     EntityList returnList=null;
     if (topic != null) {
       String id = topic.getId();
@@ -295,9 +301,7 @@ public class DatabaseContentToTopics extends Database implements StorageObject{
             returnList = DatabaseContent.getInstance().selectByWhereClause(topicSelect,-1);
         }
       }
-      catch (Exception e) {
-        logger.error("-- get contetn failed");
-      }
+      catch (Exception e) {theLog.printDebugInfo("-- get contetn failed");}
       finally { freeConnection(con,stmt);}
     }
     return returnList;

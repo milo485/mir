@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001, 2002 The Mir-coders group
+ * Copyright (C) 2001, 2002  The Mir-coders group
  *
  * This file is part of Mir.
  *
@@ -18,21 +18,22 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with  any library licensed under the Apache Software License, 
- * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
- * (or with modified versions of the above that use the same license as the above), 
- * and distribute linked combinations including the two.  You must obey the 
- * GNU General Public License in all respects for all of the code used other than 
- * the above mentioned libraries.  If you modify this file, you may extend this 
- * exception to your version of the file, but you are not obligated to do so.  
- * If you do not wish to do so, delete this exception statement from your version.
+ * the code of this program with the com.oreilly.servlet library, any library
+ * licensed under the Apache Software License, The Sun (tm) Java Advanced
+ * Imaging library (JAI), The Sun JIMI library (or with modified versions of
+ * the above that use the same license as the above), and distribute linked
+ * combinations including the two.  You must obey the GNU General Public
+ * License in all respects for all of the code used other than the above
+ * mentioned libraries.  If you modify this file, you may extend this exception
+ * to your version of the file, but you are not obligated to do so.  If you do
+ * not wish to do so, delete this exception statement from your version.
  */
+
 package  mir.servlet;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import freemarker.template.TemplateModelRoot;
+import javax.servlet.http.*;
+import freemarker.template.*;
+import mir.storage.*;
 
 
 /**
@@ -47,55 +48,54 @@ import freemarker.template.TemplateModelRoot;
  * @author RK
  */
 public class ServletModuleShow extends ServletModule {
-  private static ServletModuleShow instance = new ServletModuleShow();
+	private static ServletModuleShow instance = new ServletModuleShow();
 
-  /**
-   * Ein ServletModuleShow-Objekt wird ?ber getInstance geliefert. Es gibt zur
-   * Laufzeit nur ein Objekt (Singleton)
-   * @return ServletModuleShow
-   */
-  public static ServletModule getInstance() {
-    return instance;
-  }
+	/**
+	 * Ein ServletModuleShow-Objekt wird über getInstance geliefert. Es gibt zur
+	 * Laufzeit nur ein Objekt (Singleton)
+	 * @return ServletModuleShow
+	 */
+	public static ServletModule getInstance () {
+		return  instance;
+	}
 
-  /**
-   * Initialisierung leer.
-   */
-  private ServletModuleShow() {
-  }
+	/**
+	 * Initialisierung leer.
+	 */
+	private ServletModuleShow () {
+	}
 
-  /**
-   * defaultAction (s.a ServletModule)
-   * @return "show"
-   */
-  public String defaultAction() {
-    return "show";
-  }
+	/**
+	 * defaultAction (s.a ServletModule)
+	 * @return "show"
+	 */
+	public String defaultAction () {
+		return  "show";
+	}
 
-  /**
-   * Standardmethode, die die Funktionalitaet des ServletModules implementiert.
-   *
-   * @param req Http-Request, das vom Dispatcher durchgereicht wird
-   * @param res Http-Response, die vom Dispatcher durchgereicht wird
-   * @return String fuer Logfile
-   * @exception ServletModuleException
-   */
-  public void show(HttpServletRequest req, HttpServletResponse res) throws
-      ServletModuleExc {
+	/**
+	 * Standardmethode, die die Funktionalitaet des ServletModules implementiert.
+	 *
+	 * @param req Http-Request, das vom Dispatcher durchgereicht wird
+	 * @param res Http-Response, die vom Dispatcher durchgereicht wird
+	 * @return String fuer Logfile
+	 * @exception ServletModuleException
+	 */
+  public void show(HttpServletRequest req, HttpServletResponse res) throws ServletModuleException {
     try {
       String idParam = req.getParameter("tmpl");
-      if (! (idParam == null || idParam.equals(""))) {
-        deliver(req, res, (TemplateModelRoot)null,
-                "html/" + idParam + ".template");
+      if (!(idParam==null || idParam.equals(""))) {
+  	    deliver(req, res, (TemplateModelRoot)null, "html/"+idParam+".template");
       }
       else {
-        throw new ServletModuleExc("Invalid template: " + idParam);
+        throw new ServletModuleException("Falsches template: " + idParam);
       }
     }
-    catch (Throwable e) {
-      throw new ServletModuleFailure(e);
+    catch (Exception e) {
+      throw new ServletModuleException(e.toString());
     }
   }
+
 }
 
 

@@ -1,0 +1,98 @@
+<html>
+<head>
+<title>${lang("producer.openposting.htmltitle")}${topic.title}</title>
+<meta http-equiv="Content-Type" content="text/html; charset=${config.defEncoding}">
+<link rel="stylesheet" href="/style/mir.css" type="text/css">
+</head>
+
+<body bgcolor="#CCCCCC">
+<table width="760" border="0" cellpadding="0" cellspacing="1" align="center" bgcolor="#000000">
+  <tr bgcolor="#FFFFFF"> 
+    <td valign="top" align="left" width="150" bgcolor="#666666"> 
+      <table width="150" border="0" cellspacing="0" cellpadding="0">
+        <tr> 
+          <td width="140">
+             <a href="${config.productionHost}${config.producerDocRoot}">
+             <img src="images/mirlogo.jpg" width="150" height="205" border="0">
+             </a>
+          </td>
+        </tr>
+        <tr valign="top"> 
+          <td width="140" bgcolor="#666666"> 
+            <table width="100%" border="0" cellspacing="2" cellpadding="0">
+              <tr> 
+                <td> 
+                <!--#include virtual="navigation.inc" -->
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </td>
+    <td align="left" valign="top" colspan="2" height="100%">
+      <table width="100%" border="0" cellspacing="0" cellpadding="0">
+        <tr> 
+          <td> 
+            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+              <tr> 
+                <td><img src="images/mirfont.gif" width="600" height="68"></td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr bgcolor="#000000"> 
+          <td height="1"><img src="images/1pixel.gif" width="1" height="1"></td>
+        </tr>
+        <tr> 
+          <td align="left" valign="top">
+            <h2> ${title}</h2> 
+            <table width="100%" border="0" cellpadding="0" cellspacing="2" height="100%">
+              <tr> 
+                <td width="100%" valign="top"> 
+                  <!--- articles ---> 
+                  <list data.contentlist as i> 
+                  <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                    <tr> 
+                      <td> 
+                        <h3>${i.title}</h3>
+                        <h4><i>${i.creator}, ${i.webdb_create_formatted}</i></h4>
+                        <p>			 
+                        <if i.to_media_audio > 
+                          <img src="/img/${i.to_media_audio[0]["big_icon"]}">
+                        </if> 
+                        <if i.to_media_video > 
+                          <img src="/img/${i.to_media_video[0]["big_icon"]}">
+                        </if> 
+                        <if i.to_media_other > 
+                          <img src="/img/${i.to_media_other[0]["big_icon"]}">
+                        </if> 
+                        <p>
+                        <if i.to_media_images >
+                          <img src="${i.to_media_images[0]["icon_path"]}"
+                            width="${i.to_media_images[0]["icon_width"]}"
+                            height="${i.to_media_images[0]["icon_height"]}"
+                            border=0 alt="${i.to_media_images[0]["title"]}">
+                        </if> 
+			  ${i.description}</p>
+                        <p align="right">[<a href="${config.producerDocRoot}${i.publish_path}${i.id}.shtml">read</a>]</p>
+                      </td>
+                    </tr>
+                  </table>
+                  <br>
+                  </list> 
+                  <!--- articles ---> 
+                  </td>
+		  <if data.previousPage><a href="${data.previousPage}">${lang("producer.previous")}</a></if>
+		  <a href="${data.nextPage}">${lang("producer.next")}</a>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<p>&nbsp;</p>
+</body>
+</html>

@@ -1,0 +1,52 @@
+<html>
+<head>
+<title>
+${lang("mediafolder.htmltitle")}
+</title>
+<head>
+
+<body bgcolor="#FFFFFF">
+<include "admin/head.template">
+<form method="post" action="${config.actionRoot}">
+	<input type=hidden name=module value=Mediafolder>
+	<input type="hidden" name="id" value="${data.id}">
+	<if data.new> <input type="hidden" name="do" value="insert">
+	<else>	 <input type="hidden" name="do" value="update"></if>
+
+<table border="0">
+
+  <tr> 
+    <td align="right" bgcolor="#006600"><font color="#ffffff"><B>${lang("mediafolder.date")}:</B></font></td>
+    <td><input type="text" size="8" maxsize="8" name="date" value="${encodeHTML(data.date)}"></td>
+  </tr>
+
+  <tr> 
+    <td align="right" bgcolor="#006600"><font color="#ffffff"><B>${lang("mediafolder.name")}:</B></font></td>
+    <td><input type="text" size="40" name="name" value="${encodeHTML(data.name)}"></td>
+  </tr>
+
+  <tr> 
+    <td align="right" bgcolor="#006600"><font color="#ffffff"><B>${lang("mediafolder.location")}:</B></font></td>
+    <td><input type="text" size="40" name="place" value="${encodeHTML(data.place)}"></td>
+  </tr>
+
+  <tr> 
+    <td align="right" bgcolor="#006600"><font color="#ffffff"><B>${lang("mediafolder.comment")}:</B></font></td>
+    <td><textarea cols="40" rows="5" name="comment">${encodeHTML(data.comment)}</textarea></td>
+  </tr>
+
+  <tr> 
+    <td align="right" bgcolor="#006600"><font color="#ffffff"><B>${lang("mediafolder.keywords")}:</B></font></td>
+    <td><textarea cols="40" rows="4" name="keywords">${encodeHTML(data.keywords)}</textarea></td>
+  </tr>
+
+  <tr> 
+    <td colspan="4" align="right"> <font color="#ffffff">
+		<if data.new> <input type="submit" name="save" value="${lang("insert")}">
+    	<else>   <input type="submit" name="save" value="${lang("save")}"></if>
+		</font></form></font>
+    </td>
+</table>
+<include "admin/foot.template">
+</body>
+</html>

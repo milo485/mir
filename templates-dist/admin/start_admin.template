@@ -1,0 +1,302 @@
+<html>
+  <head>
+    <title>${lang("start.htmltitle")}</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=${config.defEncoding}">
+  </head>
+
+<body bgcolor="#FFFFFF" link="#666666" vlink="#990000" alink="#990000">
+  <include "admin/head.template">
+  <table border="0" width="100%">
+	<tr>
+		<td valign="top" width="40%" bgcolor="c0c0c0">
+
+
+		<font face="Verdana, Arial, Helvetica, sans-serif" size="2" color="#663399">
+		<b>${lang("start.openpostings.title")}</b></font>
+
+	 <p>
+	 	<a href="${config.actionRoot}?module=Content&do=listop&order=webdb_create+desc">
+		<img src="${config.docRoot}/img/pointgris.gif" border=0>${lang("edit")}</a>
+
+		<p>
+			<font face="Verdana, Arial, Helvetica, sans-serif" size="2" color="#663399">
+			<b>${lang("start.comments.title")}</b></font>
+		<p>
+			<a href="${config.actionRoot}?module=Comment&do=list">
+			<img src="${config.docRoot}/img/pointgris.gif" border=0>${lang("edit")}</a>
+	    <p>
+			<font face="Verdana, Arial, Helvetica, sans-serif" size="2" color="#663399">
+			<b>${lang("start.breaking.title")}</b></font>
+		<p>
+			<img src="${config.docRoot}/img/pointgris.gif" border=0>
+			<a href="${config.actionRoot}?module=Breaking&do=list">${lang("edit")}</a>
+	    	<img src="${config.docRoot}/img/pointgris.gif" border=0>
+			<a href="${config.actionRoot}?module=Breaking&do=add">${lang("start.breaking.new")}</a>
+
+			<table width="100%" border="0">
+		<tr><td bgcolor="white">&nbsp;</td></tr>
+		</table>
+
+	    <font face="Verdana, Arial, Helvetica, sans-serif" size="2" color="#663399">
+			<b>${lang("start.content.title")}</b></font>
+
+  		<p>
+			<img src="${config.docRoot}/img/pointgris.gif" border=0>
+			<a href="${config.actionRoot}?module=Content&do=add&where=aktuell">${lang("start.content.new")}</a>
+	    <p>
+			<b>${lang("start.show")}:</b><br>
+			<img src="${config.docRoot}/img/pointgris.gif" border=0>
+	  		<a href="${config.actionRoot}?module=Content&do=list&where=newswire">${lang("start.content.newswire")}</a><br>
+			<img src="${config.docRoot}/img/pointgris.gif" border=0>
+	  		<a href="${config.actionRoot}?module=Content&do=list&where=feature">${lang("start.content.feature")}</a><br>
+			<img src="${config.docRoot}/img/pointgris.gif" border=0>
+	  		<a href="${config.actionRoot}?module=Content&do=list&where=themenspecial">${lang("start.content.topicspecial")}</a><br>
+			<img src="${config.docRoot}/img/pointgris.gif" border=0>
+	  		<a href="${config.actionRoot}?module=Content&do=list&where=special">${lang("start.content.startspecial")}</a><br>
+			<br>
+	    	<img src="${config.docRoot}/img/pointgris.gif" border=0>
+			<a href="${config.actionRoot}?module=Content&do=list&where=nfrei" >${lang("start.content.not_published")}</a><br>
+			<img src="${config.docRoot}/img/pointgris.gif" border=0>
+			<a href="${config.actionRoot}?module=Content&do=list&where=media">${lang("start.content.with_media")}</a><br>
+			<img src="${config.docRoot}/img/pointgris.gif" border=0>
+			<a href="${config.actionRoot}?module=Content&do=list&where=lastchange">${lang("start.content.last_changes")}</a><br>
+			<img src="${config.docRoot}/img/pointgris.gif" border=0>
+			<a href="${config.actionRoot}?module=Content&do=list&where=comments">${lang("start.content.with_comments")}</a><br>
+                        <br>
+                        <img src="${config.docRoot}/img/pointgris.gif" border=0>
+                        <a href="${config.actionRoot}?module=Hidden&do=list">${lang("start.content.hidden")}</a>
+
+<br><br>
+                        <b>here to edit all the include files:</b>
+                        <br>
+                        <img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp;
+                        <a href="${config.actionRoot}?module=FileEdit&do=list">${lang("edit")}
+${lang("file")}</a>
+
+                        <br><br>
+
+
+     <form action="${config.actionRoot}" method="post">
+	     <input type="hidden" name="module" value="Content">
+       <input type="hidden" name="do" value="search">
+       <input type="hidden" name="order" value="date desc">
+		    ${lang("start.content.search")}: <font size="-1">
+       <input type="text" name="fieldvalue" size="15">
+       <select name="field">
+       	<option value="title">${lang("content.title")}</option>
+        <option value="creator">${lang("content.creator")}</option>
+        <option value="place">${lang("content.location")}</option>
+        <option value="description">${lang("content.abstract")}</option>
+				<option value="comment">${lang("content.comment")}</option>
+        <option value="content_data">${lang("content.content")}</option>
+       </select></font>
+      </form>
+
+		<table width="100%" border="0">
+		<tr><td bgcolor="white">&nbsp;</td></tr>
+		</table>
+
+
+			<font  face="Verdana, Arial, Helvetica, sans-serif" size="2" color="#663399">
+			<b>${lang("start.generate.title")}</b></font>
+
+			<div align="left">
+				<br>
+				${lang("start.generate.all.title")}:
+				<br>
+		 		<img src="${config.docRoot}/img/pointgris.gif" border=0>
+		 		<a href="${config.actionRoot}?module=Producer&task=All">${lang("start.generate.all.new")}</a> &nbsp;|&nbsp;
+        <!--
+	<br>
+        <a href="${config.actionRoot}?module=Producer&task=All&forced=1">alles (!)(forced, update auf www > 5min.)</a>
+        &nbsp;|&nbsp;
+        <br>
+        <a href="${config.actionRoot}?module=Producer&task=All&forced=1&sync=1">alles (!)(www sofort, nur im Notfall)</a>
+        &nbsp;|&nbsp;
+        <br>
+	-->
+		 		<br>${lang("start.generate.parts.title")}:
+		 		<br>
+     			<img src="${config.docRoot}/img/pointgris.gif" border=0>
+		 		<a href="${config.actionRoot}?module=Producer&task=StartPage">${lang("start.generate.startpages.new")}</a>
+				&nbsp;|&nbsp;
+		 		<a href="${config.actionRoot}?module=Producer&task=StartPage&forced=1">${lang("start.generate.all_forced")}</a>
+		 		&nbsp;|&nbsp;
+		 		<a href="${config.actionRoot}?module=Producer&task=StartPage&forced=1&sync=1">${lang("start.generate.all_sync")}</a>
+		 		<br>
+				<img src="${config.docRoot}/img/pointgris.gif" border=0>
+     			<a href="${config.actionRoot}?module=Producer&task=Content">${lang("start.generate.content.new")}</a>
+				&nbsp;|&nbsp;
+				<a href="${config.actionRoot}?module=Producer&task=Content&forced=1">${lang("start.generate.all_forced")}</a>
+		 		<br>
+      			<img src="${config.docRoot}/img/pointgris.gif" border=0>
+				<a href="${config.actionRoot}?module=Producer&task=Topics">${lang("start.generate.topics.new")}</a>
+				&nbsp;|&nbsp;
+		 		<a href="${config.actionRoot}?module=Producer&task=Topics&forced=1">${lang("start.generate.all_forced")}</a>
+				<br>
+				<a href="${config.actionRoot}?module=Producer&task=OpenPosting">
+		  	<img src="${config.docRoot}/img/pointgris.gif" border=0>${lang("start.generate.postings.new")}</a>
+				&nbsp;|&nbsp;
+		 		<a href="${config.actionRoot}?module=Producer&task=OpenPosting&forced=1">${lang("start.generate.all_forced")}</a>
+				<br>
+				<a href="${config.actionRoot}?module=Producer&task=Images">
+		  	<img src="${config.docRoot}/img/pointgris.gif" border=0>${lang("start.generate.images.new")}</a>
+				&nbsp;|&nbsp;
+		 		<a href="${config.actionRoot}?module=Producer&task=Images&forced=1">${lang("start.generate.all_forced")}</a>
+                <br>
+				<a href="${config.actionRoot}?module=Producer&task=Audio">
+		  	<img src="${config.docRoot}/img/pointgris.gif" border=0>${lang("start.generate.audio.new")}</a>
+				&nbsp;|&nbsp;
+		 		<a href="${config.actionRoot}?module=Producer&task=Audio&forced=1">${lang("start.generate.all_forced")}</a>
+<br>
+				<a href="${config.actionRoot}?module=Producer&task=Video">
+		  	<img src="${config.docRoot}/img/pointgris.gif" border=0>${lang("start.generate.video.new")}</a>
+				&nbsp;|&nbsp;
+		 		<a href="${config.actionRoot}?module=Producer&task=Video&forced=1">${lang("start.generate.all_forced")}</a>
+<br>
+				<a href="${config.actionRoot}?module=Producer&task=Other">
+		  	<img src="${config.docRoot}/img/pointgris.gif" border=0>${lang("start.generate.other.new")}</a>
+				&nbsp;|&nbsp;
+		 		<a href="${config.actionRoot}?module=Producer&task=Other&forced=1">${lang("start.generate.all_forced")}</a>
+
+				<br>
+        <a href="${config.actionRoot}?module=Producer&task=Navigation">
+		  	<img src="${config.docRoot}/img/pointgris.gif" border=0>${lang("start.generate.navigation")}</a>
+				<br>
+
+
+	</td>
+
+
+			<td bgcolor="white" width="5%">&nbsp;
+			</td>
+			<td valign="top" width="30%" bgcolor="c0c0c0">
+
+<!-- not finished yet
+  	<font face="Verdana, Arial, Helvetica, sans-serif" size="2" color="#663399">
+		<b>${lang("start.coverage.title")}</b></font>
+
+		<P>
+			<a href="${config.actionRoot}?module=Schwerpunkt&do=list" >
+      <img src="${config.docRoot}/img/pointgris.gif" border=0> ${lang("edit")}</a><br>
+      <a href="${config.actionRoot}?module=Schwerpunkt&do=add" >
+		  <img src="${config.docRoot}/img/pointgris.gif" border=0> ${lang("add")}</a>
+    <p>
+-->
+			<font face="Verdana, Arial, Helvetica, sans-serif" size="2" color="#663399">
+			<b>${lang("start.topics.title")}</b></font>
+
+		<p>
+			<a href="${config.actionRoot}?module=Topics&do=list">
+      <img src="${config.docRoot}/img/pointgris.gif" border=0> ${lang("edit")}</a><br>
+      <a href="${config.actionRoot}?module=Topics&do=add" >
+			<img src="${config.docRoot}/img/pointgris.gif" border=0> ${lang("add")}</a>
+
+		<p>
+			<font face="Verdana, Arial, Helvetica, sans-serif" size="2" color="#663399">
+		  <b>${lang("start.images.title")}</b></font>
+
+    <p>
+			<a href="${config.actionRoot}?module=Images&do=list">
+      <img src="${config.docRoot}/img/pointgris.gif" border=0> ${lang("edit")}</a><br>
+      <a href="${config.actionRoot}?module=Images&do=add" >
+			<img src="${config.docRoot}/img/pointgris.gif" border=0> ${lang("add")}</a>
+
+		<p>
+
+        <font face="Verdana, Arial, Helvetica, sans-serif" size="2" color="#663399">
+		  <b>${lang("start.audio.title")}</b></font>
+
+    <p>
+			<a href="${config.actionRoot}?module=Audio&do=list">
+      <img src="${config.docRoot}/img/pointgris.gif" border=0> ${lang("edit")}</a><br>
+      <a href="${config.actionRoot}?module=Audio&do=add" >
+			<img src="${config.docRoot}/img/pointgris.gif" border=0> ${lang("add")}</a>
+
+		<p>
+
+        <font face="Verdana, Arial, Helvetica, sans-serif" size="2" color="#663399">
+		  <b>${lang("start.video.title")}</b></font>
+
+    <p>
+			<a href="${config.actionRoot}?module=Video&do=list">
+      <img src="${config.docRoot}/img/pointgris.gif" border=0> ${lang("edit")}</a><br>
+      <a href="${config.actionRoot}?module=Video&do=add" >
+			<img src="${config.docRoot}/img/pointgris.gif" border=0> ${lang("add")}</a>
+
+		<p>
+
+        <font face="Verdana, Arial, Helvetica, sans-serif" size="2" color="#663399">
+		  <b>${lang("start.other_media.title")}</b></font>
+
+    <p>
+			<a href="${config.actionRoot}?module=OtherMedia&do=list">
+      <img src="${config.docRoot}/img/pointgris.gif" border=0> ${lang("edit")}</a><br>
+      <a href="${config.actionRoot}?module=OtherMedia&do=add" >
+			<img src="${config.docRoot}/img/pointgris.gif" border=0> ${lang("add")}</a>
+
+		<p>
+
+			<font face="Verdana, Arial, Helvetica, sans-serif" size="2" color="#663399">
+		  <b>${lang("start.mediafolder.title")}</b></font>
+
+		<p>
+			<a href="${config.actionRoot}?module=Mediafolder&do=list">
+      <img src="${config.docRoot}/img/pointgris.gif" border=0> ${lang("edit")}</a><br>
+      <a href="${config.actionRoot}?module=Mediafolder&do=add" >
+			<img src="${config.docRoot}/img/pointgris.gif" border=0> ${lang("add")}</a>
+
+    <p>
+<!--
+		<font face="Verdana, Arial, Helvetica, sans-serif" size="2" color="#663399">
+		  <b>${lang("start.languages.title")}</b></font>
+
+		<p>
+			<a href="${config.actionRoot}?module=Language&do=list">
+      <img src="${config.docRoot}/img/pointgris.gif" border=0> ${lang("edit")}</a><br>
+      <a href="${config.actionRoot}?module=Language&do=add" >
+			<img src="${config.docRoot}/img/pointgris.gif" border=0> ${lang("add")}</a>
+
+		<p>
+-->
+			<font face="Verdana, Arial, Helvetica, sans-serif" size="2" color="#663399">
+		  <b>${lang("start.imcs.title")}</b></font>
+
+		<p>
+			<a href="${config.actionRoot}?module=LinksImcs&do=list">
+      <img src="${config.docRoot}/img/pointgris.gif" border=0> ${lang("edit")}</a><br>
+      <a href="${config.actionRoot}?module=LinksImcs&do=add" >
+			<img src="${config.docRoot}/img/pointgris.gif" border=0> ${lang("add")}</a>
+			</td>
+
+
+			<td bgcolor="white" width="5%">&nbsp;
+			</td>
+			<td valign="top" width="20%" bgcolor="pink">
+
+	<!-- internes messageboard -->
+
+		<font  face="Verdana, Arial, Helvetica, sans-serif" size="2" color="#663399">
+		<b>${lang("start.messageboard.title")}</b>
+		<font size="-1"><br><a href="${config.actionRoot}?module=Message&do=add">${lang("add")}</a></font>
+		<if data.messages>
+			<list data.messages as m>
+				<p>
+				<if m.title><b>${m.title}</b><br></if>
+				${m.description}<br>
+				<font size="-2">
+				<if m.creator><i>von: ${m.creator}</i> / </if>${m.webdb_create}<br>
+				</font>
+			</list>
+		<else>
+			<p><i>${lang("start.messageboard.no_messages")}</i>
+		</if></font>
+	</td>
+
+ 	</tr>
+	</table>
+
+	<include "admin/foot.template">
+
+	</body>
+</html>

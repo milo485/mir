@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001, 2002 The Mir-coders group
+ * Copyright (C) 2001, 2002  The Mir-coders group
  *
  * This file is part of Mir.
  *
@@ -18,26 +18,40 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with  any library licensed under the Apache Software License, 
- * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
- * (or with modified versions of the above that use the same license as the above), 
- * and distribute linked combinations including the two.  You must obey the 
- * GNU General Public License in all respects for all of the code used other than 
- * the above mentioned libraries.  If you modify this file, you may extend this 
- * exception to your version of the file, but you are not obligated to do so.  
- * If you do not wish to do so, delete this exception statement from your version.
+ * the code of this program with the com.oreilly.servlet library, any library
+ * licensed under the Apache Software License, The Sun (tm) Java Advanced
+ * Imaging library (JAI), The Sun JIMI library (or with modified versions of
+ * the above that use the same license as the above), and distribute linked
+ * combinations including the two.  You must obey the GNU General Public
+ * License in all respects for all of the code used other than the above
+ * mentioned libraries.  If you modify this file, you may extend this exception
+ * to your version of the file, but you are not obligated to do so.  If you do
+ * not wish to do so, delete this exception statement from your version.
  */
+
 package mircoders.module;
 
-import mir.entity.EntityList;
-import mir.log.LoggerWrapper;
-import mir.module.AbstractModule;
-import mir.storage.StorageObject;
+import java.io.*;
+import java.lang.*;
+import java.util.*;
+import java.sql.*;
+import javax.servlet.*;
+import javax.servlet.http.*;
 
+import freemarker.template.*;
+
+import mir.servlet.*;
+import mir.module.*;
+import mir.entity.*;
+import mir.misc.*;
+import mir.storage.*;
+
+import mir.entity.*;
+import mir.storage.*;
 
 
 /*
- *
+ *  ContentObjekt -
  *
  *
  * @author RK
@@ -45,22 +59,25 @@ import mir.storage.StorageObject;
 
 public class ModuleBreaking extends AbstractModule
 {
-  static LoggerWrapper logger = new LoggerWrapper("Module.Breaking");
+	static Logfile theLog;
 
-  public ModuleBreaking (StorageObject theStorage)
-  {
-    if (theStorage == null) logger.warn("ModuleBreaking -- StorageObject was null!");
-    this.theStorage = theStorage;
-  }
+	// Kontruktor
 
-// Methoden
+	public ModuleBreaking (StorageObject theStorage)
+	{
+		if (theLog == null) theLog = Logfile.getInstance(MirConfig.getProp("Home") + MirConfig.getProp("Module.Breaking.Logfile"));
+		if (theStorage == null) theLog.printWarning("ModuleBreaking -- StorageObject was null!");
+		this.theStorage = theStorage;
+	}
+
+	// Methoden
   public EntityList getBreakingNews() {
     EntityList returnList = null;
     try {
       returnList = getByWhereClause(null,"webdb_create desc",0,5);
     }
     catch (Exception ex) {
-      logger.error("--getBreakingNews(): could not fetch Breaking News" + ex.toString());
+      theLog.printWarning("--getBreakingNews(): could not fetch Breaking News" + ex.toString());
     }
     return returnList;
   }

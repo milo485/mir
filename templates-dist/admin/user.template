@@ -1,0 +1,47 @@
+<html>
+<head>
+<title>
+${lang("user.htmltitle")}
+</title>
+<head>
+
+<body bgcolor="#FFFFFF">
+<include "admin/head.template">
+<form action="${config.actionRoot}" method="post">
+	<input type="hidden" name="module" value="Users">
+	<input type="hidden" name="id" value="${encodeHTML(id)}">
+	<if new><input type="hidden" name="do" value="insert">
+	<else><input type="hidden" name="do" value="update"></if>
+<table border="0">
+  <tr> 
+    <td align="right" bgcolor="#006600"><font color="#ffffff" face="Verdana, Arial, Helvetica, sans-serif" size="-1">
+	<B>${lang("user.login")}:</B></font></td>
+    <td>
+      <input type="text" size="40" name="login" value="${encodeHTML(login)}">
+    </td>
+  </tr>
+  <tr> 
+    <td align="right" bgcolor="#006600"><font color="#ffffff" face="Verdana, Arial, Helvetica, sans-serif" size="-1">
+	<B>${lang("user.password")}:</B></font></td>
+    <td>
+      <input type="text" size="20" name="password" value="${encodeHTML(password)}">
+    </td>
+  </tr>
+  <tr> 
+    <td align="right" bgcolor="#006600"><font color="#ffffff" face="Verdana, Arial, Helvetica, sans-serif" size="-1">
+	<B>${lang("user.admin")}:</B><font color="#CCCCCC">(<a href="${encodeHTML(docRoot)}/help/users.html#admin" target="_help">?</a>)</font></font></td>
+    <td>
+	    <input type="checkbox" name="is_admin" value="1"<if is_admin=="1"> checked</if>>
+    </td>
+  </tr>
+  <tr> 
+    <td colspan="2" align="right"> <font color="#ffffff"><if new> 
+      <input type="submit" name="save" value="${lang("insert")}">
+    <else> 
+    <input type="submit" name="save" value="${lang("save")}">
+    </if> </font></form></font>
+    </td>
+</table>
+<include "admin/foot.template">
+</body>
+</html>

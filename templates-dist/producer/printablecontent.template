@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- example for a simple fo file. At the beginning the page layout is set. 
+  Below fo:root there is always 
+- a single fo:layout-master-set which defines one or more page layouts
+- an optional fo:declarations 
+- and a sequence of one or more fo:page-sequences containing the text and formatting instructions 
+-->
+
+<fo:root xmlns:fo="http://www.w3.org/1999/XSL/Format">
+
+  <fo:layout-master-set>
+  <!-- fo:layout-master-set defines in its children the page layout: 
+       the pagination and layout specifications
+      - page-masters: have the role of describing the intended subdivisions 
+                       of a page and the geometry of these subdivisions 
+                      In this case there is only a simple-page-master which defines the 
+                      layout for all pages of the text
+  -->
+    <!-- layout information -->
+    <fo:simple-page-master master-name="simple"
+                  page-height="29.7cm" 
+                  page-width="21cm"
+                  margin-top="1cm" 
+                  margin-bottom="2cm" 
+                  margin-left="2.5cm" 
+                  margin-right="2.5cm">
+      <fo:region-body margin-top="3cm" />
+
+      <fo:region-before extent="5.0cm" />
+      <fo:region-after extent="1.5cm"/>
+    </fo:simple-page-master>
+  </fo:layout-master-set>
+  <!-- end: defines page layout -->
+
+
+  <!-- start page-sequence
+       here comes the text (contained in flow objects)
+       the page-sequence can contain different fo:flows 
+       the attribute value of master-name refers to the page layout
+       which is to be used to layout the text contained in this
+       page-sequence-->
+  <fo:page-sequence master-reference="simple">
+	<fo:static-content flow-name="xsl-region-before">
+      <!-- this defines a title -->
+      <fo:block font-size="24pt" 
+            line-height="23pt"
+            space-after.optimum="5pt"
+            background-color="black"
+            text-align="start">
+<fo:external-graphic  src="file:/some/dir/printbanner.gif"  />
+      </fo:block>
+<fo:block font-size="10pt" 
+ 	font-family="serif" 
+	color="black"
+	line-height="12pt">
+	Here is where some descriptive text could go.  A fair use disclaimer
+an attribution of copyright/left rights, etc.  the possibilities are endless.
+	<fo:leader leader-pattern="rule" leader-length="18cm"
+            rule-thickness="1pt" color="black"/>
+</fo:block>
+	
+	</fo:static-content>
+	
+      <!-- start fo:flow
+           each flow is targeted 
+           at one (and only one) of the following:
+           xsl-region-body (usually: normal text)
+           xsl-region-before (usually: header)
+           xsl-region-after  (usually: footer)
+           xsl-region-start  (usually: left margin) 
+           xsl-region-end    (usually: right margin)
+           ['usually' applies here to languages with left-right and top-down 
+            writing direction like English]
+           in this case there is only one target: xsl-region-body
+        -->
+    <fo:flow flow-name="xsl-region-body">
+
+      <!-- each paragraph is encapsulated in a block element
+           the attributes of the block define
+           font-family and size, line-heigth etc. -->
+      
+      <!-- here is the article title -->
+      <fo:block font-size="16pt" 
+                font-family="sans-serif" 
+		font-weight="bold"
+                line-height="18pt"
+                space-after.optimum="3pt"
+                text-align="center">      	
+      ${data.content.title}
+      </fo:block>
+      
+      <!-- here is the article author and date-->
+      <fo:block font-size="11pt" 
+                font-family="sans-serif" 
+                line-height="13pt"
+                space-after.optimum="3pt"
+                text-align="end">      	
+      ${data.content.creator},  ${data.content.webdb_create_formatted}
+      </fo:block>
+
+
+      <!-- here is the article summary -->
+      <fo:block font-size="11pt" 
+                font-family="sans-serif" 
+		font-weight="bold"
+                line-height="13pt"
+                space-after.optimum="3pt"
+                text-align="justify">      	
+      ${data.content.description_parsed}
+      </fo:block>
+
+
+	      <!-- here is the header stuff -->
+<if content.creator_main_url || content.creator_email>
+	<fo:block><fo:leader leader-pattern="rule" leader-length="18cm"
+            rule-thickness="1pt" color="black"/></fo:block>
+</if>
+      <if content.creator_email>
+      <fo:block font-size="10pt" 
+                font-family="sans-serif" 
+                line-height="12pt">
+      Email:   	${data.content.creator_email}
+      </fo:block>
+      </if>
+      <if content.creator_main_url>
+      <fo:block font-size="10pt" 
+                font-family="sans-serif" 
+                line-height="12pt">
+      URL:  	${data.content.creator_main_url}
+      </fo:block>
+      </if> 
+      <fo:block><fo:leader leader-pattern="rule" leader-length="18cm"
+            rule-thickness="1pt" color="black"/></fo:block>
+
+      <!-- here is the content -->
+      <fo:block font-size="12pt" 
+                font-family="sans-serif" 
+                line-height="15pt"
+                space-after.optimum="3pt"
+                text-align="justify">
+	${data.content.content_data_parsed}
+        <list data.content.to_media_images as media>
+	<fo:external-graphic  src="file:${config.imagePath}/${media["publish_path"]}"  />
+	     ${media["description"]}
+        </list>
+      </fo:block>
+	
+
+
+    </fo:flow> <!-- closes the flow element-->
+  </fo:page-sequence> <!-- closes the page-sequence -->
+</fo:root>
+
+

@@ -1,0 +1,108 @@
+<html>
+<head>
+	<title>${lang("start.content.hidden")}</title>
+	<link rel="stylesheet" type="text/css" href="${config.docRoot}/admin.css">
+
+</head>
+
+<body bgcolor="#FFFFFF">
+
+<include "admin/head.template">
+<table bgcolor="#fbb1c0" width="98%">
+  <tr>
+    <td>
+
+
+<form method="post" action="${config.actionRoot}">
+	<input type="hidden" name="module" value="Hidden">
+	<input type="hidden" name="do" value="list">
+
+
+
+     ${lang("month")}
+    <select name="month">
+    <option value="01" selected >01</option>
+    <option value="02">02</option>
+    <option value="03">03</option>
+    <option value="04">04</option>
+    <option value="05">05</option>
+    <option value="06">06</option>
+    <option value="07">07</option>
+    <option value="08">08</option>
+    <option value="09">09</option>
+    <option value="10">10</option>
+    <option value="11">11</option>
+    <option value="12">12</option>
+    </select>
+    ${lang("year")}
+    <select name="year">
+    <option value="2001">2001</option>
+    <option value="2002" selected >2002</option>
+    <option value="2002">2003</option>
+    <option value="2002">2004</option>
+    <option value="2002">2005</option>
+    </select>
+
+    &nbsp;
+
+    <input type="submit" name="search" value="${lang("commentlist.search")}">
+</form>
+
+
+    </td>
+  </tr>
+</table>
+
+
+<br><br>
+
+<hr size="4" width="98%" noshade>
+
+<if data.contentlist>
+<table cellpadding="6" bgcolor="#dddddd" width="98%">
+  <tr>
+    <td>
+     <p>${lang("start.content.hidden")} | ${lang("month")}: ${data.month} , ${lang("year")}:${data.year}</p>
+    </td>
+  </tr>
+</table>
+
+<list data.contentlist as i>
+<p>
+${lang("content.title")}: <b>${encodeHTML(i.title)}</b><br>
+${lang("content.creator")}: ${encodeHTML(i.creator)}<br>
+${lang("message.date")}: ${encodeHTML(i.webdb_create_formatted)}<br>
+<br>
+<if i.to_media_audio >additional media, type: audio<br></if>
+<if i.to_media_video >additional media, type: video<br></if>
+<if i.to_media_other >additional media, type: other<br></if>
+<if i.to_media_images >additional media, type: image<br></if>
+</p>
+
+<p>
+${lang("content.abstract")}:<br>
+${encodeHTML(i.description_parsed)}</p>
+
+<p>
+${lang("content.content")}:<br>
+${encodeHTML(i.content_data_parsed)}
+</p>
+<p>&nbsp;</p>
+<hr size="4" width="98%" noshade>
+<p>&nbsp;</p>
+
+</list>
+
+
+
+<else>
+  <tr><td align="center">${lang("no_matches_found")}</td></tr>
+</if>
+
+
+<include "admin/foot.template">
+
+</body>
+</html>
+
+

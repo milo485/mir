@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001, 2002 The Mir-coders group
+ * Copyright (C) 2001, 2002  The Mir-coders group
  *
  * This file is part of Mir.
  *
@@ -18,15 +18,17 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with  any library licensed under the Apache Software License, 
- * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
- * (or with modified versions of the above that use the same license as the above), 
- * and distribute linked combinations including the two.  You must obey the 
- * GNU General Public License in all respects for all of the code used other than 
- * the above mentioned libraries.  If you modify this file, you may extend this 
- * exception to your version of the file, but you are not obligated to do so.  
- * If you do not wish to do so, delete this exception statement from your version.
+ * the code of this program with the com.oreilly.servlet library, any library
+ * licensed under the Apache Software License, The Sun (tm) Java Advanced
+ * Imaging library (JAI), The Sun JIMI library (or with modified versions of
+ * the above that use the same license as the above), and distribute linked
+ * combinations including the two.  You must obey the GNU General Public
+ * License in all respects for all of the code used other than the above
+ * mentioned libraries.  If you modify this file, you may extend this exception
+ * to your version of the file, but you are not obligated to do so.  If you do
+ * not wish to do so, delete this exception statement from your version.
  */
+
 package mircoders.module;
 
 /**
@@ -38,39 +40,46 @@ package mircoders.module;
  * @version
  */
 
-import mir.log.LoggerWrapper;
-import mir.module.AbstractModule;
-import mir.module.ModuleExc;
-import mir.module.ModuleFailure;
-import mir.storage.StorageObject;
-import mircoders.storage.DatabaseMediafolder;
-import freemarker.template.SimpleList;
+import java.io.*;
+import java.lang.*;
+import java.util.*;
+import java.sql.*;
+import javax.servlet.*;
+import javax.servlet.http.*;
+
+import freemarker.template.*;
+
+import mir.servlet.*;
+import mir.module.*;
+import mir.entity.*;
+import mir.misc.*;
+import mir.storage.*;
+
+import mircoders.storage.*;
 
 
 public class ModuleMediafolder extends AbstractModule
 {
-  static LoggerWrapper logger = new LoggerWrapper("Module.Mediafolder");
+	static Logfile theLog;
 
-// Kontruktor
+	// Kontruktor
 
-  public ModuleMediafolder(StorageObject aStorage)
-  {
-    if (aStorage == null)
-      logger.warn("ModuleMediafolder: StorageObject was null!");
+	public ModuleMediafolder(StorageObject theStorage)
+	{
+		if (theLog == null) theLog = Logfile.getInstance(MirConfig.getProp("Home") + MirConfig.getProp("Module.Mediafolder.Logfile"));
+		if (theStorage == null) theLog.printWarning("StorageObject was null!");
+		this.theStorage = theStorage;
+	}
 
-    theStorage = aStorage;
-  }
+	// Methoden
 
-// Methoden
-
-  public SimpleList getPopupData() throws ModuleExc, ModuleFailure {
-    try {
-      return ((DatabaseMediafolder)theStorage).getPopupData();
-    }
-    catch (Throwable e) {
-      throw new ModuleFailure(e);
-    }
-  }
+		public SimpleList getPopupData() throws ModuleException {
+      try {
+			  return ((DatabaseMediafolder)theStorage).getPopupData();
+      } catch (Exception e) {
+        throw new ModuleException(e.toString());
+      }
+		}
 
 
 }

@@ -1,0 +1,58 @@
+<html>
+<head>
+<title>
+${lang("topic.htmltitle")}
+</title>
+<head>
+
+<body bgcolor="#FFFFFF">
+<include "admin/head.template">
+<form action="${config.actionRoot}" method="post">
+	<input type=hidden name=module value=Topics>
+	<input type="hidden" name="id" value="${data.id}">
+	<if data.new><input type="hidden" name="do" value="insert">
+	<else><input type="hidden" name="do" value="update"></if>
+<table border="0">
+  <tr>
+    <td align="right" bgcolor="#006600"><font face="Verdana, Arial, Helvetica, sans-serif" size="-1" color="#ffffff">
+		<B>${lang("topic.title")}:</B></font></td>
+    <td>
+      <input type="text" size="40" name="title" value="${encodeHTML(data.title)}">
+    </td>
+  </tr>
+    <tr>
+      <td align="right" valign="top" bgcolor="#006600"><font color="#ffffff"><B>${lang("topic.description")}:</B></font></td>
+      <td>
+        <textarea cols="40" rows="3" name="description">${encodeHTML(data.description)}</textarea>
+      </td>
+  </tr>
+  <tr>
+    <td align="right" bgcolor="#006600"><font color="#ffffff"><B>${lang("topic.filename")}:</B></font></td>
+    <td>
+      <input type="text" size="20" name="filename" value="${encodeHTML(data.filename)}">
+    </td>
+  </tr>
+  <tr>
+    <td align="right" bgcolor="#006600"><font color="#ffffff"><B>${lang("topic.main_url")}
+      </B></font></td>
+    <td>
+      <input type="text" size="40" name="main_url" value="${encodeHTML(data.main_url)}">
+    </td>
+  </tr>
+  <tr>
+    <td align="right" bgcolor="#006600"><font color="#ffffff"><B>${lang("topic.archive_url")}:</B></font></td>
+    <td>
+      <input type="text" size="40" name="archiv_url" value="${encodeHTML(data.archiv_url)}">
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2" align="right"> <font color="#ffffff"><if new>
+      <input type="submit" name="save" value="${lang("insert")}">
+    <else>
+    <input type="submit" name="save" value="${lang("save")}">
+    </if> </font></form></font>
+    </td>
+</table>
+<include "admin/foot.template">
+</body>
+</html>

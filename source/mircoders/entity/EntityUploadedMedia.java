@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001, 2002 The Mir-coders group
+ * Copyright (C) 2001, 2002  The Mir-coders group
  *
  * This file is part of Mir.
  *
@@ -18,37 +18,42 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with  any library licensed under the Apache Software License, 
- * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
- * (or with modified versions of the above that use the same license as the above), 
- * and distribute linked combinations including the two.  You must obey the 
- * GNU General Public License in all respects for all of the code used other than 
- * the above mentioned libraries.  If you modify this file, you may extend this 
- * exception to your version of the file, but you are not obligated to do so.  
- * If you do not wish to do so, delete this exception statement from your version.
+ * the code of this program with the com.oreilly.servlet library, any library
+ * licensed under the Apache Software License, The Sun (tm) Java Advanced
+ * Imaging library (JAI), The Sun JIMI library (or with modified versions of
+ * the above that use the same license as the above), and distribute linked
+ * combinations including the two.  You must obey the GNU General Public
+ * License in all respects for all of the code used other than the above
+ * mentioned libraries.  If you modify this file, you may extend this exception
+ * to your version of the file, but you are not obligated to do so.  If you do
+ * not wish to do so, delete this exception statement from your version.
  */
+
 package mircoders.entity;
 
-import java.sql.SQLException;
-import java.util.Map;
-
-import mir.entity.Entity;
-import mir.log.LoggerWrapper;
-import mir.media.MediaHelper;
-import mir.media.MirMedia;
-import mir.misc.NumberUtils;
-import mir.storage.StorageObject;
-import mir.storage.StorageObjectFailure;
-import mircoders.storage.DatabaseUploadedMedia;
 import freemarker.template.SimpleList;
 import freemarker.template.SimpleScalar;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 
+import mir.entity.Entity;
+import mir.entity.EntityList;
+import mir.media.MediaHelper;
+import mir.media.MirMedia;
+import mir.storage.StorageObject;
+import mir.storage.StorageObjectException;
+import mir.misc.NumberUtils;
+import mircoders.storage.DatabaseUploadedMedia;
+import mircoders.storage.DatabaseContentToMedia;
+
+import java.sql.SQLException;
+import java.util.HashMap;
+
 /**
+ * Diese Klasse enthält die Daten eines MetaObjekts
  *
  * @author mh, mir-coders group
- * @version $Id: EntityUploadedMedia.java,v 1.26 2003/04/21 12:42:53 idfx Exp $
+ * @version $Id: EntityUploadedMedia.java,v 1.9.2.7 2002/12/05 08:47:06 mh Exp $
  */
 
 
@@ -57,8 +62,6 @@ public class EntityUploadedMedia extends Entity {
 
   public EntityUploadedMedia() {
     super();
-
-    logger = new LoggerWrapper("Entity.UploadedMedia");
   }
 
   public EntityUploadedMedia(StorageObject theStorage) {
@@ -66,17 +69,18 @@ public class EntityUploadedMedia extends Entity {
     setStorage(theStorage);
   }
 
-  public void update() throws StorageObjectFailure {
+  public void update() throws StorageObjectException {
     super.update();
-    try {
-      theStorageObject.executeUpdate("update content set is_produced='0' where exists(select * from content_x_media where to_content=content.id and to_media=" + getId()+")");
-    }
-    catch (SQLException e) {
-      throwStorageObjectFailure(e, "EntityAudio :: update :: failed!! ");
+    EntityList contentList = DatabaseContentToMedia.getInstance().getContent(this);
+    if (contentList!=null && contentList.size()>0) {
+      for(int i=0;i<contentList.size();i++) {
+        EntityContent contentEnt = (EntityContent)contentList.elementAt(i);
+        contentEnt.setProduced(false);
+      }
     }
   }
 
-  public void setValues(Map theStringValues) {
+  public void setValues(HashMap theStringValues) {
     if (theStringValues != null) {
       if (!theStringValues.containsKey("is_published"))
         theStringValues.put("is_published", "0");
@@ -90,13 +94,13 @@ public class EntityUploadedMedia extends Entity {
    *
    * @return mir.entity.Entity
    */
-  public Entity getMediaType() throws StorageObjectFailure {
+  public Entity getMediaType() throws StorageObjectException {
     Entity ent = null;
     try {
       ent = DatabaseUploadedMedia.getInstance().getMediaType(this);
     }
-    catch (StorageObjectFailure e) {
-      throwStorageObjectFailure(e, "get MediaType failed -- ");
+    catch (StorageObjectException e) {
+      throwStorageObjectException(e, "get MediaType failed -- ");
     }
     return ent;
   }
@@ -150,7 +154,8 @@ public class EntityUploadedMedia extends Entity {
         return "other";
     }
     catch (Exception ex) {
-      logger.warn("EntityUploadedMedia.getMediaTypeString: could not fetch data: " + ex.toString());
+      theLog.printWarning("-- getMediaTypeString: could not fetch data "
+                          + this.getClass().toString() + " " + ex.toString());
     }
     return null;
   }
@@ -165,7 +170,8 @@ public class EntityUploadedMedia extends Entity {
       return mediaHandler.getBigIconName();
     }
     catch (Exception ex) {
-      logger.warn("EntityUploadedMedia.getBigIconName: could not fetch data: " + ex.toString());
+      theLog.printWarning("-- getBigIconName: could not fetch data "
+                          + this.getClass().toString() + " " + ex.toString());
     }
     return null;
   }
@@ -179,8 +185,9 @@ public class EntityUploadedMedia extends Entity {
       mediaHandler = MediaHelper.getHandler(mediaType);
       return mediaHandler.getURL(this, mediaType);
     }
-    catch (Throwable t) {
-      logger.warn("EntityUploadedMedia.getUrl: could not fetch data: " + t.toString());
+    catch (Exception ex) {
+      theLog.printWarning("-- getUrl: could not fetch data "
+                          + this.getClass().toString() + " " + ex.toString());
     }
     return null;
   }
@@ -195,7 +202,8 @@ public class EntityUploadedMedia extends Entity {
       return mediaHandler.getDescr(mediaType);
     }
     catch (Exception ex) {
-      logger.warn("EntityUploadedMedia.getDescr: could not fetch data: " + ex.toString());
+      theLog.printWarning("-- getDescr: could not fetch data "
+                          + this.getClass().toString() + " " + ex.toString());
     }
     return null;
   }
@@ -207,7 +215,8 @@ public class EntityUploadedMedia extends Entity {
       return mediaType.getValue("mime_type");
     }
     catch (Exception ex) {
-      logger.warn("EntityUploadedMedia.getBigIconName: could not fetch data: " + ex.toString());
+      theLog.printWarning("-- getBigIconName: could not fetch data "
+                          + this.getClass().toString() + " " + ex.toString());
     }
     return null;
   }

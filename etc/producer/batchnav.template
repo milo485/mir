@@ -1,2 +1,0 @@
-${batch.first.index}<p>
-<list batch.all as b><a href="${docPrefix}${b.identifier}${docSuffix}">${b.index}</a><if b.index!=batch.last.index>&nbsp;| </if></list>

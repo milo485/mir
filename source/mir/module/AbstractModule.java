@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001, 2002 The Mir-coders group
+ * Copyright (C) 2001, 2002  The Mir-coders group
  *
  * This file is part of Mir.
  *
@@ -18,23 +18,25 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with  any library licensed under the Apache Software License, 
- * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
- * (or with modified versions of the above that use the same license as the above), 
- * and distribute linked combinations including the two.  You must obey the 
- * GNU General Public License in all respects for all of the code used other than 
- * the above mentioned libraries.  If you modify this file, you may extend this 
- * exception to your version of the file, but you are not obligated to do so.  
- * If you do not wish to do so, delete this exception statement from your version.
+ * the code of this program with the com.oreilly.servlet library, any library
+ * licensed under the Apache Software License, The Sun (tm) Java Advanced
+ * Imaging library (JAI), The Sun JIMI library (or with modified versions of
+ * the above that use the same license as the above), and distribute linked
+ * combinations including the two.  You must obey the GNU General Public
+ * License in all respects for all of the code used other than the above
+ * mentioned libraries.  If you modify this file, you may extend this exception
+ * to your version of the file, but you are not obligated to do so.  If you do
+ * not wish to do so, delete this exception statement from your version.
  */
+
 package  mir.module;
 
-import java.util.Map;
-
-import mir.entity.Entity;
-import mir.entity.EntityList;
-import mir.storage.StorageObject;
-import freemarker.template.SimpleHash;
+import  java.util.*;
+import  java.sql.*;
+import  freemarker.template.*;
+import  mir.storage.*;
+import  mir.misc.*;
+import  mir.entity.*;
 
 
 /**
@@ -43,213 +45,179 @@ import freemarker.template.SimpleHash;
  * on Database and Entity classes. The modules are used by ServletModules.
  * Future possibility could be access via Applications.
  *
- * Abstrakte Klasse, von denen die Modules die Basisfunktionalit?t erben.
- * Die Moduleschicht dient dazu, Funktionalitaeten zur Verf?gung zu stellen,
+ * Abstrakte Klasse, von denen die Modules die Basisfunktionalität erben.
+ * Die Moduleschicht dient dazu, Funktionalitaeten zur Verfügung zu stellen,
  * die von mehreren ServletModulen verwendet werden.
  *
  */
 
 public class AbstractModule {
-  protected StorageObject theStorage;
+	protected StorageObject theStorage;
 
   public void setStorage(StorageObject storage) {
-    this.theStorage = storage;
-  }
+	 this.theStorage = storage;
+	}
+
+	/**
+	 * Liefert das Standard-StorageObject zurück, mit dem das Module assoziiert ist.
+	 * @return Standard-StorageObject
+	 */
+	public StorageObject getStorageObject () {
+	 return theStorage;
+	}
+
+	/**
+	 *   Holt eine Entity anhand der Id via StorageObject
+	 *   @param String der Entity
+	 *   @return Entity
+	 */
+	public Entity getById (String id) throws ModuleException {
+		try {
+			if (theStorage == null)
+				throw  new ModuleException("No StorageObject set!");
+			Entity entity = (Entity)theStorage.selectById(id);
+			if (entity == null)
+				 throw new ModuleException("No object for id = " + id);
+			else return entity;
+			}
+		catch (StorageObjectException e){
+			throw new ModuleException(e.toString());
+		}
+	}
 
   /**
-   * Liefert das Standard-StorageObject zur?ck, mit dem das Module assoziiert ist.
-   * @return Standard-StorageObject
-   */
-  public StorageObject getStorageObject () {
-    return theStorage;
-  }
+	 *   Holt eine EntityListe anhand des WhereClause via StorageObject
+	 *   @param String whereclause
+	 *   @param offset - ab welchem Datensatz die gematchten Entities zurueckgeliefert werden
+	 *   @return EntityList Liste der gematchten Datensätze
+	 */
+	public EntityList getByWhereClause (String whereClause, int offset) throws ModuleException {
+		try {
+			if (theStorage == null)
+				throw  new ModuleException("Kein StorageObject gesetzt");
+			return theStorage.selectByWhereClause(whereClause, offset);
+		}
+		catch (StorageObjectException e){
+			throw new ModuleException(e.toString());
+		}
+	}
 
-  /**
-   *   Holt eine Entity anhand der Id via StorageObject
-   *   @param String der Entity
-   *   @return Entity
-   */
-  public Entity getById (String id) throws ModuleExc, ModuleFailure {
+	/**
+	 *   Holt eine EntityListe anhand des WhereClause aus dem StorageObject
+	 *   @param String where WhereClause
+	 *   @param String order Sortierreihenfolge
+	 *   @param offset - ab welchem Datensatz die gematchten Entities zurueckgeliefert werden
+	 *   @return EntityList Liste der gematchten Datensätze
+	 */
+	public EntityList getByWhereClause (String where, String order, int offset) throws ModuleException {
+		try {
+			if (theStorage==null) throw new ModuleException("Kein StorageObject gesetzt");
+			return theStorage.selectByWhereClause(where, order, offset);
+		}
+		catch (StorageObjectException e){
+			throw new ModuleException(e.toString());
+		}
+	}
+	/**
+	 *   Executes a where clause on the StorageObject with order criteria
+	 *   fetching from offset the number of limit objects
+	 *
+	 *   @param String where
+	 *   @param String order
+	 *   @param int offset
+	 *   @param int limit
+	 *   @return EntityList
+	 */
+
+	public EntityList getByWhereClause(String where, String order, int offset, int limit) throws ModuleException
+	{
+		try {
+			if (theStorage==null) throw new ModuleException("StorageObject not set!");
+			return theStorage.selectByWhereClause(where, order, offset, limit);
+		}
+		catch (StorageObjectException e){
+			throw new ModuleException(e.toString());
+		}
+	}
+
+	/**
+	 *   Holt eine EntityListe anhand des Wertes aValue von Feld aField aus dem StorageObject
+	 *   @param String aField - Feldname im StorageObject
+	 *   @param String aValue - Wert in Feld im StorageObject
+	 *   @param offset - ab welchem Datensatz die gematchten Entities zurueckgeliefert werden
+	 *   @return EntityList Liste der gematchten Datensätze
+	 */
+	public EntityList getByFieldValue (String aField, String aValue, int offset) throws ModuleException {
+		String whereClause;
+		whereClause = aField + " like '%" + aValue + "%'";
+		return getByWhereClause(whereClause, offset);
+	}
+
+	/**
+	 * Standardfunktion, um einen Datensatz via StorageObject einzufügen
+	 * @param theValues Hash mit Spalte/Wert-Paaren
+	 * @return Id des eingefügten Objekts
+	 * @exception ModuleException
+	 */
+	public String add (HashMap theValues) throws ModuleException {
+		try {
+			Entity theEntity = (Entity)theStorage.getEntityClass().newInstance();
+			theEntity.setStorage(theStorage);
+			theEntity.setValues(theValues);
+			return theEntity.insert();
+		} catch (Exception e) {
+			throw new ModuleException(e.toString());
+		}
+	}
+
+	/**
+	 * Standardfunktion, um einen Datensatz via StorageObject zu aktualisieren
+	 * @param theValues Hash mit Spalte/Wert-Paaren
+	 * @return Id des eingefügten Objekts
+	 * @exception ModuleException
+	 */
+	public String set (HashMap theValues) throws ModuleException {
+		try {
+			Entity theEntity = theStorage.selectById((String)theValues.get("id"));
+			if (theEntity == null)
+				 throw new ModuleException("Kein Objekt mit id in Datenbank id: " + theValues.get("id"));
+		 theEntity.setValues(theValues);
+		 theEntity.update();
+		 return theEntity.getId();
+		}
+		catch (StorageObjectException e){
+			e.printStackTrace(System.err);
+			throw new ModuleException(e.toString());
+		}
+ }
+
+	/**
+	 * Löscht einen Datensatz anhand seiner Id
+	 * @param idParam
+	 * @exception ModuleException
+	 */
+	public void deleteById (String idParam) throws ModuleException {
     try {
-      if (theStorage == null)
-        throw  new ModuleExc("AbstractModule.getById: No StorageObject set!");
-      Entity entity = (Entity)theStorage.selectById(id);
-
-      if (entity == null)
-        throw new ModuleExc("AbstractModule.getById: No object for id = " + id);
-      else
-        return entity;
-    }
-    catch (Throwable e) {
-      throw new ModuleFailure(e);
+	    theStorage.delete(idParam);
+    } catch (StorageObjectException e){
+      throw new ModuleException(e.toString());
     }
   }
 
-  /**
-   *   Holt eine EntityListe anhand des WhereClause via StorageObject
-   *   @param String whereclause
-   *   @param offset - ab welchem Datensatz die gematchten Entities zurueckgeliefert werden
-   *   @return EntityList Liste der gematchten Datens?tze
-   */
-  public EntityList getByWhereClause (String whereClause, int offset) throws ModuleExc, ModuleFailure {
-    try {
-      if (theStorage == null)
-        throw  new ModuleExc("AbstractModule.getByWhereClause: No StorageObject set!");
-
-      return theStorage.selectByWhereClause(whereClause, offset);
-    }
-    catch (Throwable e) {
-      throw new ModuleFailure(e);
-    }
-  }
-
-  /**
-   *   Holt eine EntityListe anhand des WhereClause aus dem StorageObject
-   *   @param String where WhereClause
-   *   @param String order Sortierreihenfolge
-   *   @param offset - ab welchem Datensatz die gematchten Entities zurueckgeliefert werden
-   *   @return EntityList Liste der gematchten Datens?tze
-   */
-  public EntityList getByWhereClause (String where, String order, int offset) throws ModuleExc, ModuleFailure {
-    try {
-      if (theStorage==null)
-        throw new ModuleExc("AbstractModule.getByWhereClause: No StorageObject set!");
-
-      return theStorage.selectByWhereClause(where, order, offset);
-    }
-    catch (Throwable e) {
-      throw new ModuleFailure(e);
-    }
-  }
-  /**
-   *   Executes a where clause on the StorageObject with order criteria
-   *   fetching from offset the number of limit objects
-   *
-   *   @param String where
-   *   @param String order
-   *   @param int offset
-   *   @param int limit
-   *   @return EntityList
-   */
-
-  public EntityList getByWhereClause(String where, String order, int offset, int limit) throws ModuleExc, ModuleFailure   {
-    try {
-      if (theStorage==null)
-        throw new ModuleExc("AbstractModule.getByWhereClause: StorageObject not set!");
-
-      return theStorage.selectByWhereClause(where, order, offset, limit);
-    }
-    catch (Throwable e) {
-      throw new ModuleFailure(e);
-    }
-  }
-
-  /**
-   *   Holt eine EntityListe anhand des Wertes aValue von Feld aField aus dem StorageObject
-   *   @param String aField - Feldname im StorageObject
-   *   @param String aValue - Wert in Feld im StorageObject
-   *   @param offset - ab welchem Datensatz die gematchten Entities zurueckgeliefert werden
-   *   @return EntityList Liste der gematchten Datens?tze
-   */
-  public EntityList getByFieldValue (String aField, String aValue, int offset) throws ModuleExc, ModuleFailure {
-    String whereClause;
-    whereClause = aField + " like '%" + aValue + "%'";
-    return getByWhereClause(whereClause, offset);
-  }
-
-  /**
-   *    * Standardfunktion, um einen Datensatz via StorageObject einzuf?gen
-   * @param theValues Hash mit Spalte/Wert-Paaren
-   * @return Id des eingef?gten Objekts
-   * @exception ModuleExc
-   * @exception ModuleFailure
-   */
-  public String add (Map theValues) throws ModuleExc, ModuleFailure {
-    try {
-      Entity theEntity = (Entity)theStorage.getEntityClass().newInstance();
-      theEntity.setStorage(theStorage);
-      theEntity.setValues(theValues);
-      return theEntity.insert();
-    }
-    catch (Throwable e) {
-      throw new ModuleFailure(e);
-    }
-  }
-
-  /**
-   * This function creates an Entity without yet storing it in the database
-   *
-   * @param theValues
-   * @return
-   * @throws ModuleExc
-   * @throws ModuleFailure
-   */
-  public Entity createNew() throws ModuleExc, ModuleFailure {
-    try {
-      Entity result = (Entity)theStorage.getEntityClass().newInstance();
-      result.setStorage(theStorage);
-
-      return result;
-    }
-    catch (Throwable e) {
-      throw new ModuleFailure(e);
-    }
-  }
-
-  /**
-   * Standardfunktion, um einen Datensatz via StorageObject zu aktualisieren
-   * @param theValues Hash mit Spalte/Wert-Paaren
-   * @return Id des eingef?gten Objekts
-   * @exception ModuleExc
-   * @exception ModuleFailure
-   */
-  public String set (Map theValues) throws ModuleExc, ModuleFailure {
-    try {
-      Entity theEntity = theStorage.selectById((String)theValues.get("id"));
-      if (theEntity == null)
-        throw new ModuleExc("No object found with id " + theValues.get("id"));
-      theEntity.setValues(theValues);
-      theEntity.update();
-      return theEntity.getId();
-    }
-    catch (Throwable e) {
-      throw new ModuleFailure(e);
-    }
-  }
-
-  /**
-   * Deletes a record using an id
-   * @param idParam
-   * @exception ModuleExc
-   * @exception ModuleFailure
-   */
-  public void deleteById (String idParam) throws ModuleExc, ModuleFailure {
-    try {
-      theStorage.delete(idParam);
-    }
-    catch (Throwable e) {
-      throw new ModuleFailure(e);
-    }
-  }
-
-  /**
-   * Liefert den Lookuptable aller Objekte des StorageObjects
-   * @return freemarker.template.SimpleHash
-   */
-  public SimpleHash getHashData() {
-    return theStorage.getHashData();
-  }
+	/**
+	 * Liefert den Lookuptable aller Objekte des StorageObjects
+	 * @return freemarker.template.SimpleHash
+	 */
+	public SimpleHash getHashData() {
+		return theStorage.getHashData();
+	}
 
   /**
    * returns the number of rows
    */
-  public int getSize(String where) throws ModuleExc, ModuleFailure {
-    try {
-      return theStorage.getSize(where);
-    }
-    catch (Throwable e) {
-      throw new ModuleFailure(e);
-    }
+  public int getSize(String where)
+    throws SQLException,StorageObjectException {
+    return theStorage.getSize(where);
   }
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001, 2002 The Mir-coders group
+ * Copyright (C) 2001, 2002  The Mir-coders group
  *
  * This file is part of Mir.
  *
@@ -18,21 +18,26 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with  any library licensed under the Apache Software License, 
- * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
- * (or with modified versions of the above that use the same license as the above), 
- * and distribute linked combinations including the two.  You must obey the 
- * GNU General Public License in all respects for all of the code used other than 
- * the above mentioned libraries.  If you modify this file, you may extend this 
- * exception to your version of the file, but you are not obligated to do so.  
- * If you do not wish to do so, delete this exception statement from your version.
+ * the code of this program with the com.oreilly.servlet library, any library
+ * licensed under the Apache Software License, The Sun (tm) Java Advanced
+ * Imaging library (JAI), The Sun JIMI library (or with modified versions of
+ * the above that use the same license as the above), and distribute linked
+ * combinations including the two.  You must obey the GNU General Public
+ * License in all respects for all of the code used other than the above
+ * mentioned libraries.  If you modify this file, you may extend this exception
+ * to your version of the file, but you are not obligated to do so.  If you do
+ * not wish to do so, delete this exception statement from your version.
  */
-package mir.storage;
+/*
+ * Implementiert DatabaseAdaptor Interface für Sybase.
+ */
 
-import java.util.Properties;
 
-import mir.config.MirPropertiesConfiguration;
-import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
+
+package  mir.storage;
+
+import java.util.*;
+import  mir.misc.*;
 
 
 /**
@@ -41,65 +46,71 @@ import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
  * @author <RK>
  * @version 15.05.2000
  */
-public final class DatabaseAdaptorSybase implements DatabaseAdaptor {
-  /**
-   * Liefert den Namen der Adaptorklasse <code>Adaptor.Sybase.Driver</code>
-   * f?r Sybase zur?ck.
-   * @return Adaptorklasse als String
-   */
-  public String getDriver() throws PropertiesConfigExc {
-    return MirPropertiesConfiguration.instance().getString("Adaptor.Sybase.Driver");
-  }
+public final class DatabaseAdaptorSybase
+		implements DatabaseAdaptor {
 
-  /**
-   * Liefert die URL f?r JDBC zur?ck, in den die Parameter user, pass und host
-   * eingef?gt werden. Die URL wird aus der Konfiguration geholt.
-   *
-   * @param user user als String
-   * @param pass passwort als String
-   * @param host host als String
-   * @return url als String
-   */
-  public String getURL(String user, String pass, String host)
-    throws PropertiesConfigExc {
-    return MirPropertiesConfiguration.instance().getString("Adaptor.Sybase.URL");
+	/**
+	 * Liefert den Namen der Adaptorklasse <code>Adaptor.Sybase.Driver</code>
+	 * für Sybase zurück.
+	 * @return Adaptorklasse als String
+	 */
+    public String getDriver() {
+	    return MirConfig.getProp("Adaptor.Sybase.Driver");
+    }
 
-    /** @todo  hier muesste bessererweise $HOST durch HOST ersetzt, etc. werden */
-  }
+	/**
+	 * Liefert die URL für JDBC zurück, in den die Parameter user, pass und host
+	 * eingefügt werden. Die URL wird aus der Konfiguration geholt.
+	 *
+	 * @param user user als String
+	 * @param pass passwort als String
+	 * @param host host als String
+	 * @return url als String
+	 */
+    public String getURL(String user, String pass, String host) {
+	    return MirConfig.getProp("Adaptor.Sybase.URL");
+		/** @todo  hier muesste bessererweise $HOST durch HOST ersetzt, etc. werden */
+    }
 
-  /**
-   * Gibt zur?ck, ob das SQL der Datenbank den <code>limit</code>-Befehl beherrscht.
-   * @return false
-   */
-  public boolean hasLimit() {
-    return false;
-  }
+	/**
+	 * Gibt zurück, ob das SQL der Datenbank den <code>limit</code>-Befehl beherrscht.
+	 * @return false
+	 */
+	public boolean hasLimit () {
+		return  false;
+	}
 
-  /**
-   * Liefert zur?ck, ob der <code>limit</code>-Befehl erst start und dann offset
-   * hat (true), oder umgekehrt. Nur Relevant, wenn hasLimit true zur?ckliefert.
-   *
-   * @return false
-   */
-  public boolean reverseLimit() {
-    return false;
-  }
+	/**
+	 * Liefert zurück, ob der <code>limit</code>-Befehl erst start und dann offset
+	 * hat (true), oder umgekehrt. Nur Relevant, wenn hasLimit true zurückliefert.
+	 *
+	 * @return false
+	 */
+    public boolean reverseLimit() {
+      return false;
+    }
 
-  /**
-   * Liefert ein Properties-Objekt zurueck mit user und password.
-   * @param user
-   * @param password
-   * @return Properties
-   */
-  public Properties getProperties(String user, String password) {
-    Properties props = new Properties();
-    props.put("user", user);
-    props.put("password", password);
+	/**
+	 * Liefert ein Properties-Objekt zurueck mit user und password.
+	 * @param user
+	 * @param password
+	 * @return Properties
+	 */
+    public Properties getProperties(String user, String password) {
+      Properties props = new Properties();
+      props.put("user", user);
+      props.put("password", password);
+      return props;
+    }
 
-    return props;
-  }
 
-  public String getLastInsertSQL(Database theDB) {
-    return "select currval('" + theDB.getCoreTable() + "_id_seq')";
-  }
+
+
+
+
+
+
+    public String getLastInsertSQL(Database theDB) {
+           return "select currval('"+theDB.getCoreTable()+"_id_seq')";
+    }
 }

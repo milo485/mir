@@ -1,0 +1,42 @@
+<html>
+<head>
+<title>
+${lang("breaking.htmltitle")}
+</title>
+<head>
+
+<body bgcolor="#FFFFFF">
+<include "admin/head.template">
+<form action="${config.actionRoot}" method="post">
+	<input type="hidden" name="module" value="Breaking">
+	<input type="hidden" name="id" value="${data.id}">
+	<if data.new><input type="hidden" name="do" value="insert">
+	<else><input type="hidden" name="do" value="update"></if>
+<table border="0">
+  <tr>
+    <td align="right" bgcolor="#006600"><font color="#ffffff" face="Verdana, Arial, Helvetica, sans-serif" size="-1">
+	<B>${lang("breaking.date")}:</B></font></td>
+    <td>
+      ${data.webdb_create_formatted}
+    </td>
+  </tr>
+
+  <tr> 
+    <td align="right" bgcolor="#006600"><font color="#ffffff" face="Verdana, Arial, Helvetica, sans-serif" size="-1">
+	<B>${lang("breaking.text")}:</B> ${lang("breaking.textinfo")}</font></td>
+    <td>
+	 <textarea cols="50" rows="3" name="text" wrap=virtual>${encodeHTML(data.text)}</textarea>
+    </td>
+  </tr>
+
+  <tr>
+    <td colspan="2" align="right"> <font color="#ffffff"><if data.new>
+      <input type="submit" name="save" value="${lang("insert")}">
+    <else>
+    <input type="submit" name="save" value="${lang("save")}">
+    </if> </font></form></font>
+    </td>
+</table>
+<include "admin/foot.template">
+</body>
+</html>

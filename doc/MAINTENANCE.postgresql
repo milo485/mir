@@ -1,25 +1,20 @@
+To dump mir database <dbname>:
+	pg_dumplo -a -d <dbname> -s /dumpdir/dir
+	pg_dump -c -D -f /dumpdir/<dbname>.sql <dbname>
+this generates a dir with all blobs and a sql-file with all data.
 
-DUMP & RESTORE
-
-To dump the database use pg_dump
-
-  pg_dump -Ft -b -u -f dump.tar [name_of_database]
-
-To restore do the following
-
-  pg_restore -d [name_of_database] -U [dbuser] -Ft dump.tar 
-
-
-VACUUM and VACUUM ANALYZE
+To restore the database:
+	psql <dbname> < <dbname>.sql
+	pgdump_lo -i -d <dbname> -s /dumpdir/dir
 
 Every once in a while (or make a script) postgresql database should
 be "cleaned". See postgresql docs for commands VACUUM and VACUUM ANALYZE
 
-MISC
+Every once in a while (or make a script) postgresql database should
+be "cleaned". See postgresql docs for commands VACUUM and VACUUM ANALYZE
 
 We also have misc. perl scripts to merge Large Objects from other DB's.
 these can be used as a basis to write your own custom scripts.
-
 
 USER MANAGMENT IN POSTGRESQL
 

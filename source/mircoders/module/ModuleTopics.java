@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001, 2002 The Mir-coders group
+ * Copyright (C) 2001, 2002  The Mir-coders group
  *
  * This file is part of Mir.
  *
@@ -18,28 +18,35 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with  any library licensed under the Apache Software License,
- * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library
- * (or with modified versions of the above that use the same license as the above),
- * and distribute linked combinations including the two.  You must obey the
- * GNU General Public License in all respects for all of the code used other than
- * the above mentioned libraries.  If you modify this file, you may extend this
- * exception to your version of the file, but you are not obligated to do so.
- * If you do not wish to do so, delete this exception statement from your version.
+ * the code of this program with the com.oreilly.servlet library, any library
+ * licensed under the Apache Software License, The Sun (tm) Java Advanced
+ * Imaging library (JAI), The Sun JIMI library (or with modified versions of
+ * the above that use the same license as the above), and distribute linked
+ * combinations including the two.  You must obey the GNU General Public
+ * License in all respects for all of the code used other than the above
+ * mentioned libraries.  If you modify this file, you may extend this exception
+ * to your version of the file, but you are not obligated to do so.  If you do
+ * not wish to do so, delete this exception statement from your version.
  */
+
 package mircoders.module;
 
-import java.util.Map;
-
+import freemarker.template.SimpleList;
 import mir.entity.Entity;
 import mir.entity.EntityList;
-import mir.log.LoggerWrapper;
+import mir.misc.Logfile;
+import mir.misc.MirConfig;
 import mir.module.AbstractModule;
-import mir.module.ModuleExc;
-import mir.module.ModuleFailure;
+import mir.module.ModuleException;
 import mir.storage.StorageObject;
+import mir.storage.StorageObjectException;
+import mircoders.entity.EntityContent;
+import mircoders.entity.EntityTopics;
+import mircoders.storage.DatabaseContent;
+import mircoders.storage.DatabaseContentToTopics;
 import mircoders.storage.DatabaseTopics;
-import freemarker.template.SimpleList;
+
+import java.util.HashMap;
 
 /*
  *  ThemenModule -
@@ -50,20 +57,23 @@ import freemarker.template.SimpleList;
 
 public class ModuleTopics extends AbstractModule {
 
-  static LoggerWrapper logger = new LoggerWrapper("Module.Topics");
+  static Logfile theLog;
 
   public ModuleTopics(StorageObject theStorage) {
     this.theStorage = theStorage;
+    if (theLog == null)
+      theLog = Logfile.getInstance(MirConfig.getProp("Home") + MirConfig.getProp("Module.Themen.Logfile"));
   }
 
-  public SimpleList getTopicsAsSimpleList() throws ModuleExc, ModuleFailure {
+  public SimpleList getTopicsAsSimpleList() throws ModuleException {
     try {
       return ((DatabaseTopics) theStorage).getPopupData();
     }
-    catch (Throwable e) {
-      throw new ModuleFailure(e);
+    catch (StorageObjectException e) {
+      throw new ModuleException(e.toString());
     }
   }
+
 
   /**
    *  Method getTopicList
@@ -71,37 +81,45 @@ public class ModuleTopics extends AbstractModule {
    *  @return SimpleList of all Topics sorted by title
    *
    */
-  public EntityList getTopicsList() throws ModuleExc, ModuleFailure {
+  public EntityList getTopicsList() {
+    EntityList returnList = null;
     try {
-      return getByWhereClause("", "title", -1);
+      returnList = getByWhereClause("", "title", -1);
     }
-    catch (Throwable e) {
-      logger.error("ModuleTopics.getTopicsList: topics could not be fetched: " + e.getMessage());
-
-      throw new ModuleFailure("ModuleTopics.getTopicsList: topics could not be fetched: " + e.getMessage(), e);
+    catch (Exception e) {
+      theLog.printWarning("--getTopicsList: topics could not be fetched");
     }
+    return returnList;
   }
 
   /**
    * Overrides the AbstractModule.set(),
    * All dependent ContentEntities are set unproduced.
    * @param theValues Hash mit Spalte/Wert-Paaren
-   * @return Id des eingef?gten Objekts
+   * @return Id des eingefügten Objekts
    * @exception ModuleException
    */
-  public String set(Map theValues) throws ModuleExc, ModuleFailure {
+  public String set(HashMap theValues) throws ModuleException {
     try {
       Entity theEntity = theStorage.selectById((String) theValues.get("id"));
       if (theEntity == null) {
-        throw new ModuleExc("No topic with id  " + theValues.get("id") + " found");
+        throw new ModuleException("Kein Objekt mit id in Datenbank id: " + theValues.get("id"));
       }
       theEntity.setValues(theValues);
+      DatabaseContentToTopics db = DatabaseContentToTopics.getInstance();
+      DatabaseContent dbc = DatabaseContent.getInstance();
+      EntityList contentList = db.getContent((EntityTopics) theEntity);
+      if (contentList!=null) {
+        for (int i = 0; i < contentList.size(); i++) {
+          dbc.setUnproduced("id=" + ((EntityContent) contentList.elementAt(i)).getId());
+        }
+      }
       theEntity.update();
-
       return theEntity.getId();
     }
-    catch (Throwable e) {
-      throw new ModuleFailure(e);
+    catch (StorageObjectException e) {
+      e.printStackTrace(System.err);
+      throw new ModuleException(e.toString());
     }
   }
 

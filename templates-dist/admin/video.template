@@ -1,0 +1,153 @@
+<html>
+<head>
+<title>
+${lang("video.htmltitle")}
+</title>
+</head>
+<body bgcolor="#FFFFFF">
+<include "admin/head.template">
+
+<if data.new>
+<form action="${config.actionRoot}?module=Video&do=add" method="post">
+	<table border="0">
+	<tr>
+	<td align="right" bgcolor="#006600">
+	<font color="#ffffff" face="Verdana, Arial, Helvetica, sans-serif" size="-1">
+	<b>${lang("open.posting.nr_of_media")}</b> <br>
+	</font>
+	</td>
+	<td>
+	<input type="text" size="3" name="medianum" value="${medianum}">&nbsp;<input type="submit" value="${lang("open.posting.nr_of_media.submit")}">
+	</td>
+	</tr>
+	</table> 
+</form>
+</if>
+<form enctype="multipart/form-data" method="post" action="${config.actionRoot}?module=Video&do=<if data.new>insert<else>update</if>&id=${data.id}">
+
+	<input type="hidden" name="where" value="${encodeHTML(data.where)}">
+	<input type="hidden" name="offset" value="${encodeHTML(data.offset)}">
+	<input type="hidden" name="order" value="${encodeHTML(data.order)}">
+	<input type="hidden" name="id" value="${data.id}">
+
+	<table border="0">
+	<if !data.new>
+	<tr>
+    <td align="right" bgcolor="#006600">
+		<font color="#ffffff" face="Verdana, Arial, Helvetica, sans-serif" size="-1">
+			<a href="${config.actionRoot}?module=Video&do=getMedia&id=${data.id}">
+	  	  	<img src="${config.docRoot}/img/${data.big_icon}" border=0></a></font></td>
+    <td valign="bottom"><font color="Silver" face="Verdana, Arial, Helvetica, sans-serif" size=1>
+	  	${lang("media.created")}: ${data.webdb_create}
+        <if data.webdb_lastchange>/ ${lang("media.changed")} ${data.webdb_lastchange}</if><br>
+	  	<if data.is_published=="1">${lang("media.published")}: ${data.publish_date} / ${data.publish_server}${data.publish_path}<br></if>
+	  	${lang("media.format")}: ${data.mimetype} / ${encodeHTML(data.media_descr)} / ${data.human_readable_size}<br>
+	  	${lang("media.rights")}: <b>${data.rightsHashdata[to_rights]["name"]}</b><br>
+	</td>
+  	</tr>
+	</if>
+
+	<tr>
+    <td align="right" bgcolor="#006600"><font color="#ffffff" face="Verdana, Arial, Helvetica, sans-serif" size="-1">
+	 <B>${lang("media.mediafolder")}:</B></font></td>
+    <td>
+		<select name="to_media_folder">
+ 		<list extra.mediafolderPopupData as m>
+		<option value="${encodeHTML(m.key)}" <if m.key == data.to_media_folder>selected</if>>${encodeHTML(m.value)}</option>
+	  	</list>
+	    </select>
+  	</td>
+	</tr>
+
+	<tr>
+    <td align="right" bgcolor="#006600"><font color="#ffffff" face="Verdana, Arial, Helvetica, sans-serif" size="-1">
+	 <B>${lang("media.description")}:</B></font></td>
+    <td><input type="text" size="40" maxlength="255" name="description" value="${encodeHTML(data.description)}"></td>
+  	</tr>
+
+	<tr>
+    <td align="right" bgcolor="#006600"><font color="#ffffff" face="Verdana, Arial, Helvetica, sans-serif" size="-1">
+	 <B>${lang("media.date")}:</B></font></td>
+    <td><input type="text" size="8" maxlength="8" name="date" value="${data.date}">
+		<input type="text" size="20" maxlength="40" name="year" value="${data.year}"></td>
+  	</tr>
+
+	<tr>
+    <td align="right" bgcolor="#006600"><font color="#ffffff" face="Verdana, Arial, Helvetica, sans-serif" size="-1">
+	 <B>${lang("media.location")}:</B></font></td>
+    <td><input type="text" size="40" maxlength="80" name="place" value="${encodeHTML(data.place)}"></td>
+  	</tr>
+
+	<tr>
+    <td align="right" bgcolor="#006600"><font color="#ffffff" face="Verdana, Arial, Helvetica, sans-serif" size="-1">
+	 <B>${lang("media.creator")}:</B></font></td>
+    <td>
+		<input type="text" size="40" maxlength="80" name="creator" value="${encodeHTML(data.creator)}">
+  	</tr>
+
+	<tr>
+    <td align="right" bgcolor="#006600"><font color="#ffffff" face="Verdana, Arial, Helvetica, sans-serif" size="-1">
+	 <B>${lang("media.keywords")}:</B></font></td>
+    <td><textarea cols="40" rows="2" name="keywords">${encodeHTML(data.keywords)}</textarea></td>
+  	</tr>
+
+	<tr>
+    <td align="right" bgcolor="#006600"><font color="#ffffff" face="Verdana, Arial, Helvetica, sans-serif" size="-1">
+	 <B>${lang("media.comment")}:</B></font></td>
+    <td><textarea cols="40" rows="2" name="comment">${data.comment}</textarea></td>
+  	</tr>
+
+	<tr>
+    <td align="right" bgcolor="#006600"><font color="#ffffff" face="Verdana, Arial, Helvetica, sans-serif" size="-1">
+	 <B>${lang("media.source")}:</B></font></td>
+    <td><input type="text" size="40" maxlength="80" name="source" value="${encodeHTML(data.source)}"></td>
+  	</tr>
+	<tr>
+    <td colspan="2" align="right"> <font color="black">
+	<if data.new>
+	<tr>
+	<td>
+		${lang("media.is_published")} <input type="checkbox" name="is_published" value="1"<if data.is_published!="0" && data.is_published!=""> checked</if>>
+	</td>
+	</tr>
+	
+	<list data.mediafields as m>
+		<tr>
+		<td align="right" bgcolor="#006600"><font color="#ffffff" face="Verdana, Arial, Helvetica, sans-serif" size="-1">
+
+			<B>${lang("media.title")}:<B>
+		</font> </td>
+		<td>
+			<input type="text" name="media_title${m}" size="40" maxlength="80" value="">
+		</td>
+		</tr>
+		<tr>
+		<td bgcolor="#006600"></td>
+		<td>
+				<INPUT TYPE="file" NAME="mpfile${m}"><br>
+		</td>	
+		</tr>	
+	</list>
+	<else>
+		<tr>
+		<td align="right" bgcolor="#006600"><font color="#ffffff" face="Verdana, Arial, Helvetica, sans-serif" size="-1">
+
+			<B>${lang("media.title")}:<B>
+		</font> </td>
+		<td>
+			<input type="text" name="title" size="40" maxlength="80" value="${encodeHTML(data.title)}">
+		</td>
+		</tr>
+	</if>
+    <td colspan="2" align="right"> <font color="black">
+	<if data.new>
+      <input type="submit" name="save" value="${lang("insert")}">
+    <else>
+	${lang("media.is_published")} <input type="checkbox" name="is_published" value="1"<if data.is_published!="0" && data.is_published!=""> checked</if>>
+    <input type="submit" name="save" value="${lang("save")}">
+    </if> </font></form></font>
+    </td>
+</table>
+<include "admin/foot.template">
+</body>
+</html>

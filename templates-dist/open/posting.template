@@ -1,0 +1,229 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//DE">
+<html>
+<head>
+	<title>${lang("open.posting.htmltitle")}</title>
+	<meta name="description" content="${lang("open.posting.meta.description")}">
+	<meta name="author" content="${lang("open.posting.meta.author")}">
+	<meta name="keywords" content="${lang("open.posting.meta.keywords")}">
+	<!--<meta name="date" content="### Date ###Time">-->
+	<meta http-equiv="Content-Type" content="text/html; charset=${config.defEncoding}">
+	<meta name="robots" content="index">
+	<meta name="robots" content="follow">
+
+ 	<link rel=stylesheet type="text/css" href="${config.productionHost}/style/formate.css">
+</head>
+
+<body bgcolor="White" text="Black" link="#006600" vlink="#006600" alink="Red">
+
+
+<table width="99%" border="0" cellspacing="0" cellpadding="8" bgcolor="silver">
+	<tr>
+		<td align="left" bgcolor="#663399" colspan="3">
+			<a href="#form"><font face="Verdana, Arial, Helvetica, sans-serif" size="-2" color="white"><b>&gt;&gt; ${lang("open.posting.jump_to_form")}</b></font></a>
+		<br>
+		</td>
+	</tr>
+	<tr>
+		<td align="center" colspan="3">
+			<font size="+1" face="Verdana, Arial, Helvetica, sans-serif"><b>${lang("open.posting.title")}</b></font><br>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="3" bgcolor="white">
+
+<include "open/disclaimer.inc.de">
+<br>${data.passwd}
+<br><br>
+<a name="form"></a>
+		</td>
+	</tr>
+<form action="${config.openAction}?do=addposting" method="post">
+	<tr>
+		<td><b>${lang("open.posting.nr_of_media")}</b> <br>
+  		${lang("open.posting.nr_of_media.info")}</td>
+		<td colspan="2"><input type="text" name="medianum" value="${medianum}">&nbsp;<input type="submit" value="${lang("open.posting.nr_of_media.submit")}">
+	</tr>
+</form>
+
+
+<form enctype="multipart/form-data" action="${config.openAction}?do=insposting" method="post">
+	<tr>
+		<td bgcolor="#663399" colspan="3">
+			<center><font size="+2" face="Helvetica, Arial,sans-serif" color="white"><b>${lang("open.posting.form.title")}</b></font></center>
+		</td>
+	</tr>
+        <tr>
+		<td>Passwort:</td>
+		<td><input type="text" name="passwd" size="10"></td>
+	<tr>
+	<tr>
+ 		<td valign="top">
+			${lang("open.posting.title")}:<br>
+			<font size="-2">${lang("open.posting.title.info")}</font>
+		</td>
+		<td colspan="2" bgcolor="#003300">
+			<input type="text" name="title" size="45" maxlength="45" value=""> <font size="-1" color="white"><br>(${lang("open.required")})</font>
+		</td>
+	</tr>
+    <tr>
+        <td valign="top">
+            ${lang("open.posting.topic")}:<br>
+	<font size="-2">${lang("open.posting.topic.info")}</font>
+        </td>
+       <td colspan="2">
+       <select name="to_topic" size="3" multiple>
+       <list extra.themenPopupData as t>
+       <option value="${t.key}" <list to_topic as to><if (t.key == to)>selected</if></list>>${t.value}</option>
+       </list>
+       </select>
+       &nbsp;&nbsp;<font size="-1">(<i>${lang("open.optional")}</i>)</font>
+       </td>
+    </tr>
+	<tr>
+ 		<td valign="top">
+			${lang("open.posting.author")}:
+		</td>
+		<td colspan="2" bgcolor="#003300">
+			<input type="text" name="creator" size="45" maxlength="45"> <font size="-1" color="white"><br>${lang("open.required")}</font>
+		</td>
+	</tr>
+	<tr>
+ 		<td valign="top">
+			${lang("open.posting.abstract")}:</b> <br>
+			<font size="-2">${lang("open.posting.abstract.info")}</font>
+		</td>
+		<td colspan="2" bgcolor="#003300">
+			<textarea name="description" rows="6" cols="55" wrap=virtual></textarea>
+			<font size="-1" color="white"><br>${lang("open.posting.abstract.constraint")}</font>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="3" bgcolor="#FFFFFF">
+		<font face="Helvetica, Arial, sans-serif" size=-1 color="#222222">
+		${lang("open.posting.contact.info")}
+		</font>
+		</td>
+	</tr>
+
+	<tr>
+ 		<td>
+			${lang("open.posting.email")}:
+		</td>
+		<td colspan="2">
+			<input type="text" name="creator_email" size="55" maxlength="80" value=""><br>
+                        		 <font size="-1">(<i>${lang("open.optional")}</i>)</font>
+		</td>
+	</tr>
+	<tr>
+ 		<td>
+			${lang("open.posting.url")}:
+		</td>
+		<td colspan="2">
+		<input type="text" name="creator_main_url" size="55" maxlength="160" value="http://"><br>
+		 <font size="-1">(<i>${lang("open.optional")}</i>)</font>
+		</td>
+	</tr>
+	<tr>
+ 		<td>
+			${lang("open.posting.address")}:
+		</td>
+		<td colspan="2">
+			<input type="text" name="creator_address" size="55" maxlength="160" value=""><br>
+                        	<font size="-1"> <i>(${lang("open.optional")})</i></font>
+		</td>
+	</tr>
+	<tr>
+ 		<td>
+			${lang("open.posting.phone")}:
+		</td>
+		<td colspan="2">
+			<input type="text" name="creator_phone" size="20" maxlength="20" value=""><br>
+			<font size="-1">(<i>${lang("open.optional")}</i>)</font>
+		</td>
+	</tr>
+
+        	<tr>
+        		<td colspan="3" bgcolor="#FFFFFF">&nbsp;</td>
+	</tr>
+
+ 	<tr>
+ 		<td>
+			${lang("open.posting.language")}:
+		</td>
+		<td colspan="2">
+			<select name="to_language">
+				<list extra.languagePopUpData as l>
+				<option value="${l.key}">${l.value}</option>
+				</list>
+			</select>
+			&nbsp;&nbsp;<font size="-1"><i>(${lang("open.optional")})</i></font>
+		</td>
+	</tr>
+	<tr>
+		<td valign="top">
+			${lang("open.posting.text")}:<br>
+			<font size="-2">${lang("open.posting.text.info")}</font>
+		</td>
+		<td bgcolor="#003300" colspan="2">
+			&nbsp; <textarea name="content_data" rows="20" cols="55" wrap="soft"></textarea>
+			<br><br>
+		</td>
+	</tr>
+
+	<tr>
+ 		<td>
+			<b>${lang("open.posting.media")}:</b>
+		</td>
+		<td colspan="2">
+			${lang("open.posting.media.info")}<br>
+			<font size="-2">${lang("open.posting.media.howto")}</font>
+		</td>
+	</tr>
+<list data.mediafields as m>
+	<tr>
+ 		<td>
+		${lang("open.posting.media.title")} ${m}:
+		</td>
+		<td colspan="2">
+			<input type="text" name="media_title${m}" size="40" maxlength="80" value=""><br>
+		</td>
+	</tr>
+	<tr>
+		<td>${lang("open.posting.media.media")} ${m}</td>
+		<td colspan="2">
+			<INPUT TYPE="file" NAME="media${m}">
+			<br><font size="-1">(<i>${lang("open.optional")}</i>)</font>
+		</td>
+	</tr>
+</list>
+
+	<tr>
+        	<td colspan="3" bgcolor="#FFFFFF">&nbsp;</td>
+	</tr>
+
+	<tr>
+		<td align="left" valign="center">
+
+            <!-- text -->
+            ${lang("open.posting.submit.info")}
+
+			<br>
+			${lang("open.posting.criteria")}<br>
+
+		</td>
+		<td bgcolor="#663399" valign="center" align="center">
+	<input type="submit" value="${lang("open.posting.submit")}">
+
+		</td>
+		<td bgcolor="#003300" valign="center" align="center">
+			<input type="reset" value="${lang("open.posting.reset")}">
+		</td>
+	</tr>
+</form>
+
+</table>
+
+
+
+</body>
+</html>

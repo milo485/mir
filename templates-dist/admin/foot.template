@@ -1,0 +1,11 @@
+<table width="100%" cellspacing="0" cellpadding="0">
+<tr>
+	<td colspan=2><hr></td>
+</tr>
+<tr>
+	<td align="left" bgcolor="#663399"><font face="Verdana, Arial, Helvetica, sans-serif" size="-1">
+	<a href="#top"><font color="white"><b>${lang("foot.top")}</b></font></a></font></td>
+	<td align="right"><font face="Verdana, Arial, Helvetica, sans-serif" size="-1">
+	<a href="mailto:${lang("imc.contact-email.address")}"><font color="#663399"><b>${lang("imc.shortname")}</b></font></a> - ${config.mirVersion}</font></td>
+</tr>
+</table>

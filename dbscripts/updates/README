@@ -1,6 +1,0 @@
-the scripts in this directory are for upgrading the databases of older
-mirs. The scripts are date-marked. To upgrade a very old database, it
-might be needed to run several scripts, chronologically. The scripts
-are constructed so that running a script twice will not have ill effects.
-However, database conversion is always risky, so making a dump before
-converting is strongly advised.

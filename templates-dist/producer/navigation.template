@@ -1,0 +1,22 @@
+                  <p> 
+                    <!-- topiclist --> 
+                    <list data.topics as t> 
+                    <br>
+                    <a href="${config.producerDocRoot}/${t.filename}.shtml"><b>${t.title}</b></a> 
+                    </list> 
+                    <!-- topiclist --> 
+                  </p>
+                  <hr noshade width="146" size="1" align="left">
+                  <p> 
+                    <a href="/cgi-bin/cvsweb/mir/">cvsweb</a><br>
+                       <a href="/mir/javadoc/">java-doc</a><br>
+                    <a href="https://prod.indymedia.nl/mantis/">bug-tracker</a><br>
+                    <a href="${config.openAction}?do=addposting">publish</a><br>
+                    <a href="/download">download</a>
+                  </p>
+                  <hr noshade width="146" size="1" align="left"> 
+                  <p class="small">
+<!-- imclist --> 
+<include "producer/cities.inc"> 
+<!-- imclist --> 
+                  </p>

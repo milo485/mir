@@ -1,71 +1,88 @@
-[Updated $Date: 2002/12/23 05:38:50 $]
+[Updated $Date: 2002/11/30 00:44:07 $]
 
-v 1.1
+General/Forever valid:
 
-* producers merged (done, max, mh)
-* bundle cleanup (done, br1)
-* new templates with css (done, thomas - max)
-* seperation of things that should be edited and things that dont change:
-    admin templates in templates, producer templates in templates-dist? 
-    (done, br1)
-* utf8 encoding (mh)
-* media refactoring (mh)
-* index.en.html ,etc..
-* more formats for media uploads --> generic media upload support (mh)
-* drop media_type table (mh)
-* yet another search format what to do about it..
-* merge StringUtil/util *Routines stuff into one
-* see for languages default --> merge it into OpenMir
-* Throwable Vs. Exception
-* merge MirConfig and config stuff in MirGlobal into one..
-* tuneup fileeditor
-* producer queue job stop/start
-* error reporting for Job queue?
-* set config paramater for default timezone.. (for use in templates)
+a) watch performance.. mimimize SQL
+b) try to use more freemarker features like transformations when possible
+instead of putting it in Java code. i.e make it more localizable.
+c) translating the templates/code-comments to english (underway, mir-coders)
 
-before 2.0
+Version 1.0: 
 
-* logging: log4j (max) --> is this not already a 1.1 item?
-* configuration (mh, max)
-* searching (john) --> is this not already a 1.1 item?
-* HTML validation, struts (br1)
-* PDF generation (john)
-* better user interface (br1)
-* split OpenPosting servlet modules or filter mechanism
-
-
-v 2.0
-
-* persistence layer: OJB or Torque (mh, idfx,...)
-* data model
-* struts (br1)
-* users / roles (max)
-* article translation
-
-
-general
-
-* mir website maintainance
-* website design / mir default templates
-* documentation
+Bugfixes/Improvements: 
+a) installation-procedure 
+- templates-directory should be splittet in two directories: "internal"- (openmir and mir templates) and "external"-templates (in upcoming v1.1, producer-templates) 
+- build.sh should be more intelligent. (done, convert to build.xml, mj)
+b) code-cleaning 
+- the variable-names for the freemarker should be better: the same name for the same thing
+c) We have to make sure that all errors are handled intelligently. e.g. if an 
+article is corrupt, do we just ignore it, etc.. (done, mh)
+d) Admin interface needs to be made aware of media handlers (done, mh, br1)
+e) insposting() in ServletModuleOpenIndy should not insert article text if any associated media upload is wrong. (done, mh) (in 1.1 to be done via transactions)
+f) documentation 
+- it lacks a documentation for creating the producer-templates
+g) new layout Mir/OpenMir (done in 1.1, indy de team??) 
+i) mission-statement and licensing 
+j) there are no memory-leaks (done)
+k) tomcat 4.x (done, confirmed, -idfx)
+l) poolman (done, idfx) (although poolman now needs to be replaced too.)
+m) re-tweak media infrastructure (done, -mh)
+    - wildcard support for content-type mappings (done)
+    - handle all image types and transparency (done)
+    - convert other media type storage/producing consistent (done, mh)
+    - handle generic media (deferred to upcoming v1.1, mh)
+        - better extension handling
+    - handle external meta links
+    - media size handling nicely (done, mh)
+    - rework creation of audio (video too?) meta-data (done, mh)
+        - make getUrl() return a SimpleList (done, mh)
+    - use added flexibility in templates (done, mh)
+n) CVS id, author stamps (done, mh)
+o) make Entity implement freemarker TemplateModel (done, rk)
+p) don't use deprecated methods. specifically the SimpleList stuff (done, mh, rk)
+q) Admin interface for some media handlers needs to be improved (done, mh)
+r) Streaming IO for media files + merge upload handling on admin/open (done, mh)
 
 
---- misc ---
-
+New Features: 
+a) Multifile-Upload in OpenMir and Mir (done, idfx) 
+b) Video and audio-upload in OpenMir and Mir: How will this files be stored, what has to be done in the producer-code? (done, mh) 
 c) Coverage: Alternative start-page for e.g. a event like genua. every article that has
-something to do with this event can be seen on this page. (nn)
+something to do with this event can be seen on this page. (nn) 
+e) It should be possible to choose between direct and indirect open posting. (09/14/2001,
+done, idfx). 
+g) "Upcoming Events"-include-file (ha) 
+h) indymedia-links (done, fh) 
+i) objectStore (underway, -rk)
+j) Templates should be made common for all languages. (done, kellan, br1, idfx)
+
+
+Version 1.1: 
+Vital:
+a) Multilanguage-Support (Step 1): Producing html-pages with navigation for every
+language. Topics and coverage-titles have to be saved in the db in every language that is
+needed. (done, max) 
+
+New Features: 
+a) Multilanguage-Support (Step 2): Separate OpenMir-servlet to publish a tranlation of an
+article. If a article has translations, only the translated versions are produced in the language
+the translated article is. 
 b) P2P-Data-Transfer/Content-Syndication: Implementing RDF/RSS-Support or a own
-indymedia-protocoll.
-drop media_type table
-d) email-article-to-a-friend-servlet
+indymedia-protocoll. 
+c) dynamically creating "internal"-templates for new languages. 
+d) email-article-to-a-friend-servlet 
 e) semidynamic create-pdf-from-article-servlet: every requested pdf should be cached (underway, john)
 f) servletapi-2.3: Filters for file upload (also in cos.jar)
 g) servletapi-2.3: use web.xml for simpler/better error handling.
-h) servletapi-2.3: set character encoding properly based on what the template says
+h) servletapi-2.3: set character encoding properly based on what the template
+says
 i) servletapi-2.3: servletapi-2.3 requires tomcat-4.x, so require it
+j) use some JMF (Java Media Framework at sun.com) features for nifty media
+tricks
 k) better transaction support in the DB/Persistance layer for more efficient
 use of DB.
-m) Editing producer-templates in the mir-servlet. (idfx)
+l) - config.porperties has to be cleaned and has to be better documentated. (half done, mj) --> config.properties is being replaced with new config system. (mh, zapata)
+m) Editing producer-templates in the mir-servlet. (idfx) 
 n) Media infrastructure stuff:
   - make a sort of Factory to get handler perhaps in EntiyMediaType
   - MediaHandler should take care of storage tablename, the entry in SQL is
@@ -74,18 +91,10 @@ n) Media infrastructure stuff:
   - use FM's TemplateMethodModel to access the MediaHandler method in templates
     instead of the crude way it's done now.
 
-*) move log to WEB-INF!!! (security problem)
-*)
+Version 2: 
+Database-Layer 
+a) Container Managed Persistance (EJB) or Castor?
+b) MySQL compatibility? 
 
---- wishlist ---
-
-* search engine: foto small thumbnails
-* comments: mark last read comments
-* comments: allow some HTML (let user choose)
-* allow HTML in abstracts
-* preview for video
-* protection against spam
-	possibility to block submissions in case of spam attacks
-	apache: 1-2 postings / IP / minute
-	close artice for comments
-	image with password
+Testing: 
+- resin (idfx) 

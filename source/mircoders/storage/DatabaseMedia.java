@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001, 2002 The Mir-coders group
+ * Copyright (C) 2001, 2002  The Mir-coders group
  *
  * This file is part of Mir.
  *
@@ -18,25 +18,29 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with  any library licensed under the Apache Software License,
- * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library
- * (or with modified versions of the above that use the same license as the above),
- * and distribute linked combinations including the two.  You must obey the
- * GNU General Public License in all respects for all of the code used other than
- * the above mentioned libraries.  If you modify this file, you may extend this
- * exception to your version of the file, but you are not obligated to do so.
- * If you do not wish to do so, delete this exception statement from your version.
+ * the code of this program with the com.oreilly.servlet library, any library
+ * licensed under the Apache Software License, The Sun (tm) Java Advanced
+ * Imaging library (JAI), The Sun JIMI library (or with modified versions of
+ * the above that use the same license as the above), and distribute linked
+ * combinations including the two.  You must obey the GNU General Public
+ * License in all respects for all of the code used other than the above
+ * mentioned libraries.  If you modify this file, you may extend this exception
+ * to your version of the file, but you are not obligated to do so.  If you do
+ * not wish to do so, delete this exception statement from your version.
  */
 
 package mircoders.storage;
 
-import mir.entity.Entity;
-import mir.entity.EntityRelation;
-import mir.log.LoggerWrapper;
-import mir.storage.Database;
-import mir.storage.StorageObject;
-import mir.storage.StorageObjectExc;
-import mir.storage.StorageObjectFailure;
+import java.lang.*;
+import java.sql.*;
+import java.io.*;
+import java.util.*;
+
+import freemarker.template.*;
+
+import mir.storage.*;
+import mir.entity.*;
+import mir.misc.*;
 
 /**
  * <b>Diese Klasse implementiert die Datenbankverbindung zur MetaObjekt-Tabelle
@@ -52,23 +56,29 @@ public class DatabaseMedia extends Database implements StorageObject{
   // the following *has* to be sychronized cause this static method
   // could get preemted and we could end up with 2 instances of DatabaseFoo..
   // see the "Singletons with needles and thread" article at JavaWorld -mh
-  public synchronized static DatabaseMedia getInstance() {
+  public synchronized static DatabaseMedia getInstance() 
+    throws StorageObjectException {
     if (instance == null) {
       instance = new DatabaseMedia();
+      instance.myselfDatabase = instance;
     }
     return instance;
   }
 
-  private DatabaseMedia() {
+  private DatabaseMedia() throws StorageObjectException
+  {
     super();
-
-    logger = new LoggerWrapper("Database.Media");
-
-    hasTimestamp = false;
-    theTable="media";
-    relationMediaType =
-        new EntityRelation("to_media_type", "id", DatabaseMediaType.getInstance(), EntityRelation.TO_ONE);
-    theEntityClass = mircoders.entity.EntityMedia.class;
+    //this.cache = new DatabaseCache(100);
+    this.hasTimestamp = false;
+    this.theTable="media";
+    relationMediaType = new EntityRelation("to_media_type", "id", 
+                        DatabaseMediaType.getInstance(), EntityRelation.TO_ONE);
+    try {
+      this.theEntityClass = Class.forName("mircoders.entity.EntityMedia");
+    }
+    catch (Exception e) {
+      throw new StorageObjectException(e.toString());
+    }
   }
 
   // methods
@@ -78,14 +88,16 @@ public class DatabaseMedia extends Database implements StorageObject{
    * returns the comments that belong to the article (via entityrelation)
    * where db-flag is_published is true
    */
-  public Entity getMediaType(Entity ent) throws StorageObjectFailure, StorageObjectExc {
+  public Entity getMediaType(Entity ent) throws StorageObjectException {
+    Entity type=null;
     try {
-      return relationMediaType.getOne(ent);
+      type = relationMediaType.getOne(ent);
     }
-    catch (Throwable e) {
-      logger.error("failed to get media_type: " + e.getMessage());
-      throw new StorageObjectFailure("DatabaseMedia.getMediaType :" + e.getMessage(),e);
+    catch (StorageObjectException e) {
+      theLog.printError("DatabaseMedia :: failed to get media_type");
+      throw new StorageObjectException("DatabaseMedia :"+e.toString());
     }
+    return type;
   }
 
 }

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<rdf:RDF
+ xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+ xmlns="http://purl.org/rss/1.0/"
+ xmlns:dc="http://purl.org/dc/elements/1.1/"
+ xmlns:syn="http://purl.org/rss/1.0/modules/syndication/"
+>
+
+<channel rdf:about="${config.productionHost}">
+<title>Indymedia-XX</title>
+<link>${config.productionHost}</link>
+<description>Highlights from Indymedia-XX, a revolutionary expirement in democratic media</description>
+<dc:publisher>IMC Features Working Group &amp;lt;features@someindymedia.org&amp;gt;</dc:publisher>
+<dc:rights>Open Content License, http://www.opencontent.org</dc:rights>
+<dc:date>${data.dc_now}</dc:date>
+<items>
+ <rdf:Seq>
+  <list data.startspecial as s> 
+    <rdf:li rdf:resource="${config.productionHost}${config.docRoot}${s.publish_path}${s.id}.shtml" />
+  </list>
+  <list data.features as i> 	
+  <rdf:li rdf:resource="${config.productionHost}${config.docRoot}${i.publish_path}${i.id}.shtml" />
+  </list>
+ </rdf:Seq>
+</items>
+</channel>
+<list data.startspecial as s> 		
+<item rdf:about="${config.productionHost}${config.docRoot}${s.publish_path}${s.id}.shtml">
+<title>${s.title}</title>
+<link>${config.productionHost}${config.docRoot}${s.publish_path}${s.id}.shtml</link>
+<description>${s.description_sentence}</description>
+<dc:date>${s.webdb_create_dc}+0200</dc:date>
+</item>
+</list>
+<list data.features as i> 		
+<item rdf:about="${config.productionHost}${config.docRoot}${i.publish_path}${i.id}.shtml">
+<title>${i.title}</title>
+<link>${config.productionHost}${config.docRoot}${i.publish_path}${i.id}.shtml</link>
+<description>${i.description_sentence}</description>
+<dc:date>${i.webdb_create_dc}+0200</dc:date>
+</item>
+</list>
+</rdf:RDF>
+
+

@@ -1,0 +1,48 @@
+<html>
+<head>
+	<title>${lang("breakinglist.htmltitle")}</title>
+</head>
+
+<body bgcolor="#FFFFFF">
+<include "admin/head.template">
+<if data.contentlist>
+<table border="0" cellpadding="2" cellspacing="1">
+  <tr bgcolor="#006600">
+    <td><font color="#FFFFFF" face="Verdana, Arial, Helvetica, sans-serif" size="-1"><b>${lang("breaking.date")}</b></font></td>
+    <td><font color="#FFFFFF" face="Verdana, Arial, Helvetica, sans-serif" size="-1"><b>${lang("breaking.text")}</b></font></td>
+    <td>&nbsp;</td>
+  </tr>
+
+  <list data.contentlist as entry>
+  <tr
+       <if grey=="1"><assign grey="0">bgcolor="#dddddd" <else><assign grey="1"> </if>
+  >
+  <td>${entry.webdb_create_formatted}&nbsp;</td>
+  <td>${entry.text}&nbsp;</td>
+  <td><font size="1">&nbsp;<a href="${config.actionRoot}?module=Breaking&do=delete&id=${entry.id}">${lang("delete")}</a>
+    | <a href="${config.actionRoot}?module=Breaking&do=edit&id=${entry.id}">${lang("edit")}</a></font></td>
+  </tr>
+  </list>
+  <tr>
+    <td colspan="3" bgcolor="#006600"><font color="#ffffff">${data.count} ${lang("records")}
+      /  ${lang("show_from_to", data.from, data.to)}</font></td>
+    <td>&nbsp;</td>
+  </tr>
+</table>
+
+      <P>
+<if data.prev>
+	<a href="${config.actionRoot}?module=Breaking&do=list&where=${encodeHTML(data.where)}&prevoffset=${encodeHTML(data.prev)}&prev=zur&uuml;ck">${lang("list.previous")}</a>&nbsp;
+</if>
+<if data.next>
+<a href="${config.actionRoot}?module=Breaking&do=list&where=${encodeHTML(data.where)}&nextoffset=${data.next}&next=weiter">${lang("list.next")}</a>
+</if>
+
+<else>
+  <P align="center">${lang("no_matches_found")}</p>
+</if>
+<include "admin/foot.template">
+</body>
+</html>
+
+
