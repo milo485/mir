@@ -50,341 +50,383 @@ import java.util.*;
  */
 public final class HTMLTemplateProcessor {
 
-    public static String templateDir;
-    private static FileTemplateCache templateCache;
-    private static Logfile theLog;
-    private static String docRoot;
-    private static String actionRoot;
+  public static String templateDir;
+  private static FileTemplateCache templateCache;
+  private static Logfile theLog;
+  private static String docRoot;
+  private static String actionRoot;
 
-    static {
-        templateDir = MirConfig.getPropWithHome("HTMLTemplateProcessor.Dir");
-        templateCache = new FileTemplateCache(templateDir);
-        templateCache.setLoadingPolicy(templateCache.LOAD_ON_DEMAND);
-        // gone in freemarker 1.7.1: templateCache.startAutoUpdate();
-        theLog = Logfile.getInstance(MirConfig.getPropWithHome("HTMLTemplateProcessor.Logfile"));
+  static {
+    templateDir = MirConfig.getPropWithHome("HTMLTemplateProcessor.Dir");
+    templateCache = new FileTemplateCache(templateDir);
+    templateCache.setLoadingPolicy(templateCache.LOAD_ON_DEMAND);
+    // gone in freemarker 1.7.1: templateCache.startAutoUpdate();
+    theLog = Logfile.getInstance(MirConfig.getPropWithHome(
+        "HTMLTemplateProcessor.Logfile"));
 
-        docRoot = MirConfig.getProp("RootUri");
-        try {
-            actionRoot = docRoot + MirConfig.getProp("Producer.ActionServlet");
-        } catch (ConfigException ce) {
-            // if  Producer.ActionServlet is not set in the conf file
-            actionRoot = docRoot + "/Mir";
+    docRoot = MirConfig.getProp("RootUri");
+    try {
+      actionRoot = docRoot + MirConfig.getProp("Producer.ActionServlet");
+    }
+    catch (ConfigException ce) {
+      // if  Producer.ActionServlet is not set in the conf file
+      actionRoot = docRoot + "/Mir";
+    }
+  }
+
+  /**
+   * empty private constructor, to avoid instantiation
+   */
+  private HTMLTemplateProcessor() {
+  }
+
+  // process-methods to merge different datastructures
+  // with freemarker templates
+
+  /**
+       * Wandelt <code>anEntity</code> in freemarker-Struktur um, mischt die Daten mit
+   * Template <code>templateFilename</code> und gibt das Ergebnis an den PrintWriter
+   * <code>out</code>
+   *
+   * @param templateFilename
+   * @param anEntity
+   * @param out
+   * @exception HTMLParseException
+   */
+
+  public static void process(String templateFilename, Entity anEntity,
+                             PrintWriter out) throws HTMLParseException {
+    if (anEntity == null)
+      throw new HTMLParseException("entity is empty!");
+    else
+      process(templateFilename, anEntity, out);
+  }
+
+  /**
+   * Wandelt Liste mit Entities <code>entList</code> in freemarker-Struktur um, mischt die Daten mit
+   * Template <code>templateFilename</code> und gibt das Ergebnis an den PrintWriter
+   * <code>out</code>
+   *
+   * @param templateFilename
+   * @param entList
+   * @param out
+   * @exception HTMLParseException
+   */
+  public static void process(HttpServletResponse res, String templateFilename,
+   EntityList entList, PrintWriter out, Locale locale) throws HTMLParseException {
+    process(res, templateFilename, entList, (String)null, (TemplateModelRoot)null,
+            out, locale);
+  }
+
+  /**
+   * Wandelt Entitylist in freemarker-Struktur um, fügt <code>additionalModel</code>
+       * unter dem Namen <code>additionalModelName</code> ein und mischt die Daten mit
+   * Template <code>templateFilename</code> und gibt das Ergebnis an den PrintWriter
+   * <code>out</code>
+   *
+   * @param templateFilename
+   * @param entList
+   * @param additionalModelName
+   * @param additionalModel
+   * @param out
+   * @exception HTMLParseException
+   */
+  public static void process(HttpServletResponse res, String templateFilename,
+                             EntityList entList, String additionalModelName,
+                             TemplateModelRoot additionalModel, PrintWriter out,
+                             Locale locale) throws HTMLParseException {
+
+    SimpleHash modelRoot = new SimpleHash();
+
+    if (entList == null) {
+      process(null, templateFilename, modelRoot, out, locale);
+    }
+    else {
+      try {
+        modelRoot = makeSimpleHashWithEntitylistInfos(entList);
+
+        // Quickhack um mal ein Popup mit reinzunhemen ..
+        if (additionalModelName != null && additionalModel != null)
+          modelRoot.put(additionalModelName, additionalModel);
+
+        process(res, templateFilename, modelRoot, out, locale);
+      }
+      catch (StorageObjectException e) {
+        throw new HTMLParseException(e.toString());
+      }
+    }
+  }
+
+  /**
+   * Gibt Template <code>templateFilename</code> an den PrintWriter
+   * <code>out</code>
+   *
+   * @param templateFilename
+   * @param mergeData
+   * @param out
+   * @exception HTMLParseException
+   */
+  public static void process(String templateFilename, PrintWriter out,
+                             Locale locale) throws HTMLParseException {
+    process(null, templateFilename, (TemplateModelRoot)null, out, locale);
+  }
+
+  /**
+   * Mischt die freemarker-Struktur <code>tmr</code> mit
+   * Template <code>templateFilename</code> und gibt das Ergebnis an den PrintWriter
+   * <code>out</code>
+   *
+   * @param templateFilename
+   * @param mergeData
+   * @param out
+   * @exception HTMLParseException
+   */
+  public static void process(HttpServletResponse res, String templateFilename,
+                             TemplateModelRoot tmr, PrintWriter out,
+                             Locale locale) throws HTMLParseException {
+    process(res, templateFilename, tmr, null, out, locale);
+  }
+
+  public static void process(HttpServletResponse res, String templateFilename,
+                             TemplateModelRoot tmr, TemplateModelRoot extra,
+                             PrintWriter out, Locale locale) throws HTMLParseException {
+    process(res, templateFilename, tmr, extra, out, locale, "bundles.adminlocal", "bundles.admin");
+  }
+
+  public static void process(HttpServletResponse res, String templateFilename,
+       TemplateModelRoot tmr, TemplateModelRoot extra, PrintWriter out,
+       Locale locale, String bundles) throws HTMLParseException {
+    process(res, templateFilename, tmr, extra, out, locale, bundles, null);
+  }
+
+  /**
+   * Mischt die freemarker-Struktur <code>tmr</code> mit
+   * Template <code>templateFilename</code> und gibt das Ergebnis an den PrintWriter
+   * <code>out</code>
+   *
+   * @param templateFilename
+   * @param mergeData
+   * @param out
+   * @exception HTMLParseException
+   */
+  public static void process(HttpServletResponse res, String templateFilename,
+                             TemplateModelRoot tmr, TemplateModelRoot extra,
+                             PrintWriter out, Locale locale, String bundles,
+                             String bundles2) throws
+      HTMLParseException {
+    if (out == null)
+      throw new HTMLParseException("no outputstream");
+    Template tmpl = getTemplateFor(templateFilename);
+    if (tmpl == null)
+      throw new HTMLParseException("no template: " + templateFilename);
+    if (tmr == null)
+      tmr = new SimpleHash();
+
+      /** @todo  what is this for? (rk) */
+    String session = "";
+    if (res != null) {
+      session = res.encodeURL("");
+    }
+
+    SimpleHash configHash = new SimpleHash();
+
+    // pass the whole config hash to the templates
+    Enumeration en = MirConfig.getResourceKeys();
+    String key;
+    while (en.hasMoreElements()) {
+      key = (String) en.nextElement();
+      configHash.put(key, new SimpleScalar(MirConfig.getProp(key)));
+    }
+
+    // this does not come directly from the config file
+    configHash.put("docRoot", new SimpleScalar(docRoot));
+    configHash.put("actionRoot", new SimpleScalar(actionRoot + session));
+    configHash.put("now",
+                   new SimpleScalar(StringUtil.date2readableDateTime(new GregorianCalendar())));
+
+    // this conform to updated freemarker syntax
+    configHash.put("compressWhitespace",
+                   new freemarker.template.utility.CompressWhitespace());
+
+    SimpleHash utilityHash = new SimpleHash();
+    try {
+      utilityHash.put("compressWhitespace",
+                      new freemarker.template.utility.CompressWhitespace());
+      utilityHash.put("encodeURI",
+                      FreemarkerGenerator.makeAdapter(new GeneratorHTMLFunctions.
+          encodeURIGeneratorFunction()));
+      utilityHash.put("encodeHTML",
+                      FreemarkerGenerator.makeAdapter(new GeneratorHTMLFunctions.
+          encodeHTMLGeneratorFunction()));
+      utilityHash.put("isOdd",
+                      FreemarkerGenerator.makeAdapter(new GeneratorIntegerFunctions.
+          isOddFunction()));
+      utilityHash.put("increment",
+                      FreemarkerGenerator.makeAdapter(new GeneratorIntegerFunctions.
+          incrementFunction()));
+    }
+    catch (Throwable t) {
+      throw new HTMLParseException(t.getMessage());
+    }
+
+    SimpleHash outPutHash = new SimpleHash();
+
+    if (extra != null) {
+      outPutHash.put("extra", extra);
+      try {
+        while ( ( (SimpleList) extra).hasNext()) {
+          theLog.printDebugInfo( ( (SimpleList) extra).next().toString());
         }
+      }
+      catch (Exception e) {
+      }
+    }
+    outPutHash.put("data", tmr);
+    outPutHash.put("config", configHash);
+    outPutHash.put("utility", utilityHash);
+
+    MessageResources messages = MessageResources.getMessageResources(bundles);
+    if (bundles2!=null) {
+      outPutHash.put("lang", new MessageMethodModel(locale, MessageResources.getMessageResources(bundles), MessageResources.getMessageResources(bundles2)));
+    }
+    else {
+      outPutHash.put("lang", new MessageMethodModel(locale, MessageResources.getMessageResources(bundles)));
     }
 
-    /**
-     * empty private constructor, to avoid instantiation
-     */
-    private HTMLTemplateProcessor() {
+    tmpl.process(outPutHash, out);
+  }
+
+  /**
+   *   Converts Entity-List to SimpleList of SimpleHashes.
+   *   @param aList ist eine Liste von Entity
+   *   @return eine freemarker.template.SimpleList von SimpleHashes.
+   *
+   *    @deprecated EntityLists comply with TemplateListModel now.
+   */
+  public static SimpleList makeSimpleList(EntityList aList) throws
+      StorageObjectException {
+    theLog.printWarning(
+        "## using deprecated makeSimpleList(entityList) - a waste of resources");
+    SimpleList simpleList = new SimpleList();
+    if (aList != null) {
+      for (int i = 0; i < aList.size(); i++) {
+        simpleList.add(aList.elementAt(i));
+      }
+    }
+    return simpleList;
+  }
+
+  /**
+   *  Konvertiert ein EntityList in ein freemarker.template.SimpleHash-Modell. Im Hash
+   *  sind die einzelnen Entities ueber ihre id zu erreichen.
+   *  @param aList ist die EntityList
+   *  @return SimpleHash mit den entsprechenden freemarker Daten
+   *
+   */
+  public static SimpleHash makeSimpleHash(EntityList aList) throws
+      StorageObjectException {
+    SimpleHash simpleHash = new SimpleHash();
+    Entity currentEntity;
+
+    if (aList != null) {
+      for (int i = 0; i < aList.size(); i++) {
+        currentEntity = (Entity) aList.elementAt(i);
+        simpleHash.put(currentEntity.getId(), currentEntity);
+      }
+    }
+    return simpleHash;
+  }
+
+  /**
+   *  Konvertiert ein Hashtable mit den keys und values als String
+   *  in ein freemarker.template.SimpleHash-Modell
+   *  @param mergeData der HashMap mit den String / String Daten
+   *  @return SimpleHash mit den entsprechenden freemarker Daten
+   *
+   */
+  public static SimpleHash makeSimpleHash(HashMap mergeData) {
+    SimpleHash modelRoot = new SimpleHash();
+    String aField;
+    if (mergeData != null) {
+      Set set = mergeData.keySet();
+      Iterator it = set.iterator();
+      for (int i = 0; i < set.size(); i++) {
+        aField = (String) it.next();
+        modelRoot.put(aField, (String) mergeData.get(aField));
+      }
+    }
+    return modelRoot;
+  }
+
+  /**
+   * Converts EntityList in SimpleHash and adds additional information
+   * to the returned SimpleHash
+   *
+   * @param entList
+   * @return SimpleHash returns SimpleHash with the converted EntityList plus
+   *        additional Data about the list.
+   * @exception StorageObjectException
+   */
+
+  public static SimpleHash makeSimpleHashWithEntitylistInfos(EntityList entList) throws
+      StorageObjectException {
+    SimpleHash modelRoot = new SimpleHash();
+    if (entList != null) {
+      modelRoot.put("contentlist", entList);
+      modelRoot.put("count",
+                    new SimpleScalar( (new Integer(entList.getCount())).toString()));
+      if (entList.getWhere() != null) {
+        modelRoot.put("where", new SimpleScalar(entList.getWhere()));
+        modelRoot.put("where_encoded",
+                      new SimpleScalar(URLEncoder.encode(entList.getWhere())));
+      }
+      if (entList.getOrder() != null) {
+        modelRoot.put("order", new SimpleScalar(entList.getOrder()));
+        modelRoot.put("order_encoded",
+                      new SimpleScalar(URLEncoder.encode(entList.getOrder())));
+      }
+      modelRoot.put("from",
+                    new SimpleScalar( (new Integer(entList.getFrom())).toString()));
+      modelRoot.put("to",
+                    new SimpleScalar( (new Integer(entList.getTo())).toString()));
+
+      if (entList.hasNextBatch())
+        modelRoot.put("next",
+                      new SimpleScalar( (new Integer(entList.getNextBatch())).
+                                       toString()));
+      if (entList.hasPrevBatch())
+        modelRoot.put("prev",
+                      new SimpleScalar( (new Integer(entList.getPrevBatch())).
+                                       toString()));
+    }
+    return modelRoot;
+  }
+
+  /**
+   * Private methods to get template from a templateFilename
+   * @param templateFilename
+   * @return Template
+   * @exception HTMLParseException
+   */
+  private static Template getTemplateFor(String templateFilename) throws
+      HTMLParseException {
+    Template returnTemplate = null;
+    if (templateFilename != null)
+      returnTemplate = (Template) templateCache.getItem(templateFilename,
+          "template");
+
+    if (returnTemplate == null) {
+      theLog.printError("CACHE (ERR): Unknown template: " + templateFilename);
+      throw new HTMLParseException("Templatefile: " + templateFilename +
+                                   " not found.");
     }
 
+    return returnTemplate;
+  }
 
-    // process-methods to merge different datastructures
-    // with freemarker templates
-
-
-    /**
-     * Wandelt <code>anEntity</code> in freemarker-Struktur um, mischt die Daten mit
-     * Template <code>templateFilename</code> und gibt das Ergebnis an den PrintWriter
-     * <code>out</code>
-     *
-     * @param templateFilename
-     * @param anEntity
-     * @param out
-     * @exception HTMLParseException
-     */
-
-    public static void process(String templateFilename, Entity anEntity, PrintWriter out)
-            throws HTMLParseException {
-        if (anEntity == null)
-            throw new HTMLParseException("entity is empty!");
-        else
-            process(templateFilename, anEntity, out);
-    }
-
-
-    /**
-     * Wandelt Liste mit Entities <code>entList</code> in freemarker-Struktur um, mischt die Daten mit
-     * Template <code>templateFilename</code> und gibt das Ergebnis an den PrintWriter
-     * <code>out</code>
-     *
-     * @param templateFilename
-     * @param entList
-     * @param out
-     * @exception HTMLParseException
-     */
-    public static void process(HttpServletResponse res, String templateFilename,
-                               EntityList entList, PrintWriter out, Locale locale)
-            throws HTMLParseException {
-        process(res, templateFilename, entList, (String) null, (TemplateModelRoot) null, out, locale);
-    }
-
-    /**
-     * Wandelt Entitylist in freemarker-Struktur um, fügt <code>additionalModel</code>
-     * unter dem Namen <code>additionalModelName</code> ein und mischt die Daten mit
-     * Template <code>templateFilename</code> und gibt das Ergebnis an den PrintWriter
-     * <code>out</code>
-     *
-     * @param templateFilename
-     * @param entList
-     * @param additionalModelName
-     * @param additionalModel
-     * @param out
-     * @exception HTMLParseException
-     */
-    public static void process(HttpServletResponse res, String templateFilename,
-                               EntityList entList, String additionalModelName,
-                               TemplateModelRoot additionalModel, PrintWriter out,
-                               Locale locale)
-            throws HTMLParseException {
-
-        SimpleHash modelRoot = new SimpleHash();
-
-        if (entList == null) {
-            process(null, templateFilename, modelRoot, out, locale);
-        } else {
-            try {
-                modelRoot = makeSimpleHashWithEntitylistInfos(entList);
-
-                // Quickhack um mal ein Popup mit reinzunhemen ..
-                if (additionalModelName != null && additionalModel != null)
-                    modelRoot.put(additionalModelName, additionalModel);
-
-                process(res, templateFilename, modelRoot, out, locale);
-            } catch (StorageObjectException e) {
-                throw new HTMLParseException(e.toString());
-            }
-        }
-    }
-
-    /**
-     * Gibt Template <code>templateFilename</code> an den PrintWriter
-     * <code>out</code>
-     *
-     * @param templateFilename
-     * @param mergeData
-     * @param out
-     * @exception HTMLParseException
-     */
-    public static void process(String templateFilename, PrintWriter out,
-                               Locale locale)
-            throws HTMLParseException {
-        process(null, templateFilename, (TemplateModelRoot) null, out, locale);
-    }
-
-
-    /**
-     * Mischt die freemarker-Struktur <code>tmr</code> mit
-     * Template <code>templateFilename</code> und gibt das Ergebnis an den PrintWriter
-     * <code>out</code>
-     *
-     * @param templateFilename
-     * @param mergeData
-     * @param out
-     * @exception HTMLParseException
-     */
-    public static void process(HttpServletResponse res, String templateFilename,
-                               TemplateModelRoot tmr, PrintWriter out, Locale locale)
-            throws HTMLParseException {
-        process(res, templateFilename, tmr, null, out, locale, "bundles.admin");
-        // this method is
-    }
-
-    /**
-     * Mischt die freemarker-Struktur <code>tmr</code> mit
-     * Template <code>templateFilename</code> und gibt das Ergebnis an den PrintWriter
-     * <code>out</code>
-     *
-     * @param templateFilename
-     * @param mergeData
-     * @param out
-     * @exception HTMLParseException
-     */
-    public static void process(HttpServletResponse res, String templateFilename,
-                               TemplateModelRoot tmr, TemplateModelRoot extra,
-                               PrintWriter out, Locale locale, String bundles)
-            throws HTMLParseException {
-        if (out == null) throw new HTMLParseException("no outputstream");
-        Template tmpl = getTemplateFor(templateFilename);
-        if (tmpl == null) throw new HTMLParseException("no template: " + templateFilename);
-        if (tmr == null) tmr = new SimpleHash();
-
-        /** @todo  what is this for? (rk) */
-        String session = "";
-        if (res != null) {
-            session = res.encodeURL("");
-        }
-
-        SimpleHash configHash = new SimpleHash();
-
-        // pass the whole config hash to the templates
-        Enumeration en = MirConfig.getResourceKeys();
-        String key;
-        while (en.hasMoreElements()) {
-            key = (String) en.nextElement();
-            configHash.put(key, new SimpleScalar(MirConfig.getProp(key)));
-        }
-
-        // this does not come directly from the config file
-        configHash.put("docRoot", new SimpleScalar(docRoot));
-        configHash.put("actionRoot", new SimpleScalar(actionRoot + session));
-        configHash.put("now", new SimpleScalar(StringUtil.date2readableDateTime(new GregorianCalendar())));
-
-        // this conform to updated freemarker syntax
-        configHash.put("compressWhitespace", new freemarker.template.utility.CompressWhitespace());
-
-        SimpleHash utilityHash = new SimpleHash();
-        try {
-          utilityHash.put("compressWhitespace", new freemarker.template.utility.CompressWhitespace());
-          utilityHash.put("encodeURI", FreemarkerGenerator.makeAdapter(new GeneratorHTMLFunctions.encodeURIGeneratorFunction()));
-          utilityHash.put("encodeHTML", FreemarkerGenerator.makeAdapter(new GeneratorHTMLFunctions.encodeHTMLGeneratorFunction()));
-          utilityHash.put("isOdd", FreemarkerGenerator.makeAdapter(new GeneratorIntegerFunctions.isOddFunction()));
-          utilityHash.put("increment", FreemarkerGenerator.makeAdapter(new GeneratorIntegerFunctions.incrementFunction()));
-        }
-        catch (Throwable t) {
-          throw new HTMLParseException(t.getMessage());
-        }
-
-
-        SimpleHash outPutHash = new SimpleHash();
-
-        if (extra != null) {
-            outPutHash.put("extra", extra);
-            try {
-                while (((SimpleList) extra).hasNext()) {
-                    theLog.printDebugInfo(((SimpleList) extra).next().toString());
-                }
-            } catch (Exception e) {
-            }
-        }
-        outPutHash.put("data", tmr);
-        outPutHash.put("config", configHash);
-        outPutHash.put("utility", utilityHash);
-
-        MessageResources messages = MessageResources.getMessageResources(bundles);
-        outPutHash.put("lang", new MessageMethodModel(locale, messages));
-
-        tmpl.process(outPutHash, out);
-    }
-
-
-    /**
-     *   Converts Entity-List to SimpleList of SimpleHashes.
-     *   @param aList ist eine Liste von Entity
-     *   @return eine freemarker.template.SimpleList von SimpleHashes.
-     *
-     *    @deprecated EntityLists comply with TemplateListModel now.
-     */
-    public static SimpleList makeSimpleList(EntityList aList) throws StorageObjectException {
-        theLog.printWarning("## using deprecated makeSimpleList(entityList) - a waste of resources");
-        SimpleList simpleList = new SimpleList();
-        if (aList != null) {
-            for (int i = 0; i < aList.size(); i++) {
-                simpleList.add(aList.elementAt(i));
-            }
-        }
-        return simpleList;
-    }
-
-    /**
-     *  Konvertiert ein EntityList in ein freemarker.template.SimpleHash-Modell. Im Hash
-     *  sind die einzelnen Entities ueber ihre id zu erreichen.
-     *  @param aList ist die EntityList
-     *  @return SimpleHash mit den entsprechenden freemarker Daten
-     *
-     */
-    public static SimpleHash makeSimpleHash(EntityList aList) throws StorageObjectException {
-        SimpleHash simpleHash = new SimpleHash();
-        Entity currentEntity;
-
-        if (aList != null) {
-            for (int i = 0; i < aList.size(); i++) {
-                currentEntity = (Entity) aList.elementAt(i);
-                simpleHash.put(currentEntity.getId(), currentEntity);
-            }
-        }
-        return simpleHash;
-    }
-
-    /**
-     *  Konvertiert ein Hashtable mit den keys und values als String
-     *  in ein freemarker.template.SimpleHash-Modell
-     *  @param mergeData der HashMap mit den String / String Daten
-     *  @return SimpleHash mit den entsprechenden freemarker Daten
-     *
-     */
-    public static SimpleHash makeSimpleHash(HashMap mergeData) {
-        SimpleHash modelRoot = new SimpleHash();
-        String aField;
-        if (mergeData != null) {
-            Set set = mergeData.keySet();
-            Iterator it = set.iterator();
-            for (int i = 0; i < set.size(); i++) {
-                aField = (String) it.next();
-                modelRoot.put(aField, (String) mergeData.get(aField));
-            }
-        }
-        return modelRoot;
-    }
-
-
-    /**
-     * Converts EntityList in SimpleHash and adds additional information
-     * to the returned SimpleHash
-     *
-     * @param entList
-     * @return SimpleHash returns SimpleHash with the converted EntityList plus
-     *        additional Data about the list.
-     * @exception StorageObjectException
-     */
-
-    public static SimpleHash makeSimpleHashWithEntitylistInfos(EntityList entList) throws StorageObjectException {
-        SimpleHash modelRoot = new SimpleHash();
-        if (entList != null) {
-            modelRoot.put("contentlist", entList);
-            modelRoot.put("count", new SimpleScalar((new Integer(entList.getCount())).toString()));
-            if (entList.getWhere() != null) {
-                modelRoot.put("where", new SimpleScalar(entList.getWhere()));
-                modelRoot.put("where_encoded", new SimpleScalar(URLEncoder.encode(entList.getWhere())));
-            }
-            if (entList.getOrder() != null) {
-                modelRoot.put("order", new SimpleScalar(entList.getOrder()));
-                modelRoot.put("order_encoded", new SimpleScalar(URLEncoder.encode(entList.getOrder())));
-            }
-            modelRoot.put("from", new SimpleScalar((new Integer(entList.getFrom())).toString()));
-            modelRoot.put("to", new SimpleScalar((new Integer(entList.getTo())).toString()));
-
-            if (entList.hasNextBatch())
-                modelRoot.put("next", new SimpleScalar((new Integer(entList.getNextBatch())).toString()));
-            if (entList.hasPrevBatch())
-                modelRoot.put("prev", new SimpleScalar((new Integer(entList.getPrevBatch())).toString()));
-        }
-        return modelRoot;
-    }
-
-    /**
-     * Private methods to get template from a templateFilename
-     * @param templateFilename
-     * @return Template
-     * @exception HTMLParseException
-     */
-    private static Template getTemplateFor(String templateFilename) throws HTMLParseException {
-        Template returnTemplate = null;
-        if (templateFilename != null)
-            returnTemplate = (Template) templateCache.getItem(templateFilename, "template");
-
-
-        if (returnTemplate == null) {
-            theLog.printError("CACHE (ERR): Unknown template: " + templateFilename);
-            throw new HTMLParseException("Templatefile: " + templateFilename + " not found.");
-        }
-
-        return returnTemplate;
-    }
-
-    public static void stopAutoUpdate() {
-        templateCache.stopAutoUpdate();
-        templateCache = null;
-    }
+  public static void stopAutoUpdate() {
+    templateCache.stopAutoUpdate();
+    templateCache = null;
+  }
 
 }

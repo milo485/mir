@@ -39,6 +39,7 @@ import javax.servlet.http.*;
 import mir.servlet.*;
 import mir.entity.adapter.*;
 import mir.log.*;
+import mir.util.*;
 
 import mircoders.global.*;
 import mircoders.localizer.*;
@@ -65,29 +66,82 @@ public class ServletModuleLocalizer extends ServletModule {
     }
   }
 
-  public void commentoperation(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleException {
-    String idString = aRequest.getParameter("id");
-    String operationString = aRequest.getParameter("operation");
-    String returnUrlString = aRequest.getParameter("returnurl");
-
+  public void performCommentOperation(String anId, String anOperation) {
     MirAdminInterfaceLocalizer.MirSimpleEntityOperation operation;
     EntityAdapter comment;
     EntityComment entity;
 
     try {
-      entity = (EntityComment) commentModule.getById(idString);
+      entity = (EntityComment) commentModule.getById(anId);
 
-      if (entity!=null) {
+      if (entity != null) {
         comment = MirGlobal.localizer().dataModel().adapterModel().makeEntityAdapter("comment", entity);
-        operation = MirGlobal.localizer().adminInterface().simpleCommentOperationForName(operationString);
+        operation = MirGlobal.localizer().adminInterface().simpleCommentOperationForName(anOperation);
         operation.perform(comment);
+        logger.info("Operation " + anOperation + " successfully performed on comment " + anId);
       }
-
-      redirect(aResponse, returnUrlString);
+      logger.error("Error while performing " + anOperation + " on comment " + anId + ": comment is null");
     }
     catch (Throwable e) {
-      e.printStackTrace(System.out);
-      throw new ServletModuleException(e.getMessage());
+      logger.error("Error while performing " + anOperation + " on comment " + anId + ": " + e.getMessage());
+    }
+  }
+
+  public void commentoperation(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleException {
+    String commentIdString = aRequest.getParameter("id");
+    String operationString = aRequest.getParameter("operation");
+    String returnUrlString = aRequest.getParameter("returnurl");
+
+    performCommentOperation(commentIdString, operationString);
+
+    redirect(aResponse, returnUrlString);
+  }
+
+  public void commentoperationbatch(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleException {
+    String returnUrlString = aRequest.getParameter("returnurl");
+
+    String[] operations = aRequest.getParameterValues("operation");
+
+    for (int i=0; i<operations.length; i++) {
+      if (operations[i].length()>0) {
+        List parts = StringRoutines.splitString(operations[i], ";");
+
+        if (parts.size() != 2) {
+          logger.error("commentoperationbatch: operation string invalid: " +
+                       operations[i]);
+        }
+        else {
+          String commentIdString = (String) parts.get(0);
+          String operationString = (String) parts.get(1);
+
+          performCommentOperation(commentIdString, operationString);
+        }
+      }
+    }
+
+    redirect(aResponse, returnUrlString);
+  }
+
+  public void performArticleOperation(String anId, String anOperation) {
+    MirAdminInterfaceLocalizer.MirSimpleEntityOperation operation;
+    EntityAdapter article;
+    EntityContent entity;
+
+    try {
+      entity = (EntityContent) contentModule.getById(anId);
+
+      if (entity != null) {
+        article = MirGlobal.localizer().dataModel().adapterModel().
+            makeEntityAdapter("content", entity);
+        operation = MirGlobal.localizer().adminInterface().
+            simpleArticleOperationForName(anOperation);
+        operation.perform(article);
+        logger.info("Operation " + anOperation + " successfully performed on article " + anId);
+      }
+      logger.error("Error while performing " + anOperation + " on article " + anId + ": article is null");
+    }
+    catch (Throwable e) {
+      logger.error("Error while performing " + anOperation + " on article " + anId + ": " + e.getMessage());
     }
   }
 
@@ -96,26 +150,33 @@ public class ServletModuleLocalizer extends ServletModule {
     String operationString = aRequest.getParameter("operation");
     String returnUrlString = aRequest.getParameter("returnurl");
 
-    MirAdminInterfaceLocalizer.MirSimpleEntityOperation operation;
-    EntityAdapter article;
-    EntityContent entity;
-
-    try {
-      entity = (EntityContent) contentModule.getById(articleIdString);
-
-      if (entity!=null) {
-        article = MirGlobal.localizer().dataModel().adapterModel().makeEntityAdapter("content", entity);
-        operation = MirGlobal.localizer().adminInterface().simpleArticleOperationForName(operationString);
-        operation.perform(article);
-      }
-
-      redirect(aResponse, returnUrlString);
-    }
-    catch (Throwable e) {
-      e.printStackTrace(System.out);
-      throw new ServletModuleException(e.getMessage());
-    }
+    performArticleOperation(articleIdString, operationString);
+    redirect(aResponse, returnUrlString);
   }
 
+  public void articleoperationbatch(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleException {
+    String returnUrlString = aRequest.getParameter("returnurl");
+
+    String[] operations = aRequest.getParameterValues("operation");
+
+    for (int i=0; i<operations.length; i++) {
+      if (operations[i].length()>0) {
+        List parts = StringRoutines.splitString(operations[i], ";");
+
+        if (parts.size() != 2) {
+          logger.error("articleoperationbatch: operation string invalid: " +
+                       operations[i]);
+        }
+        else {
+          String articleIdString = (String) parts.get(0);
+          String operationString = (String) parts.get(1);
+
+          performArticleOperation(articleIdString, operationString);
+        }
+      }
+    }
+
+    redirect(aResponse, returnUrlString);
+  }
 
 }

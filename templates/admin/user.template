@@ -1,7 +1,7 @@
 <html>
 <head>
-        <title>${config["Mir.Name"]} | ${lang("user.htmltitle")}</title>
-        <link rel="stylesheet" type="text/css" href="${config.docRoot}/style/admin.css">
+  <title>${config["Mir.Name"]} | ${lang("user.htmltitle")}</title>
+  <link rel="stylesheet" type="text/css" href="${config.docRoot}/style/admin.css">
 <head>
 
 <body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
@@ -9,39 +9,51 @@
 <include "templates/admin/head.template">
 <form action="${config.actionRoot}" method="post">
 	<input type="hidden" name="module" value="Users">
-	<input type="hidden" name="id" value="${id}">
-	<if new><input type="hidden" name="do" value="insert">
-	<else><input type="hidden" name="do" value="update"></if>
-<table border="0">
-  <tr> 
-    <td align="right" class="darkgrey"><span class="witesmall">
-	<B>${lang("user.login")}:</B></span></td>
-    <td>
-      <input type="text" size="40" name="login" value="${login}">
-    </td>
-  </tr>
-  <tr>
-    <td align="right" class="darkgrey"><span class="witesmall">
-	<B>${lang("user.password")}:</B></span></td>
-    <td>
-      <input type="text" size="20" name="password" value="${password}">
-    </td>
-  </tr>
-  <tr>
-    <td align="right" class="darkgrey"><span class="witesmall">
-	<B>${lang("user.admin")}:</B><span class="spezailtext">(<a href="${docRoot}/help/users.html#admin" target="_help">?</a>)</span></span></td>
-    <td>
-	    <input type="checkbox" name="is_admin" value="1"<if is_admin=="1"> checked</if>>
-    </td>
-  </tr>
-  <tr>
-    <td colspan="2" align="right"> <span class="witetext"><if new>
-      <input type="submit" name="save" value="${lang("insert")}">
-    <else>
-    <input type="submit" name="save" value="${lang("save")}">
-    </if> </span></form></span>
-    </td>
-</table>
+	<input type="hidden" name="id" value="${data.id}">
+	<if data.new>
+	  <input type="hidden" name="do" value="insert">
+	<else>
+	  <input type="hidden" name="do" value="update">
+	</if>
+
+  <table border="0">
+    <tr> 
+      <td align="right" class="darkgrey"><span class="witesmall">
+  	<B>${lang("user.login")}:</B></span></td>
+      <td>
+        <input type="text" size="40" name="login" value="${data.login}">
+      </td>
+    </tr>
+    <tr>
+      <td align="right" class="darkgrey"><span class="witesmall">
+  	<B>${lang("user.password")}:</B></span></td>
+      <td>
+        <input type="password" size="20" name="password" value="${data.password}">
+      </td>
+    </tr>
+    <tr>
+      <td align="right" class="darkgrey">
+        <span class="witesmall">
+  	      <b>${lang("user.admin")}:</b>
+  	    </span>
+  	  </td>
+      <td>
+  	    <input type="checkbox" name="is_admin" value="1"<if data.is_admin=="1"> checked</if>>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2" align="right"> 
+        <span class="witetext">
+          <if data.new>
+            <input type="submit" name="save" value="${lang("insert")}">
+          <else>
+            <input type="submit" name="save" value="${lang("save")}">
+          </if> 
+        </span>
+      </td>
+    </tr>
+  </table>
+</form>
 <include "templates/admin/foot.template">
 </body>
 </html>

@@ -1,63 +1,69 @@
 <html>
-<head>
-	<title>${config["Mir.Name"]} | ${lang("topiclist.htmltitle")}</title>
-        <link rel="stylesheet" type="text/css" href="${config.docRoot}/style/admin.css">
-</head>
+  <head>
+    <title>${config["Mir.Name"]} | ${lang("topiclist.htmltitle")}</title>
+    <link rel="stylesheet" type="text/css" href="${config.docRoot}/style/admin.css">
+  </head>
 
-<body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
+  <body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
 
-<include "templates/admin/head.template">
-<if data.contentlist>
-<table border="0">
-  <tr class="darkgrey">
-    <td><span class="witesmall">
-		<b>${lang("topic.title")}</b></span></td>
-    <td><span class="witesmall">
-		<b>${lang("topic.description")}</b></span></td>
-    <td><span class="witesmall">
-		<b>${lang("topic.main_url")}<br>${lang("topic.archive_url")}</b></span></td>
-	<td>&nbsp;</td>
-  </tr>
-  <list data.contentlist as entry>
-  <tr <if grey=="1"><assign grey="0">class="list1"<else>class="list2"<assign grey="1"> </if>>
-  <td><span class="small">${entry.title}&nbsp;</span></td>
-  <td><span class="small">${entry.description}&nbsp;</span></td>
-  <td><span class="small">
-  	${entry.main_url}<br>
-  	${entry.archiv_url}</span></td>
-  <td><span class="text">&nbsp;<a href="${config.actionRoot}?module=Topics&do=delete&id=${entry.id}">${lang("delete")}</a>
-    | <a href="${config.actionRoot}?module=Topics&do=edit&id=${entry.id}">${lang("edit")}</a></span></td>
-  </tr>
-  </list>
-  <tr>
-  <td colspan="4" class="darkgrey"><span class="witesmall">
-  	${data.count} ${lang("records")} / ${lang("show_from_to", data.from, data.to)}</span></td>
-  <td>&nbsp;</td>
-  </tr>
-</table>
-<P>
-<if (data.prev || data.next)>
- <form method="post" action="${config.actionRoot}">
- <input type="hidden" name="module" value="Topics">
- <input type="hidden" name="where" value="${data.where}">
-<if data.prev>
- <input type="hidden" name="do" value="list">
- <input type="hidden" name="prevoffset" value="${data.prev}">
- <input type="submit" name="prev" value="${lang("list.previous")}">
-</if>
-<if data.next>
- <input type="hidden" name="do" value="list">
- <input type="hidden" name="nextoffset" value="${data.next}">
- <input type="submit" name="next" value="${lang("list.next")}">
-</if>
- </form>
-</if>
+    <include "templates/admin/head.template">
 
-<else>
-  <P align="center">${lang("no_matches_found")}</p>
-</if>
-<include "templates/admin/foot.template">
-</body>
+      <a class="majorcommand" href="${config.actionRoot}?module=Topics&do=add">${lang("add")}</a> |
+      <a class="majorcommand" href="${config.actionRoot}?module=Admin&do=superusermenu">${lang("back")}</a>
+    
+    <if data.contentlist>
+      <table border="0">
+        <tr class="darkgrey">
+          <td><span class="witesmall"><b>${lang("topic.title")}</b></span></td>
+          <td><span class="witesmall"><b>${lang("topic.description")}</b></span></td>
+          <td><span class="witesmall"><b>${lang("topic.main_url")}<br>${lang("topic.archive_url")}</b></span></td>
+      	  <td>&nbsp;</td>
+        </tr>
+        <list data.contentlist as entry>
+          <if grey=="1"><assign grey="0"><tr class="list1"><else><tr class="list2"><assign grey="1"></if>
+            <td><span class="small">${entry.title}&nbsp;</span></td>
+            <td><span class="small">${entry.description}&nbsp;</span></td>
+            <td><span class="small">${entry.main_url}<br>${entry.archiv_url}</span></td>
+            <td><span class="text">&nbsp;
+                <a href="${config.actionRoot}?module=Topics&do=delete&id=${entry.id}">${lang("delete")}</a>
+              | <a href="${config.actionRoot}?module=Topics&do=edit&id=${entry.id}">${lang("edit")}</a>
+            </span></td>
+          </tr>
+        </list>
+        <tr>
+          <td colspan="4" class="darkgrey"><span class="witesmall">
+            ${data.count} ${lang("records")} / ${lang("show_from_to", data.from, data.to)}
+          </span></td>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      <p>
+        <if (data.prev || data.next)>
+          <form method="post" action="${config.actionRoot}">
+            <input type="hidden" name="module" value="Topics">
+            <input type="hidden" name="where" value="${data.where}">
+            <if data.prev>
+              <input type="hidden" name="do" value="list">
+              <input type="hidden" name="prevoffset" value="${data.prev}">
+              <input type="submit" name="prev" value="${lang("list.previous")}">
+            </if>
+            <if data.next>
+              <input type="hidden" name="do" value="list">
+              <input type="hidden" name="nextoffset" value="${data.next}">
+              <input type="submit" name="next" value="${lang("list.next")}">
+            </if>
+          </form>
+        </if>
+      </p>
+    <else>
+      <p align="center">${lang("no_matches_found")}</p>
+    </if>
+
+      <a class="majorcommand" href="${config.actionRoot}?module=Topics&do=add">${lang("add")}</a> |
+      <a class="majorcommand" href="${config.actionRoot}?module=Admin&do=superusermenu">${lang("back")}</a>
+
+    <include "templates/admin/foot.template">
+  </body>
 </html>
 
 

@@ -91,12 +91,40 @@ public class ServletModuleComment extends ServletModule
     }
   }
 
+  public void edit(HttpServletRequest req, HttpServletResponse res) throws ServletModuleException
+  {
+    String idParam = req.getParameter("id");
+
+    if (idParam == null)
+      throw new ServletModuleException("Invalid call: id not supplied ");
+
+    showComment(idParam, req, res);
+  }
+
+  public void showComment(String anId, HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleException {
+    try {
+      SimpleHash extraInfo = new SimpleHash();
+      TemplateModelRoot data;
+
+      data = (TemplateModelRoot) mainModule.getById(anId);
+
+      extraInfo.put("languages", DatabaseLanguage.getInstance().getPopupData());
+      extraInfo.put("comment_status_values", DatabaseCommentStatus.getInstance().getPopupData());
+
+      deliver(aRequest, aResponse, data, extraInfo, templateObjektString);
+    }
+    catch (Exception e) {
+      throw new ServletModuleException(e.toString());
+    }
+  }
+
+
   public void list(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleException
   {
     HTTPRequestParser requestParser = new HTTPRequestParser(aRequest);
 
     String where = requestParser.getParameter("where");
-    String order = requestParser.getParameter("order");
+    String order = requestParser.getParameterWithDefault("order", "webdb_create desc");
     int offset = requestParser.getIntegerWithDefault("offset", 0);
 
     returnCommentList(aRequest, aResponse, where, order, offset);
@@ -138,8 +166,7 @@ public class ServletModuleComment extends ServletModule
         if (!whereClause.equals(""))
           whereClause = whereClause + " and ";
 
-        // ML: searchText must be properly escaped!
-        whereClause = whereClause + "lower(" + queryField + ") like '%" + searchText.toLowerCase() + "%'";
+        whereClause = whereClause + "lower(" + queryField + ") like '%" + JDBCStringRoutines.escapeStringLiteral(searchText.toLowerCase()) + "%'";
       }
     }
 

@@ -40,34 +40,16 @@ public class HTMLRoutines {
   }
 
   public static String encodeHTML(String aText) {
+    final char[] CHARACTERS_TO_ESCAPE = { '&', '<', '>', '"' };
+    final String[] ESCAPE_CODES = { "&amp;", "&lt;", "&gt;", "&quot;" };
+
+    return StringRoutines.replaceStringCharacters(aText, CHARACTERS_TO_ESCAPE, ESCAPE_CODES);
+  }
+
+  public static String encodeXML(String aText) {
     final char[] CHARACTERS_TO_ESCAPE = { '&', '<', '>', '"', '\'' };
     final String[] ESCAPE_CODES = { "&amp;", "&lt;", "&gt;", "&quot;", "&apos;" };
 
-    int position, nextPosition;
-    int i;
-    StringBuffer result = new StringBuffer();
-
-    position=0;
-
-    do {
-      nextPosition = StringRoutines.indexOfCharacters(aText, CHARACTERS_TO_ESCAPE, position);
-
-      if (nextPosition<0)
-        nextPosition = aText.length();
-
-      result.append(aText.substring(position, nextPosition));
-
-      if (nextPosition<aText.length())
-        for (i=0; i<CHARACTERS_TO_ESCAPE.length; i++) {
-          if (CHARACTERS_TO_ESCAPE[i] == aText.charAt(nextPosition)) {
-            result.append(ESCAPE_CODES[i]);
-            break;
-          }
-        }
-      position=nextPosition+1;
-    }
-    while (nextPosition<aText.length()) ;
-
-    return result.toString();
+    return StringRoutines.replaceStringCharacters(aText, CHARACTERS_TO_ESCAPE, ESCAPE_CODES);
   }
 }

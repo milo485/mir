@@ -80,7 +80,8 @@ public class ServletModuleUsers extends mir.servlet.ServletModule
 
   public void edit(HttpServletRequest req, HttpServletResponse res) throws ServletModuleException
   {
-    String        idParam = req.getParameter("id");
+    String idParam = req.getParameter("id");
+
     if (idParam == null)
       throw new ServletModuleException("ServletModuleUser.edit: invalid call: (id) not specified");
 

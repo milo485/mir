@@ -48,77 +48,89 @@ import java.util.Locale;
 
 public class MessageMethodModel implements TemplateMethodModel {
 
-    /**
-     * The perferred locale for this instance of MessageMethod.
-     */
-    private Locale locale;
+  /**
+   * The perferred locale for this instance of MessageMethod.
+   */
+  private Locale locale;
 
-    /**
-     * The MessageResources to query, a single instance shared for
-     * the lifetime of servlet.
-     */
-    private MessageResources messages;
+  /**
+   * The MessageResources to query, a single instance shared for
+   * the lifetime of servlet.
+   */
+  private MessageResources messages;
+  private MessageResources messages2;
 
 
-    /**
-     * Construct a MessageMethod that uses the JVM's default locale.
-     *
-     * @param message The MessageResources object to query
-     */
-    public MessageMethodModel(MessageResources messages) {
-        this(null, messages);
+  /**
+   * Construct a MessageMethod that uses the JVM's default locale.
+   *
+   * @param message The MessageResources object to query
+   */
+  public MessageMethodModel(MessageResources messages) {
+    this(null, messages);
+  }
+
+  /**
+   * Construct a MessageMethod
+   *
+   * @param locale a Locale object, persumably initialized
+   *               from users Accept-Language header field
+   *
+   * @param message The MessageResources object to query
+   */
+  public MessageMethodModel(Locale aLocale, MessageResources aMessages) {
+    this(aLocale, aMessages, null);
+  }
+
+  public MessageMethodModel(Locale aLocale, MessageResources aMessages,
+                            MessageResources aMessages2) {
+    locale = aLocale;
+    messages = aMessages;
+    messages2 = aMessages2;
+  }
+
+  /**
+   * Takes the first argument as a resource key, then looks up
+   * a string in the MessagesResources, based on that key, and the Locale
+   *
+   * TODO: error messages should be i18n :)
+   *
+   * @param arguments List passed in by FM, first arguement is a string used as the key
+   *                  all subsequent arguments are used as described in MessageResources
+   *                  (they are filled into the placehoders of the string being returned)
+   */
+  public TemplateModel exec(List arguments) {
+    if (arguments != null) {
+      String key = (String) arguments.get(0);
+      arguments.remove(0);
+      String mesg = null;
+
+      if (messages!=null)
+        mesg = messages.getMessage(locale, key, arguments.toArray());
+
+      if (mesg == null && messages2!=null) {
+        mesg = messages2.getMessage(locale, key, arguments.toArray());
+      }
+
+      if (mesg == null) {
+        return new SimpleScalar(errUnknownTag + key);
+      }
+      return new SimpleScalar(mesg);
     }
-
-    /**
-     * Construct a MessageMethod
-     *
-     * @param locale a Locale object, persumably initialized
-     *               from users Accept-Language header field
-     *
-     * @param message The MessageResources object to query
-     */
-    public MessageMethodModel(Locale locale, MessageResources messages) {
-        this.locale = locale;
-        this.messages = messages;
+    else {
+      return missingKeyScalar;
     }
+  }
 
+  // i'm not real clear on how this is used - kellan :)
+  public boolean isEmpty() {
+    if (messages == null)
+      return true;
+    else
+      return false;
+  }
 
-    /**
-     * Takes the first argument as a resource key, then looks up
-     * a string in the MessagesResources, based on that key, and the Locale
-     *
-     * TODO: error messages should be i18n :)
-     *
-     * @param arguments List passed in by FM, first arguement is a string used as the key
-     *                  all subsequent arguments are used as described in MessageResources
-     *                  (they are filled into the placehoders of the string being returned)
-     */
-    public TemplateModel exec(List arguments) {
-        if (arguments != null) {
-            String key = (String) arguments.get(0);
-            arguments.remove(0);
-            String mesg = messages.getMessage(locale, key, arguments.toArray());
-
-            if (mesg == null) {
-                return new SimpleScalar(errUnknownTag+key);
-            }
-            return new SimpleScalar(mesg);
-        }
-        else {
-            return missingKeyScalar;
-        }
-    }
-
-    // i'm not real clear on how this is used - kellan :)
-    public boolean isEmpty() {
-        if (messages == null)
-            return true;
-        else
-            return false;
-    }
-
-    private static String errUnknownTag = "MESSAGE NOT FOUND: ";
-    private static String missingKey = "MESSAGE CALL WITHOUT KEY";
-    private static SimpleScalar missingKeyScalar =
-            new SimpleScalar(missingKey);
+  private static String errUnknownTag = "MESSAGE NOT FOUND: ";
+  private static String missingKey = "MESSAGE CALL WITHOUT KEY";
+  private static SimpleScalar missingKeyScalar = new SimpleScalar(missingKey);
 }

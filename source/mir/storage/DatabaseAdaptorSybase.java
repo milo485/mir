@@ -46,71 +46,63 @@ import  mir.misc.*;
  * @author <RK>
  * @version 15.05.2000
  */
-public final class DatabaseAdaptorSybase
-		implements DatabaseAdaptor {
+public final class DatabaseAdaptorSybase implements DatabaseAdaptor {
 
-	/**
-	 * Liefert den Namen der Adaptorklasse <code>Adaptor.Sybase.Driver</code>
-	 * für Sybase zurück.
-	 * @return Adaptorklasse als String
-	 */
-    public String getDriver() {
-	    return MirConfig.getProp("Adaptor.Sybase.Driver");
-    }
+  /**
+   * Liefert den Namen der Adaptorklasse <code>Adaptor.Sybase.Driver</code>
+   * für Sybase zurück.
+   * @return Adaptorklasse als String
+   */
+  public String getDriver() {
+    return MirConfig.getProp("Adaptor.Sybase.Driver");
+  }
 
-	/**
-	 * Liefert die URL für JDBC zurück, in den die Parameter user, pass und host
-	 * eingefügt werden. Die URL wird aus der Konfiguration geholt.
-	 *
-	 * @param user user als String
-	 * @param pass passwort als String
-	 * @param host host als String
-	 * @return url als String
-	 */
-    public String getURL(String user, String pass, String host) {
-	    return MirConfig.getProp("Adaptor.Sybase.URL");
-		/** @todo  hier muesste bessererweise $HOST durch HOST ersetzt, etc. werden */
-    }
+  /**
+   * Liefert die URL für JDBC zurück, in den die Parameter user, pass und host
+   * eingefügt werden. Die URL wird aus der Konfiguration geholt.
+   *
+   * @param user user als String
+   * @param pass passwort als String
+   * @param host host als String
+   * @return url als String
+   */
+  public String getURL(String user, String pass, String host) {
+    return MirConfig.getProp("Adaptor.Sybase.URL");
+        /** @todo  hier muesste bessererweise $HOST durch HOST ersetzt, etc. werden */
+  }
 
-	/**
-	 * Gibt zurück, ob das SQL der Datenbank den <code>limit</code>-Befehl beherrscht.
-	 * @return false
-	 */
-	public boolean hasLimit () {
-		return  false;
-	}
+  /**
+   * Gibt zurück, ob das SQL der Datenbank den <code>limit</code>-Befehl beherrscht.
+   * @return false
+   */
+  public boolean hasLimit() {
+    return false;
+  }
 
-	/**
-	 * Liefert zurück, ob der <code>limit</code>-Befehl erst start und dann offset
-	 * hat (true), oder umgekehrt. Nur Relevant, wenn hasLimit true zurückliefert.
-	 *
-	 * @return false
-	 */
-    public boolean reverseLimit() {
-      return false;
-    }
+  /**
+   * Liefert zurück, ob der <code>limit</code>-Befehl erst start und dann offset
+   * hat (true), oder umgekehrt. Nur Relevant, wenn hasLimit true zurückliefert.
+   *
+   * @return false
+   */
+  public boolean reverseLimit() {
+    return false;
+  }
 
-	/**
-	 * Liefert ein Properties-Objekt zurueck mit user und password.
-	 * @param user
-	 * @param password
-	 * @return Properties
-	 */
-    public Properties getProperties(String user, String password) {
-      Properties props = new Properties();
-      props.put("user", user);
-      props.put("password", password);
-      return props;
-    }
+  /**
+   * Liefert ein Properties-Objekt zurueck mit user und password.
+   * @param user
+   * @param password
+   * @return Properties
+   */
+  public Properties getProperties(String user, String password) {
+    Properties props = new Properties();
+    props.put("user", user);
+    props.put("password", password);
+    return props;
+  }
 
-
-
-
-
-
-
-
-    public String getLastInsertSQL(Database theDB) {
-           return "select currval('"+theDB.getCoreTable()+"_id_seq')";
-    }
+  public String getLastInsertSQL(Database theDB) {
+    return "select currval('" + theDB.getCoreTable() + "_id_seq')";
+  }
 }

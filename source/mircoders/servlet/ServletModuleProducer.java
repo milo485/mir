@@ -105,10 +105,7 @@ public class ServletModuleProducer extends ServletModule
     try {
       generator = MirGlobal.localizer().generators().makeAdminGeneratorLibrary().makeGenerator("producerqueue.template");
 
-      generationData = new HashMap();
-      MirGlobal.localizer().producerAssistant().initializeGenerationValueSet(generationData);
-
-      generationData.put( "lang", new ResourceBundleGeneratorFunction( getLocale(aRequest), MessageResources.getMessageResources("bundles.admin")));
+      generationData = ServletHelper.makeGenerationData(getLocale(aRequest));
       generationData.put( "thisurl", "module=Producer&do=showProducerQueueStatus");
 
       producersData = new Vector();

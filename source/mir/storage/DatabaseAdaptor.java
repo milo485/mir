@@ -41,63 +41,57 @@ import java.util.*;
  *
  * @author <RK>
  *
- * @version $Id: DatabaseAdaptor.java,v 1.2 2002/09/01 22:05:52 mh Exp $
+ * @version $Id: DatabaseAdaptor.java,v 1.3 2002/12/14 01:37:43 zapata Exp $
  */
 
 public interface  DatabaseAdaptor{
 
-	 /* Liefert den Namen der Adaptorklasse
-	 * @return Adaptorklasse als String
-	 */
-	public abstract String getDriver ();
+  /* Liefert den Namen der Adaptorklasse
+   * @return Adaptorklasse als String
+   */
+  public abstract String getDriver();
 
+  /**
+   * Liefert die URL für JDBC zurück, in den die Parameter user, pass und host
+   * eingefügt werden. Die URL wird aus der Konfiguration geholt.
+   *
+   * @param user user als String
+   * @param pass passwort als String
+   * @param host host als String
+   * @return url als String
+   */
+  public abstract String getURL(String user, String pass, String host);
 
-	/**
-	 * Liefert die URL für JDBC zurück, in den die Parameter user, pass und host
-	 * eingefügt werden. Die URL wird aus der Konfiguration geholt.
-	 *
-	 * @param user user als String
-	 * @param pass passwort als String
-	 * @param host host als String
-	 * @return url als String
-	 */
-	public abstract String getURL (String user, String pass, String host);
+  /**
+   * Gibt zurück, ob das SQL der Datenbank den <code>limit</code>-Befehl beherrscht.
+   * @return true wenn ja, sonst false
+   */
+  public abstract boolean hasLimit();
 
+  /**
+       * Liefert zurück, ob der <code>limit</code>-Befehl erst start und dann offset
+       * hat (true), oder umgekehrt. Nur Relevant, wenn hasLimit true zurückliefert.
+   *
+   * @return true wenn erstes, sonst false
+   */
+  public abstract boolean reverseLimit();
 
-	/**
-	 * Gibt zurück, ob das SQL der Datenbank den <code>limit</code>-Befehl beherrscht.
-	 * @return true wenn ja, sonst false
-	 */
-	public abstract boolean hasLimit ();
+  /**
+   * Liefert ein Properties-Objekt zurueck mit user und password.
+   * @param user
+   * @param password
+   * @return Properties
+   */
+  public abstract Properties getProperties(String user, String password);
 
-
-	/**
-	 * Liefert zurück, ob der <code>limit</code>-Befehl erst start und dann offset
-	 * hat (true), oder umgekehrt. Nur Relevant, wenn hasLimit true zurückliefert.
-	 *
-	 * @return true wenn erstes, sonst false
-	 */
-	public abstract boolean reverseLimit ();
-
-
-	/**
-	 * Liefert ein Properties-Objekt zurueck mit user und password.
-	 * @param user
-	 * @param password
-	 * @return Properties
-	 */
-	public abstract Properties getProperties (String user, String password);
-
-
-	/**
-	 * Gibt SQL-Stringfragment zurück, mit dem nach einem insert-Befehl ermittelt
-	 * werden kann, wie man den primary-Key des eingefügten Datensatzes bekommt.
-	 *
-	 * @param theDB Database-Objekt, aus dem ggf. noetige Informationen geholt
-	 * werden können, wie z.B. der Tabellenname
-	 * @return SQL-Statement als String
-	 */
-	public abstract String getLastInsertSQL (Database theDB);
+  /**
+   * Gibt SQL-Stringfragment zurück, mit dem nach einem insert-Befehl ermittelt
+   * werden kann, wie man den primary-Key des eingefügten Datensatzes bekommt.
+   *
+   * @param theDB Database-Objekt, aus dem ggf. noetige Informationen geholt
+   * werden können, wie z.B. der Tabellenname
+   * @return SQL-Statement als String
+   */
+  public abstract String getLastInsertSQL(Database theDB);
 }
-
 

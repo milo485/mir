@@ -55,6 +55,36 @@ public class StringRoutines {
     return result;
   }
 
+  static String replaceStringCharacters(String aText, char[] aCharactersToReplace, String[] aStringsToSubstitute) {
+    int position, nextPosition;
+    int i;
+    StringBuffer result = new StringBuffer();
+
+    position=0;
+
+    do {
+      nextPosition = StringRoutines.indexOfCharacters(aText, aCharactersToReplace, position);
+
+      if (nextPosition<0)
+        nextPosition = aText.length();
+
+      result.append(aText.substring(position, nextPosition));
+
+      if (nextPosition<aText.length())
+        for (i=0; i<aCharactersToReplace.length; i++) {
+          if (aCharactersToReplace[i] == aText.charAt(nextPosition)) {
+            result.append(aStringsToSubstitute[i]);
+            break;
+          }
+        }
+      position=nextPosition+1;
+    }
+    while (nextPosition<aText.length()) ;
+
+    return result.toString();
+  }
+
+
   public static String interpretAsString(Object aValue) throws Exception {
     if (aValue instanceof String)
       return (String) aValue;

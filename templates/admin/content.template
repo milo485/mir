@@ -20,7 +20,11 @@
   <table border="0" width="80%" align="middle">
     <tr>
       <td colspan="1">&nbsp</td>
-      <td colspan="2"><a href="${config.actionRoot}?module=Comment&do=articlecomments&articleid=${data.id}">${lang("content.comments")}</a></td>
+      <td class="minorcommand" colspan="2">
+        <if !data.new>
+          <a href="${config.actionRoot}?module=Comment&do=articlecomments&articleid=${data.id}">${lang("content.comments")}</a>
+        </if>
+      </td>
       <td colspan="2" align="right" valign="top">
         ${lang("content.published")} <a href="${config.docRoot}/help/content.html"><img src="${config.docRoot}/img/help.gif" border="0" align="absmiddle"></a>:
         <input type="checkbox" name="is_published" value="1"<if data.is_published!="0" && data.is_published!=""> checked</if>>
@@ -31,6 +35,7 @@
         </if>
       </td>
     </tr>
+
     <tr>
       <td align="right" class="editfieldname">
           ${lang("content.import_date")}:
@@ -65,7 +70,6 @@
       <td align="right" valign="top" class="editfieldname">
         ${lang("content.topic")}&nbsp;
         <a href="${config.docRoot}/help/content.html"><img src=" ${config.docRoot}/img/help.gif" border="0" align="absmiddle"></a>
-        &nbsp;/&nbsp;${lang("content.feature")}:&nbsp;
         <a href="${config.docRoot}/help/content.html">
           <img src="${config.docRoot}/img/help.gif" border="0" align="middle"></a>
       </td>
@@ -75,12 +79,7 @@
             <td>
               <select name="to_article_type">
                 <list extra.articletypePopupData as a>
-                  <option value="${a.key}" <if (a.key == data.to_article_type)>selected</if>>${a.value}</option>
-                </list>
-              </select>
-              <select name="to_feature">
-                <list extra.schwerpunktPopupData as s>
-                  <option value="${s.key}" <if (s.key == data.to_feature)>selected</if>>${s.value}</option>
+                  <option value="${a.key}" <if (a.key == data.to_article_type)>selected</if>>${lang("articletypes."+a.value)}</option>
                 </list>
               </select>
             </td>
@@ -104,13 +103,13 @@
         </table>
       </td>
     </tr>
+
     <tr>
     <td align="right" valign="top" class="editfieldname">
       ${lang("content.title")}:&nbsp;
     </td>
     <td colspan="4">
       <input type="text" size="40" name="title" value="${utility.encodeHTML(data.title)}"><br>
-    </tr>
     </tr>
     <tr>
       <td align="right" valign="top" class="editfieldname">

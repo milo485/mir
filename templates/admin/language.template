@@ -9,7 +9,7 @@
 <include "templates/admin/head.template">
 <form action="${config.actionRoot}" method="post">
 	<input type="hidden" name="module" value="Language">
-	<input type="hidden" name="id" value="${id}">
+	<input type="hidden" name="id" value="${data.id}">
 	<if data.new><input type="hidden" name="do" value="insert">
 	<else><input type="hidden" name="do" value="update"></if>
 <table border="0">

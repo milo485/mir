@@ -72,4 +72,21 @@ public class GeneratorHTMLFunctions {
       }
     };
   }
+
+  public static class encodeXMLGeneratorFunction implements Generator.GeneratorFunction {
+    public Object perform(List aParameters) throws GeneratorExc {
+      try {
+        if (aParameters.size()!=1)
+          throw new GeneratorExc("encodeHTMLGeneratorFunction: only 1 parameter expected");
+
+        return HTMLRoutines.encodeXML(StringRoutines.interpretAsString(aParameters.get(0)));
+      }
+      catch (GeneratorExc e) {
+        throw e;
+      }
+      catch (Throwable t) {
+        throw new GeneratorFailure("encodeHTMLGeneratorFunction: " + t.getMessage(), t);
+      }
+    };
+  }
 }

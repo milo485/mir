@@ -42,6 +42,7 @@ import mir.servlet.*;
 import mir.module.*;
 import mir.entity.*;
 import mir.misc.*;
+import mir.util.*;
 import mir.storage.*;
 import mir.log.*;
 
@@ -51,7 +52,7 @@ import mircoders.storage.*;
 /*
  *  ContentObjekt -
  *
- * @version $Id: ModuleContent.java,v 1.12 2002/11/30 19:45:56 zapata Exp $
+ * @version $Id: ModuleContent.java,v 1.13 2002/12/14 01:37:43 zapata Exp $
  *
  * @author RK, mir-coders
  *
@@ -156,7 +157,7 @@ public class ModuleContent extends AbstractModule
   public EntityList getContentByField(String aField, String aValue, String orderBy, int offset,
                                       EntityUsers user) throws ModuleException
   {
-    String whereClause = "lower("+aField + ") like lower('%" + StringUtil.quote(aValue) + "%')";
+    String whereClause = "lower("+aField + ") like lower('%" + JDBCStringRoutines.escapeStringLiteral(aValue) + "%')";
     return getContent(whereClause, orderBy, offset, user);
   }
 

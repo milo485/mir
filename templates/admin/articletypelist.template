@@ -1,0 +1,89 @@
+<html>
+  <head>
+    <title>${config["Mir.Name"]} | ${lang("articletypelist.htmltitle")}</title>
+    <link rel="stylesheet" type="text/css" href="${config.docRoot}/style/admin.css">
+  </head>
+  <body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
+
+    <include "templates/admin/head.template">
+
+    <p>
+      <a class="majorcommand" href="${config.actionRoot}?module=ArticleType&do=add">${lang("add")}</a> |
+      <a class="majorcommand" href="${config.actionRoot}?module=Admin&do=superusermenu">${lang("back")}</a>
+    </p>
+
+    <if data.contentlist>
+      <table border="0">
+        <tr class="darkgrey">
+          <td>
+            <span class="witesmall">
+              <b>${lang("articletype.id")}</b>
+            </span>
+          </td>
+          <td>
+            <span class="witesmall">
+	            <b>${lang("articletype.name")}</b>
+	          </span>
+	        </td>
+          <td>
+            &nbsp;
+          </td>
+        </tr>
+        <list data.contentlist as entry>
+          <if grey=="1">
+            <assign grey="0">
+            <tr class="list1">
+          <else>
+            <assign grey="1"> 
+            <tr class="list2">
+          </if>
+            <td><span class="small">${entry.id}&nbsp;</span></td>
+            <td><span class="small">${entry.name}&nbsp;</span></td>
+            <td>
+              <span class="text">&nbsp;
+                  <a href="${config.actionRoot}?module=ArticleType&do=delete&id=${entry.id}">${lang("delete")}</a>
+                | <a href="${config.actionRoot}?module=ArticleType&do=edit&id=${entry.id}">${lang("edit")}</a>
+              </span>
+            </td>
+          </tr>
+        </list>
+        <tr>
+          <td colspan="2" class="darkgrey">
+            <span class="witesmall">
+              ${data.count} ${lang("records")} / ${lang("show_from_to", data.from, data.to)}
+	          </span>
+	        </td>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      <p>
+      <if (data.prev || data.next)>
+        <form method="post" action="${config.actionRoot}">
+          <input type="hidden" name="module" value="ArticleType">
+          <input type="hidden" name="where" value="${data.where}">
+          <if data.prev>
+            <input type="hidden" name="do" value="list">
+            <input type="hidden" name="prevoffset" value="${data.prev}">
+            <input type="submit" name="prev" value="${lang("list.previous")}">
+          </if>
+          <if data.next>
+            <input type="hidden" name="do" value="list">
+            <input type="hidden" name="nextoffset" value="${data.next}">
+            <input type="submit" name="next" value="${lang("list.next")}">
+          </if>
+        </form>
+      </if>
+    <else>
+      <P align="center">${lang("no_matches_found")}</p>
+    </if>
+    
+    <p>
+      <a class="majorcommand" href="${config.actionRoot}?module=ArticleType&do=add">${lang("add")}</a> |
+      <a class="majorcommand" href="${config.actionRoot}?module=Admin&do=superusermenu">${lang("back")}</a>
+    </p>
+
+    <include "templates/admin/foot.template">
+  </body>
+</html>
+
+

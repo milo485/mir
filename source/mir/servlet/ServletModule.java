@@ -88,7 +88,7 @@ public abstract class ServletModule {
    * get the module name to be used for generic operations like delete.
    */
   protected String getOperationModuleName() {
-    return getClass().getName().substring((new String("mircoders.servler.ServletModule")).length());
+    return getClass().getName().substring((new String("mircoders.servlet.ServletModule")).length());
   }
 
   /**
@@ -159,13 +159,8 @@ public abstract class ServletModule {
         }
       }
       theList = mainModule.getByWhereClause(null, offset);
-      //theList = mainModule.getByWhereClause((String)null, offset);
-      if (theList == null || theList.getCount() == 0 || theList.getCount() > 1) {
-        HTMLTemplateProcessor.process(res, templateListString, theList, out, getLocale(req));
-      }
-      else {
-        deliver(req, res, theList.elementAt(0), templateObjektString);
-      }
+
+      HTMLTemplateProcessor.process(res, templateListString, theList, out, getLocale(req));
     }
     catch (Exception e) {
       throw new ServletModuleException(e.getMessage());
@@ -292,19 +287,17 @@ public abstract class ServletModule {
     try {
       String idParam = req.getParameter("id");
       HashMap withValues = getIntersectingValues(req, mainModule.getStorageObject());
+
       String id = mainModule.set(withValues);
-      //theLog.printInfo("Showing Entity with id: " + id);
-      //edit(req,res);
       String whereParam = req.getParameter("where");
       String orderParam = req.getParameter("order");
+
       if ((whereParam != null && !whereParam.equals("")) || (orderParam != null && !orderParam.equals(""))) {
-        //theLog.printDebugInfo("update to list");
         list(req, res);
       }
       else {
         edit(req, res);
       }
-      //list(req,res);
     }
     catch (Exception e) {
       throw new ServletModuleException(e.getMessage());
@@ -329,8 +322,8 @@ public abstract class ServletModule {
     if (rtm == null) rtm = new SimpleHash();
     try {
       PrintWriter out = res.getWriter();
-      HTMLTemplateProcessor.process(res, templateFilename, rtm, popups, out,
-                                    getLocale(req), "bundles.admin");
+      HTMLTemplateProcessor.process(res, templateFilename, rtm, popups, out, getLocale(req));
+
       // we default to admin bundles here, which is not exactly beautiful...
       // but this whole producer stuff is going to be rewritten soon.
       // ServletModuleOpenIndy overwrites deliver() to use open bundles

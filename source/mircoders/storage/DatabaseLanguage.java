@@ -54,36 +54,35 @@ import mir.misc.*;
 
 public class DatabaseLanguage extends Database implements StorageObject{
 
-	private static DatabaseLanguage instance;
-	private static SimpleList languagePopupData;
+  private static DatabaseLanguage instance;
+  private static SimpleList languagePopupData;
 
-	// the following *has* to be sychronized cause this static method
-	// could get preemted and we could end up with 2 instances of DatabaseFoo..
-	// see the "Singletons with needles and thread" article at JavaWorld -mh
-	public synchronized static DatabaseLanguage getInstance() 
-	  throws StorageObjectException
-	{
-		if (instance == null) {
-			instance = new DatabaseLanguage();
-			instance.myselfDatabase = instance;
-		}
-		return instance;
-	}
-
-	private DatabaseLanguage() throws StorageObjectException
-	{
-		super();
-		this.hasTimestamp = false;
-		this.theTable="language";
-	}
-
-	public SimpleList getPopupData() throws StorageObjectException { 
-      SimpleList pData = null;
-      try {
-      pData = getPopupData("name",false);
-      } catch (StorageObjectException e) {System.err.println("FF");}
-      return pData;
+  // the following *has* to be sychronized cause this static method
+  // could get preemted and we could end up with 2 instances of DatabaseFoo..
+  // see the "Singletons with needles and thread" article at JavaWorld -mh
+  public synchronized static DatabaseLanguage getInstance() throws
+      StorageObjectException {
+    if (instance == null) {
+      instance = new DatabaseLanguage();
+      instance.myselfDatabase = instance;
     }
+    return instance;
+  }
 
+  private DatabaseLanguage() throws StorageObjectException {
+    super();
+    this.hasTimestamp = false;
+    this.theTable = "language";
+  }
 
+  public SimpleList getPopupData() throws StorageObjectException {
+    SimpleList pData = null;
+    try {
+      pData = getPopupData("name", false);
+    }
+    catch (StorageObjectException e) {
+      System.err.println("FF");
+    }
+    return pData;
+  }
 }

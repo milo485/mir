@@ -37,12 +37,24 @@ import org.apache.struts.util.MessageResources;
 import mir.generator.*;
 
 public class ResourceBundleGeneratorFunction implements Generator.GeneratorFunction {
-  private MessageResources messages;
+  private List messages;
   private Locale locale;
 
   public ResourceBundleGeneratorFunction(Locale aLocale, MessageResources aMessages) {
-    this.locale = aLocale;
-    this.messages = aMessages;
+    this(aLocale, new MessageResources[] {aMessages} );
+  }
+
+  public ResourceBundleGeneratorFunction(Locale aLocale, MessageResources aMessages1, MessageResources aMessages2) {
+    this(aLocale, new MessageResources[] {aMessages1, aMessages2} );
+  }
+
+  public ResourceBundleGeneratorFunction(Locale aLocale, MessageResources[] aMessages) {
+    locale = aLocale;
+    messages = new Vector();
+
+    for(int i=0; i<aMessages.length; i++) {
+      this.messages.add(aMessages[i]);
+    }
   }
 
   public Object perform(List aParameters) throws GeneratorExc {
@@ -56,7 +68,11 @@ public class ResourceBundleGeneratorFunction implements Generator.GeneratorFunct
 
     String key = (String) aParameters.get(0);
     extraParameters.remove(0);
-    String message = messages.getMessage(locale, key, extraParameters.toArray());
+
+    String message=null;
+    Iterator i = messages.iterator();
+    while (i.hasNext() && message==null)
+      message = ((MessageResources) i.next()).getMessage(locale, key, extraParameters.toArray());
 
     if (message == null) {
       return new String("??" + key + "??");

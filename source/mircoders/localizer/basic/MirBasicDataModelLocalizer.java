@@ -65,6 +65,7 @@ public class MirBasicDataModelLocalizer implements MirDataModelLocalizer {
       anEntityAdapterDefinition.addCalculatedField("language", new ContentToLanguageField());
 
       anEntityAdapterDefinition.addCalculatedField("commentcount", new ContentCommentCountField(" and is_published='1'"));
+      anEntityAdapterDefinition.addCalculatedField("fullcommentcount", new ContentCommentCountField(""));
 
       anEntityAdapterDefinition.addCalculatedField("to_media_images",  new ContentToMediaField( "image" ));
       anEntityAdapterDefinition.addCalculatedField("to_uploaded_media", new ContentToMediaField( "uploadedMedia" ));
@@ -90,6 +91,7 @@ public class MirBasicDataModelLocalizer implements MirDataModelLocalizer {
     try {
       anEntityAdapterDefinition.addDBDateField("creationdate", "webdb_create");
       anEntityAdapterDefinition.addCalculatedField("to_content", new CommentToContentField());
+      anEntityAdapterDefinition.addCalculatedField("status", new CommentToStatusField());
 
       anEntityAdapterDefinition.addCalculatedField("description_parsed", new FilteredField("description"));
       anEntityAdapterDefinition.addCalculatedField("operations",
@@ -115,6 +117,7 @@ public class MirBasicDataModelLocalizer implements MirDataModelLocalizer {
       result.addMapping( "comment", DatabaseComment.getInstance(), definition);
 
       result.addMapping( "articleType", DatabaseArticleType.getInstance(), new EntityAdapterDefinition());
+      result.addMapping( "commentStatus", DatabaseCommentStatus.getInstance(), new EntityAdapterDefinition());
 
       definition = new EntityAdapterDefinition();
       definition.addDBDateField("creationdate", "webdb_create");
@@ -149,6 +152,20 @@ public class MirBasicDataModelLocalizer implements MirDataModelLocalizer {
                     "id="+anEntityAdapter.get("to_media"),
                     "id",
                     "content" );
+      }
+      catch (Throwable t) {
+        throw new RuntimeException(t.getMessage());
+      }
+    }
+  }
+
+  protected class CommentToStatusField implements EntityAdapterDefinition.CalculatedField {
+    public Object getValue(EntityAdapter anEntityAdapter) {
+      try {
+        return anEntityAdapter.getToOneRelation(
+                    "id="+anEntityAdapter.get("to_comment_status"),
+                    "id",
+                    "commentStatus" );
       }
       catch (Throwable t) {
         throw new RuntimeException(t.getMessage());

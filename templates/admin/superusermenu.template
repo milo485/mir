@@ -1,0 +1,33 @@
+<html>
+<head>
+	<title>${config["Mir.Name"]} | ${lang("superusermenu.htmltitle")}</title>
+  <link rel="stylesheet" type="text/css" href="${config.docRoot}/style/admin.css">
+</head>
+
+<body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
+<include "head.template">
+
+			<a class="menucommand" href="${config.actionRoot}?module=Topics&do=list">${lang("superusermenu.topics")}</a>
+
+      <p>
+			<a class="menucommand" href="${config.actionRoot}?module=ArticleType&do=list">${lang("superusermenu.articletypes")}</a>
+
+      <p>
+			<a class="menucommand" href="${config.actionRoot}?module=CommentStatus&do=list">${lang("superusermenu.comment_statuses")}</a>
+
+      <p>
+			<a class="menucommand" href="${config.actionRoot}?module=Users&do=list">${lang("superusermenu.users")}</a>
+
+      <p>
+			<a class="menucommand" href="${config.actionRoot}?module=Language&do=list">${lang("superusermenu.languages")}</a>
+
+      <p>
+			<a class="menucommand" href="${config.actionRoot}?module=LinksImcs&do=list">${lang("superusermenu.imcs")}</a>
+
+
+
+<include "foot.template">
+
+</body>
+</html>
+

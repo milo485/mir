@@ -119,10 +119,25 @@ public class MirBasicProducerAssistantLocalizer implements MirProducerAssistantL
       }
     }
     catch (Throwable t) {
-      logger.printError("initializeGenerationValueSet: Exception "+t.getMessage());
+      logger.printError("initializeGenerationValueSet: Exception while collecting article types "+t.getMessage());
     }
-
     aValueSet.put("articletype", articleTypeMap);
+
+    Map commentStatusMap = new HashMap();
+    try {
+      i = new EntityIteratorAdapter( "", "", 20, MirGlobal.localizer().dataModel().adapterModel(), "commentStatus"  );
+
+      while (i.hasNext()) {
+        EntityAdapter commentStatus = (EntityAdapter) i.next();
+
+        commentStatusMap.put(commentStatus.get("name"), commentStatus.get("id"));
+      }
+    }
+    catch (Throwable t) {
+      logger.printError("initializeGenerationValueSet: Exception while collecting comment statuses"+t.getMessage());
+    }
+    aValueSet.put("commentstatus", articleTypeMap);
+
   };
 
   public String filterText(String aText) {

@@ -87,8 +87,9 @@
 		</td>
 		<td colspan="2">
 			<select name="to_language">
-				<option value="0">de</option>
-				<option value="1">en</option>
+				<list extra.languagePopUpData as l>
+				<option value="${l.key}">${l.value}</option>
+				</list>
 			</select>
 			<font size="-1"><i>(${lang("optional")})</i></font>
 		</td>

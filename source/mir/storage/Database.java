@@ -45,6 +45,7 @@ import  mir.storage.StorageObject;
 import  mir.storage.store.*;
 import  mir.entity.*;
 import  mir.misc.*;
+import  mir.util.*;
 
 
 /**
@@ -55,7 +56,7 @@ import  mir.misc.*;
  * Treiber, Host, User und Passwort, ueber den der Zugriff auf die
  * Datenbank erfolgt.
  *
- * @version $Id: Database.java,v 1.25 2002/12/01 15:05:51 zapata Exp $
+ * @version $Id: Database.java,v 1.27 2002/12/14 01:37:43 zapata Exp $
  * @author rk
  *
  */
@@ -642,13 +643,17 @@ public class Database implements StorageObject {
       } else {
         throwStorageObjectException("Internal Error: theEntityClass not set!");
       }
-    } catch (IllegalAccessException e) {
+    }
+    catch (IllegalAccessException e) {
       throwStorageObjectException("No access! -- " + e.getMessage());
-    } catch (IOException e) {
+    }
+    catch (IOException e) {
       throwStorageObjectException("IOException! -- " + e.getMessage());
-    } catch (InstantiationException e) {
+    }
+    catch (InstantiationException e) {
       throwStorageObjectException("No Instatiation! -- " + e.getMessage());
-    } catch (SQLException sqe) {
+    }
+    catch (SQLException sqe) {
       throwSQLException(sqe, "makeEntityFromResultSet");
       return  null;
     }
@@ -699,8 +704,7 @@ public class Database implements StorageObject {
             }
             else {
               if (theEntity.hasValueForField(aField)) {
-                aValue = "'" + StringUtil.quote((String)theEntity.getValue(aField))
-                       + "'";
+                aValue = "'" + JDBCStringRoutines.escapeStringLiteral((String)theEntity.getValue(aField)) + "'";
               }
             }
           }
@@ -802,7 +806,9 @@ public class Database implements StorageObject {
           else {
             firstField = false;
           }
-          fv.append(aField).append("='").append(StringUtil.quote((String)theEntity.getValue(aField))).append("'");
+          fv.append(aField).append("='").append(JDBCStringRoutines.escapeStringLiteral((String) theEntity.getValue(aField))).append("'");
+
+//              fv.append(aField).append("='").append(StringUtil.quote((String)theEntity.getValue(aField))).append("'");
         }
       }
     }
@@ -851,9 +857,11 @@ public class Database implements StorageObject {
         }
       }
       pstmt.executeUpdate();
-    } catch (SQLException sqe) {
+    }
+    catch (SQLException sqe) {
       throwSQLException(sqe, "update");
-    } finally {
+    }
+    finally {
       try {
         con.setAutoCommit(true);
       } catch (Exception e) {

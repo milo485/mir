@@ -40,7 +40,7 @@
   </if>
   
 </table>
-<a href="${config.actionRoot}?${thisurl}">${lang("producer.jobqueue.refresh")}</a><br><br>
+<a class="minorcommand" href="${config.actionRoot}?${thisurl}">${lang("producer.jobqueue.refresh")}</a><br><br>
 
 <br><br>
 

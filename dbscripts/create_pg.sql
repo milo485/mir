@@ -152,17 +152,16 @@ CREATE TABLE "img_color" (
 	"name" character varying(30) NOT NULL
 );
 
---
--- TOC Entry ID 18 (OID 20063)
---
--- Name: language Type: TABLE Owner: postgres
---
+
+-- language
+
+CREATE SEQUENCE "language_id_seq" start 1 increment 1 maxvalue 2147483647 minvalue 1 cache 1 ;
 
 CREATE TABLE "language" (
-	"id" integer NOT NULL,
-	"name" character varying(40) NOT NULL,
-	"code" character varying(2) NOT NULL,
-	Constraint "language_pkey" Primary Key ("id")
+	"id" integer DEFAULT nextval('language_id_seq') NOT NULL,
+  "name" character varying(40) NOT NULL,
+  "code" character varying(2) NOT NULL,
+  Constraint "language_pkey" Primary Key ("id")
 );
 
 --
@@ -219,15 +218,14 @@ CREATE TABLE "content_x_topic" (
 	"topic_id" integer NOT NULL
 );
 
---
--- TOC Entry ID 23 (OID 20172)
---
--- Name: article_type Type: TABLE Owner: postgres
---
+-- article type
+
+CREATE SEQUENCE "article_type_id_seq" start 1 increment 1 maxvalue 2147483647 minvalue 1 cache 1 ;
 
 CREATE TABLE "article_type" (
-	"id" integer NOT NULL,
-	"name" character varying(20) NOT NULL
+	"id" integer DEFAULT nextval('article_type_id_seq') NOT NULL,
+	"name" character varying(40) NOT NULL,
+	CONSTRAINT "article_type_pkey" PRIMARY KEY ("id")
 );
 
 --
@@ -268,6 +266,7 @@ CREATE TABLE "comment" (
 	"to_media" integer NOT NULL,
 	"to_comment_status" smallint,
 	"checksum" integer,
+	"is_html" boolean DEFAULT '0' NOT NULL,
 	Constraint "comment_pkey" Primary Key ("id")
 );
 
@@ -385,16 +384,17 @@ CREATE TABLE "messages" (
 	"webdb_create" timestamp with time zone NOT NULL
 );
 
---
--- TOC Entry ID 32 (OID 20577)
---
--- Name: comment_status Type: TABLE Owner: postgres
---
+
+-- comment_status
+
+CREATE SEQUENCE "comment_status_id_seq" start 1 increment 1 maxvalue 2147483647 minvalue 1 cache 1 ;
 
 CREATE TABLE "comment_status" (
-	"id" smallint NOT NULL,
-	"name" character varying(40) NOT NULL
+  "id" integer DEFAULT nextval('comment_status_id_seq') NOT NULL,
+  "name" character varying(40) NOT NULL,
+  CONSTRAINT "comment_status_pkey" PRIMARY KEY ("id")
 );
+
 
 --
 -- TOC Entry ID 33 (OID 20588)

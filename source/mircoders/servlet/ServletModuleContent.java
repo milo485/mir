@@ -62,7 +62,7 @@ import mircoders.localizer.*;
  *  ServletModuleContent -
  *  deliver html for the article admin form.
  *
- * @version $Id: ServletModuleContent.java,v 1.26 2002/12/02 12:33:24 zapata Exp $
+ * @version $Id: ServletModuleContent.java,v 1.29 2002/12/14 01:37:44 zapata Exp $
  * @author rk, mir-coders
  *
  */
@@ -156,7 +156,7 @@ public class ServletModuleContent extends ServletModule
       String        orderParam = req.getParameter("order");
 
       theList = ((ModuleContent)mainModule).getContentByField(fieldParam, fieldValueParam, orderParam, 0, user);
-      returnArticleList(req, res, "lower("+ fieldParam + ") like lower('%" + StringUtil.quote(fieldValueParam) + "%')", orderParam, 0);
+      returnArticleList(req, res, "lower("+ fieldParam + ") like lower('%" + JDBCStringRoutines.escapeStringLiteral(fieldValueParam) + "%')", orderParam, 0);
     } catch (ModuleException e) {
       throw new ServletModuleException(e.toString());
     }
@@ -250,7 +250,7 @@ public class ServletModuleContent extends ServletModule
   public void edit(HttpServletRequest req, HttpServletResponse res) throws ServletModuleException
   {
     String        idParam = req.getParameter("id");
-    if (idParam == null) throw new ServletModuleException("Falscher Aufruf: (id) nicht angegeben");
+    if (idParam == null) throw new ServletModuleException("Invalid call: id not supplied ");
     _showObject(idParam, req, res);
   }
 
@@ -328,7 +328,7 @@ public class ServletModuleContent extends ServletModule
       HashMap withValues = getIntersectingValues(req, DatabaseContent.getInstance());
       String[] topic_id = req.getParameterValues("to_topic");
       String content_id = req.getParameter("id");
-// withValues.put("publish_path", StringUtil.webdbDate2path((String)withValues.get("date")));
+
       if(user != null) withValues.put("user_id", user.getId());
       withValues.put("is_produced", "0");
       if (!withValues.containsKey("is_published"))
@@ -341,8 +341,8 @@ public class ServletModuleContent extends ServletModule
 
       String whereParam = req.getParameter("where");
       String orderParam = req.getParameter("order");
+
       if ((whereParam!=null && !whereParam.equals("")) || (orderParam!=null && !orderParam.equals(""))){
-        //theLog.printDebugInfo("update to list");
         list(req,res);
       }
       else
@@ -368,9 +368,11 @@ public class ServletModuleContent extends ServletModule
     SimpleHash extraInfo = new SimpleHash();
     try {
       TemplateModelRoot entContent;
+
       if (id != null) {
         entContent = (TemplateModelRoot)mainModule.getById(id);
-      } else {
+      }
+      else {
         SimpleHash withValues = new SimpleHash();
         withValues.put("new", "1");
         withValues.put("is_published", "0");
@@ -382,20 +384,8 @@ public class ServletModuleContent extends ServletModule
       }
 
       extraInfo.put("themenPopupData", themenModule.getTopicsAsSimpleList());
-      try {
-        extraInfo.put("articletypePopupData", DatabaseArticleType.getInstance().getPopupData());
-      }
-      catch (Exception e) {
-        logger.error("articletype could not be fetched.");
-      }
-      try {
-        extraInfo.put("languagePopupData", DatabaseLanguage.getInstance().getPopupData());
-      }
-      catch (Exception e) {
-        logger.error("language-popup could not be fetched.");
-      }
-
-      extraInfo.put("schwerpunktPopupData", schwerpunktModule.getSchwerpunktAsSimpleList());
+      extraInfo.put("articletypePopupData", DatabaseArticleType.getInstance().getPopupData());
+      extraInfo.put("languagePopupData", DatabaseLanguage.getInstance().getPopupData());
 
       // code to be able to return to the list:
       String offsetParam, whereParam, orderParam;

@@ -67,6 +67,11 @@ Mir.Localizer.Producer.GeneratorLibrary= default=freemarker(etc/producer/)
 Mir.Localizer.Admin.GeneratorLibrary= default=freemarker(templates/admin/)
 Mir.Localizer.OpenPosting.GeneratorLibrary= default=freemarker(etc/open/)
 
+# How should the custom operations (hide etc) in article and comment lists
+# be presented?
+# 0 = links, 1 = checkboxes, 2 = a listbox
+Mir.Localizer.Admin.ListOperationsFlavor=1
+
 # Which producers need to be called after an article (resp. a comment) is posted
 Mir.Localizer.OpenPosting.ContentProducers= media.new;articles.changed;startpage.generate;synchronization.run
 Mir.Localizer.OpenPosting.CommentProducers= articles.changed;synchronization.run
@@ -328,6 +333,18 @@ ServletModule.Messages.ListTemplate=templates/admin/messagelist.template
 ServletModule.Language.ConfirmTemplate=templates/admin/confirm.template
 ServletModule.Language.ObjektTemplate=templates/admin/language.template
 ServletModule.Language.ListTemplate=templates/admin/languagelist.template
+
+#
+# config for article type
+ServletModule.ArticleType.ConfirmTemplate=templates/admin/confirm.template
+ServletModule.ArticleType.EditTemplate=templates/admin/articletype.template
+ServletModule.ArticleType.ListTemplate=templates/admin/articletypelist.template
+
+#
+# config for comment status
+ServletModule.CommentStatus.ConfirmTemplate=templates/admin/confirm.template
+ServletModule.CommentStatus.EditTemplate=templates/admin/commentstatus.template
+ServletModule.CommentStatus.ListTemplate=templates/admin/commentstatuslist.template
 
 #
 # producer-related configs below

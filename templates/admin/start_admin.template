@@ -49,7 +49,7 @@
 			<b>${lang("start.show")}:</b><br>
       <list data.articletypes as a>
     			<img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp;
-    			<a href="${config.actionRoot}?module=Content&do=list&where=is_published%3d'1'%20and%20to_article_type%3D${a.id}&order=webdb_create%20desc">${a.name}</a><br>
+    			<a href="${config.actionRoot}?module=Content&do=list&where=is_published%3d'1'%20and%20to_article_type%3D${a.id}&order=webdb_create%20desc">${lang("start.allarticlesoftype", lang("articletypes."+a.name))}</a><br>
       </list>
 
       <br>
@@ -105,114 +105,92 @@
     <p>
       <a href="${config.actionRoot}?module=Producer&do=produceAllNew">${lang("start.producers.produceAllNew")}</a><br>
       <a href="${config.actionRoot}?module=Producer&do=showProducerQueueStatus">${lang("start.producers.advanced")}</a>
+      
+        
+      <table width="100%" border="0"><tr><td bgcolor="white">&nbsp;</td></tr></table>
+
+      <a class="menucommand" href="${config.actionRoot}?module=Admin&do=superusermenu">${lang("start.superusermenu")}</a>
+
+    </td>
+			<td bgcolor="white" width="5%">&nbsp;
+			</td>
+			
+<comment> Middle column </comment>
+			
+    <td valign="top" width="30%" class="grey">
+
+        <span class="spezialtext">
+  		    <b>${lang("start.images.title")}</b>
+  		  </span>
+
+      <p>
+        <a href="${config.actionRoot}?module=Images&do=list">
+          <img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp; ${lang("edit")}</a><br>
+        <a href="${config.actionRoot}?module=Images&do=add">
+          <img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp; ${lang("add")}</a>
+
+      <p>
+        <span class="spezialtext">
+          <b>${lang("start.audio.title")}</b>
+        </span>
+
+      <p>
+        <a href="${config.actionRoot}?module=Audio&do=list">
+            <img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp; ${lang("edit")}
+        </a><br>
+
+        <a href="${config.actionRoot}?module=Audio&do=add">
+          <img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp; ${lang("add")}
+        </a>
+
+      <p>
+        <span class="spezialtext">
+          <b>${lang("start.video.title")}</b>
+        </span>
+
+      <p>
+        <a href="${config.actionRoot}?module=Video&do=list">
+          <img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp; ${lang("edit")}
+        </a><br>
+      
+        <a href="${config.actionRoot}?module=Video&do=add">
+          <img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp; ${lang("add")}
+        </a>
+
+      <p>
+        <span class="spezialtext">
+          <b>${lang("start.other_media.title")}</b>
+        </span>
+
+      <p>
+        <a href="${config.actionRoot}?module=OtherMedia&do=list">
+          <img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp; ${lang("edit")}
+        </a><br>
+
+        <a href="${config.actionRoot}?module=OtherMedia&do=add" >
+          <img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp; ${lang("add")}
+        </a>
+
+      <p>
+			  <span class="spezialtext">
+		      <b>${lang("start.mediafolder.title")}</b>
+		    </span>
+
+      <p>
+        <a href="${config.actionRoot}?module=Mediafolder&do=list">
+          <img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp; ${lang("edit")}
+        </a><br>
+        
+        <a href="${config.actionRoot}?module=Mediafolder&do=add">
+          <img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp; ${lang("add")}
+        </a>
     </td>
 
+    <td bgcolor="white" width="5%">&nbsp;
+    </td>
 
-			<td bgcolor="white" width="5%">&nbsp;
-			</td>
-			<td valign="top" width="30%" class="grey">
+<comment> RIGHT COLUMN </comment>
 
-<comment> -- not finished yet --
-  	<span class="spezialtext">
-		<b>${lang("start.coverage.title")}</b></span>
-
-		<P>
-			<a href="${config.actionRoot}?module=Schwerpunkt&do=list" >
-      <img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp; ${lang("edit")}</a><br>
-      <a href="${config.actionRoot}?module=Schwerpunkt&do=add" >
-		  <img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp; ${lang("add")}</a>
-    <p>
-</comment>
-
-			<span class="spezialtext">
-			<b>${lang("start.topics.title")}</b></span>
-
-		<p>
-			<a href="${config.actionRoot}?module=Topics&do=list">
-      <img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp; ${lang("edit")}</a><br>
-      <a href="${config.actionRoot}?module=Topics&do=add" >
-			<img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp; ${lang("add")}</a>
-
-		<p>
-			<span class="spezialtext">
-		  <b>${lang("start.images.title")}</b></span>
-
-    <p>
-			<a href="${config.actionRoot}?module=Images&do=list">
-      <img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp; ${lang("edit")}</a><br>
-      <a href="${config.actionRoot}?module=Images&do=add" >
-			<img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp; ${lang("add")}</a>
-
-		<p>
-
-        <span class="spezialtext">
-		  <b>${lang("start.audio.title")}</b></span>
-
-    <p>
-			<a href="${config.actionRoot}?module=Audio&do=list">
-      <img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp; ${lang("edit")}</a><br>
-      <a href="${config.actionRoot}?module=Audio&do=add" >
-			<img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp; ${lang("add")}</a>
-
-		<p>
-
-        <span class="spezialtext">
-		  <b>${lang("start.video.title")}</b></span>
-
-    <p>
-			<a href="${config.actionRoot}?module=Video&do=list">
-      <img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp; ${lang("edit")}</a><br>
-      <a href="${config.actionRoot}?module=Video&do=add" >
-			<img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp; ${lang("add")}</a>
-
-		<p>
-
-        <span class="spezialtext">
-		  <b>${lang("start.other_media.title")}</b></span>
-
-    <p>
-			<a href="${config.actionRoot}?module=OtherMedia&do=list">
-      <img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp; ${lang("edit")}</a><br>
-      <a href="${config.actionRoot}?module=OtherMedia&do=add" >
-			<img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp; ${lang("add")}</a>
-
-		<p>
-
-			<span class="spezialtext">
-		  <b>${lang("start.mediafolder.title")}</b></span>
-
-		<p>
-			<a href="${config.actionRoot}?module=Mediafolder&do=list">
-      <img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp; ${lang("edit")}</a><br>
-      <a href="${config.actionRoot}?module=Mediafolder&do=add" >
-			<img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp; ${lang("add")}</a>
-
-    <p>
-<comment> -- not finished yet --
-		<span class="spezialtext">
-		  <b>${lang("start.languages.title")}</b></span>
-
-		<p>
-			<a href="${config.actionRoot}?module=Language&do=list">
-      <img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp; ${lang("edit")}</a><br>
-      <a href="${config.actionRoot}?module=Language&do=add" >
-			<img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp; ${lang("add")}</a>
-
-		<p>
-</comment> 
-			<span class="spezialtext">
-		  <b>${lang("start.imcs.title")}</b></span>
-
-		<p>
-			<a href="${config.actionRoot}?module=LinksImcs&do=list">
-      <img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp; ${lang("edit")}</a><br>
-      <a href="${config.actionRoot}?module=LinksImcs&do=add" >
-			<img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp; ${lang("add")}</a>
-			</td>
-
-
-			<td bgcolor="white" width="5%">&nbsp;
-			</td>
 			<td valign="top" width="20%" class="pink">
 
 	<comment>internal messageboard</comment>

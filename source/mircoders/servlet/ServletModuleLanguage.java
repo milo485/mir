@@ -67,6 +67,7 @@ public class ServletModuleLanguage extends ServletModule
     templateListString = MirConfig.getProp("ServletModule.Language.ListTemplate");
     templateObjektString = MirConfig.getProp("ServletModule.Language.ObjektTemplate");
     templateConfirmString = MirConfig.getProp("ServletModule.Language.ConfirmTemplate");
+
     try {
       mainModule = new ModuleLanguage(DatabaseLanguage.getInstance());
     }

@@ -43,29 +43,29 @@ import mir.misc.*;
 
 public final class DatabaseAdaptorMySQL implements DatabaseAdaptor{
 
-    public String getDriver() {
-    	return MirConfig.getProp("Adaptor.MySQL.Driver");
-    }
+  public String getDriver() {
+    return MirConfig.getProp("Adaptor.MySQL.Driver");
+  }
 
-    public String getURL(String user, String pass, String host) {
-	    return MirConfig.getProp("Adaptor.MySQL.URL");
-    }
+  public String getURL(String user, String pass, String host) {
+    return MirConfig.getProp("Adaptor.MySQL.URL");
+  }
 
-    public  boolean hasLimit() {
-      return true;
-    }
+  public boolean hasLimit() {
+    return true;
+  }
 
-    public boolean reverseLimit() {
-      return false;
-    }
+  public boolean reverseLimit() {
+    return false;
+  }
 
-    public Properties getProperties(String user, String password) {
-      return null;
-    }
+  public Properties getProperties(String user, String password) {
+    return null;
+  }
 
-    public String getLastInsertSQL(Database theDB) {
-           return "select last_insert_id()";
-    }
+  public String getLastInsertSQL(Database theDB) {
+    return "select last_insert_id()";
+  }
 }
 
 

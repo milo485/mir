@@ -84,7 +84,7 @@ import mircoders.search.*;
  *    open-postings to the newswire
  *
  * @author mir-coders group
- * @version $Id: ServletModuleOpenIndy.java,v 1.49 2002/12/01 15:05:51 zapata Exp $
+ * @version $Id: ServletModuleOpenIndy.java,v 1.50 2002/12/14 17:36:17 zapata Exp $
  *
  */
 
@@ -141,28 +141,36 @@ public class ServletModuleOpenIndy extends ServletModule
     String aid = req.getParameter("aid"); // the article id the comment will belong to
     String language = req.getParameter("language");
 
-    if (aid!=null && !aid.equals(""))
-      {
+    if (aid!=null && !aid.equals("")) {
+      try {
         SimpleHash mergeData = new SimpleHash();
 
         // onetimepasswd
-        if(passwdProtection.equals("yes")){
+        if (passwdProtection.equals("yes")) {
           String passwd = this.createOneTimePasswd();
           System.out.println(passwd);
           HttpSession session = req.getSession(false);
-          session.setAttribute("passwd",passwd);
+          session.setAttribute("passwd", passwd);
           mergeData.put("passwd", passwd);
         }
 
-        if (language!=null) {
+        if (language != null) {
           HttpSession session = req.getSession(false);
           session.setAttribute("Locale", new Locale(language, ""));
-          session.setAttribute("passwd",language);
+          session.setAttribute("passwd", language);
         }
 
         mergeData.put("aid", aid);
-        deliver(req, res, mergeData, commentFormTemplate);
+
+        SimpleHash extraInfo = new SimpleHash();
+        extraInfo.put("languagePopUpData", DatabaseLanguage.getInstance().getPopupData());
+
+        deliver(req, res, mergeData, extraInfo, commentFormTemplate);
       }
+      catch (Throwable t) {
+        throw new ServletModuleException("ServletModuleOpenIndy.addcomment: " + t.getMessage());
+      }
+    }
     else throw new ServletModuleException("aid not set!");
   }
 
@@ -220,9 +228,6 @@ public class ServletModuleOpenIndy extends ServletModule
             catch (Throwable t) {
               throw new ServletModuleException(t.getMessage());
             }
-
-
-
           }
 
           // redirecting to url
@@ -275,8 +280,7 @@ public class ServletModuleOpenIndy extends ServletModule
 
     SimpleHash extraInfo = new SimpleHash();
     try{
-      SimpleList popUpData = DatabaseLanguage.getInstance().getPopupData();
-      extraInfo.put("languagePopUpData", popUpData );
+      extraInfo.put("languagePopUpData", DatabaseLanguage.getInstance().getPopupData() );
       extraInfo.put("themenPopupData", themenModule.getTopicsAsSimpleList());
 
       extraInfo.put("topics", themenModule.getTopicsList());

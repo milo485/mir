@@ -99,7 +99,7 @@ public class EntityAdapter implements Map {
   }
 
   public boolean isEmpty() {
-    throw new UnsupportedOperationException("EntityAdapter.isEmpty()");
+    return false;
   }
 
   public Set keySet() {

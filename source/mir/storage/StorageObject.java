@@ -52,204 +52,178 @@ import mir.entity.*;
  */
 public interface StorageObject {
 
-	/**
-	 * Dokumentation siehe Database.java
-	 * @param id
-	 * @return Entity
-	 * @exception StorageObjectException
-	 */
-	abstract public Entity selectById (String id) throws StorageObjectException;
+  /**
+   * Dokumentation siehe Database.java
+   * @param id
+   * @return Entity
+   * @exception StorageObjectException
+   */
+  abstract public Entity selectById(String id) throws StorageObjectException;
 
+  /**
+   * Dokumentation siehe Database.java
+   * @param aField
+   * @param aValue
+   * @return EntityList
+   * @exception StorageObjectException
+   */
+  abstract public EntityList selectByFieldValue(String aField, String aValue) throws
+      StorageObjectException;
 
+  /**
+   * Dokumentation siehe Database.java
+   * @param whereClause
+   * @return EntityList
+   * @exception StorageObjectException
+   */
+  abstract public EntityList selectByWhereClause(String whereClause) throws
+      StorageObjectException;
 
-	/**
-	 * Dokumentation siehe Database.java
-	 * @param aField
-	 * @param aValue
-	 * @return EntityList
-	 * @exception StorageObjectException
-	 */
-	abstract public EntityList selectByFieldValue (String aField, String aValue) throws StorageObjectException;
+  /**
+   * Dokumentation siehe Database.java
+   * @param whereClause
+   * @param offset
+   * @return EntityList
+   * @exception StorageObjectException
+   */
+  abstract public EntityList selectByWhereClause(String whereClause, int offset) throws
+      StorageObjectException;
 
+  /**
+   * Dokumentation siehe Database.java
+   * @param whereClause
+   * @param orderBy
+   * @param offset
+   * @return EntityList
+   * @exception StorageObjectException
+   */
+  abstract public EntityList selectByWhereClause(String whereClause,
+                                                 String orderBy,
+                                                 int offset) throws
+      StorageObjectException;
 
+  /**
+   * Dokumentation siehe Database.java
+   * @param whereClause
+   * @param orderBy
+   * @param offset
+   * @param limit
+   * @return EntityList
+   * @exception StorageObjectException
+   */
+  abstract public EntityList selectByWhereClause(String whereClause,
+                                                 String orderBy,
+                                                 int offset, int limit) throws
+      StorageObjectException;
 
-	/**
-	 * Dokumentation siehe Database.java
-	 * @param whereClause
-	 * @return EntityList
-	 * @exception StorageObjectException
-	 */
-	abstract public EntityList selectByWhereClause (String whereClause) throws StorageObjectException;
+  /**
+   * Dokumentation siehe Database.java
+   * @param id
+   * @return boolen
+   * @exception StorageObjectException
+   */
+  abstract public boolean delete(String id) throws StorageObjectException;
 
+  /**
+   * Dokumentation siehe Database.java
+   * @return ArrayList
+   * @exception StorageObjectException
+   */
+  abstract public ArrayList getFields() throws StorageObjectException;
 
+  /**
+   * Dokumentation siehe Database.java
+   * @return int[]
+   * @exception StorageObjectException
+   */
+  abstract public int[] getTypes() throws StorageObjectException;
 
-	/**
-	 * Dokumentation siehe Database.java
-	 * @param whereClause
-	 * @param offset
-	 * @return EntityList
-	 * @exception StorageObjectException
-	 */
-	abstract public EntityList selectByWhereClause (String whereClause, int offset) throws StorageObjectException;
+  /**
+   * Dokumentation siehe Database.java
+   * @return ArrayList
+   * @exception StorageObjectException
+   */
+  abstract public ArrayList getLabels() throws StorageObjectException;
 
+  /**
+   * Dokumentation siehe Database.java
+   * @param a
+   * @exception StorageObjectException
+   */
+  abstract public void update(Entity a) throws StorageObjectException;
 
+  /**
+   * Dokumentation siehe Database.java
+   * @param a
+   * @return String id
+   * @exception StorageObjectException
+   */
+  abstract public String insert(Entity a) throws StorageObjectException;
 
-	/**
-	 * Dokumentation siehe Database.java
-	 * @param whereClause
-	 * @param orderBy
-	 * @param offset
-	 * @return EntityList
-	 * @exception StorageObjectException
-	 */
-	abstract public EntityList selectByWhereClause (String whereClause, String orderBy,
-			int offset) throws StorageObjectException;
+  /**
+   * Dokumentation siehe Database.java
+   * @return Class Klasse der Entity
+   */
+  abstract public Class getEntityClass();
 
+  /**
+   * put your documentation comment here
+   * @return
+   */
+  abstract public String getIdName();
 
+  /**
+   * Dokumentation siehe Database.java
+   * @return String
+   */
+  abstract public String getTableName();
 
-	/**
-	 * Dokumentation siehe Database.java
-	 * @param whereClause
-	 * @param orderBy
-	 * @param offset
-	 * @param limit
-	 * @return EntityList
-	 * @exception StorageObjectException
-	 */
-	abstract public EntityList selectByWhereClause (String whereClause, String orderBy,
-			int offset, int limit) throws StorageObjectException;
+  /**
+   * Dokumentation siehe Database.java
+   * @return SimpleHash
+   */
+  abstract public SimpleHash getHashData();
 
+  /**
+   * Dokumentation siehe Database.java
+   * @return Connection
+   * @exception StorageObjectException
+   */
+  abstract public Connection getPooledCon() throws StorageObjectException;
 
+  /**
+   * Dokumentation siehe Database.java
+   * @param a
+   * @param sql
+   * @return ResultSet
+   * @exception StorageObjectException, SQLException
+   */
+  abstract public ResultSet executeSql(Statement a, String sql) throws
+      StorageObjectException,
+      SQLException;
 
-	/**
-	 * Dokumentation siehe Database.java
-	 * @param id
-	 * @return boolen
-	 * @exception StorageObjectException
-	 */
-	abstract public boolean delete (String id) throws StorageObjectException;
+  /**
+   * Dokumentation siehe Database.java
+   * @param con
+   * @param stmt
+   */
+  abstract public void freeConnection(Connection con, Statement stmt) throws
+      StorageObjectException;
 
+  /**
+   * Dokumentation siehe Database.java
+   * @return
+   */
+  abstract public SimpleList getPopupData() throws StorageObjectException;
 
+  abstract public int executeUpdate(Statement a, String sql) throws
+      StorageObjectException, SQLException;
 
-	/**
-	 * Dokumentation siehe Database.java
-	 * @return ArrayList
-	 * @exception StorageObjectException
-	 */
-	abstract public ArrayList getFields () throws StorageObjectException;
+  abstract public int executeUpdate(String sql) throws StorageObjectException,
+      SQLException;
 
-
-
-	/**
-	 * Dokumentation siehe Database.java
-	 * @return int[]
-	 * @exception StorageObjectException
-	 */
-	abstract public int[] getTypes () throws StorageObjectException;
-
-
-
-	/**
-	 * Dokumentation siehe Database.java
-	 * @return ArrayList
-	 * @exception StorageObjectException
-	 */
-	abstract public ArrayList getLabels () throws StorageObjectException;
-
-
-
-	/**
-	 * Dokumentation siehe Database.java
-	 * @param a
-	 * @exception StorageObjectException
-	 */
-	abstract public void update (Entity a) throws StorageObjectException;
-
-
-
-	/**
-	 * Dokumentation siehe Database.java
-	 * @param a
-	 * @return String id
-	 * @exception StorageObjectException
-	 */
-	abstract public String insert (Entity a) throws StorageObjectException;
-
-
-
-	/**
-	 * Dokumentation siehe Database.java
-	 * @return Class Klasse der Entity
-	 */
-		abstract public Class getEntityClass();
-
-
-
-	/**
-	 * put your documentation comment here
-	 * @return
-	 */
-		abstract public String getIdName();
-
-
-
-	/**
-	 * Dokumentation siehe Database.java
-	 * @return String
-	 */
-		abstract public String getTableName();
-
-
-
-	/**
-	 * Dokumentation siehe Database.java
-	 * @return SimpleHash
-	 */
-		abstract public SimpleHash getHashData();
-
-
-
-	/**
-	 * Dokumentation siehe Database.java
-	 * @return Connection
-	 * @exception StorageObjectException
-	 */
-	abstract public Connection getPooledCon () throws StorageObjectException;
-
-
-
-	/**
-	 * Dokumentation siehe Database.java
-	 * @param a
-	 * @param sql
-	 * @return ResultSet
-	 * @exception StorageObjectException, SQLException
-	 */
-	abstract public ResultSet executeSql (Statement a, String sql) throws StorageObjectException,
-			SQLException;
-
-
-
-	/**
-	 * Dokumentation siehe Database.java
-	 * @param con
-	 * @param stmt
-	 */
-		abstract public void freeConnection(Connection con,  Statement stmt)
-            throws StorageObjectException;
-
-
-
-	/**
-	 * Dokumentation siehe Database.java
-	 * @return
-	 */
-	abstract public SimpleList getPopupData () throws StorageObjectException;
-
-	abstract public int executeUpdate(Statement a, String sql) throws StorageObjectException, SQLException ;
-	abstract public int executeUpdate(String sql) throws StorageObjectException, SQLException ;
-	abstract public int getSize(String where) throws SQLException,StorageObjectException;
-
+  abstract public int getSize(String where) throws SQLException,
+      StorageObjectException;
 }
 
 

@@ -1,5 +1,23 @@
-[last changed: $Date: 2002/12/07 07:01:08 $]  2002 mir-coders group
+[last changed: $Date: 2002/12/09 21:39:18 $]  2002 mir-coders group
 -------------------------------------------------------------------------------
+
+================================
+1.1(HEAD) (as of yet unreleased)
+================================
+
+[New features/Improvements]
+* added support for a built-in search engine using lucene.  indexes articles incrementally when
+  they are produced, uses standard internationalized template scheme to display results of queries, 
+  which can be sorted by real publication date and include things like image thumbnails
+  
+[Bugfixes]
+
+[Build process]
+
+[Maintenance]
+
+[Notes]
+
 
 ================================
 1.0.0-rc4 (as of yet unreleased)

@@ -40,7 +40,7 @@ import  gnu.regexp.*;
 /**
  * Statische Hilfsmethoden zur Stringbehandlung
  *
- * @version $Id: StringUtil.java,v 1.29 2002/12/02 12:33:23 zapata Exp $
+ * @version $Id: StringUtil.java,v 1.30 2002/12/14 01:37:43 zapata Exp $
  * @author mir-coders group
  *
  */
@@ -322,6 +322,7 @@ public final class StringUtil {
    *
    * @return geqoteter String
    */
+/*
   public static String quote(String s)
   {
     //String s2 = quote(s, '\'');
@@ -341,7 +342,7 @@ public final class StringUtil {
     s2 = quote(s2, '\"');
     return s2;
   }
-
+*/
   /**
    * schlieﬂt <code>s</code> in <code>'</code> ein und setzt Backslashes vor
    * "gef‰hrliche" Zeichen innerhalb des Strings

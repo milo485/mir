@@ -43,28 +43,28 @@ import mir.misc.*;
 
 public final class DatabaseAdaptorPostgresql implements DatabaseAdaptor{
 
-    public String getDriver() {
-    	return MirConfig.getProp("Adaptor.PostgreSQL.Driver");
-    }
+  public String getDriver() {
+    return MirConfig.getProp("Adaptor.PostgreSQL.Driver");
+  }
 
-    public String getURL(String user, String pass, String host) {
-	    return MirConfig.getProp("Adaptor.PostgreSQL.URL");
-    }
+  public String getURL(String user, String pass, String host) {
+    return MirConfig.getProp("Adaptor.PostgreSQL.URL");
+  }
 
-    public  boolean hasLimit() {
-      return true;
-    }
+  public boolean hasLimit() {
+    return true;
+  }
 
-    public boolean reverseLimit() {
-      return true;
-    }
+  public boolean reverseLimit() {
+    return true;
+  }
 
-    public Properties getProperties(String user, String password) {
-      return null;
-    }
+  public Properties getProperties(String user, String password) {
+    return null;
+  }
 
-    public String getLastInsertSQL(Database theDB) {
-           return "select currval('"+theDB.getCoreTable()+"_id_seq')";
+  public String getLastInsertSQL(Database theDB) {
+    return "select currval('" + theDB.getCoreTable() + "_id_seq')";
     }
 }
 

@@ -54,31 +54,30 @@ import mir.misc.*;
 
 public class DatabaseArticleType extends Database implements StorageObject{
 
-	private static DatabaseArticleType instance;
-	private static SimpleList articletypePopupData;
+  private static DatabaseArticleType instance;
+  private static SimpleList articletypePopupData;
 
-	// the following *has* to be sychronized cause this static method
-	// could get preemted and we could end up with 2 instances of DatabaseFoo..
-	// see the "Singletons with needles and thread" article at JavaWorld -mh
-	public synchronized static DatabaseArticleType getInstance() 
-	  throws StorageObjectException
-	{
-		if (instance == null) {
-			instance = new DatabaseArticleType();
-			instance.myselfDatabase = instance;
-		}
-		return instance;
-	}
+  // the following *has* to be sychronized cause this static method
+  // could get preemted and we could end up with 2 instances of DatabaseFoo..
+  // see the "Singletons with needles and thread" article at JavaWorld -mh
+  public synchronized static DatabaseArticleType getInstance() throws
+      StorageObjectException {
+    if (instance == null) {
+      instance = new DatabaseArticleType();
+      instance.myselfDatabase = instance;
+    }
+    return instance;
+  }
 
-	private DatabaseArticleType() throws StorageObjectException
-	{
-		super();
-		this.hasTimestamp = false;
-		this.theTable="article_type";
-	}
+  private DatabaseArticleType() throws StorageObjectException {
+    super();
+    this.hasTimestamp = false;
+    this.theTable = "article_type";
+  }
 
-	public SimpleList getPopupData()
-        throws StorageObjectException { return getPopupData("name",false); }
+  public SimpleList getPopupData() throws StorageObjectException {
+    return getPopupData("name", false);
+  }
 
 
 }

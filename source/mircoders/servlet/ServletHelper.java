@@ -20,13 +20,14 @@ public class ServletHelper {
 
   static Map makeGenerationData(Locale aLocale) throws ServletModuleException {
     try {
-      MessageResources messages;
       Map result = new HashMap();
 
       MirGlobal.localizer().producerAssistant().initializeGenerationValueSet(result);
-      messages = MessageResources.getMessageResources("bundles.admin");
 
-      result.put( "lang", new ResourceBundleGeneratorFunction( aLocale, messages));
+      result.put( "lang",
+          new ResourceBundleGeneratorFunction( aLocale,
+                  MessageResources.getMessageResources("bundles.adminlocal"),
+                  MessageResources.getMessageResources("bundles.admin")));
 
       return result;
     }
