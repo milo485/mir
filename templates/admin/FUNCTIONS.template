@@ -250,6 +250,25 @@
   </if>
 </function>
 
+
+<comment>previous next links</comment>
+<function showPrevNextLinks (aPreviousUrl, aNextUrl, anAlignment)>
+  <if aPreviousUrl || aNextUrl>      
+    <p align="${anAlignment}">
+    <if aPreviousUrl>
+      <a class="link-box" href="${config.actionRoot}?${aPreviousUrl}"> [ &lt; ] ${lang("list.previous")}</a>
+    </if>
+    <if aPreviousUrl && aNextUrl>      
+      &nbsp;&nbsp; 
+    </if>
+    <if aNextUrl>
+      <a class="link-box" href="${config.actionRoot}?${aNextUrl}">   ${lang("list.next")} [ &gt; ]</a>
+    </if>
+    </p>
+  </if>
+</function>
+
+
 <comment>multifunctional help - popup or not - big or small designs</comment>
 <function Help (HelpUrl, popup, big )>
   <if popup>

@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with  any library licensed under the Apache Software License, 
- * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
- * (or with modified versions of the above that use the same license as the above), 
- * and distribute linked combinations including the two.  You must obey the 
- * GNU General Public License in all respects for all of the code used other than 
- * the above mentioned libraries.  If you modify this file, you may extend this 
- * exception to your version of the file, but you are not obligated to do so.  
+ * the code of this program with  any library licensed under the Apache Software License,
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library
+ * (or with modified versions of the above that use the same license as the above),
+ * and distribute linked combinations including the two.  You must obey the
+ * GNU General Public License in all respects for all of the code used other than
+ * the above mentioned libraries.  If you modify this file, you may extend this
+ * exception to your version of the file, but you are not obligated to do so.
  * If you do not wish to do so, delete this exception statement from your version.
  */
 package mir.util;
@@ -77,7 +77,7 @@ public class XMLReader {
     try {
       SAXParserFactory parserFactory = SAXParserFactory.newInstance();
 
-      parserFactory.setNamespaceAware(namespaceAware);
+      parserFactory.setNamespaceAware(true);
       parserFactory.setValidating(true);
 
       XMLReaderHandler handler = new XMLReaderHandler(parserFactory, aRootHandler);
@@ -133,16 +133,21 @@ public class XMLReader {
       }
     }
 
-    public void startElement(String aUri, String aTag, String aQualifiedName, Attributes anAttributes) throws SAXException {
+    public void startElement(String aUri, String aLocalName, String aQualifiedName, Attributes anAttributes) throws SAXException {
       Map attributesMap;
       int i;
 
       try {
         attributesMap = new HashMap();
-        for (i=0; i<anAttributes.getLength(); i++)
-          attributesMap.put(anAttributes.getQName(i), anAttributes.getValue(i));
 
-        SectionHandler handler = manager.currentHandler().startElement(aQualifiedName, attributesMap);
+        if (namespaceAware)
+          for (i=0; i<anAttributes.getLength(); i++)
+            attributesMap.put(new XMLName(anAttributes.getURI(i), anAttributes.getLocalName(i)), anAttributes.getValue(i));
+        else
+          for (i=0; i<anAttributes.getLength(); i++)
+            attributesMap.put(anAttributes.getLocalName(i), anAttributes.getValue(i));
+
+        SectionHandler handler = manager.currentHandler().startElement(new XMLName(aUri, aLocalName), attributesMap);
 
         manager.pushHandler( handler );
       }
@@ -154,7 +159,7 @@ public class XMLReader {
       }
     }
 
-    public void endElement(String aUri, String aTag, String aQualifiedName) throws SAXException {
+    public void endElement(String aUri, String aLocalName, String aQualifiedName) throws SAXException {
       try
       {
         if (!aQualifiedName.equals("include")) {
@@ -215,7 +220,7 @@ public class XMLReader {
   }
 
   public static interface SectionHandler {
-    public abstract SectionHandler startElement(String aTag, Map anAttributes) throws XMLReaderExc;
+    public abstract SectionHandler startElement(XMLName aTag, Map anAttributes) throws XMLReaderExc;
 
     public abstract void endElement(SectionHandler aHandler) throws XMLReaderExc;
 
@@ -225,7 +230,11 @@ public class XMLReader {
   }
 
   public static abstract class AbstractSectionHandler implements SectionHandler {
-    public SectionHandler startElement(String aTag, Map anAttributes) throws XMLReaderExc {
+    public SectionHandler startElement(XMLName aTag, Map anAttributes) throws XMLReaderExc {
+      return startElement(aTag.getLocalName(), anAttributes);
+    };
+
+    public SectionHandler startElement(String aLocalName, Map anAttributes) throws XMLReaderExc {
       return null;
     };
 
@@ -284,6 +293,52 @@ public class XMLReader {
 
     public XMLReaderFailure(Throwable aCause) {
       super(aCause.getMessage(), aCause);
+    }
+  }
+
+  public static class XMLName {
+    private String namespaceURI;
+    private String localName;
+
+    public XMLName(String aLocalName) {
+      this(aLocalName, null);
+    }
+
+    public XMLName(String aNamespaceURI, String aLocalName) {
+      namespaceURI = aNamespaceURI;
+      localName = aLocalName;
+    }
+
+    public String getNamespaceURI() {
+      return namespaceURI;
+    }
+
+    public String getLocalName() {
+      return localName;
+    }
+
+    public int hashCode() {
+      if (namespaceURI == null)
+        return localName.hashCode();
+      else
+        return localName.hashCode() + 3*namespaceURI.hashCode();
+    }
+
+    public String toString() {
+      return namespaceURI+":"+localName;
+    }
+
+    public boolean equals(Object anObject) {
+      if (anObject instanceof XMLName) {
+        if (namespaceURI==null)
+          return (((XMLName) anObject).namespaceURI == null) &&
+                 localName.equals(((XMLName) anObject).localName);
+        else
+          return namespaceURI.equals(((XMLName) anObject).namespaceURI) &&
+                 localName.equals(((XMLName) anObject).localName);
+      }
+      else
+        return false;
     }
   }
 

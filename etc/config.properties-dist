@@ -140,6 +140,9 @@ ServletModule.OpenIndy.DefaultMediaUploadItems=1
 # the url of the static site
 Producer.ProductionHost=http://indy.code-fu.de
 
+# the url of the public site
+Producer.PublicationHost=http://indy.code-fu.de
+
 # Produrce.StorageRoot is the directory, in which
 # the generated HTML pages will be stored
 Producer.StorageRoot=/pub/Dokumente/Indymedia/de-tech/Mir/produced
@@ -299,3 +302,8 @@ Lists.Max.Items=10
 # as the dynamic output html.
 # also used for the HTML charset meta tag.
 Mir.DefaultEncoding=UTF8
+
+# this encoding is used for the HTML charset meta tag.
+# it must be the html charset equivalent of the Java encoding above
+# don't change this unless...
+Mir.DefaultHTMLCharset=UTF-8

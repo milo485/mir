@@ -29,52 +29,21 @@
  */
 package mir.rss;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Vector;
 
-public class RSSData {
-  private List resources;
-  private Map rdfClassToResources;
-  private Map identifierToResource;
+public interface RSSModule {
+  public static final int PCDATA_PROPERTY_TYPE = 0;
+  public static final int W3CDTF_PROPERTY_TYPE = 1;
+  public static final int RDFCOLLECTION_PROPERTY_TYPE = 2;
 
-  protected RSSData() {
-    resources = new Vector();
-    rdfClassToResources = new HashMap();
-    identifierToResource = new HashMap();
+  public interface RSSModuleProperty {
+    String getName();
+    int getType();
   }
 
-  public List getAllResources() {
-    return resources;
-  }
+  public String getNamespaceURI();
 
-  public void addResource(RDFResource aResource) {
-    resources.add(aResource);
-    List resourcesForClass = (List) rdfClassToResources.get(aResource.getRdfClass());
-    if (resourcesForClass==null) {
-      resourcesForClass = new Vector();
-      rdfClassToResources.put(aResource.getRdfClass(), resourcesForClass);
-    }
-    resourcesForClass.add(aResource);
-    if (aResource.getIdentifier()!=null)
-      identifierToResource.put(aResource.getIdentifier(), aResource);
-  }
+  public RSSModuleProperty getPropertyForName(String aName);
 
-  public List getResourcesForRdfClass(String aClass) {
-    return (List) rdfClassToResources.get(aClass);
-  }
-
-  public RDFResource getResourceForIdentifier(String anIdentifier) {
-    return (RDFResource) identifierToResource.get(anIdentifier);
-  }
-
-  public Object get(String aKey) {
-    Object result = getResourceForIdentifier(aKey);
-
-    if (result==null)
-      return getResourcesForRdfClass(aKey);
-    else
-      return result;
-  }
+  public List getAllProperties();
 }

@@ -1,9 +1,3 @@
-<comment>
-  Template file for an rdf file.
-  
-  Variables:
-
-</comment>
 <?xml version="1.0" encoding="UTF-8"?>
 
 <rdf:RDF
@@ -13,17 +7,17 @@
   xmlns:syn="http://purl.org/rss/1.0/modules/syndication/"
 >
 
-  <channel rdf:about="${config["Producer.ProductionHost"]}">
-    <title>Indymedia-XX</title>
-    <link>${config["Producer.ProductionHost"]}</link>
-    <description>Highlights from Indymedia-XX, a revolutionary expirement in democratic media</description>
-    <dc:publisher>IMC Features Working Group &amp;lt;features@someindymedia.org&amp;gt;</dc:publisher>
+  <channel rdf:about="${utility.encodeXML(channelidentifier)}">
+    <title>${utility.encodeXML(channeltitle)}</title>
+    <link>${utility.encodeXML(channellink)}</link>
+    <description>${utility.encodeXML(channeldescription)}</description>
+    <dc:publisher>${utility.encodeXML(channelpublisher)}</dc:publisher>
     <dc:rights>Open Content License, http://www.opencontent.org</dc:rights>
     <dc:date>${config.now.dc}</dc:date>
     <items>
       <rdf:Seq>
         <list articles as i> 	
-          <rdf:li rdf:resource="${config["Producer.ProductionHost"]}${config.docRoot}${i.publish_path}${i.id}.shtml" />
+          <rdf:li rdf:resource="${config["Producer.PublicationHost"]}${config.docRoot}${i.publish_path}${i.id}.shtml" />
         </list>
       </rdf:Seq>
     </items>

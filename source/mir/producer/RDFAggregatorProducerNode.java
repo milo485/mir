@@ -29,7 +29,7 @@
  */
 package mir.producer;
 
-import java.util.Map;
+import java.util.*;
 
 import mir.log.LoggerWrapper;
 import mir.rss.RSSData;
@@ -37,28 +37,51 @@ import mir.rss.*;
 import mir.util.ExceptionFunctions;
 import mir.util.ParameterExpander;
 
-public class RSSProducerNode implements ProducerNode {
+public class RDFAggregatorProducerNode implements ProducerNode {
   private String key;
-  private String url;
+  private String source;
+  private String order;
+  private String filter;
 
-  public RSSProducerNode(String aKey, String anURL) {
+  public RDFAggregatorProducerNode(String aKey, String aSource, String anOrder, String aFilter) {
     key = aKey;
-    url = anURL;
+    source=aSource;
+    order=anOrder;
+    filter=aFilter;
   }
 
   public void produce(Map aValueMap, String aVerb, LoggerWrapper aLogger) throws ProducerFailure {
     try {
-      String expandedKey = ParameterExpander.expandExpression( aValueMap, key );
-      String expandedUrl = ParameterExpander.expandExpression( aValueMap, url );
+      aLogger.debug(source);
+      String evaluatedKey = ParameterExpander.expandExpression( aValueMap, key );
+      String evaluatedOrder = ParameterExpander.expandExpression( aValueMap, order );
+      Object evaluatedSource = ParameterExpander.evaluateExpression( aValueMap, source );
 
-      ParameterExpander.setValueForKey(aValueMap, expandedKey, null);
-      RSSReader reader = new RSSReader();
-      RSSData rssData = reader.parseUrl(expandedUrl);
-      ParameterExpander.setValueForKey(aValueMap, expandedKey, rssData);
+      Object aggregator = aValueMap.get(evaluatedKey);
+
+      if (aggregator == null) {
+        aLogger.debug("creating");
+        aggregator = new RSSAggregator(100, "dc:date", true, null, null);
+        aValueMap.put(evaluatedKey, aggregator);
+      }
+
+      if (aggregator instanceof RSSAggregator) {
+        RSSAggregator agg = (RSSAggregator) aggregator;
+
+        if (evaluatedSource instanceof List) {
+          aLogger.debug("appending");
+          agg.appendItems( (List) evaluatedSource);
+          aLogger.debug("now: " + agg.getItems().size());
+        }
+        else
+          throw new ProducerExc("List expected, " + evaluatedSource.toString() + " found");
+      }
+      else
+        throw new ProducerExc("RSSAggregator expected, " + aggregator.toString() + " found");
     }
     catch (Throwable t) {
       Throwable s = ExceptionFunctions.traceCauseException(t);
-      aLogger.error("Error while processing RSS data: " + s.getClass().getName()+","+ s.getMessage());
+      aLogger.error("Error while aggregating RDF data: " + s.getClass().getName()+","+ s.getMessage());
     }
   };
 }

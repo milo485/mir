@@ -29,52 +29,40 @@
  */
 package mir.rss;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Vector;
+import java.util.*;
 
-public class RSSData {
-  private List resources;
-  private Map rdfClassToResources;
-  private Map identifierToResource;
+public class RDFResource {
+  private String identifier;
+  private String rdfClass;
+  private Map properties;
 
-  protected RSSData() {
-    resources = new Vector();
-    rdfClassToResources = new HashMap();
-    identifierToResource = new HashMap();
+  protected RDFResource(String anRdfClass, String anIdentifier) {
+    rdfClass=anRdfClass;
+    identifier = anIdentifier;
+    properties = new HashMap();
   }
 
-  public List getAllResources() {
-    return resources;
+  protected RDFResource(String anRdfClass) {
+    this(anRdfClass, null);
   }
 
-  public void addResource(RDFResource aResource) {
-    resources.add(aResource);
-    List resourcesForClass = (List) rdfClassToResources.get(aResource.getRdfClass());
-    if (resourcesForClass==null) {
-      resourcesForClass = new Vector();
-      rdfClassToResources.put(aResource.getRdfClass(), resourcesForClass);
-    }
-    resourcesForClass.add(aResource);
-    if (aResource.getIdentifier()!=null)
-      identifierToResource.put(aResource.getIdentifier(), aResource);
+  public String getIdentifier() {
+    return identifier;
   }
 
-  public List getResourcesForRdfClass(String aClass) {
-    return (List) rdfClassToResources.get(aClass);
+  public String getRdfClass() {
+    return rdfClass;
   }
 
-  public RDFResource getResourceForIdentifier(String anIdentifier) {
-    return (RDFResource) identifierToResource.get(anIdentifier);
+  public Object get(String aProperty) {
+    return properties.get(aProperty);
   }
 
-  public Object get(String aKey) {
-    Object result = getResourceForIdentifier(aKey);
+  public void set(String aProperty, Object aValue) {
+    properties.put(aProperty, aValue);
+  }
 
-    if (result==null)
-      return getResourcesForRdfClass(aKey);
-    else
-      return result;
+  public String toString() {
+    return rdfClass + " ("+identifier+")";
   }
 }

@@ -51,13 +51,13 @@
 
 </table>
 
-      <P>
-<if data.prev>
-  <a class="majorcommand" href="${config.actionRoot}?module=Message&do=list&where=${data.where}&offset=${data.prev}&prev=zurück">[&nbsp;${lang("list.previous")}&nbsp;]</a>&nbsp;
-</if>
-<if data.next>
-  <a class="majorcommand" href="${config.actionRoot}?module=Message&do=list&where=${data.where}&offset=${data.next}&next=weiter">[&nbsp;${lang("list.next")}&nbsp;]</a>
-</if>
+<P>
+  <if data.prev>
+    <a class="majorcommand" href="${config.actionRoot}?module=Message&do=list&where=${data.where}&offset=${data.prev}">[&nbsp;${lang("list.previous")}&nbsp;]</a>&nbsp;
+  </if>
+  <if data.next>
+    <a class="majorcommand" href="${config.actionRoot}?module=Message&do=list&where=${data.where}&offset=${data.next}">[&nbsp;${lang("list.next")}&nbsp;]</a>
+  </if>
 
 <else>
   <P align="center">${lang("no_matches_found")}</p>

@@ -78,6 +78,7 @@ public class DefaultProducerNodeBuilders {
     aBuilderLibrary.registerBuilder("While", LoopProducerNodeBuilder.class);
 
     aBuilderLibrary.registerBuilder("RSS", RSSProducerNodeBuilder.class);
+    aBuilderLibrary.registerBuilder("RDFAggregate", RDFAggregatorProducerNodeBuilder.class);
 
     aBuilderLibrary.registerBuilder("FreeQuery", FreeQueryProducerNodeBuilder.class);
 
@@ -768,6 +769,41 @@ public class DefaultProducerNodeBuilders {
 
     public ProducerNode constructNode() {
       return new RSSProducerNode(key, url);
+    };
+  }
+
+////////////////////////////////////////////////////////////////////////////////
+
+  public static class RDFAggregatorProducerNodeBuilder extends AbstractProducerNodeBuilder {
+    private final static String   RDF_AGGREGATOR_KEY_ATTRIBUTE = KEY_ATTRIBUTE;
+    private final static String   RDF_AGGREGATOR_SOURCE_ATTRIBUTE = "source";
+    private final static String   RDF_AGGREGATOR_ORDER_ATTRIBUTE = ORDER_ATTRIBUTE;
+    private final static String   RDF_AGGREGATOR_FILTER_ATTRIBUTE = "filter";
+
+    private final static String[] RDF_AGGREGATOR_REQUIRED_ATTRIBUTES = { RDF_AGGREGATOR_KEY_ATTRIBUTE, RDF_AGGREGATOR_SOURCE_ATTRIBUTE };
+    private final static String[] RDF_AGGREGATOR_OPTIONAL_ATTRIBUTES = { RDF_AGGREGATOR_ORDER_ATTRIBUTE, RDF_AGGREGATOR_FILTER_ATTRIBUTE };
+    private final static String[] RDF_AGGREGATOR_SUBNODES = {  };
+
+    private String key;
+    private String source;
+    private String order;
+    private String filter;
+
+    public RDFAggregatorProducerNodeBuilder() {
+      super(RDF_AGGREGATOR_SUBNODES);
+    }
+
+    public void setAttributes(Map anAttributes) throws ProducerConfigExc, XMLReader.XMLReaderExc {
+      XMLReaderTool.checkAttributes(anAttributes, RDF_AGGREGATOR_REQUIRED_ATTRIBUTES, RDF_AGGREGATOR_OPTIONAL_ATTRIBUTES);
+
+      key = (String) anAttributes.get( RDF_AGGREGATOR_KEY_ATTRIBUTE );
+      source = (String) anAttributes.get( RDF_AGGREGATOR_SOURCE_ATTRIBUTE );
+      order = XMLReaderTool.getStringAttributeWithDefault(anAttributes, RDF_AGGREGATOR_SOURCE_ATTRIBUTE, "");
+      filter = XMLReaderTool.getStringAttributeWithDefault(anAttributes, RDF_AGGREGATOR_FILTER_ATTRIBUTE, "");
+    };
+
+    public ProducerNode constructNode() {
+      return new RDFAggregatorProducerNode(key, source, order, filter);
     };
   }
 

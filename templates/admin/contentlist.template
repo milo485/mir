@@ -38,7 +38,7 @@
   </if>    
 </if>
 
-<call PrevNext ("right")>
+<call showPrevNextLinks(prevurl, nexturl, "right")>
 
 <table border="0" width="100%" cellspacing="3" cellpadding="2">
   <tr>
@@ -128,7 +128,7 @@
 </if>
 
 
-<call PrevNext ("right")>
+<call showPrevNextLinks(prevurl, nexturl, "right")>
 
 
 

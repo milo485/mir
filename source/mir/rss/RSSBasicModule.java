@@ -34,47 +34,48 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-public class RSSData {
-  private List resources;
-  private Map rdfClassToResources;
-  private Map identifierToResource;
+public class RSSBasicModule implements RSSModule {
+  private Map properties;
+  private String namespaceURI;
+  private String name;
 
-  protected RSSData() {
-    resources = new Vector();
-    rdfClassToResources = new HashMap();
-    identifierToResource = new HashMap();
+  public RSSBasicModule(String aNamespaceURI, String aName) {
+    properties = new HashMap();
+    namespaceURI = aNamespaceURI;
+    name = aName;
   }
 
-  public List getAllResources() {
-    return resources;
+  public String getNamespaceURI() {
+    return namespaceURI;
   }
 
-  public void addResource(RDFResource aResource) {
-    resources.add(aResource);
-    List resourcesForClass = (List) rdfClassToResources.get(aResource.getRdfClass());
-    if (resourcesForClass==null) {
-      resourcesForClass = new Vector();
-      rdfClassToResources.put(aResource.getRdfClass(), resourcesForClass);
+  public RSSModuleProperty getPropertyForName(String aName) {
+   return (RSSModuleProperty) properties.get(aName);
+  }
+
+  public List getAllProperties() {
+    return new Vector(properties.values());
+  }
+
+  public void addProperty(String aName, int aType) {
+    properties.put(aName, new RSSBasicModuleProperty(aName, aType));
+  }
+
+  private class RSSBasicModuleProperty implements RSSModuleProperty {
+    private String name;
+    private int type;
+
+    public RSSBasicModuleProperty(String aName, int aType) {
+      name = aName;
+      type = aType;
     }
-    resourcesForClass.add(aResource);
-    if (aResource.getIdentifier()!=null)
-      identifierToResource.put(aResource.getIdentifier(), aResource);
-  }
 
-  public List getResourcesForRdfClass(String aClass) {
-    return (List) rdfClassToResources.get(aClass);
-  }
+    public String getName() {
+      return name;
+    }
 
-  public RDFResource getResourceForIdentifier(String anIdentifier) {
-    return (RDFResource) identifierToResource.get(anIdentifier);
-  }
-
-  public Object get(String aKey) {
-    Object result = getResourceForIdentifier(aKey);
-
-    if (result==null)
-      return getResourcesForRdfClass(aKey);
-    else
-      return result;
+    public int getType() {
+      return type;
+    }
   }
 }
