@@ -77,6 +77,19 @@ public class ModuleComment extends AbstractModule
     }
   }
 
+  public void deleteById (String anId) throws ModuleException {
+    try {
+      Entity theEntity = theStorage.selectById((String)anId);
+      if (theEntity != null)
+        DatabaseContent.getInstance().setUnproduced("id=" + theEntity.getValue("to_media"));
+
+      super.deleteById(anId);
+    }
+    catch (StorageObjectException e){
+      throw new ModuleException(e.toString());
+    }
+  }
+
   /**
    * setValues in the Entity and updates them on the StorageObject
    */
@@ -84,7 +97,7 @@ public class ModuleComment extends AbstractModule
     try {
       Entity theEntity = theStorage.selectById((String)theValues.get("id"));
       if (theEntity == null)
-         throw new ModuleException("No Objekt with id in Database id: " + theValues.get("id"));
+         throw new ModuleException("No Object in the database with id " + theValues.get("id"));
       DatabaseContent.getInstance().setUnproduced("id=" + theEntity.getValue("to_media"));
       theEntity.setValues(theValues);
       theEntity.update();

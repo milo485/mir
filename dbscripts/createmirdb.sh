@@ -30,6 +30,7 @@ for i in populate*.sql ; do echo "\i ${i}" >> ${SCRIPT_FILE} ; done
 echo "\i update_all_sequences.sql" >> ${SCRIPT_FILE}
 
 # grant rights
+echo "grant all on media_type      to $3;"   >> ${SCRIPT_FILE}
 echo "grant all on img_format      to $3;"   >> ${SCRIPT_FILE}
 echo "grant all on img_layout      to $3;"   >> ${SCRIPT_FILE}
 echo "grant all on img_type        to $3;"   >> ${SCRIPT_FILE}
@@ -55,7 +56,7 @@ echo "grant all on video           to $3;"   >> ${SCRIPT_FILE}
 echo "grant all on content         to $3;"   >> ${SCRIPT_FILE}
 echo "grant all on comment         to $3;"   >> ${SCRIPT_FILE}
 echo "grant all on media_folder    to $3;"   >> ${SCRIPT_FILE}
-
+			  
 
 echo "grant all on media_id_seq    to $3;"   >> ${SCRIPT_FILE}
 echo "grant all on media_folder_id_seq to $3;"   >> ${SCRIPT_FILE}

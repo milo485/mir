@@ -56,7 +56,7 @@ import  mir.util.*;
  * Treiber, Host, User und Passwort, ueber den der Zugriff auf die
  * Datenbank erfolgt.
  *
- * @version $Id: Database.java,v 1.27 2002/12/14 01:37:43 zapata Exp $
+ * @version $Id: Database.java,v 1.30 2002/12/28 03:21:38 mh Exp $
  * @author rk
  *
  */
@@ -130,18 +130,6 @@ public class Database implements StorageObject {
       throw new StorageObjectException("Error in Database() constructor with "
                                        +e.getMessage());
     }
-              /*String database_username=MirConfig.getProp("Database.Username");
-              String database_password=MirConfig.getProp("Database.Password");
-              String database_host=MirConfig.getProp("Database.Host");
-              try {
-                      database_driver=theAdaptor.getDriver();
-                      database_url=theAdaptor.getURL(database_username,database_password,
-                                                                                                                                              database_host);
-                      theLog.printDebugInfo("adding Broker with: " +database_driver+":"+
-                                                                                                              database_url  );
-                      MirConfig.addBroker(database_driver,database_url);
-    //myBroker=MirConfig.getBroker();
-              }*/
   }
 
   /**
@@ -283,13 +271,9 @@ public class Database implements StorageObject {
             break;
           case java.sql.Types.CHAR:case java.sql.Types.VARCHAR:case java.sql.Types.LONGVARCHAR:
             outValue = rs.getString(valueIndex);
-            //if (outValue != null)
-            //outValue = StringUtil.encodeHtml(StringUtil.unquote(outValue));
             break;
           case java.sql.Types.LONGVARBINARY:
             outValue = rs.getString(valueIndex);
-            //if (outValue != null)
-            //outValue = StringUtil.encodeHtml(StringUtil.unquote(outValue));
             break;
           case java.sql.Types.TIMESTAMP:
             // it's important to use Timestamp here as getting it
@@ -475,28 +459,30 @@ public class Database implements StorageObject {
    * @exception StorageObjectException
    */
 
-  public EntityList selectByWhereClause(String wc, String ob, int offset, int limit)
-      throws StorageObjectException
-  {
+  public EntityList selectByWhereClause(String wc, String ob, int offset,
+                                        int limit) throws
+      StorageObjectException {
 
     // check o_store for entitylist
-    if ( StoreUtil.implementsStorableObject(theEntityClass) ) {
+    if (StoreUtil.implementsStorableObject(theEntityClass)) {
       StoreIdentifier search_sid =
-          new StoreIdentifier( theEntityClass,
-          StoreContainerType.STOC_TYPE_ENTITYLIST,
-          StoreUtil.getEntityListUniqueIdentifierFor(theTable,wc,ob,offset,limit) );
-      EntityList hit = (EntityList)o_store.use(search_sid);
-      if ( hit!=null ) {
+          new StoreIdentifier(theEntityClass,
+                              StoreContainerType.STOC_TYPE_ENTITYLIST,
+                              StoreUtil.getEntityListUniqueIdentifierFor(
+          theTable, wc, ob, offset, limit));
+      EntityList hit = (EntityList) o_store.use(search_sid);
+      if (hit != null) {
         theLog.printDebugInfo("CACHE (hit): " + search_sid.toString());
         return hit;
       }
     }
 
     // local
-    EntityList    theReturnList=null;
-    Connection    con=null;	Statement stmt=null;
-    ResultSet     rs;
-    int           offsetCount = 0, count=0;
+    EntityList theReturnList = null;
+    Connection con = null;
+    Statement stmt = null;
+    ResultSet rs;
+    int offsetCount = 0, count = 0;
 
     // build sql-statement
 
@@ -506,24 +492,19 @@ public class Database implements StorageObject {
     if (wc != null && wc.length() == 0) {
       wc = null;
     }
-    StringBuffer countSql = new StringBuffer("select count(*) from ").append(theTable);
+    StringBuffer countSql = new StringBuffer("select count(*) from ").append(
+        theTable);
     StringBuffer selectSql = new StringBuffer("select * from ").append(theTable);
     if (wc != null) {
       selectSql.append(" where ").append(wc);
       countSql.append(" where ").append(wc);
     }
-    if (ob != null && !(ob.length() == 0)) {
+    if (ob != null && ! (ob.length() == 0)) {
       selectSql.append(" order by ").append(ob);
     }
     if (theAdaptor.hasLimit()) {
       if (limit > -1 && offset > -1) {
-        selectSql.append(" limit ");
-        if (theAdaptor.reverseLimit()) {
-          selectSql.append(limit).append(",").append(offset);
-        }
-        else {
-          selectSql.append(offset).append(",").append(limit);
-        }
+        selectSql.append(" LIMIT ").append(limit).append(" OFFSET ").append(offset);
       }
     }
 
@@ -535,7 +516,8 @@ public class Database implements StorageObject {
       // selecting...
       rs = executeSql(stmt, selectSql.toString());
       if (rs != null) {
-        if (!evaluatedMetaData) evalMetaData(rs.getMetaData());
+        if (!evaluatedMetaData)
+          evalMetaData(rs.getMetaData());
 
         theReturnList = new EntityList();
         Entity theResultEntity;
@@ -548,21 +530,24 @@ public class Database implements StorageObject {
       }
 
       // making entitylist infos
-      if (!(theAdaptor.hasLimit())) count = offsetCount;
+      if (! (theAdaptor.hasLimit()))
+        count = offsetCount;
 
       if (theReturnList != null) {
         // now we decide if we have to know an overall count...
-        count=offsetCount;
+        count = offsetCount;
         if (limit > -1 && offset > -1) {
-          if (offsetCount==limit) {
+          if (offsetCount == limit) {
             /** @todo counting should be deffered to entitylist
              *  getSize() should be used */
             rs = executeSql(stmt, countSql.toString());
             if (rs != null) {
-              if ( rs.next() ) count = rs.getInt(1);
+              if (rs.next())
+                count = rs.getInt(1);
               rs.close();
             }
-            else theLog.printError("Could not count: " + countSql);
+            else
+              theLog.printError("Could not count: " + countSql);
           }
         }
         theReturnList.setCount(count);
@@ -571,21 +556,31 @@ public class Database implements StorageObject {
         theReturnList.setOrder(ob);
         theReturnList.setStorage(this);
         theReturnList.setLimit(limit);
-        if ( offset >= limit )
+        if (offset >= limit)
           theReturnList.setPrevBatch(offset - limit);
-        if ( offset+offsetCount < count )
+        if (offset + offsetCount < count)
           theReturnList.setNextBatch(offset + limit);
-        if ( StoreUtil.implementsStorableObject(theEntityClass) ) {
-          StoreIdentifier sid=theReturnList.getStoreIdentifier();
+        if (StoreUtil.implementsStorableObject(theEntityClass)) {
+          StoreIdentifier sid = theReturnList.getStoreIdentifier();
           theLog.printDebugInfo("CACHE (add): " + sid.toString());
           o_store.add(sid);
         }
       }
     }
-    catch (SQLException sqe) { throwSQLException(sqe, "selectByWhereClause"); }
-    finally { freeConnection(con, stmt); }
+    catch (SQLException sqe) {
+      throwSQLException(sqe, "selectByWhereClause");
+    }
+    finally {
+      try {
+        if (con != null)
+          freeConnection(con, stmt);
+      }
+      catch (Throwable t) {
+      }
 
-    return  theReturnList;
+    }
+
+    return theReturnList;
   }
 
 
@@ -725,7 +720,7 @@ public class Database implements StorageObject {
       // insert into db
       StringBuffer sqlBuf = new StringBuffer("insert into ").append(theTable).append("(").append(f).append(") values (").append(v).append(")");
       String sql = sqlBuf.toString();
-      theLog.printInfo("INSERT: " + sql);
+      //theLog.printInfo("INSERT: " + sql);
       con = getPooledCon();
       con.setAutoCommit(false);
       pstmt = con.prepareStatement(sql);
@@ -844,7 +839,7 @@ public class Database implements StorageObject {
       }
     }
     sql.append(" where id=").append(id);
-    theLog.printInfo("UPDATE: " + sql);
+    //theLog.printInfo("UPDATE: " + sql);
     // execute sql
     try {
       con = getPooledCon();
@@ -894,7 +889,7 @@ public class Database implements StorageObject {
     Statement stmt = null; Connection con = null;
     int res = 0;
     String sql="delete from "+theTable+" where "+thePKeyName+"='"+id+"'";
-    theLog.printInfo("DELETE " + sql);
+    //theLog.printInfo("DELETE " + sql);
     try {
       con = getPooledCon(); stmt = con.createStatement();
       res = stmt.executeUpdate(sql);
@@ -1052,13 +1047,11 @@ public class Database implements StorageObject {
     ResultSet rs;
     try {
       rs = stmt.executeQuery(sql);
-      theLog.printInfo((System.currentTimeMillis() - startTime) + "ms. for: "
-                       + sql);
+      //theLog.printInfo((System.currentTimeMillis() - startTime) + "ms. for: " + sql);
     }
     catch (SQLException e)
     {
-      theLog.printDebugInfo("Failed: " + (System.currentTimeMillis()
-          - startTime) + "ms. for: "+ sql);
+      theLog.printDebugInfo("Failed: " + (System.currentTimeMillis() - startTime) + "ms. for: "+ sql);
       throw e;
     }
 
@@ -1110,8 +1103,7 @@ public class Database implements StorageObject {
       freeConnection(con,stmt);
     }
     //theLog.printInfo(theTable + " has "+ result +" rows where " + where);
-    theLog.printInfo((System.currentTimeMillis() - startTime) + "ms. for: "
-                     + sql);
+    //theLog.printInfo((System.currentTimeMillis() - startTime) + "ms. for: " + sql);
     return result;
   }
 
@@ -1123,8 +1115,7 @@ public class Database implements StorageObject {
     try
     {
       rs = stmt.executeUpdate(sql);
-      theLog.printInfo((new java.util.Date().getTime() - startTime) + "ms. for: "
-                       + sql);
+      //theLog.printInfo((new java.util.Date().getTime() - startTime) + "ms. for: " + sql);
     }
     catch (SQLException e)
     {
@@ -1147,13 +1138,13 @@ public class Database implements StorageObject {
       result = pstmt.executeUpdate();
     }
     catch (Exception e) {
-      theLog.printDebugInfo("settimage :: setImage failed: "+e.getMessage());
+      theLog.printDebugInfo("executeUpdate failed: "+e.getMessage());
       throw new StorageObjectException("executeUpdate failed: "+e.getMessage());
     }
     finally {
       freeConnection(con,pstmt);
     }
-    theLog.printInfo((new java.util.Date().getTime() - startTime) + "ms. for: " + sql);
+    //theLog.printInfo((new java.util.Date().getTime() - startTime) + "ms. for: " + sql);
     return result;
   }
 
@@ -1203,7 +1194,7 @@ public class Database implements StorageObject {
     try {
       con = getPooledCon();
       pstmt = con.prepareStatement(sql);
-      theLog.printInfo("METADATA: " + sql);
+      //theLog.printInfo("METADATA: " + sql);
       ResultSet rs = pstmt.executeQuery();
       evalMetaData(rs.getMetaData());
       rs.close();

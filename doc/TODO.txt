@@ -1,31 +1,46 @@
-[Updated $Date: 2002/10/09 16:09:05 $]
+[Updated $Date: 2002/12/23 05:38:50 $]
 
 v 1.1
 
 * producers merged (done, max, mh)
 * bundle cleanup (done, br1)
-* new templates with css (thomas - max)
+* new templates with css (done, thomas - max)
 * seperation of things that should be edited and things that dont change:
-    admin templates in templates, producer templates in templates-dist?
+    admin templates in templates, producer templates in templates-dist? 
+    (done, br1)
 * utf8 encoding (mh)
-
+* media refactoring (mh)
+* index.en.html ,etc..
+* more formats for media uploads --> generic media upload support (mh)
+* drop media_type table (mh)
+* yet another search format what to do about it..
+* merge StringUtil/util *Routines stuff into one
+* see for languages default --> merge it into OpenMir
+* Throwable Vs. Exception
+* merge MirConfig and config stuff in MirGlobal into one..
+* tuneup fileeditor
+* producer queue job stop/start
+* error reporting for Job queue?
+* set config paramater for default timezone.. (for use in templates)
 
 before 2.0
 
-* logging: log4j (max)
-* configuration (mh)
-* searching (john)
+* logging: log4j (max) --> is this not already a 1.1 item?
+* configuration (mh, max)
+* searching (john) --> is this not already a 1.1 item?
 * HTML validation, struts (br1)
 * PDF generation (john)
 * better user interface (br1)
+* split OpenPosting servlet modules or filter mechanism
 
 
 v 2.0
 
-* persistence layer: OJB (mh,...)
+* persistence layer: OJB or Torque (mh, idfx,...)
 * data model
 * struts (br1)
 * users / roles (max)
+* article translation
 
 
 general
@@ -41,6 +56,7 @@ c) Coverage: Alternative start-page for e.g. a event like genua. every article t
 something to do with this event can be seen on this page. (nn)
 b) P2P-Data-Transfer/Content-Syndication: Implementing RDF/RSS-Support or a own
 indymedia-protocoll.
+drop media_type table
 d) email-article-to-a-friend-servlet
 e) semidynamic create-pdf-from-article-servlet: every requested pdf should be cached (underway, john)
 f) servletapi-2.3: Filters for file upload (also in cos.jar)
@@ -67,7 +83,6 @@ n) Media infrastructure stuff:
 * comments: mark last read comments
 * comments: allow some HTML (let user choose)
 * allow HTML in abstracts
-* more formats for media uploads
 * preview for video
 * protection against spam
 	possibility to block submissions in case of spam attacks

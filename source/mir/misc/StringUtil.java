@@ -40,13 +40,14 @@ import  gnu.regexp.*;
 /**
  * Statische Hilfsmethoden zur Stringbehandlung
  *
- * @version $Id: StringUtil.java,v 1.30 2002/12/14 01:37:43 zapata Exp $
+ * @version $Id: StringUtil.java,v 1.31 2002/12/23 03:15:32 mh Exp $
  * @author mir-coders group
  *
  */
 public final class StringUtil {
 
-  private static RE   re_newline2br, re_brbr2p, re_mail, re_url, re_tags;
+  private static RE   re_newline2br, re_brbr2p, re_mail, re_url, re_tags,
+                      re_tables, re_forbiddenTags;
 
   private StringUtil() { }  // this avoids contruction
 
@@ -58,6 +59,8 @@ public final class StringUtil {
       re_mail       = new RE("([a-zA-Z0-9_.-]+)@([a-zA-Z0-9_-]+)\\.([a-zA-Z0-9_.-]+)");
       re_url        = new RE("((https://)|(http://)|(ftp://)){1}([a-zA-Z0-9_-]+).([a-zA-Z0-9_.:-]+)/?([^ \t\r\n<>\\)\\]]+[^ \t\r\n.,<>\\)\\]])");
       re_tags       = new RE("<[^>]*>",RE.REG_ICASE);
+			re_tables = new RE("<[ \t\r\n/]*(table|td|tr)[ \t\r\n]*>",RE.REG_ICASE);
+			re_forbiddenTags = new RE("<[ \t\r\n/]*(body|head|script)[ \t\r\n]*>",RE.REG_ICASE);
     }
     catch (REException e){
       System.err.println("FATAL: StringUtil: could not precompile REGEX: "+e.toString());
@@ -162,17 +165,15 @@ public final class StringUtil {
   *  this method deletes all <script>, <body> and <head>-tags
   */
   public static final String deleteForbiddenTags(String haystack) {
-    try {
-      RE regex = new RE("<[ \t\r\n](.*?)script(.*?)/script(.*?)>",RE.REG_ICASE);
-      haystack = regex.substituteAll(haystack,"");
-      regex = new RE("<head>(.*?)</head>");
-      haystack = regex.substituteAll(haystack,"");
-      regex = new RE("<[ \t\r\n/]*body(.*?)>");
-      haystack = regex.substituteAll(haystack,"");
-      return haystack;
-    } catch(REException ex){
-      return null;
-    }
+    return re_forbiddenTags.substituteAll(haystack,"");
+  }
+
+	/**
+	 *  deleteHTMLTableTags
+	 *  this method deletes all <table>, <tr> and <td>-tags
+	 */
+  public static final String deleteHTMLTableTags(String haystack) {
+    return re_tables.substituteAll(haystack,"");
   }
 
   /**
@@ -300,93 +301,6 @@ public final class StringUtil {
     csv.append(list[i]);
     }
     return csv.toString();
-  }
-
-
-  /**
-   * schließt einen String in Anführungsszeichen ein, falls er Leerzeichen o.ä. enthält
-   *
-   * @return gequoteter String
-   */
-  public static String quoteIfNecessary(String s) {
-    for (int i = 0; i < s.length(); i++)
-      if (!(Character.isLetterOrDigit(s.charAt(i)) || s.charAt(i) == '.'))
-        return quote(s, '"');
-    return s;
-  }
-
-  /**
-   * schließt <code>s</code> in <code>'</code> ein und setzt Backslashes vor
-   * "gefährliche" Zeichen innerhalb des Strings
-   * Quotes special SQL-characters in <code>s</code>
-   *
-   * @return geqoteter String
-   */
-/*
-  public static String quote(String s)
-  {
-    //String s2 = quote(s, '\'');
-    //Quickhack	ÊÊ Ê Ê Ê Ê Ê Ê
-    //Because of '?-Bug in Postgresql-JDBC-Driver
-    StringBuffer temp = new StringBuffer();
-    for(int i=0;i<s.length();i++){
-      if(s.charAt(i)=='\''){
-        temp.append("&#39;");
-      } else {
-        temp.append(s.charAt(i));
-      }
-    }
-    String s2 = temp.toString();
-    //end Quickhack
-
-    s2 = quote(s2, '\"');
-    return s2;
-  }
-*/
-  /**
-   * schließt <code>s</code> in <code>'</code> ein und setzt Backslashes vor
-   * "gefährliche" Zeichen innerhalb des Strings
-   *
-   * @param s String, der gequoted werden soll
-   * @param quoteChar zu quotendes Zeichen
-   * @return gequoteter String
-   */
-  public static String quote(String s, char quoteChar)
-  {
-    StringBuffer buf = new StringBuffer(s.length());
-    int pos = 0;
-    while (pos < s.length()) {
-      int i = s.indexOf(quoteChar, pos);
-      if (i < 0) i = s.length();
-      buf.append(s.substring(pos, i));
-      pos = i;
-      if (pos < s.length()) {
-        buf.append('\\');
-        buf.append(quoteChar);
-        pos++;
-      }
-    }
-    return buf.toString();
-  }
-
-  /**
-   * replaces dangerous characters in <code>s</code>
-   *
-   */
-
-  public static String unquote(String s)
-  {
-    char quoteChar='\'';
-    StringBuffer buf = new StringBuffer(s.length());
-    int pos = 0;
-    String searchString = "\\"+quoteChar;
-    while (pos < s.length()) {
-      int i = s.indexOf(searchString, pos);
-      if (i < 0) i = s.length();
-      buf.append(s.substring(pos, i));
-      pos = i+1;
-    }
-    return buf.toString();
   }
 
   /**
@@ -529,21 +443,6 @@ public final class StringUtil {
       }
     }
     return s;
-  }
-
-  public static String replaceQuot(String s) {
-    StringBuffer buffer = new StringBuffer();
-    for(int j = 0; j < s.length();j++){
-      if(s.charAt(j)=='&'){
-        if(s.indexOf( "&quot;",j) == j) {
-          buffer.append( "\"" );
-          j += 5;
-        }//if
-      } else {
-        buffer.append(s.charAt(j));
-      }//else
-    }//for
-    return buffer.toString();
   }
 
  /**

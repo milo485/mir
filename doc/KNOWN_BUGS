@@ -1,4 +1,4 @@
-last changed: $Date: 2002/12/08 07:05:56 $ 2002 mir-coders
+last changed: $Date: 2002/12/23 02:54:40 $ 2002 mir-coders
 -------------------------------------------------------------------
 
 In all versions
@@ -13,9 +13,6 @@ In all versions
   lists, but it will not delete the file from the filesystem. hopefully this
   will be fixed before 1.1.0 is released and in 1.0.1. (FIXME: is this still a
   problem in the HEAD branch?)
-* single quotes in text get convert to an HTML encoding when stored in the DB..
-  it is a quickhack that we have to do cause are persistance layer can't handle
-  them when doing prepared statements.. (FIXME: is this still in HEAD?)
 * some obscure "under certain conditions" corner cases listed in our bug tracker
   at https://prod.indymedia.nl/mantis
 * some others that I'm forgetting now.

@@ -90,7 +90,15 @@ public class MirGlobal {
   public static String getConfigPropertyWithDefault(String aPropertyName, String aDefault) {
     String result;
 
-    result = config().getProp(aPropertyName);
+    //this try-catch is sort of a hack, if we make everything use MirGlobal
+    //instead of MirConfig, we can get rid of the Runtime exception we through
+    //in getProp, and deal with it here.. needs more thinking.. -mh
+    try {
+      result = config().getProp(aPropertyName);
+    } catch (Throwable t) {
+      result = aDefault;
+    }
+       
 
     if (result==null)
       result = aDefault;

@@ -55,7 +55,7 @@ import mir.media.*;
  *    appropriate media objects are set.
  *
  * @author mh
- * @version $Id: MediaRequest.java,v 1.9 2002/12/01 15:05:51 zapata Exp $
+ * @version $Id: MediaRequest.java,v 1.11 2002/12/23 03:38:32 mh Exp $
  *
  */
 
@@ -141,6 +141,21 @@ public class MediaRequest implements FileHandler
       if (contentType.equals("text/plain") ||
           contentType.equals("application/octet-stream")) {
         _throwBadContentType(fileName, contentType);
+      }
+
+      // call the routines that escape html
+      for (Iterator i=mediaValues.keySet().iterator(); i.hasNext(); ){
+        String k=(String)i.next();
+        String v=(String)mediaValues.get(k);
+        
+        if (k.equals("description")) {
+          String tmp = StringUtil.deleteForbiddenTags(v);
+          mediaValues.put(k,StringUtil.deleteHTMLTableTags(tmp));
+        } else {
+          //we don't want people fucking with the author/title, etc..
+          mediaValues.put(k,StringUtil.removeHTMLTags(v));
+        }
+        
       }
 
       String mediaTitle = (String)mediaValues.get("media_title"+fileNum);
@@ -242,6 +257,7 @@ public class MediaRequest implements FileHandler
         mediaHandler.set(filePart.getInputStream(), mediaEnt, mediaType);
       }
       catch (MirMediaException e) {
+        e.printStackTrace(System.out);
         throw new FileHandlerException(e.getMessage());
       }
       try {

@@ -84,7 +84,7 @@ import mircoders.search.*;
  *    open-postings to the newswire
  *
  * @author mir-coders group
- * @version $Id: ServletModuleOpenIndy.java,v 1.50 2002/12/14 17:36:17 zapata Exp $
+ * @version $Id: ServletModuleOpenIndy.java,v 1.52 2002/12/23 03:43:46 mh Exp $
  *
  */
 
@@ -197,6 +197,7 @@ public class ServletModuleOpenIndy extends ServletModule
             withValues.put(k,StringUtil.removeHTMLTags(v));
           }
           withValues.put("is_published","1");
+          withValues.put("to_comment_status","1");
 
           //checking the onetimepasswd
           if(passwdProtection.equals("yes")){
@@ -261,10 +262,13 @@ public class ServletModuleOpenIndy extends ServletModule
     }
 
     String maxMedia = MirConfig.getProp("ServletModule.OpenIndy.MaxMediaUploadItems");
+    String defaultMedia = MirConfig.getProp("ServletModule.OpenIndy.DefaultMediaUploadItems");
     String numOfMedia = req.getParameter("medianum");
+
     if(numOfMedia==null||numOfMedia.equals("")){
-      numOfMedia="1";
-    } else if(Integer.parseInt(numOfMedia) > Integer.parseInt(maxMedia)) {
+      numOfMedia=defaultMedia;
+    }
+    else if(Integer.parseInt(numOfMedia) > Integer.parseInt(maxMedia)) {
       numOfMedia = maxMedia;
     }
 
@@ -352,7 +356,10 @@ public class ServletModuleOpenIndy extends ServletModule
         if (k.equals("content_data")){
           //this doesn't quite work yet, so for now, all html goes
           //withValues.put(k,StringUtil.approveHTMLTags(v));
-          //withValues.put(k,StringUtil.removeHTMLTags(v));
+          withValues.put(k,StringUtil.deleteForbiddenTags(v));
+        } else if (k.equals("description")) {
+          String tmp = StringUtil.deleteForbiddenTags(v);
+          withValues.put(k,StringUtil.deleteHTMLTableTags(tmp));
         } else {
           withValues.put(k,StringUtil.removeHTMLTags(v));
         }
@@ -417,7 +424,10 @@ public class ServletModuleOpenIndy extends ServletModule
         throw new ServletModuleException(t.getMessage());
       }
     }
-    catch (FileHandlerException e) { throw new ServletModuleException("MediaException: "+ e.getMessage());}
+    catch (FileHandlerException e) {
+      e.printStackTrace(System.out);
+      throw new ServletModuleException("MediaException: "+ e.getMessage());
+    }
     catch (IOException e) { throw new ServletModuleException("IOException: "+ e.getMessage());}
     catch (StorageObjectException e) { throw new ServletModuleException("StorageObjectException" + e.getMessage());}
     catch (ModuleException e) { throw new ServletModuleException("ModuleException"+e.getMessage());}

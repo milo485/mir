@@ -1,4 +1,4 @@
-[last changed: $Date: 2002/12/09 21:39:18 $]  2002 mir-coders group
+[last changed: $Date: 2002/12/24 01:52:41 $]  2002 mir-coders group
 -------------------------------------------------------------------------------
 
 ================================
@@ -6,9 +6,10 @@
 ================================
 
 [New features/Improvements]
-* added support for a built-in search engine using lucene.  indexes articles incrementally when
-  they are produced, uses standard internationalized template scheme to display results of queries, 
-  which can be sorted by real publication date and include things like image thumbnails
+* added support for a built-in search engine using lucene.  indexes articles
+  incrementally when they are produced, uses standard internationalized
+  template scheme to display results of queries, which can be sorted by real
+  publication date and include things like image thumbnails
   
 [Bugfixes]
 
@@ -18,27 +19,131 @@
 
 [Notes]
 
+===============================
+1.0.0 final released 2002/12/24
+===============================
 
-================================
-1.0.0-rc4 (as of yet unreleased)
-================================
+[New features/Improvements]
+
+[Bugfixes]
+* minor: in source/mir/misc/HTMLTemplateProcessor.java, use Video.Host
+  config option not the non-existant VideoHost option.
+  
+[Build process]
+
+[Maintenance]
+* update README file.
+
+[Notes]
+
+=============================
+1.0.0-rc6 released 2002/12/20
+=============================
+
+[New features/Improvements]
+* throw a RuntimeException in MirConfig.getProp(..) if the property is not 
+  found. This should ease upgrading between versions when a new Config property
+  is added.
+
+[Bugfixes]
+* Add a new method to escape characters that are special characters in SQL. It
+  does a better job than the old hack in StringUtil.quote(..) which replaced 
+  single quotes with the HTML representation of a single quote (&#39; 
+  I believe). The hack papered over a bug in the postgres JDBC driver which
+  makes it not recognize escaping w/ a backslash (it uses double single quotes
+  instead).
+  
+[Build process]
+
+[Maintenance]
+* remove some unused methods in the StringUtil class.
+
+[Notes]
+
+=============================
+1.0.0-rc5 released 2002/12/13
+=============================
+
+[New features/Improvements]
+* remove gratuitous uses of encodeHTML in admin templates. this speeds things
+  up.
+* make StringUtil.deleteForbiddenTags handle the case when a tag is spread over
+  more that one line.
+
+
+[Bugfixes]
+* encodeHTML in admin templates shouldn't be used for the list views.
+* StringUtil.deleteForbiddenTags regexps didn't ignore case.
+* do not use encodeHTML for internal comments and messageboard in the admin.
+* next link in messageboard list was broken. (link pointed to "User" module
+  instead of Message module.
+* remove unwanted tags in MediaRequest as well.
+* fix call of StringUtil.deleteForbiddenTags in
+  ServletModuleOpenIndy.insposting.
+* Fix to_topic (just to_topic, not data.to_topic) select field in
+  posting.template that prevented the chossing of a topic in openposting from
+  working. luckily this bug didn't affect most sites since most installations
+  customize the template.
+  
+
+[Build process]
+
+[Maintenance]
+* remove debug prints in ServletModuleOpenIndy.java
+* remove lot's of no longer used source files and templates.
+
+[Notes]
+
+=============================
+1.0.0-rc4 released 2002/12/10
+=============================
 
 [New features/Improvements]
 * set a "Cache-control", "Pragma" and "Expires" header to the http response
   in the Mir and OpenMir servlets to insure that nothing gets cached by a
   client browser.
+* Add a new config parameter: Mir.DefaultHTMLCharset to set the HTML 
+  content-type charset in one place and re-use it in templates as 
+  ${config.defEncoding}.
+* Allow some HTML tags in the abstract (description field) during an
+  openposting. strip out the dangerous ones like <head>, <body> and <script> as
+  well as table tags. also strip out dangerous tags from the article body
+  (content_data).
+* re-introduce smaller/better encodeHTML method to StringUtil class. make it
+  directly callable in FreeMarker templates (like the "lang" template method)
+* comment and media lists: after deleting an item, return to the same place
+  you were in the list.
 
 [Bugfixes]
+* fix content-type in response header: we were sending the Java character
+  encoding instead of the HTML one.
+* backport from the HEAD branch: fix finding out the Module Name in
+  the ServletModule base class. needed for generic routines like delete.
+* backport: don't try to free a JDBC connection in EntityImages if it is null.
+* Fix embarrassing bug in the admin interface that caused data to dissappear
+  when double quotes were in a title form field for example.. (anything
+  enclosed in a value="...")
+* fix a bug in comment search: if you were at an offset > 0, i.e not on the 
+  first page, the search would be broken.
+* fix minor bug in media searching: mediafolder search setting would be reset
+  each time. make sure it is not so.
+* backport from HEAD: fix minor email address filtering bug.
 
 [Build process]
 
 [Maintenance]
+* comment out a bunch of debug logging in Database.java
+* add this file, REPORTING_BUGS, KNOWN_BUGS, CODINGSTYLE and a README file.
+* Add gnu Style ChangeLog using cvs2cl (use "-F MIR_1_0 --utc" options., for 
+  HEAD, it would be "-F trunk --utc")
 
 [Notes]
+* you'll need to add the new "Mir.DefaultHTMLCharset" config option to your
+  config.properties file. see config.properties-dist
 
-=========
-1.0.0-rc3
-=========
+=============================
+1.0.0-rc3 released 2002/12/05
+=============================
 
 [New features/Improvements]
 * support "video/avi" mime type.
@@ -121,6 +226,9 @@ From approx. March 2001 (beginning of indymedia.de) to 1.0.0-rc1, Dec 2002
 * creation of a servlet module to list all non publish content items
 * start of a one-time passwd system for openposting to protect against SPAM
   attacks
+* support production of RDF/XML syndication for startspecials/features, works
+  with the new global indymedia system. Should probably be re-factored to be
+  more generic. i.e being able to decide what makes it into the RDF file.
 * allow for changing the maximum allowed size of an uploaded file as well as
   the maximum number of files one can upload
 * support changing the character encoding used in for produced files

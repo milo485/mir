@@ -39,6 +39,7 @@ import mir.storage.StorageObjectException;
 import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.util.Locale;
 import java.util.Random;
@@ -49,12 +50,22 @@ import java.util.Random;
  * Copyright:    Copyright (c) 2001, 2002
  * Company:      Mir-coders group
  * @author       idfx, the Mir-coders group
- * @version      $Id: AbstractServlet.java,v 1.18 2002/11/27 08:22:03 mh Exp $
+ * @version      $Id: AbstractServlet.java,v 1.19 2002/12/23 03:12:46 mh Exp $
  */
 
 public abstract class AbstractServlet extends HttpServlet {
     protected static String lang;
     protected static Logfile theLog;
+
+    protected void setNoCaching(HttpServletResponse res) {
+      //nothing in Mir can or should be cached as it's all dynamic...
+      //
+      //this needs to be done here and not per page (via meta tags) as some
+      //browsers have problems w/ it per-page -mh
+      res.setHeader("Pragma", "no-cache");
+      res.setDateHeader("Expires", 0);
+      res.setHeader("Cache-Control", "no-cache");
+    }
 
     /**
      * the configration
@@ -62,11 +73,9 @@ public abstract class AbstractServlet extends HttpServlet {
     protected boolean getConfig(HttpServletRequest req)
             throws UnavailableException {
 
-        //String RealPath = super.getServletContext().getRealPath("/");
         String name = super.getServletName();
 
         // init config
-        //MirConfig.initConfig(RealPath, RootUri, Name, getInitParameter("Config"));
         MirConfig.initConfig(super.getServletContext(), req.getContextPath(),
                               name, getInitParameter("Config"));
 
@@ -137,16 +146,6 @@ public abstract class AbstractServlet extends HttpServlet {
     protected String getAcceptLanguage(HttpServletRequest req) {
         Locale loc = req.getLocale();
         lang = loc.getLanguage();
-        /* not needed anymore due to new i18n
-          File f = new File(HTMLTemplateProcessor.templateDir+"/"+lang);
-        //is there an existing template-path?
-        if(!f.isDirectory()){
-          //no there isn't. we use standard-language
-          lang = MirConfig.getProp("StandardLanguage");
-          theLog.printDebugInfo("language not existing");
-        }
-        theLog.printDebugInfo("Language: " + lang);
-        */
         return lang;
     }
 }

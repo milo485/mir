@@ -22,6 +22,10 @@
           <input type="hidden" name="id" value="${data.id}">
           <input type="hidden" name="where" value="${data.where}">
           <input type="hidden" name="order" value="${data.order}">
+          <input type="hidden" name="query_text" value="${utility.encodeHTML(data.query_text)}">
+          <input type="hidden" name="query_field" value="${utility.encodeHTML(data.query_field)}">
+          <input type="hidden" name="query_is_pubished" value="${data.query_is_pubished}">
+          <input type="hidden" name="query_media_folder" value="${data.query_media_folder}">
           <input type="hidden" name="offset" value="${data.offset}">
           <input type="submit" name="cancel" value="${lang("cancel")}">
           <input type="submit" name="confirm" value="${lang("delete")}">

@@ -39,8 +39,8 @@
   	  <tr <if grey=="1"><assign grey="0">class="list1"<else>class="list2"<assign grey="1"></if>>
   	    <td>
   	      <span class="x-small">
-  	        ${entry.creationdate.formatted["dd.MM.yyyy hh:mm"]}<br>
-  	        ${entry.changedate.formatted["dd.MM.yyyy hh:mm"]}<br>
+  	        ${entry.creationdate.formatted["dd.MM.yyyy HH:mm"]}<br>
+  	        ${entry.changedate.formatted["dd.MM.yyyy HH:mm"]}<br>
   			    <if entry.is_published!="0">F<else>-</if><if entry.is_html!="0">H<else>-</if>
   			  </span>
   			</td>
@@ -75,7 +75,7 @@
   			    <if entry.operations>
   			      |
   			    </if>
-  			    <a href="${config.actionRoot}?module=Content&do=edit&id=${entry.id}&returnurl=${utility.encodeURI(thisurl)}">${lang("edit")}</a>
+  			    <a href="${config.actionRoot}?module=Content&do=edit&id=${entry.id}&returnurl=${utility.encodeURI(thisurl)}">${lang("edit")}</a> |
             <a href="${config.actionRoot}?module=Comment&do=articlecomments&articleid=${entry.id}">${lang("contentlist.comments")}</a>
   			  </span>
   			</td>

@@ -30,8 +30,10 @@ BEGIN TRANSACTION;
     relacl =   (SELECT relacl FROM pg_class WHERE relname='comment_status_old')
   WHERE 
     relname = 'comment_status' or relname='comment_status_id_seq';
-  
+
   DROP TABLE "comment_status_old";
+
+
   
 -- task 2: add sequenced and unique id's to article_type
 
@@ -154,6 +156,12 @@ BEGIN TRANSACTION;
     relname = 'comment';
   
   DROP TABLE "comment_old";
+
+  CREATE  INDEX "comment_checksum_index" on "comment" using btree ( "checksum" "int4_ops" );
+  CREATE  INDEX "idx_comment_to_media" on "comment" using btree ( "to_media" "int4_ops" );
+  create index idx_comment_webdb_create on comment(webdb_create);
+  CREATE  INDEX "idx_comment_tomedia_ispublished" on "comment" using btree ( "to_media" "int4_ops", "is_published" "bool_ops" );
+  CREATE UNIQUE INDEX "idx_comment_id" on "comment" using btree ( "id" "int4_ops" );
   
 -- that's it!
   

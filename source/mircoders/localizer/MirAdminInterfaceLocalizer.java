@@ -48,6 +48,6 @@ public interface MirAdminInterfaceLocalizer {
   public interface MirSimpleEntityOperation {
     public String getName();
     public boolean isAvailable(EntityAdapter anEntity);
-    public void perform(EntityAdapter anEntity);
+    public void perform(EntityAdapter aUser, EntityAdapter anEntity);
   }
 }

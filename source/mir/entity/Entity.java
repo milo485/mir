@@ -50,7 +50,7 @@ import mir.misc.*;
  * Base Class of Entities
  * Interfacing TemplateHashModel and TemplateModelRoot to be freemarker compliant
  *
- * @version $Id: Entity.java,v 1.11 2002/12/02 12:33:22 zapata Exp $
+ * @version $Id: Entity.java,v 1.12 2002/12/17 19:20:31 zapata Exp $
  * @author rk
  *
  */
@@ -284,6 +284,7 @@ public class Entity implements TemplateHashModel, TemplateModelRoot
 
   protected void throwStorageObjectException (Exception e, String wo) throws StorageObjectException {
     theLog.printError( e.toString() + " Funktion: "+ wo);
+    e.printStackTrace(System.out);
     throw  new StorageObjectException("Storage Object Exception in entity" +e.toString());
   }
 

@@ -66,7 +66,18 @@ public class ServletModuleLocalizer extends ServletModule {
     }
   }
 
-  public void performCommentOperation(String anId, String anOperation) {
+  private EntityAdapter getActiveUser(HttpServletRequest aRequest) throws ServletModuleException {
+    try {
+      HttpSession session = aRequest.getSession(false);
+      return MirGlobal.localizer().dataModel().adapterModel().makeEntityAdapter
+          ("user", (EntityUsers) session.getAttribute("login.uid"));
+    }
+    catch (Exception e) {
+      throw new ServletModuleException("ServletModuleLocalizer.getActiveUser: " + e.getMessage());
+    }
+  }
+
+  public void performCommentOperation(EntityAdapter aUser, String anId, String anOperation) {
     MirAdminInterfaceLocalizer.MirSimpleEntityOperation operation;
     EntityAdapter comment;
     EntityComment entity;
@@ -77,7 +88,7 @@ public class ServletModuleLocalizer extends ServletModule {
       if (entity != null) {
         comment = MirGlobal.localizer().dataModel().adapterModel().makeEntityAdapter("comment", entity);
         operation = MirGlobal.localizer().adminInterface().simpleCommentOperationForName(anOperation);
-        operation.perform(comment);
+        operation.perform(aUser, comment);
         logger.info("Operation " + anOperation + " successfully performed on comment " + anId);
       }
       logger.error("Error while performing " + anOperation + " on comment " + anId + ": comment is null");
@@ -92,7 +103,7 @@ public class ServletModuleLocalizer extends ServletModule {
     String operationString = aRequest.getParameter("operation");
     String returnUrlString = aRequest.getParameter("returnurl");
 
-    performCommentOperation(commentIdString, operationString);
+    performCommentOperation(getActiveUser(aRequest), commentIdString, operationString);
 
     redirect(aResponse, returnUrlString);
   }
@@ -114,7 +125,7 @@ public class ServletModuleLocalizer extends ServletModule {
           String commentIdString = (String) parts.get(0);
           String operationString = (String) parts.get(1);
 
-          performCommentOperation(commentIdString, operationString);
+          performCommentOperation(getActiveUser(aRequest), commentIdString, operationString);
         }
       }
     }
@@ -122,7 +133,7 @@ public class ServletModuleLocalizer extends ServletModule {
     redirect(aResponse, returnUrlString);
   }
 
-  public void performArticleOperation(String anId, String anOperation) {
+  public void performArticleOperation(EntityAdapter aUser, String anId, String anOperation) {
     MirAdminInterfaceLocalizer.MirSimpleEntityOperation operation;
     EntityAdapter article;
     EntityContent entity;
@@ -135,7 +146,7 @@ public class ServletModuleLocalizer extends ServletModule {
             makeEntityAdapter("content", entity);
         operation = MirGlobal.localizer().adminInterface().
             simpleArticleOperationForName(anOperation);
-        operation.perform(article);
+        operation.perform(aUser, article);
         logger.info("Operation " + anOperation + " successfully performed on article " + anId);
       }
       logger.error("Error while performing " + anOperation + " on article " + anId + ": article is null");
@@ -150,7 +161,7 @@ public class ServletModuleLocalizer extends ServletModule {
     String operationString = aRequest.getParameter("operation");
     String returnUrlString = aRequest.getParameter("returnurl");
 
-    performArticleOperation(articleIdString, operationString);
+    performArticleOperation(getActiveUser(aRequest), articleIdString, operationString);
     redirect(aResponse, returnUrlString);
   }
 
@@ -171,7 +182,7 @@ public class ServletModuleLocalizer extends ServletModule {
           String articleIdString = (String) parts.get(0);
           String operationString = (String) parts.get(1);
 
-          performArticleOperation(articleIdString, operationString);
+          performArticleOperation(getActiveUser(aRequest), articleIdString, operationString);
         }
       }
     }

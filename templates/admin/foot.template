@@ -6,6 +6,6 @@
 	<td align="left" class="darkgrey"><span class="small">
 	<a href="#top"><span class="whitetext"><b>${lang("foot.top")}</b></span></a></span></td>
 	<td align="right"><span class="small">
-	<a href="mailto:${lang("imc.contact-email.address")}"><span class="spezialtext"><b>${config["Mir.Shortname"]}</b></span></a> - ${config["Mir.Version"]}</span></td>
+	<a href="mailto:${lang("Mir.Contact-email.address")}"><span class="spezialtext"><b>${config["Mir.Shortname"]}</b></span></a> - ${config["Mir.Version"]}</span></td>
 </tr>
 </table>

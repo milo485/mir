@@ -82,6 +82,8 @@ public class MirBasicProducerAssistantLocalizer implements MirProducerAssistantL
     aValueSet.put("config", configMap);
     aValueSet.put("utility", utilityMap);
 
+
+
     EntityList topicList=null;
     EntityList entityList=null;
     EntityList parentList=null;
@@ -93,6 +95,7 @@ public class MirBasicProducerAssistantLocalizer implements MirProducerAssistantL
 
       topicList = topicsModule.getTopicsList();
       languageList = languageModule.getByWhereClause("", "id", -1);
+
     }
     catch (Throwable t) {
       logger.printError("initializeGenerationValueSet: Exception "+t.getMessage());
@@ -136,7 +139,7 @@ public class MirBasicProducerAssistantLocalizer implements MirProducerAssistantL
     catch (Throwable t) {
       logger.printError("initializeGenerationValueSet: Exception while collecting comment statuses"+t.getMessage());
     }
-    aValueSet.put("commentstatus", articleTypeMap);
+    aValueSet.put("commentstatus", commentStatusMap);
 
   };
 

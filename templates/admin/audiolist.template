@@ -42,7 +42,7 @@
 	<td>
 	<select name="query_media_folder">
  	<list extra.mediafolderPopupData as m>
-	<option value="${m.key}" <if m.key == query_media_folder>selected</if>>${m.value}</option>
+	<option value="${m.key}" <if m.key == data.query_media_folder>selected</if>>${m.value}</option>
   	</list>
    	</select>
 	</td>
@@ -84,7 +84,7 @@
   <td><span class="text">&nbsp;
 	<if data.cid><a href="${config.actionRoot}?module=Content&do=attach&mid=${entry.id}&cid=${data.cid}">${lang("attach")}</a>
 	<else>
-	<a href="${config.actionRoot}?module=Audio&do=delete&id=${entry.id}">${lang("delete")}</a>
+	<a href="${config.actionRoot}?module=Audio&do=delete&id=${entry.id}&query_text=${utility.encodeHTML(data.query_text_encoded)}&query_field=${utility.encodeHTML(data.query_field)}&query_is_published=${data.query_is_published}&query_media_folder=${data.query_media_folder}&offset=${data.offset}">${lang("delete")}</a>
     | <a href="${config.actionRoot}?module=Audio&do=edit&id=${entry.id}">${lang("edit")}</a>
 	</if>
 	</span></td>

@@ -6,7 +6,7 @@
 	<meta name="author" content="${lang("posting.meta.author")}">
 	<meta name="keywords" content="${lang("posting.meta.keywords")}">
 	<!--<meta name="date" content="### Date ###Time">-->
-	<meta http-equiv="Content-Type" content="text/html; charset=iso-8559-1">
+	<meta http-equiv="Content-Type" content="text/html; charset=${config["Mir.DefaultHTMLCharset"]}">
 	<meta name="robots" content="index">
 	<meta name="robots" content="follow">
 
@@ -73,7 +73,7 @@
 	<font size="-2">${lang("posting.topic.info")}</font>
         </td>
        <td colspan="2">
-       <select name="data.to_topic" size="3" multiple>
+       <select name="to_topic" size="3" multiple>
        <list extra.themenPopupData as t>
        <option value="${t.key}" <list to_topic as to><if (t.key == to)>selected</if></list>>${t.value}</option>
        </list>

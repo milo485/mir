@@ -38,10 +38,10 @@
 
       <P>
 <if data.prev>
-	<a href="${config.actionRoot}?module=Users&do=list&where=${data.where}&prevoffset=${data.prev}&prev=zur&uuml;ck">${lang("list.previous")}</a>&nbsp;
+	<a href="${config.actionRoot}?module=Message&do=list&where=${data.where}&prevoffset=${data.prev}&prev=zur&uuml;ck">${lang("list.previous")}</a>&nbsp;
 </if>
 <if data.next>
-<a href="${config.actionRoot}?module=Users&do=list&where=${data.where}&nextoffset=${data.next}&next=weiter">${lang("list.next")}</a>
+<a href="${config.actionRoot}?module=Message&do=list&where=${data.where}&nextoffset=${data.next}&next=weiter">${lang("list.next")}</a>
 </if>
 
 <else>

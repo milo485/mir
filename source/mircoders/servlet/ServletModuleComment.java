@@ -245,6 +245,7 @@ public class ServletModuleComment extends ServletModule
       responseData.put("searchorder", requestParser.getParameter("searchorder"));
 
       urlBuilder.setValue("offset", anOffset);
+      responseData.put("offset" , new Integer(anOffset).toString());
       responseData.put("thisurl" , urlBuilder.getQuery());
 
       if (count>=anOffset+nrCommentsPerPage) {

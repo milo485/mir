@@ -256,7 +256,7 @@
     </verbs>
 
     <body>
-      <If condition="config['Rsync']">
+      <If condition="config['Rsync'] in ('1', 'y', 'yes', 'Y')">
         <then>
           <Execute command="${config['Rsync.Script.Path']}"/>
         </then>

@@ -131,6 +131,7 @@ public final class HTMLTemplateProcessor {
    * @param out
    * @exception HTMLParseException
    */
+
   public static void process(HttpServletResponse res, String templateFilename,
                              EntityList entList, String additionalModelName,
                              TemplateModelRoot additionalModel, PrintWriter out,
@@ -156,6 +157,7 @@ public final class HTMLTemplateProcessor {
       }
     }
   }
+
 
   /**
    * Gibt Template <code>templateFilename</code> an den PrintWriter

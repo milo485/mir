@@ -1,13 +1,18 @@
-last changed $Date: 2002/12/08 07:05:56 $
+last changed $Date: 2002/12/24 01:45:54 $
 -----------------------------------------
 
-Mir is an Open-Source content managment system, designed to run an
-indymedia(type) website. Besides powering several indymedia sites, a number of
-progessive organizations use Mir customized for their own needs. Mir aims to
-provide sophisticated functionality, for example, complete multi-lingual content
-production, editing, administration, and presentation, while retaining the
-ability to be run on less than top of the line hardware through extensive static
-caching.
+GENERAL INFO
+============
+
+Mir is an Open-Source java servlet based content managment system, designed to
+run an indymedia(type) website. Besides powering several indymedia sites, a
+number of progessive organizations use Mir customized for their own needs. Mir
+aims to provide sophisticated functionality, for example, complete
+multi-lingual content production, editing, administration, and presentation,
+while retaining the ability to be run on less than top of the line hardware
+through extensive static caching.
+
+Mir uses technologies such as Apache Tomcat and the Freemarker template engine.
 
 more info at: http://mir.indymedia.org
 
@@ -21,3 +26,63 @@ http://lists.indymedia.org/mailman/listinfo/mir-coders
 mailing list for cvs commits:
 
 http://lists.indymedia.org/mailman/listinfo/Mir-cvs
+
+LICENSING
+=========
+
+Mir is licensed under the GNU GPL.
+
+FEATURES
+========
+
+* Static publishing: Mir produces static HTML files for easy mirroring and so
+  that the site can be viewed without creating a high load on servers. No fancy
+  caching mechanisms are necessary. The presentation and production are
+  completely independent from each other.
+* Very configurable (see the config.properties file)
+* Written in Java using standard servlet API and popular tools like those from
+  the Apache Jakarta project (http://jakarta.apache.org)
+* Uses the Freemarker template engine to allow easy modification of
+  site design without programming knowledge.
+* Structured Object oriented 4 layer design. Servlet modules, Entity/Database
+  (the persistance layer), Media handlers (an abstraction layer for
+  manipulating different media formats) and the Producer layer (for creating
+  the static html pages). see doc/CODESTRUCTURE for more details.
+* The persistance layer uses the poolman package for caching Database
+  connections. 
+* Entity object caching is integrated into the persistance layer.
+* Meta-data/Database schema and classification based on the Dublic Core
+  standard. Media folders, topics, features.
+* supports displaying the dynamic part of the site in multiple languages using
+  the Java Locale/language bundle standard (.properties files). Bundles exist
+  for spanish, english, dutch, quechua, turkish, german and aymara. The
+  upcoming 1.1  version (in CVS) supports producing the static site in several
+  languages.
+* Media abstraction layer to cleanly and easily handle/add different Media
+  formats like mp3, realmedia, video, etc.. uses mime-types to map to the
+  correct handler
+* Supports categorization into topics and media folders (eg. different folders
+  for different events), features, breaking news, newswire, etc..
+* Production of xml RDF syndication. e.g for the indymedia global newswire.
+* Powerful and rich admin/editor interface with features like the ability to
+  change the event date of an article, multiple ways to search.. help and much
+  more.
+* Ability to edit some static site files such as CSS, html include files
+  through a basic web based text editor.
+* Filtering of uploaded articles to remove unwanted HTML tags.
+* Can output articles into PDF (upcoming 1.1 version has better text wrapping
+  support).
+* Search via HTdig index of static files.  (upcoming 1.1 CVS version uses
+  integrated Jakarta Lucene for indexing the static files.)
+* Automatic thumbnail generation using Java Advanced Imaging (JAI). (1.1 will
+  probably use Jmagick)
+
+In the upcoming 1.1 release
+===========================
+
+* completely rewrite of the producer layer. Runs in it's own thread.
+  Configurable via an XML file to dynamically choose the structure the site
+  should take, what should be archived...
+* Introduction of the Localization infracstructure to allow easy low-level
+  customization of Mir.
+

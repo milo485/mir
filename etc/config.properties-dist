@@ -62,6 +62,13 @@ Mir.Localizer.Logfile=log/localizer.log
 # The location of the producer specifiations
 Mir.Localizer.ProducerConfigFile=etc/producer/producers.xml
 
+# Settings for the admin login:
+# If the default language is left empty, it will set the accept-language of
+# the client browser as the default.
+Mir.Login.DefaultLanguage=en
+Mir.Login.Languages=en;nl;de;qu;tr;ay;es;eu
+
+
 # the templates
 Mir.Localizer.Producer.GeneratorLibrary= default=freemarker(etc/producer/)
 Mir.Localizer.Admin.GeneratorLibrary= default=freemarker(templates/admin/)
@@ -96,6 +103,10 @@ MaxMediaUploadSize=20000
 
 # the maximum number of allowed media items to upload at once.
 ServletModule.OpenIndy.MaxMediaUploadItems=20
+
+# the default number of media items to upload at once
+ServletModule.OpenIndy.DefaultMediaUploadItems=1
+
 
 #
 #
@@ -238,6 +249,11 @@ Entity.Logfile=log/dbentity.log
 # as the dynamic output html.
 # also used for the HTML charset meta tag.
 Mir.DefaultEncoding=ISO8859_1
+# this encoding is used for the HTML charset meta tag.
+# it must be the html charset equivalent of the Java encoding above
+# don't change this unless...
+Mir.DefaultHTMLCharset=ISO-8859-1
+
 Mir.Logfile=log/mir.log
 Mir.ErrorTemplate=templates/error.template
 Mir.UserErrorTemplate=templates/usererror.template

@@ -233,6 +233,13 @@ public abstract class ServletModule {
         mergeData.put("where", req.getParameter("where"));
         mergeData.put("order", req.getParameter("order"));
         mergeData.put("offset", req.getParameter("offset"));
+        // this stuff is to be compatible with the other more advanced
+        // search method used for media and comments
+        mergeData.put("query_media_folder", req.getParameter("query_media_folder"));
+        mergeData.put("query_is_published", req.getParameter("query_is_published"));
+        mergeData.put("query_text", req.getParameter("query_text"));
+        mergeData.put("query_field", req.getParameter("query_field"));
+
         deliver(req, res, mergeData, templateConfirmString);
       }
       else {

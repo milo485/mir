@@ -59,7 +59,7 @@
   <property name="app.name"       value="Mir"/>
   <property name="deploy.home"    value="../${app.name}"/>
 
-  <!-- don't use unless your Jikes is >= v1.17 and you know what you are doing -->
+  <!-- don't use unless your Jikes is >= v1.18 -->
   <!-- <property name="build.compiler"   value="jikes"/>-->
 
 
@@ -94,13 +94,17 @@
 	<fileset dir="${tomcat.home}">
 		<include name="lib/apps/*.jar" />
 	</fileset>
-  <!-- for libs shared between tomcat and webapps (tomcat 4.0.x) -->
+  <!-- for libs shared between tomcat and webapps (tomcat 4.x.x) -->
 	<fileset dir="${tomcat.home}">
 		<include name="common/lib/*.jar" />
 	</fileset>
   <!-- for libs shared between webapps (tomcat 4.0.x) -->
 	<fileset dir="${tomcat.home}">
 		<include name="lib/*.jar" />
+	</fileset>
+  <!-- for libs shared between webapps (tomcat 4.1.x) -->
+	<fileset dir="${tomcat.home}">
+		<include name="shared/lib/*.jar" />
 	</fileset>
   </path>
 
@@ -143,7 +147,6 @@
       <fileset dir="lib">
         <exclude name="ant.jar"/>
         <exclude name="xerces.jar"/>
-        <exclude name="servlet-2.2.jar"/>
       </fileset>
     </copy>
   </target>

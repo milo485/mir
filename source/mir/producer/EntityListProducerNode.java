@@ -88,7 +88,7 @@ public class EntityListProducerNode extends ProducerNodeDecorator {
           new EntityIteratorAdapter(
             ParameterExpander.expandExpression( aValueMap, whereClause ),
             ParameterExpander.expandExpression( aValueMap, orderByClause ),
-            20,
+            Math.min(50, limit),
             model,
             definition,
             limit,

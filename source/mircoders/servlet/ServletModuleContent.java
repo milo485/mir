@@ -62,7 +62,7 @@ import mircoders.localizer.*;
  *  ServletModuleContent -
  *  deliver html for the article admin form.
  *
- * @version $Id: ServletModuleContent.java,v 1.29 2002/12/14 01:37:44 zapata Exp $
+ * @version $Id: ServletModuleContent.java,v 1.30 2002/12/28 03:14:42 mh Exp $
  * @author rk, mir-coders
  *
  */
@@ -429,7 +429,7 @@ public class ServletModuleContent extends ServletModule
         responseData.put("nexturl" ,
                          "module=Content&do=list&where=" + HTMLRoutines.encodeURL(aWhereClause) +
                          "&order=" + HTMLRoutines.encodeURL(anOrderByClause) +
-                         "&offset=" + anOffset + nrArticlesPerPage);
+                         "&offset=" + (anOffset + nrArticlesPerPage));
       }
       if (anOffset>0) {
         responseData.put("prevurl" ,

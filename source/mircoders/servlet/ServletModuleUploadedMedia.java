@@ -71,7 +71,7 @@ import java.util.HashMap;
  *  ServletModuleBilder -
  *  liefert HTML fuer Bilder
  *
- * @version $Id: ServletModuleUploadedMedia.java,v 1.13 2002/12/01 15:05:51 zapata Exp $
+ * @version $Id: ServletModuleUploadedMedia.java,v 1.14 2002/12/23 03:44:51 mh Exp $
  * @author RK, the mir-coders group
  */
 
@@ -181,7 +181,7 @@ public abstract class ServletModuleUploadedMedia
     mergeData.put("offset", offset);
 
     String order = req.getParameter("order");
-    if (order == null) order = "webdb_lastchange desc";
+    if (order == null || order.equals("")) order = "webdb_lastchange desc";
 
     // if in connection mode to content
     String cid = req.getParameter("cid");

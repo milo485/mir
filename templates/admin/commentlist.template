@@ -25,6 +25,11 @@
       <td>
         published
       </td>
+<comment>      
+      <td>
+        status
+      </td>
+</comment>      
       <td>
         order
       </td>
@@ -48,6 +53,15 @@
             <option value="1" <if searchispublished=="1"> selected</if>>${lang("commentlist.published")}</option>
           </select>
       </td>
+<comment>
+      <td>
+          <select name="searchstatus">
+            <option value="">--</option>
+            <option value="0" <if searchstatus=="0"> selected</if>>${lang("commentlist.hidden")}</option>
+            <option value="1" <if searchstatus=="1"> selected</if>>${lang("commentlist.published")}</option>
+          </select>
+      </td>
+</comment>
       <td>
           <select name="searchorder">
             <option value="datedesc" <if searchorder=="datedesc"> selected</if>>${lang("commentlist.order.datedesc")}</option>
@@ -85,34 +99,32 @@
           </if>
         </td></tr>
       </if>
-      <tr class="pink">
-      	<td><p class="head">${lang("comment.date")}</p></td>
-    		<td><p class="head">${lang("comment.title")}/ ${lang("comment.creator")}<br>
-    					${lang("comment.text")}</p></td>
+      <tr class="darkgrey">
+        <td><p class="witesmall">${lang("comment.date")}</p></td>
+        <td><p class="witesmall">${lang("comment.title")}/ ${lang("comment.creator")}<br>
+            ${lang("comment.text")}</p></td>
+        <td>&nbsp;</td>
       </tr>
     
         <list comments as entry>
           <tr <if grey=="1"><assign grey="0">class="list1"<else><assign grey="1">class="list2"</if>>
         
-        		<td>${entry.creationdate.formatted["dd.mm.yyyy"]}<br>
+        		<td>${entry.creationdate.formatted["dd.MM.yyyy HH:mm"]}<br>
           	  <if entry.is_published=="0"><span class="spezialtext">hidden</span><else>-</if>
         		</td>
         
             <td>
-              <span class="small">
                 ${lang("comment.article")}
                 <a href="${config.actionRoot}?module=Content&do=edit&id=${entry.to_content.id}">
                   ${utility.encodeHTML(entry.to_content.title)}
                 </a>
                 <br>
                   <a name="${entry.id}"></a>
-                  <span class="x-small">
                     <if entry.status>${lang("commentstatus." + entry.status.name)} - </if> 
-                  </span>
                     <b>${entry.title}</b><br>
       
                 <if entry.creator>${lang("comment.creator")}: ${entry.creator}<br></if>
-                <span class="small">${entry.description}</span>
+                <span>${utility.encodeHTML(entry.description)}</span>
                 <if entry.main_url><br>URL: ${entry.main_url}</if>
                 <br>
                 <if config["Mir.Localizer.Admin.ListOperationsFlavor"]=="0">
@@ -135,20 +147,19 @@
       			    </if>
                 <if entry.operations>|</if>
                 <a href="${config.actionRoot}?module=Comment&do=edit&id=${entry.id}">${lang("edit")}</a>                
-      			  </span>
             </td>
       
             <td>
               <span class="text">&nbsp;
-                <a href="${config.actionRoot}?module=Comment&do=delete&id=${entry.id}">${lang("delete")}</a>
+                <a href="${config.actionRoot}?module=Comment&do=delete&id=${entry.id}&searchtext=${utility.encodeHTML(searchtext)}&searchfield=${utility.encodeHTML(searchfield)}&searchispublished=${searchispublished}&searchorder=${searchorder}&offset=${offset}">${lang("delete")}</a>
               </span>
             </td>
         
         	</tr>
         </list>
       
-        <tr class="pink">
-          <td colspan="3">${count} ${lang("records")} / ${lang("show_from_to", from, to)}</span></td>
+        <tr class="darkgrey">
+          <td colspan="3"><span class="witesmall">${count} ${lang("records")} / ${lang("show_from_to", from, to)}</span></td>
         </tr>
         <tr><td>
           <if prevurl>

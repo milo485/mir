@@ -51,7 +51,7 @@ import mircoders.storage.*;
  *  OpenMir.java - main servlet for open posting and comment feature to articles
  *
  *  @author RK 1999-2001, the mir-coders group
- *  @version $Id: OpenMir.java,v 1.16 2002/12/06 08:12:42 mh Exp $
+ *  @version $Id: OpenMir.java,v 1.17 2002/12/23 03:12:46 mh Exp $
  *
  */
 
@@ -95,15 +95,11 @@ public class OpenMir extends AbstractServlet {
     if (req.getParameter("language")!=null)
       setLocale(session, new Locale(req.getParameter("language"), "") );
 
-    //nothing in Mir can or should be cached as it's all dynamic...
-    //
-    //this needs to be done here and not per page (via meta tags) as some
-    //browsers have problems w/ it per-page -mh
-    res.setHeader("Pragma", "no-cache");
-    res.setDateHeader("Expires", 0);
-    res.setHeader("Cache-Control", "no-cache");
+    //make sure client browsers don't cache anything
+    setNoCaching(res);
+
     res.setContentType("text/html; charset="
-                      +MirConfig.getProp("Mir.DefaultEncoding"));
+                      +MirConfig.getProp("Mir.DefaultHTMLCharset"));
     try {
       ServletModuleDispatch.dispatch(ServletModuleOpenIndy.getInstance(),req,res);
     }

@@ -54,7 +54,7 @@ import mir.storage.*;
  * Diese Klasse enthält die Daten eines MetaObjekts
  *
  * @author RK, mh, mir-coders
- * @version $Id: EntityImages.java,v 1.12 2002/12/06 08:08:14 mh Exp $
+ * @version $Id: EntityImages.java,v 1.13 2002/12/17 19:20:31 zapata Exp $
  */
 
 
@@ -144,7 +144,9 @@ public class EntityImages extends EntityUploadedMedia
         java.sql.Connection jCon;
         jCon = ((com.codestudio.sql.PoolManConnectionHandle)con)
              .getNativeConnection();
-        lom = ((org.postgresql.Connection)jCon).getLargeObjectAPI();
+
+        lom = ((org.postgresql.Connection) jCon).getLargeObjectAPI();
+
         int oidImage = lom.create();
         int oidIcon = lom.create();
         LargeObject lobImage = lom.open(oidImage);
