@@ -49,8 +49,29 @@ import mircoders.storage.*;
 /*
  *  ContentObjekt -
  *
+ * @version $Id: ModuleContent.java,v 1.9 2002/11/04 04:35:22 mh Exp $
  *
  * @author RK
+ *
+ * $Log: ModuleContent.java,v $
+ * Revision 1.9  2002/11/04 04:35:22  mh
+ * merge media InputStream changes from MIR_1_0 branch
+ *
+ * Revision 1.7.4.3  2002/11/01 05:38:20  mh
+ * Converted media Interface to use streams (Java IO) instead of byte buffers of
+ * the entire uplaoded files. These saves loads of unecessary memory use. JAI
+ * still consumes quite a bit though.
+ *
+ * A new temporary file (for JAI) parameter is necessary and is in the config.properties file.
+ *
+ * A nice side effect of this work is the FileHandler interface which is
+ * basically a call back mechanism for WebdbMultipartRequest which allows the
+ * uploaded file to handled by different classes. For example, for a media
+ * upload, the content-type, etc.. needs to be determined, but if say the
+ * FileEditor had a feature to upload static files... another handler wood be
+ * needed. Right now only the MediaRequest handler exists.
+ *
+ *
  */
 
 public class ModuleContent extends AbstractModule
@@ -72,24 +93,24 @@ public class ModuleContent extends AbstractModule
 
   public EntityList getFeatures(int offset, int limit) throws ModuleException
   {
-    return getContent("is_published=true AND to_article_type=2", "date desc, webdb_create desc",
+    return getContent("is_published=true AND to_article_type=2", "webdb_create desc",
                       offset, limit);
   }
 
   public EntityList getNewsWire(int offset, int limit) throws ModuleException
   {
     return getContent("is_published=true AND to_article_type = 1",
-                                    "date desc, webdb_create desc",offset,limit);
+                                    "webdb_create desc",offset,limit);
   }
 
   public EntityList getStartArticle() throws ModuleException
   {
     EntityList returnList = getContent("is_published=true AND to_article_type=4",
-                                        "date desc, webdb_create desc",0,1);
+                                        "webdb_create desc",0,1);
     //if no startspecial exists
     if (returnList==null || returnList.size()==0)
       returnList = getContent("is_published=true AND to_article_type=3",
-                              "date desc, webdb_create desc",0,1);
+                              "webdb_create desc",0,1);
 
     return returnList;
   }
@@ -210,7 +231,7 @@ public class ModuleContent extends AbstractModule
 				}
 
 				if(whereClause.equals("nfrei")) {
-					whereClause="is_published='0'"; orderBy="date desc";
+					whereClause="is_published='0'"; orderBy="webdb_create desc";
 				}
 
 				if(whereClause.equals("lastchange")) {

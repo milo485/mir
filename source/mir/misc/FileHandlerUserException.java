@@ -29,13 +29,48 @@
  * not wish to do so, delete this exception statement from your version.
  */
 
-package mircoders.localizer;
+package mir.misc;
 
-import multex.Exc;
+import java.lang.*;
 
-public class MirLocalizerException extends Exc {
+/*
+ *  differentiates itself from a bug in that it
+ *  represents a probable user error
+ * 
+ * @version $Revision: 1.2 $
+ * @author $Author: mh $
+ *
+ * $Log: FileHandlerUserException.java,v $
+ * Revision 1.2  2002/11/04 04:35:21  mh
+ * merge media InputStream changes from MIR_1_0 branch
+ *
+ * Revision 1.1.2.1  2002/11/01 05:38:20  mh
+ * Converted media Interface to use streams (Java IO) instead of byte buffers of
+ * the entire uplaoded files. These saves loads of unecessary memory use. JAI
+ * still consumes quite a bit though.
+ *
+ * A new temporary file (for JAI) parameter is necessary and is in the config.properties file.
+ *
+ * A nice side effect of this work is the FileHandler interface which is
+ * basically a call back mechanism for WebdbMultipartRequest which allows the
+ * uploaded file to handled by different classes. For example, for a media
+ * upload, the content-type, etc.. needs to be determined, but if say the
+ * FileEditor had a feature to upload static files... another handler wood be
+ * needed. Right now only the MediaRequest handler exists.
+ *
+ *
+ */
 
-  public MirLocalizerException(String aMessage) {
-    super(aMessage);
+public final class FileHandlerUserException extends Exception {
+  String msg;
+
+	public FileHandlerUserException(String msg) {
+    super(msg);
+    this.msg = msg;
+  }
+
+  public String getMsg() {
+    return msg;
   }
 }
+

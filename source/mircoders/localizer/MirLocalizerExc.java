@@ -29,38 +29,13 @@
  * not wish to do so, delete this exception statement from your version.
  */
 
-package mircoders.localizer.basic;
+package mircoders.localizer;
 
-import mir.misc.*;
-import mircoders.global.*;
-import mircoders.localizer.*;
+import multex.Exc;
 
-public class MirBasicLocalizer implements MirLocalizer {
-  protected static Logfile logger = Logfile.getInstance( MirGlobal.getConfigProperty("Home") + "/" + MirGlobal.getConfigProperty("Mir.Localizer.Logfile"));
+public class MirLocalizerExc extends Exc {
 
-  public MirProducerLocalizer producers() throws MirLocalizerFailure, MirLocalizerExc {
-    return new MirBasicProducerLocalizer();
+  public MirLocalizerExc(String aMessage) {
+    super(aMessage);
   }
-
-  public MirGeneratorLocalizer generators() {
-    return new MirBasicGeneratorLocalizer();
-  }
-
-  public MirOpenPostingLocalizer openPostings() {
-    return new MirBasicOpenPostingLocalizer();
-  }
-
-  public MirProducerAssistantLocalizer producerAssistant() {
-    return new MirBasicProducerAssistantLocalizer();
-  }
-
-  public MirDataModelLocalizer dataModel() {
-    return new MirBasicDataModelLocalizer();
-  };
-
-  public MirAdminInterfaceLocalizer adminInterface() throws MirLocalizerFailure, MirLocalizerExc {
-    return new MirBasicAdminInterfaceLocalizer();
-  };
-
-
 }

@@ -38,19 +38,8 @@ import java.lang.*;
  *  differentiates itself from a bug in that it
  *  represents a probable user error
  * 
- * @version $Revision: 1.3 $ $Date: 2002/09/01 22:05:49 $
- * @author $Author: mh $
- *
- * $Log: MirMediaUserException.java,v $
- * Revision 1.3  2002/09/01 22:05:49  mh
- * Mir goes GPL
- *
- * Revision 1.2.2.1  2002/09/01 21:31:40  mh
- * Mir goes GPL
- *
- * Revision 1.2  2002/07/21 22:29:42  mh
- * cvs macros
- *
+ * @version $Id: MirMediaUserException.java,v 1.4 2002/11/04 04:35:21 mh Exp $
+ * @author mh
  *
  */
 

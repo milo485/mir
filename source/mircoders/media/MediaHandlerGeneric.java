@@ -58,39 +58,37 @@ import mir.storage.*;
  * Of course it implements the MirMedia interface.
  *
  * @see mir.media.MirMedia
- * @author mh <heckmann@hbe.ca>
- * @version 24.09.2001
+ * @author mh <mh@nadir.org>
+ * @version $Id: MediaHandlerGeneric.java,v 1.10 2002/11/04 04:35:22 mh Exp $
  */
 
 public class MediaHandlerGeneric implements MirMedia
 {
     protected static String imageHost = MirConfig.getProp("Producer.Image.Host");
     protected static String imageRoot = MirConfig.getProp("Producer.ImageRoot");
-    protected static Logfile theLog = Logfile.getInstance(MirConfig.getProp("Home")+
+    protected static Logfile theLog = Logfile.getInstance(
+                                                   MirConfig.getProp("Home")+
                                                   "log/media.log");
-    public boolean set (byte[] uploadedData, Entity ent, Entity mediaTypeEnt )
+    private final String sepChar = File.separator;
+    
+    public void set (InputStream in, Entity ent, Entity mediaTypeEnt )
         throws MirMediaException {
 
         String ext = mediaTypeEnt.getValue("name");
         String mediaFname = ent.getId()+"."+ext;
         String date = ent.getValue("date");
         String datePath = StringUtil.webdbDate2path(date);
-        Integer size = new Integer(uploadedData.length);
         try {
-            FileUtil.write(getStoragePath()+"/"+datePath+"/"+mediaFname,
-                            uploadedData);
-            //were done with the data, dereference.
-            uploadedData=null;
-
-            ent.setValueForProperty("publish_path",datePath+"/"+mediaFname);
-            ent.setValueForProperty("size", size.toString());
+            long size = FileUtil.write(getStoragePath()+sepChar+datePath+
+                                      sepChar+mediaFname, in);
+            ent.setValueForProperty("publish_path",datePath+sepChar+mediaFname);
+            ent.setValueForProperty("size", new Long(size).toString());
             ent.update();
         } catch (Exception e) {
             theLog.printError(e.toString());
             throw new MirMediaException(e.toString());
         }
 
-        return true;
     }
 
     public void produce (Entity ent, Entity mediaTypeEnt )
@@ -107,31 +105,24 @@ public class MediaHandlerGeneric implements MirMedia
                                     " does not exist!");
     }
 
-
-    //a method that will probably never get used..
-    private byte[] getFile (String fileName)
-        throws MirMediaException {
-
-        long size = FileUtil.getSize(fileName);
-        if (size < 0) return null;
-
-        byte[] container = new byte[(int)size];
-
-        try {
-            FileUtil.read(fileName, container);
-        } catch (Exception e) {
-            theLog.printError(e.toString());
-            throw new MirMediaException(e.toString());
-        }
-
-        return container;
+    public InputStream getMedia (Entity ent, Entity mediaTypeEnt)
+      throws MirMediaException {
+      String publishPath = mediaTypeEnt.getValue("publish_path");
+      String fname = getStoragePath()+publishPath;
+      File f = new File(fname);
+      if(! f.exists())
+        throw new MirMediaException("error in MirMedia.getMedia(): "+fname+
+                                    "does not exist!");
+      FileInputStream in;
+      try {
+        in = new FileInputStream(f);
+      } catch (IOException e) {
+        throw new MirMediaException("getMedia(): "+e.toString());
+      }
+      return in;
     }
 
-    public byte[] get (Entity ent, Entity mediaTypeEnt) {
-        return null;
-    }
-
-    public byte[] getIcon (Entity ent) {
+    public InputStream getIcon (Entity ent) {
         return null;
     }
 
@@ -150,17 +141,17 @@ public class MediaHandlerGeneric implements MirMedia
         return MirConfig.getProp("Producer.Media.Host");
     }
 
-    public String getTinyIcon()
+    public String getTinyIconName()
     {
         return MirConfig.getProp("Producer.Icon.TinyText");
     }
 
-    public String getBigIcon()
+    public String getBigIconName()
     {
         return MirConfig.getProp("Producer.Icon.BigText");
     }
 
-    public String getIconAlt()
+    public String getIconAltName()
     {
         return "Generic media";
     }

@@ -69,7 +69,7 @@ abstract public class ProducerMedia extends Producer {
 
     int contentBatchsize =
             Integer.parseInt(MirConfig.getProp("Producer.Content.Batchsize"));
-    orderBy = "date desc, webdb_lastchange desc";
+    orderBy = "webdb_lastchange desc";
 
     // get batch of non-produced medias, that are to be published
     whereClause="is_published='1'";

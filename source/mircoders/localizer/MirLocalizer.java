@@ -32,11 +32,11 @@
 package mircoders.localizer;
 
 public interface MirLocalizer {
-  public MirProducerLocalizer producers() throws MirLocalizerFailure, MirLocalizerException;
-  public MirAdminInterfaceLocalizer adminInterface() throws MirLocalizerFailure, MirLocalizerException;
-  public MirOpenPostingLocalizer openPostings() throws MirLocalizerFailure, MirLocalizerException;
-  public MirProducerAssistantLocalizer producerAssistant() throws MirLocalizerFailure, MirLocalizerException;
-  public MirGeneratorLocalizer generators() throws MirLocalizerFailure, MirLocalizerException;
-  public MirDataModelLocalizer dataModel() throws MirLocalizerFailure, MirLocalizerException;
+  public MirProducerLocalizer producers() throws MirLocalizerFailure, MirLocalizerExc;
+  public MirAdminInterfaceLocalizer adminInterface() throws MirLocalizerFailure, MirLocalizerExc;
+  public MirOpenPostingLocalizer openPostings() throws MirLocalizerFailure, MirLocalizerExc;
+  public MirProducerAssistantLocalizer producerAssistant() throws MirLocalizerFailure, MirLocalizerExc;
+  public MirGeneratorLocalizer generators() throws MirLocalizerFailure, MirLocalizerExc;
+  public MirDataModelLocalizer dataModel() throws MirLocalizerFailure, MirLocalizerExc;
 
 }

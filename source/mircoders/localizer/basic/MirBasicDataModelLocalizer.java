@@ -62,6 +62,7 @@ public class MirBasicDataModelLocalizer implements MirDataModelLocalizer {
       anEntityAdapterDefinition.addMirDateField("date", "date");
       anEntityAdapterDefinition.addCalculatedField("to_topics", new ContentToTopicsField());
       anEntityAdapterDefinition.addCalculatedField("to_comments", new ContentToCommentsField());
+      anEntityAdapterDefinition.addCalculatedField("language", new ContentToLanguageField());
 
       anEntityAdapterDefinition.addCalculatedField("commentcount", new ContentCommentCountField(" and is_published='1'"));
 
@@ -138,7 +139,7 @@ public class MirBasicDataModelLocalizer implements MirDataModelLocalizer {
   protected class CommentToContentField implements EntityAdapterDefinition.CalculatedField {
     public Object getValue(EntityAdapter anEntityAdapter) {
       try {
-        return anEntityAdapter.getRelation(
+        return anEntityAdapter.getToOneRelation(
                     "id="+anEntityAdapter.get("to_media"),
                     "id",
                     "content" );
@@ -190,6 +191,20 @@ public class MirBasicDataModelLocalizer implements MirDataModelLocalizer {
         else {
           return MirGlobal.localizer().producerAssistant().filterText((String) anEntityAdapter.get(fieldName));
         }
+      }
+      catch (Throwable t) {
+        throw new RuntimeException(t.getMessage());
+      }
+    }
+  }
+
+  protected class ContentToLanguageField implements EntityAdapterDefinition.CalculatedField {
+    public Object getValue(EntityAdapter anEntityAdapter) {
+      try {
+        return anEntityAdapter.getToOneRelation(
+                    "id="+anEntityAdapter.get("to_language"),
+                    "id",
+                    "language" );
       }
       catch (Throwable t) {
         throw new RuntimeException(t.getMessage());
@@ -281,8 +296,8 @@ public class MirBasicDataModelLocalizer implements MirDataModelLocalizer {
             iconAlt = "Image";
           }
           else {
-            tinyIcon = mediaHandler.getTinyIcon();
-            iconAlt = mediaHandler.getIconAlt();
+            tinyIcon = mediaHandler.getTinyIconName();
+            iconAlt = mediaHandler.getIconAltName();
           }
 
         }

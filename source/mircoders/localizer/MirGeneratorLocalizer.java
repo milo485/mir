@@ -34,9 +34,9 @@ package mircoders.localizer;
 import mir.generator.*;
 
 public interface MirGeneratorLocalizer {
-  public WriterEngine makeWriterEngine() throws MirLocalizerException, MirLocalizerFailure;
+  public WriterEngine makeWriterEngine() throws MirLocalizerExc, MirLocalizerFailure;
 
-  public Generator.GeneratorLibrary makeProducerGeneratorLibrary() throws MirLocalizerException, MirLocalizerFailure;
-  public Generator.GeneratorLibrary makeAdminGeneratorLibrary() throws MirLocalizerException, MirLocalizerFailure;
-  public Generator.GeneratorLibrary makeOpenPostingGeneratorLibrary() throws MirLocalizerException, MirLocalizerFailure;
+  public Generator.GeneratorLibrary makeProducerGeneratorLibrary() throws MirLocalizerExc, MirLocalizerFailure;
+  public Generator.GeneratorLibrary makeAdminGeneratorLibrary() throws MirLocalizerExc, MirLocalizerFailure;
+  public Generator.GeneratorLibrary makeOpenPostingGeneratorLibrary() throws MirLocalizerExc, MirLocalizerFailure;
 }

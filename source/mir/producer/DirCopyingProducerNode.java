@@ -51,12 +51,14 @@ public class DirCopyingProducerNode implements ProducerNode  {
   public void produce(Map aValueMap, String aVerb, PrintWriter aLogger) throws ProducerFailure {
     String source = "";
     String destination = "";
+    File sourceFile;
+    File destinationFile;
 
     try {
       source = ParameterExpander.expandExpression( aValueMap, sourceExpression );
       destination = ParameterExpander.expandExpression( aValueMap, destinationExpression );
       aLogger.println("Copying " + source + " into " + destination);
-      FileCopier.copyDirectory(
+      FileCopier.copy(
         new File(sourceBasePath, source),
         new File(destinationBasePath, destination));
     }

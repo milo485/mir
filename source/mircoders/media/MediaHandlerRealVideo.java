@@ -32,6 +32,7 @@
 package  mircoders.media;
 
 import java.util.*;
+import java.io.StringReader;
 
 import freemarker.template.SimpleList;
 import freemarker.template.SimpleHash;
@@ -75,7 +76,7 @@ public class MediaHandlerRealVideo extends MediaHandlerVideo implements
     try {
       //write an rm (ram?. -mh) file
       FileUtil.write(super.getStoragePath()+"/"+RealMediaFile,
-                      RealMediaPointer.getBytes());
+                      new StringReader(RealMediaPointer), "US-ASCII");
     } catch (Exception e) {
       theLog.printError(e.toString());
       throw new MirMediaException(e.toString());

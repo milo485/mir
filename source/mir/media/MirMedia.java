@@ -32,6 +32,7 @@
 package  mir.media;
 
 import java.util.*;
+import java.io.InputStream;
 
 import freemarker.template.SimpleList;
 
@@ -93,39 +94,39 @@ public interface  MirMedia{
    * all the info for the specific media type itself. It's job is store the
    * Media data (content) itself, this could be on the local filesystem, in the
    * DB or even on a remote host. It then inserts the MetaData in the DB.
-   * @param uploadedData, a byte array containing the uploaded data.
+   * @param InputStream, a stream of the uploaded data.
    * @param ent, an Entity holding the media MetaData
    * @param mediaType, an Entity holding the media_table entry
    * @return boolean, success/fail
    * @see mir.entity.Entity
    */
-  public abstract boolean set (byte[] uploadedData, Entity ent,
+  public abstract void set (InputStream in, Entity ent,
                                 Entity mediaTypeEnt ) throws MirMediaException;
 
 	public abstract void produce (Entity ent, Entity mediaTypeEnt ) 
     throws MirMediaException;
 
   /**
-   * Get's the media data from storage and returns it as a byte array
+   * Get's the media data from storage and returns it as an InputStream
    * Not very useful for most media types as they are stored in a file,
    * but very usefull for ones stored in the DB as it is necessary to get
    * it first before making a file out of it (in Producer*).
    * @param ent, an Entity holding the media MetaData
    * @param mediaType, an Entity holding the media_table entry
-   * @return byte[]
+   * @return java.io.InputStream
    * @see mir.entity.Entity
    */
-  public abstract byte[] get (Entity ent, Entity mediaTypeEnt)
+  public abstract InputStream getMedia (Entity ent, Entity mediaTypeEnt)
           throws MirMediaException;
 
   /**
    * Pretty much like get() above. But get's the specific Icon
    * representation. useful for media stored in the DB.
    * @param ent, an Entity holding the media MetaData
-   * @return byte[]
+   * @return java.io.InputStream
    * @see mir.entity.Entity
    */
-  public abstract byte[] getIcon (Entity ent) throws MirMediaException;
+  public abstract InputStream getIcon (Entity ent) throws MirMediaException;
 
 	/**
    * gets the final content representation for the media
@@ -187,7 +188,7 @@ public interface  MirMedia{
    * @return String, the icon filename.
    * @see mir.misc.MirConfig
    */
-  public abstract String getBigIcon ();
+  public abstract String getBigIconName ();
   
 	/**
    * Returns the file name of the small Icon representing 
@@ -199,14 +200,14 @@ public interface  MirMedia{
    * @return String, the icon filename.
    * @see mir.misc.MirConfig
    */
-  public abstract String getTinyIcon ();
+  public abstract String getTinyIconName ();
 
 	/**
    * Returns the IMG SRC "ALT" text to be used
    * for the Icon representations
    * @return String, the ALT text.
    */
-  public abstract String getIconAlt ();
+  public abstract String getIconAltName ();
 
 	/**
    * your can all figure it out.

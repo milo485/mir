@@ -39,10 +39,7 @@ import mir.media.MediaHelper;
 import mir.media.MirMedia;
 import mir.media.MirMediaException;
 import mir.media.MirMediaUserException;
-import mir.misc.MirConfig;
-import mir.misc.MpRequest;
-import mir.misc.StringUtil;
-import mir.misc.WebdbMultipartRequest;
+import mir.misc.*;
 import mir.module.ModuleException;
 import mir.servlet.ServletModule;
 import mir.servlet.ServletModuleException;
@@ -84,18 +81,40 @@ public abstract class ServletModuleUploadedMedia
   public void insert(HttpServletRequest req, HttpServletResponse res)
           throws ServletModuleException, ServletModuleUserException {
     try {
-      WebdbMultipartRequest mp = new WebdbMultipartRequest(req);
       EntityUsers user = _getUser(req);
-      EntityList mediaList =
-        new MediaRequest(mp, user.getId()).getMedia(false, false);
-      list(req, res);
+      MediaRequest mediaReq =  new MediaRequest(user.getId(), false, false);
+      WebdbMultipartRequest mp = new WebdbMultipartRequest(req, (FileHandler)mediaReq);
+      EntityList mediaList = mediaReq.getEntityList();
+
+      SimpleHash mergeData = new SimpleHash();
+      SimpleHash popups = new SimpleHash();
+      mergeData.put("contentlist", mediaList);
+      if (mediaList.getOrder() != null) {
+        mergeData.put("order", mediaList.getOrder());
+        mergeData.put("order_encoded", URLEncoder.encode(mediaList.getOrder()));
+      }
+      mergeData.put("count", (new Integer(mediaList.getCount())).toString());
+      mergeData.put("from", (new Integer(mediaList.getFrom())).toString());
+      mergeData.put("to", (new Integer(mediaList.getTo())).toString());
+      if (mediaList.hasNextBatch())
+        mergeData.put("next", (new Integer(mediaList.getNextBatch())).toString());
+      if (mediaList.hasPrevBatch())
+          mergeData.put("prev", (new Integer(mediaList.getPrevBatch())).toString());
+      //fetch the popups
+      popups.put("mediafolderPopupData", DatabaseMediafolder.getInstance().getPopupData());
+      // raus damit
+      deliver(req, res, mergeData, popups, templateListString);
     }
-    catch (MirMediaUserException e) {
+    catch (FileHandlerUserException e) {
       throw new ServletModuleUserException(e.getMsg());
     }
-    catch (MirMediaException e) {
+    catch (FileHandlerException e) {
       throw new ServletModuleException(
               "upload -- media handling exception " + e.toString());
+    }
+    catch (StorageObjectException e) {
+      throw new ServletModuleException("upload -- storageobjectexception "
+                                      + e.toString());
     }
     catch (IOException e) {
       throw new ServletModuleException("upload -- ioexception " + e.toString());
@@ -105,10 +124,10 @@ public abstract class ServletModuleUploadedMedia
   public void update(HttpServletRequest req, HttpServletResponse res) throws ServletModuleException {
 
     try {
-      WebdbMultipartRequest mp = new WebdbMultipartRequest(req);
+      EntityUsers user = _getUser(req);
+      WebdbMultipartRequest mp = new WebdbMultipartRequest(req, null);
       HashMap parameters = mp.getParameters();
 
-      EntityUsers user = _getUser(req);
       parameters.put("to_publisher", user.getId());
       parameters.put("is_produced", "0");
       if (!parameters.containsKey("is_published"))
@@ -123,6 +142,9 @@ public abstract class ServletModuleUploadedMedia
     }
     catch (ModuleException e) {
       throw new ServletModuleException("upload -- moduleexception " + e.toString());
+    }
+    catch (Exception e) {
+      throw new ServletModuleException("upload -- exception " + e.toString());
     }
 
   }

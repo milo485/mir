@@ -145,6 +145,7 @@ public class ServletModuleProducer extends ServletModule
       generator.generate(aResponse.getWriter(), generationData, new PrintWriter(new NullWriter()));
     }
     catch (Throwable t) {
+      t.printStackTrace(System.out);
       throw new ServletModuleException(t.getMessage());
     }
   }

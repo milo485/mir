@@ -29,38 +29,27 @@
  * not wish to do so, delete this exception statement from your version.
  */
 
-package mircoders.localizer.basic;
+package  mir.misc;
 
-import mir.misc.*;
-import mircoders.global.*;
-import mircoders.localizer.*;
+import com.oreilly.servlet.multipart.*;
+import java.util.HashMap;
 
-public class MirBasicLocalizer implements MirLocalizer {
-  protected static Logfile logger = Logfile.getInstance( MirGlobal.getConfigProperty("Home") + "/" + MirGlobal.getConfigProperty("Mir.Localizer.Logfile"));
 
-  public MirProducerLocalizer producers() throws MirLocalizerFailure, MirLocalizerExc {
-    return new MirBasicProducerLocalizer();
-  }
+/**
+ * Interface that classes wishing to be used as a callback on FileParts for the
+ * WebdbMultipartRequest class should implement this interface.
+ * 
+ * @author mh <mh@nadir.org>
+ * @version $Id: FileHandler.java,v 1.2 2002/11/04 04:35:21 mh Exp $
+ * @see mir.misc.WebdbMultipartRequest
+ * 
+ */
 
-  public MirGeneratorLocalizer generators() {
-    return new MirBasicGeneratorLocalizer();
-  }
+public interface  FileHandler {
 
-  public MirOpenPostingLocalizer openPostings() {
-    return new MirBasicOpenPostingLocalizer();
-  }
-
-  public MirProducerAssistantLocalizer producerAssistant() {
-    return new MirBasicProducerAssistantLocalizer();
-  }
-
-  public MirDataModelLocalizer dataModel() {
-    return new MirBasicDataModelLocalizer();
-  };
-
-  public MirAdminInterfaceLocalizer adminInterface() throws MirLocalizerFailure, MirLocalizerExc {
-    return new MirBasicAdminInterfaceLocalizer();
-  };
-
+  public void setFile (FilePart filePart, int fileNum, HashMap Params)
+    throws FileHandlerException, FileHandlerUserException;
 
 }
+
+

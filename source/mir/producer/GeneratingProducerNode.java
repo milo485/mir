@@ -82,8 +82,6 @@ public class GeneratingProducerNode implements ProducerNode {
     }
     catch (Throwable t) {
       aLogger.println("  error while generating: " + t.getClass().getName() + ": " + t.getMessage());
-      t.printStackTrace(aLogger);
-      aLogger.flush();
     }
     endTime = System.currentTimeMillis();
 

@@ -47,6 +47,8 @@ Mir.Version=1.1beta
 StandardLanguage=de
 DirectOpenposting=yes
 
+TempDir=/tmp
+
 Log.LogClass = mir.log.log4j.LoggerImpl
 Log.log4j.ConfigurationFile = etc/log4j.properties
 Log.Home = log
@@ -66,10 +68,8 @@ Mir.Localizer.OpenPosting.GeneratorLibrary= default=freemarker(etc/open/)
 Mir.Localizer.OpenPosting.ContentProducers= media.new;articles.changed;startpage.generate;synchronization.run
 Mir.Localizer.OpenPosting.CommentProducers= articles.changed;synchronization.run
 
-# Which producers need to be called after the "produce all new" link is clicked
-from admin
-Mir.Localizer.Producer.AllNewProducers= media.new;articles.changed;startpage.run;syn
-chronization.run
+# Which producers need to be called after the "produce all new" link is clicked from admin
+Mir.Localizer.Producer.AllNewProducers= media.new;articles.changed;startpage.run;synchronization.run
 
 
 #note that you can't make pdf's without making fo's

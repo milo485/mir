@@ -51,7 +51,7 @@ public class MirBasicGeneratorLocalizer implements MirGeneratorLocalizer {
     aRepository.registerLibraryFactory("freemarker", new FreemarkerGenerator.FreemarkerGeneratorLibraryFactory( MirGlobal.getConfigProperty("Home") ) );
   }
 
-  public Generator.GeneratorLibrary makeProducerGeneratorLibrary() throws MirLocalizerException, MirLocalizerFailure {
+  public Generator.GeneratorLibrary makeProducerGeneratorLibrary() throws MirLocalizerExc, MirLocalizerFailure {
     try {
       return repository.constructCompositeLibrary(MirGlobal.getConfigProperty("Mir.Localizer.Producer.GeneratorLibrary"));
     }
@@ -60,7 +60,7 @@ public class MirBasicGeneratorLocalizer implements MirGeneratorLocalizer {
     }
   };
 
-  public Generator.GeneratorLibrary makeAdminGeneratorLibrary() throws MirLocalizerException, MirLocalizerFailure {
+  public Generator.GeneratorLibrary makeAdminGeneratorLibrary() throws MirLocalizerExc, MirLocalizerFailure {
     try {
       return repository.constructCompositeLibrary(MirGlobal.getConfigProperty("Mir.Localizer.Admin.GeneratorLibrary"));
     }
@@ -69,7 +69,7 @@ public class MirBasicGeneratorLocalizer implements MirGeneratorLocalizer {
     }
   };
 
-  public Generator.GeneratorLibrary makeOpenPostingGeneratorLibrary() throws MirLocalizerException, MirLocalizerFailure {
+  public Generator.GeneratorLibrary makeOpenPostingGeneratorLibrary() throws MirLocalizerExc, MirLocalizerFailure {
     try {
       return repository.constructCompositeLibrary(MirGlobal.getConfigProperty("Mir.Localizer.OpenPosting.GeneratorLibrary"));
     }
@@ -78,7 +78,7 @@ public class MirBasicGeneratorLocalizer implements MirGeneratorLocalizer {
     }
   };
 
-  public WriterEngine makeWriterEngine() throws MirLocalizerException, MirLocalizerFailure {
+  public WriterEngine makeWriterEngine() throws MirLocalizerExc, MirLocalizerFailure {
     return new MirBasicWriterEngine(MirGlobal.getConfigProperty("Mir.DefaultEncoding"));
   }
 }

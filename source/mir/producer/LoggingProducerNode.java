@@ -51,7 +51,11 @@ public class LoggingProducerNode implements ProducerNode {
       aLogger.println(text);
     }
     catch (Throwable t) {
-      throw new ProducerFailure(t.getMessage(), t);
+      try {
+        aLogger.println("Exception while logging message '"+expression+"': " + t.getMessage());
+      }
+      catch (Throwable s) {
+      }
     }
   }
 }

@@ -150,4 +150,17 @@ public class EntityAdapter implements Map {
     }
   }
 
+  public Object getToOneRelation(String aWhereClause, String anOrderByClause, String aDefinition) {
+    try {
+      Iterator i = new EntityIteratorAdapter(aWhereClause, anOrderByClause, -1, getModel(), aDefinition);
+
+      if (i.hasNext())
+        return i.next();
+      else
+        return null;
+    }
+    catch (Throwable t) {
+      throw new RuntimeException(t.getMessage());
+    }
+  }
 }

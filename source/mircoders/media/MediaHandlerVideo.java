@@ -61,7 +61,7 @@ public class MediaHandlerVideo extends MediaHandlerGeneric implements MirMedia
     return tinyIcon;
   }
 
-  public String getBigIcon()
+  public String getBigIconName()
   {
     return bigIcon;
   }

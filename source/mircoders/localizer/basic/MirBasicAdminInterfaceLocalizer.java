@@ -44,7 +44,7 @@ public class MirBasicAdminInterfaceLocalizer implements MirAdminInterfaceLocaliz
   private Map simpleCommentOperations;
   private Map simpleArticleOperations;
 
-  public MirBasicAdminInterfaceLocalizer() throws MirLocalizerFailure, MirLocalizerException {
+  public MirBasicAdminInterfaceLocalizer() throws MirLocalizerFailure, MirLocalizerExc {
     simpleCommentOperations = new HashMap();
     simpleArticleOperations = new HashMap();
 
@@ -60,12 +60,12 @@ public class MirBasicAdminInterfaceLocalizer implements MirAdminInterfaceLocaliz
     return simpleArticleOperations;
   };
 
-  public void buildSimpleCommentOperations(Map anOperations) throws MirLocalizerFailure, MirLocalizerException {
+  public void buildSimpleCommentOperations(Map anOperations) throws MirLocalizerFailure, MirLocalizerExc {
     anOperations.put("hide", new HideCommentOperation());
     anOperations.put("unhide", new UnhideCommentOperation());
   };
 
-  public void buildSimpleArticleOperations(Map anOperations)  throws MirLocalizerFailure, MirLocalizerException {
+  public void buildSimpleArticleOperations(Map anOperations)  throws MirLocalizerFailure, MirLocalizerExc {
     anOperations.put("hide", new HideArticleOperation());
     anOperations.put("unhide", new UnhideArticleOperation());
   };

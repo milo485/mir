@@ -1,0 +1,5 @@
+Last update: $Date: 2002/11/06 06:24:11 $
+
+As of this writing the IBM Jikes compiler does not work with mir. Please use
+the standard Javac from your JDK. We have not yet tested Jikes V1.16 and
+V1.17. It is possible that they may work.

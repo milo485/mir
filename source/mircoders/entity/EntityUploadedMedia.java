@@ -94,7 +94,7 @@ public class EntityUploadedMedia extends Entity {
 
     if (key != null) {
       if (key.equals("big_icon"))
-        returnValue = getBigIcon();
+        returnValue = getBigIconName();
       else if (key.equals("descr"))
         returnValue = getDescr();
       else if (key.equals("mediatype"))
@@ -139,17 +139,17 @@ public class EntityUploadedMedia extends Entity {
     return null;
   }
 
-  private String getBigIcon() {
+  private String getBigIconName() {
     MirMedia mediaHandler = null;
     Entity mediaType = null;
 
     try {
       mediaType = getMediaType();
       mediaHandler = MediaHelper.getHandler(mediaType);
-      return mediaHandler.getBigIcon();
+      return mediaHandler.getBigIconName();
     }
     catch (Exception ex) {
-      theLog.printWarning("-- getBigIcon: could not fetch data "
+      theLog.printWarning("-- getBigIconName: could not fetch data "
                           + this.getClass().toString() + " " + ex.toString());
     }
     return null;
@@ -194,7 +194,7 @@ public class EntityUploadedMedia extends Entity {
       return mediaType.getValue("mime_type");
     }
     catch (Exception ex) {
-      theLog.printWarning("-- getBigIcon: could not fetch data "
+      theLog.printWarning("-- getBigIconName: could not fetch data "
                           + this.getClass().toString() + " " + ex.toString());
     }
     return null;

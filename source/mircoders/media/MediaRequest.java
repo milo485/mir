@@ -32,9 +32,12 @@
 package mircoders.media;
 
 import java.util.*;
+import java.io.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.ServletContext;
+
+import com.oreilly.servlet.multipart.FilePart;
 
 import mircoders.storage.DatabaseMediaType;
 import mircoders.producer.ProducerMedia;
@@ -51,31 +54,26 @@ import mir.media.*;
  *    uploaded via the com.oreilly.servlet.multipart package. Finally the
  *    appropriate media objects are set.
  *
- * @author $Author: mh $
- * @version $Revision: 1.2 $
- *
- * $Log: MediaRequest.java,v $
- * Revision 1.2  2002/09/01 22:05:55  mh
- * Mir goes GPL
- *
- * Revision 1.1.2.1  2002/09/01 21:31:43  mh
- * Mir goes GPL
- *
- * Revision 1.1  2002/07/21 22:38:39  mh
- * parses a multipart request's files and makes media Entity's out of them. Basically the old code from insposting() in ServletModuleOpenIndy
- *
+ * @author mh
+ * @version $Id: MediaRequest.java,v 1.3 2002/11/04 04:35:22 mh Exp $
  *
  */
 
-public class MediaRequest
+public class MediaRequest implements FileHandler
 {
 
-  WebdbMultipartRequest _mp;
   String _user;
+  EntityList _returnList = new EntityList();
+  boolean _produce, _publish;
 
-  public MediaRequest(WebdbMultipartRequest mPreq, String user) {
-    _mp = mPreq;
+  public MediaRequest(String user, boolean produce, boolean publish) {
     _user = user;
+    _produce = produce;
+    _publish = publish;
+  }
+
+  public EntityList getEntityList() {
+    return _returnList;
   }
 
   /*
@@ -85,186 +83,199 @@ public class MediaRequest
    * is_published parameter (from the upload form) is supplied. (for backwards
    * compatibility.)
    */
-  public EntityList getMedia(boolean produce, boolean publish)
-    throws MirMediaException,
-    MirMediaUserException {
+  public void setFile(FilePart filePart, int fileNum, HashMap mediaValues)
+    throws FileHandlerException, FileHandlerUserException {
+
     String mediaId=null;
-    HashMap mediaValues = _mp.getParameters();
-    EntityList returnList = new EntityList();
     MirMedia mediaHandler;
     Database mediaStorage = null;
     ProducerMedia mediaProducer = null;
 
-    int i=1;
-    for(Iterator it = _mp.requestList.iterator(); it.hasNext();){
+    try {
+      String fileName = filePart.getFileName();
+
+      //get the content-type from what the client browser
+      //sends us. (the "Oreilly method")
+      String contentType = filePart.getContentType();
+
+      //theLog.printInfo("FROM BROWSER: "+contentType);
+
+      //if the client browser sent us unknown (text/plain is default)
+      //or if we got application/octet-stream, it's possible that
+      //the browser is in error, better check against the file extension
+      if (contentType.equals("text/plain") ||
+          contentType.equals("application/octet-stream")) {
+        /**
+         * Fallback to finding the mime-type through the standard ServletApi
+         * ServletContext getMimeType() method.
+         *
+         * This is a way to get the content-type via the .extension,
+         * we could maybe use a magic method as an additional method of
+         * figuring out the content-type, by looking at the header (first
+         * few bytes) of the file. (like the file(1) command). We could
+         * also call the "file" command through Runtime. This is an
+         * option that I almost prefer as it is already implemented and
+         * exists with an up-to-date map on most modern Unix like systems.
+         * I haven't found a really nice implementation of the magic method
+         * in pure java yet.
+         *
+         * The first method we try thought is the "Oreilly method". It
+         * relies on the content-type that the client browser sends and
+         * that sometimes is application-octet stream with
+         * broken/mis-configured browsers.
+         *
+         * The map file we use for the extensions is the standard web-app
+         * deployment descriptor file (web.xml). See Mir's web.xml or see
+         * your Servlet containers (most likely Tomcat) documentation.
+         * So if you support a new media type you have to make sure that
+         * it is in this file -mh
+         */
+        ServletContext ctx =
+          (ServletContext)MirConfig.getPropAsObject("ServletContext");
+        contentType = ctx.getMimeType(fileName);
+        if (contentType==null)
+          contentType = "text/plain"; // rfc1867 says this is the default
+      }
+      //theLog.printInfo("CONTENT TYPE IS: "+contentType);
+      
+      if (contentType.equals("text/plain") ||
+          contentType.equals("application/octet-stream")) {
+        _throwBadContentType(fileName, contentType);
+      }
+
+      String mediaTitle = (String)mediaValues.get("media_title"+fileNum);
+      if ( (mediaTitle == null) || (mediaTitle.length() == 0))
+          throw new FileHandlerUserException("Missing field: media title "+mediaTitle+fileNum);
+
+      // TODO: need to add all the extra fields that can be present in the 
+      // admin upload form. -mh
+      mediaValues.put("title", mediaTitle);
+      mediaValues.put("date", StringUtil.date2webdbDate(
+                                                    new GregorianCalendar()));
+      mediaValues.put("to_publisher", _user);
+      //mediaValues.put("to_media_folder", "7"); // op media_folder
+      mediaValues.put("is_produced", "0"); 
+
+      // icky backwards compatibility code -mh
+      if (_publish == true) {
+        mediaValues.put("is_published", "1"); 
+      } else {
+        if (!mediaValues.containsKey("is_published"))
+          mediaValues.put("is_published", "0");
+      }
+
+      // @todo this should probably be moved to DatabaseMediaType -mh
+      String[] cTypeSplit = StringUtil.split(contentType, "/");
+      String wc = " mime_type LIKE '"+cTypeSplit[0]+"%'";
+
+      DatabaseMediaType mediaTypeStor = DatabaseMediaType.getInstance();
+      EntityList mediaTypesList = mediaTypeStor.selectByWhereClause(wc);
+
+      String mediaTypeId = null;
+
+      //if we didn't find an entry matching the
+      //content-type int the table.
+      if (mediaTypesList.size() == 0) {
+       _throwBadContentType(fileName, contentType);
+      }
+
+      Entity mediaType = null;
+      Entity mediaType2 = null;
+      
+      // find out if we an exact content-type match if so take it.
+      // otherwise try to match majortype/*
+      // @todo this should probably be moved to DatabaseMediaType -mh
+      for(int j=0;j<mediaTypesList.size();j++) {
+        if(contentType.equals(
+              mediaTypesList.elementAt(j).getValue("mime_type")))
+          mediaType = mediaTypesList.elementAt(j);
+        else if ((mediaTypesList.elementAt(j).getValue("mime_type")).equals(
+                  cTypeSplit[0]+"/*") )
+          mediaType2= mediaTypesList.elementAt(j);
+      }
+
+      if ( (mediaType == null) && (mediaType2 == null) ) {
+        _throwBadContentType(fileName, contentType);
+      } else if( (mediaType == null) && (mediaType2 != null) ) {
+        mediaType = mediaType2;
+      }
+
+      //get the class names from the media_type table.
+      mediaTypeId = mediaType.getId();
+      // ############### @todo: merge these and the getURL call into one
+      // getURL helper call that just takes the Entity as a parameter
+      // along with media_type
       try {
-        MpRequest mpReq = (MpRequest)it.next();
-        String fileName = mpReq.getFilename();
-
-        //get the content-type from what the client browser
-        //sends us. (the "Oreilly method")
-        String contentType = mpReq.getContentType();
-
-        //theLog.printInfo("FROM BROWSER: "+contentType);
-
-        //if the client browser sent us unknown (text/plain is default)
-        //or if we got application/octet-stream, it's possible that
-        //the browser is in error, better check against the file extension
-        if (contentType.equals("text/plain") ||
-            contentType.equals("application/octet-stream")) {
-          /**
-           * Fallback to finding the mime-type through the standard ServletApi
-           * ServletContext getMimeType() method.
-           *
-           * This is a way to get the content-type via the .extension,
-           * we could maybe use a magic method as an additional method of
-           * figuring out the content-type, by looking at the header (first
-           * few bytes) of the file. (like the file(1) command). We could
-           * also call the "file" command through Runtime. This is an
-           * option that I almost prefer as it is already implemented and
-           * exists with an up-to-date map on most modern Unix like systems.
-           * I haven't found a really nice implementation of the magic method
-           * in pure java yet.
-           *
-           * The first method we try thought is the "Oreilly method". It
-           * relies on the content-type that the client browser sends and
-           * that sometimes is application-octet stream with
-           * broken/mis-configured browsers.
-           *
-           * The map file we use for the extensions is the standard web-app
-           * deployment descriptor file (web.xml). See Mir's web.xml or see
-           * your Servlet containers (most likely Tomcat) documentation.
-           * So if you support a new media type you have to make sure that
-           * it is in this file -mh
-           */
-          ServletContext ctx =
-            (ServletContext)MirConfig.getPropAsObject("ServletContext");
-          contentType = ctx.getMimeType(fileName);
-          if (contentType==null)
-            contentType = "text/plain"; // rfc1867 says this is the default
-        }
-        //theLog.printInfo("CONTENT TYPE IS: "+contentType);
-        
-        if (contentType.equals("text/plain") ||
-            contentType.equals("application/octet-stream")) {
-          _throwBadContentType(fileName, contentType);
-        }
-
-        String mediaTitle = (String)mediaValues.get("media_title"+i);
-        i++;
-        if ( (mediaTitle == null) || (mediaTitle.length() == 0))
-            throw new MirMediaUserException("Missing field: media title");
-
-        // TODO: need to add all the extra fields that can be present in the 
-        // admin upload form. -mh
-        mediaValues.put("title", mediaTitle);
-        mediaValues.put("date", StringUtil.date2webdbDate(
-                                                      new GregorianCalendar()));
-        mediaValues.put("to_publisher", _user);
-        //mediaValues.put("to_media_folder", "7"); // op media_folder
-        mediaValues.put("is_produced", "0"); 
-
-        // icky backwards compatibility code -mh
-        if (publish == true) {
-          mediaValues.put("is_published", "1"); 
-        } else {
-          if (!mediaValues.containsKey("is_published"))
-            mediaValues.put("is_published", "0");
-        }
-
-        // @todo this should probably be moved to DatabaseMediaType -mh
-        String[] cTypeSplit = StringUtil.split(contentType, "/");
-        String wc = " mime_type LIKE '"+cTypeSplit[0]+"%'";
-
-        DatabaseMediaType mediaTypeStor = DatabaseMediaType.getInstance();
-        EntityList mediaTypesList = mediaTypeStor.selectByWhereClause(wc);
-
-        String mediaTypeId = null;
-
-        //if we didn't find an entry matching the
-        //content-type int the table.
-        if (mediaTypesList.size() == 0) {
-         _throwBadContentType(fileName, contentType);
-        }
-
-        Entity mediaType = null;
-        Entity mediaType2 = null;
-        
-        // find out if we an exact content-type match if so take it.
-        // otherwise try to match majortype/*
-        // @todo this should probably be moved to DatabaseMediaType -mh
-        for(int j=0;j<mediaTypesList.size();j++) {
-          if(contentType.equals(
-                mediaTypesList.elementAt(j).getValue("mime_type")))
-            mediaType = mediaTypesList.elementAt(j);
-          else if ((mediaTypesList.elementAt(j).getValue("mime_type")).equals(
-                    cTypeSplit[0]+"/*") )
-            mediaType2= mediaTypesList.elementAt(j);
-        }
-
-        if ( (mediaType == null) && (mediaType2 == null) ) {
-          _throwBadContentType(fileName, contentType);
-        }
-        else if( (mediaType == null) && (mediaType2 != null) )
-          mediaType = mediaType2;
-
-        //get the class names from the media_type table.
-        mediaTypeId = mediaType.getId();
-        // ############### @todo: merge these and the getURL call into one
-        // getURL helper call that just takes the Entity as a parameter
-        // along with media_type
         mediaHandler = MediaHelper.getHandler(mediaType);
         mediaStorage = MediaHelper.getStorage(mediaType,
-                                              "mircoders.storage.Database");
-        mediaValues.put("to_media_type",mediaTypeId);
+                                            "mircoders.storage.Database");
+      } catch (MirMediaException e) {
+        throw new FileHandlerException (e.getMsg());
+      }
+      mediaValues.put("to_media_type",mediaTypeId);
 
-        //load the classes via reflection
-        String MediaId;
-        Entity mediaEnt = null;
-        try {
-          mediaEnt = (Entity)mediaStorage.getEntityClass().newInstance();
-          if (produce == true) {
-            Class prodCls = Class.forName("mircoders.producer.Producer"+
-                                          mediaType.getValue("tablename"));
-            mediaProducer = (ProducerMedia)prodCls.newInstance();
-          }
-        } catch (Exception e) {
-          throw new MirMediaException("Error in MediaRequest: "+e.toString());
+      //load the classes via reflection
+      String MediaId;
+      Entity mediaEnt = null;
+      try {
+        mediaEnt = (Entity)mediaStorage.getEntityClass().newInstance();
+        if (_produce == true) {
+          Class prodCls = Class.forName("mircoders.producer.Producer"+
+                                        mediaType.getValue("tablename"));
+          mediaProducer = (ProducerMedia)prodCls.newInstance();
         }
-                                        
-        mediaEnt.setStorage(mediaStorage);
-        mediaEnt.setValues(mediaValues);
-        mediaId = mediaEnt.insert();
+      } catch (Exception e) {
+        throw new FileHandlerException("Error in MediaRequest: "+e.toString());
+      }
+                                      
+      mediaEnt.setStorage(mediaStorage);
+      mediaEnt.setValues(mediaValues);
+      mediaId = mediaEnt.insert();
 
-        //save and store the media data/metadata
-        mediaHandler.set(mpReq.getMedia(), mediaEnt,
-                        mediaType);
-        try {
-          if (produce == true )
-            mediaProducer.handle(null, null, false, false, mediaId);
-        } catch (ModuleException e) {
-          // first try to delete it.. don't catch exception as we've already..
-          try { mediaStorage.delete(mediaId); } catch (Exception e2) {}
-          throw new MirMediaException("error in MediaRequest: "+e.toString());
-        }
+      //try {
+      //  File f = null;
+      //  f = new File("/tmp/img.jpg");
+      //  File dir = new File(f.getParent());
+      //  dir.mkdirs();
 
-        returnList.add(mediaEnt);
-      } catch (StorageObjectException e) {
+      //  FileOutputStream out = new FileOutputStream(f);
+      //  System.out.println("WRITE");
+      //  filePart.writeTo(out);
+      //  out.close();
+      //} catch (Exception e) {System.out.println("EE "+e.toString());}
+
+
+      //mir.misc.FileUtil.write("/tmp/img.jpg", filePart.getInputStream());
+      //save and store the media data/metadata
+      try {
+        mediaHandler.set(filePart.getInputStream(), mediaEnt, mediaType);
+      } catch (MirMediaException e) {
+        throw new FileHandlerException(e.getMsg());
+      }
+      try {
+        if (_produce == true )
+          mediaProducer.handle(null, null, false, false, mediaId);
+      } catch (ModuleException e) {
         // first try to delete it.. don't catch exception as we've already..
         try { mediaStorage.delete(mediaId); } catch (Exception e2) {}
-        throw new MirMediaException("error in MediaRequest: "+e.toString());
-      } //end try/catch block
+        throw new FileHandlerException("error in MediaRequest: "+e.toString());
+      }
 
-    } //end for Iterator...
-    return returnList;
-  } // method getMedia()
+      _returnList.add(mediaEnt);
+    } catch (StorageObjectException e) {
+      // first try to delete it.. don't catch exception as we've already..
+      try { mediaStorage.delete(mediaId); } catch (Exception e2) {}
+      throw new FileHandlerException("error in MediaRequest: "+e.toString());
+    } //end try/catch block
+
+  } // method setFile()
 
   private void _throwBadContentType (String fileName, String contentType)
-    throws MirMediaUserException {
+    throws FileHandlerUserException {
 
     //theLog.printDebugInfo("Wrong file type uploaded!: " + fileName+" "
       //                    +contentType);
-    throw new MirMediaUserException("The file you uploaded is of the "
+    throw new FileHandlerUserException("The file you uploaded is of the "
         +"following mime-type: "+contentType
         +", we do not support this mime-type. "
         +"Error One or more files of unrecognized type. Sorry");

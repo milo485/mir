@@ -43,11 +43,8 @@ public class EntityAdapterModel {
     entityAdapterMappings = new HashMap();
   }
 
-  public EntityAdapter makeEntityAdapter( String aName, Entity anEntity ) {
+  public EntityAdapter makeEntityAdapter( String aName, Entity anEntity ) throws EntityAdapterExc {
     Mapping mapping = getMappingForName( aName );
-
-    if (mapping == null )
-      throw new RuntimeException( "Adapter definition with name '" + aName + "' not present in model" );
 
     return mapping.getDefinition().makeEntityAdapter( anEntity, this );
   }
@@ -56,7 +53,10 @@ public class EntityAdapterModel {
     entityAdapterMappings.put( aName, new Mapping( aStorage, aDefinition ) );
     }
 
-  public Mapping getMappingForName( String aName ) {
+  public Mapping getMappingForName( String aName ) throws EntityAdapterExc {
+    if (!entityAdapterMappings.containsKey(aName))
+      throw new EntityAdapterExc( "'" + aName + "' not present in model" );
+
     return (Mapping) entityAdapterMappings.get( aName );
   }
 
@@ -80,4 +80,3 @@ public class EntityAdapterModel {
 }
 
 
-                                                                                                   

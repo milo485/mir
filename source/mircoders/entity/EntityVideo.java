@@ -64,59 +64,6 @@ public class EntityVideo extends EntityUploadedMedia
 	//
 	// methods
 
-	public byte[] getVideoData() throws StorageObjectException
-	{
-
-		Connection con=null;Statement stmt=null;
-		byte[] video_data=null;
-
-		try {
-			con = theStorageObject.getPooledCon();
-			con.setAutoCommit(false);
-			stmt = con.createStatement();
-			ResultSet rs = theStorageObject.executeSql(stmt,"select video_data from video where id="+getId());
-			if(rs!=null) {
-				if (rs.next()) {
-					 video_data = rs.getBytes(1);
-				}
-				rs.close();
-			}
-		}
-		catch (Exception e) {theLog.printDebugInfo("-- getImage gescheitert: "+e.toString());}
-		finally {
-			try {con.setAutoCommit(true); } catch (Exception e) {;}
-			theStorageObject.freeConnection(con,stmt); }
-
-		return video_data;
-	}
-
-	public void setVideoData(byte[] uploadData) throws StorageObjectException
-	{
-		if (uploadData!=null) {
-			Connection con=null;PreparedStatement pstmt=null;
-			try {
-
-				con = theStorageObject.getPooledCon();
-				con.setAutoCommit(false);
-				theLog.printDebugInfo("setvideo :: trying to insert video");
-
-				// setting values
-				String sql = "update videos set image_data=? where id="+getId();
-				theLog.printDebugInfo("setvideo: "+ sql);
-				pstmt = con.prepareStatement(sql);
-				pstmt.setBytes(1, uploadData);
-				pstmt.executeUpdate();
-				sql="update content set is_produced='0' where to_media="+getId();
-				pstmt = con.prepareStatement(sql);
-				pstmt.executeUpdate();
-			}
-			catch (Exception e) {theLog.printDebugInfo("setvideo :: setvideo gescheitert: "+e.toString());}
-			finally {
-				try {con.setAutoCommit(true); } catch (Exception e) {;}
-				theStorageObject.freeConnection(con,pstmt); }
-		}
-	}
-
 	public void update() throws StorageObjectException {
 		super.update();
 		try {

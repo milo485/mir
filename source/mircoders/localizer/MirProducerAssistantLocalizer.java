@@ -35,6 +35,6 @@ import java.util.*;
 import java.io.*;
 
 public interface MirProducerAssistantLocalizer {
-  public void initializeGenerationValueSet(Map aValueSet) throws MirLocalizerException, MirLocalizerFailure;
-  public String filterText(String aText) throws MirLocalizerException, MirLocalizerFailure;
+  public void initializeGenerationValueSet(Map aValueSet) throws MirLocalizerExc, MirLocalizerFailure;
+  public String filterText(String aText) throws MirLocalizerExc, MirLocalizerFailure;
 }

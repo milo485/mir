@@ -50,22 +50,8 @@ import mir.misc.*;
  * Base Class of Entities
  * Interfacing TemplateHashModel and TemplateModelRoot to be freemarker compliant
  *
- * @version $Revision: 1.9 $ $Date: 2002/09/01 22:05:48 $
- * @author $Author: mh $
- *
- * $Log: Entity.java,v $
- * Revision 1.9  2002/09/01 22:05:48  mh
- * Mir goes GPL
- *
- * Revision 1.8.2.1  2002/09/01 21:31:40  mh
- * Mir goes GPL
- *
- * Revision 1.8  2002/06/28 22:56:37  mh
- * fix so that webdb_lastchange appears in contentlist.template as it should
- *
- * Revision 1.7  2002/06/28 20:35:38  mh
- * use some cvs macros/id's
- *
+ * @version $Id: Entity.java,v 1.10 2002/11/04 04:35:21 mh Exp $
+ * @author rk
  *
  */
 

@@ -102,8 +102,13 @@ public class ServletModuleImages extends ServletModuleUploadedMedia
         res.setContentType(ctx.getMimeType(fName));
         ServletOutputStream out = res.getOutputStream(); // wichtig, dass vorher kein res.getwriter() gelaufen ist
 
-        byte[] outbytes = entImage.getImage();
-        out.write(outbytes);
+        InputStream in = entImage.getImage();
+        int read;
+        byte[] buf = new byte[8 * 1024];
+        while((read = in.read(buf)) != -1) {
+          out.write(buf, 0, read);
+        }
+        in.close();
         out.close();
       }
 
@@ -129,8 +134,14 @@ public class ServletModuleImages extends ServletModuleUploadedMedia
         res.setContentType(ctx.getMimeType(fName));
         ServletOutputStream out = res.getOutputStream(); // wichtig, dass vorher kein res.getwriter() gelaufen ist
 
-        byte[] outbytes = entImage.getIcon();
-        out.write(outbytes);
+        InputStream in = entImage.getIcon();
+        int read;
+        byte[] buf = new byte[8 * 1024];
+        while((read = in.read(buf)) != -1) {
+          out.write(buf, 0, read);
+        }
+        in.close();
+        //out.write(outbytes);
         out.close();
       }
 

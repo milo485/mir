@@ -41,7 +41,7 @@ public class DefaultProducerNodeBuilders {
 
   public static void registerBuilders(ProducerNodeBuilderLibrary aBuilderLibrary,
        EntityAdapterModel aModel, Generator.GeneratorLibrary aGeneratorLibrary,
-       WriterEngine aWriterEngine, String aSourceBasePath, String aDestinationBasePath) {
+       WriterEngine aWriterEngine, String aSourceBasePath, String aDestinationBasePath) throws ProducerConfigExc {
 
     aBuilderLibrary.registerBuilder("Set", EvaluatedAssignmentProducerNodeBuilder.class);
     aBuilderLibrary.registerBuilder("Define", ExpandedAssignmentProducerNodeBuilder.class);

@@ -32,6 +32,7 @@
 package  mircoders.media;
 
 import java.util.*;
+import java.io.StringReader;
 
 import freemarker.template.SimpleList;
 import freemarker.template.SimpleHash;
@@ -89,10 +90,10 @@ public class MediaHandlerMp3 extends MediaHandlerAudio implements MirMedia
         //write the "meta" files
         //first the .m3u since it only contains one line
         FileUtil.write(getStoragePath()+"/"+datePath+"/"+mpegURLFile,
-                      mp3Pointer.getBytes());
+                      new StringReader(mp3Pointer), "US-ASCII");
         //now the .pls file
         FileUtil.write(getStoragePath()+"/"+datePath+"/"+playlistFile,
-                      mp3Pointer.getBytes());
+                      new StringReader(mp3Pointer), "US-ASCII");
       } catch (Exception e) {
           theLog.printError(e.toString()); 
           throw new MirMediaException(e.toString());

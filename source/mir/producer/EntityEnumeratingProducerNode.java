@@ -86,7 +86,7 @@ public class EntityEnumeratingProducerNode extends ProducerNodeDecorator {
       }
     }
     catch (Throwable t) {
-      throw new ProducerFailure(t.getMessage(), t);
+      aLogger.println("Exception occurred inside an EntityEnumeratingProducerNode: " + t.getMessage());
     }
   };
 }

@@ -59,7 +59,7 @@ import mircoders.entity.EntityImages;
  *
  * @see mir.media.MirMedia
  * @author mh
- * @version 24.09.2001
+ * @version $Date: 2002/11/04 04:35:22 $ $Revision: 1.11 $
  */
 
 
@@ -72,34 +72,30 @@ public abstract class MediaHandlerImages implements MirMedia
 
   abstract String getType();
 
-	public byte[] get(Entity ent, Entity mediaTypeEnt)
+	public InputStream getMedia(Entity ent, Entity mediaTypeEnt)
     throws MirMediaException
 	{
-    byte[] image_data = null;
-
+    InputStream in;
     try {
-      image_data = ((EntityImages)ent).getImage();
+      in = ((EntityImages)ent).getImage();
     } catch ( StorageObjectException e) {
-      theLog.printDebugInfo("MediaHandlerImages.get: "+e.toString()); 
+      theLog.printDebugInfo("MediaHandlerImages.getImage: "+e.toString()); 
       throw new MirMediaException(e.toString());
     }
 
-    return image_data;
+    return in;
   }
 
-	public boolean set(byte[] uploadData, Entity ent, Entity mediaTypeEnt)
+	public void set(InputStream in, Entity ent, Entity mediaTypeEnt)
     throws MirMediaException {
 
     try {
-      ((EntityImages)ent).setImage(uploadData, getType());
+      ((EntityImages)ent).setImage(in, getType());
     } catch ( StorageObjectException e) {
       theLog.printError("MediaHandlerImages.set: "+e.toString()); 
       throw new MirMediaException(e.toString());
     }
-    //deref. -mh
-    uploadData=null;
 
-    return true;
 	}
 
   public void produce(Entity ent, Entity mediaTypeEnt) throws MirMediaException
@@ -110,15 +106,17 @@ public abstract class MediaHandlerImages implements MirMedia
     String filepath = datePath+ent.getId()+ext;
     String iconFilePath = MirConfig.getProp("Producer.StorageRoot")
                           +getIconStoragePath() + filepath;
-    String productionFilePath = getStoragePath() + "/" + filepath;
+    String productionFilePath = getStoragePath() + File.separator + filepath;
 
 
     if (ent.getValue("icon_data")!= null &&
         ent.getValue("image_data")!= null) {
       // make icon
       try {
-        FileUtil.write(iconFilePath,((EntityImages)ent).getIcon());
-        FileUtil.write(productionFilePath,((EntityImages)ent).getImage());
+        InputStream in = ((EntityImages)ent).getIcon();
+        FileUtil.write(iconFilePath, in);
+        in = ((EntityImages)ent).getImage();
+        FileUtil.write(productionFilePath, in);
         ent.setValueForProperty("icon_path",getIconStoragePath()+filepath);
         ent.setValueForProperty("publish_path",filepath);
         ent.update();
@@ -136,18 +134,17 @@ public abstract class MediaHandlerImages implements MirMedia
   }
                         
 
-	public byte[] getIcon(Entity ent) throws MirMediaException
+	public InputStream getIcon(Entity ent) throws MirMediaException
 	{
-    byte[] icon_data = null;
-
+    InputStream in;
     try {
-      icon_data = ((EntityImages)ent).getIcon();
+      in = ((EntityImages)ent).getIcon();
     } catch ( StorageObjectException e) {
       theLog.printDebugInfo("MediaHandlerImages.getIcon: "+e.toString()); 
       throw new MirMediaException(e.toString());
     }
 
-    return icon_data;
+    return in;
   }
 
   public SimpleList getURL(Entity ent, Entity mediaTypeEnt)
@@ -172,27 +169,27 @@ public abstract class MediaHandlerImages implements MirMedia
     return MirConfig.getProp("Producer.Image.Host");
   }
 
-  public String getTinyIcon ()
+  public String getTinyIconName()
   {
     return MirConfig.getProp("Producer.Icon.TinyImage");
   } 
 
-  public String getBigIcon ()
+  public String getBigIconName()
   {
     return MirConfig.getProp("Producer.Icon.BigImage");
   } 
 
-  public String getIconAlt ()
+  public String getIconAltName()
   {
     return "Image";
   } 
 
-  public boolean isVideo ()
+  public boolean isVideo()
   {
     return false;
   } 
 
-  public boolean isAudio ()
+  public boolean isAudio()
   {
     return false;
   } 

@@ -52,118 +52,54 @@ public class MediaGeneratingProducerNode implements ProducerNode {
     mediaEntityKey = aMediaEntityKey;
   }
 
-  public void produce(Map aValueMap, String aVerb, PrintWriter aLogger) throws ProducerFailure {
+  public void produce(Map aValueMap, String aVerb, PrintWriter aLogger) throws ProducerFailure, ProducerExc {
     Object data;
     Entity entity;
-    Entity currentMediaType;
+    EntityUploadedMedia uploadedMediaEntity = null;
+    Entity mediaType = null;
     MirMedia currentMediaHandler;
 
     try {
+
       data = ParameterExpander.findValueForKey( aValueMap, mediaEntityKey );
 
       if (!(data instanceof EntityAdapter)) {
-        throw new ProducerFailure("MediaGeneratingProducerNode: value of '"+mediaEntityKey+"' is not an EntityAdapter, but an " + data.getClass().getName(), null);
+        throw new ProducerExc("MediaGeneratingProducerNode: value of '"+mediaEntityKey+"' is not an EntityAdapter, but an " + data.getClass().getName());
       }
 
       entity = ((EntityAdapter) data).getEntity();
       if (! (entity instanceof EntityUploadedMedia)) {
-        throw new ProducerFailure("MediaGeneratingProducerNode: value of '"+mediaEntityKey+"' is not an uploaded media EntityAdapter, but a " + entity.getClass().getName() + " adapter", null);
+        throw new ProducerExc("MediaGeneratingProducerNode: value of '"+mediaEntityKey+"' is not an uploaded media EntityAdapter, but a " + entity.getClass().getName() + " adapter");
       }
 
-      currentMediaType = DatabaseUploadedMedia.getInstance().getMediaType(entity);
+      uploadedMediaEntity = (EntityUploadedMedia) entity;
 
-      currentMediaHandler = MediaHelper.getHandler( currentMediaType );
-      currentMediaHandler.produce(entity,currentMediaType);
+      mediaType = DatabaseUploadedMedia.getInstance().getMediaType(entity);
+
+      currentMediaHandler = MediaHelper.getHandler( mediaType );
+      currentMediaHandler.produce(entity, mediaType);
       entity.setValueForProperty("publish_server", currentMediaHandler.getPublishHost());
       entity.setValueForProperty("icon_is_produced", "1");
       entity.setValueForProperty("is_produced", "1");
       entity.update();
+
+      aLogger.println("media with id "+uploadedMediaEntity.getValue("id") + ", mediaType " + mediaType.getValue("name") + " successfully produced");
     }
     catch (Throwable t) {
-      aLogger.println("Error while generating media: " + t.getMessage());
-      t.printStackTrace(aLogger);
+      String message = "Error while generating media";
+      try {
+        if (uploadedMediaEntity!=null)
+          message = message +  " with id "+uploadedMediaEntity.getValue("id");
+        if (mediaType!=null) {
+          message = message + ", mediaType " + mediaType.getValue("name");
+        }
+      }
+      catch (Throwable s) {
+      }
 
-      throw new ProducerFailure(t.getMessage(), t);
+      message = message + ": " + t.getMessage();
+      aLogger.println(message);
     }
   }
 }
 
-
-/*
-
-
-  abstract Database getStorage() throws StorageObjectException;
-
-  public void handle(PrintWriter htmlout, EntityUsers user, boolean force,
-    boolean sync) throws StorageObjectException, ModuleException {
-    handle(htmlout,user,force,sync,null);
-  }
-
-  public void handle(PrintWriter htmlout,EntityUsers user,boolean force,
-    boolean sync, String id) throws StorageObjectException, ModuleException
-  {
-    long                sessionConnectTime = 0;
-    long                startTime = (new java.util.Date()).getTime();
-    String              whereClause;
-    String              orderBy;
-    Entity              currentMedia;
-    MirMedia            currentMediaHandler;
-    EntityList          batchEntityList;
-
-    int contentBatchsize =
-            Integer.parseInt(MirConfig.getProp("Producer.Content.Batchsize"));
-    orderBy = "date desc, webdb_lastchange desc";
-
-    // get batch of non-produced medias, that are to be published
-    whereClause="is_published='1'";
-    if (id!= null) {
-      whereClause += " and id="+id;
-      // optimization to avoid select count(*)..
-      contentBatchsize = -1;
-    }
-    if (force==false) whereClause += " and is_produced='0'";
-
-    batchEntityList = getStorage().selectByWhereClause(whereClause,
-                                                orderBy, 0, contentBatchsize);
-
-    while (batchEntityList != null) {
-      for(int i=0;i<batchEntityList.size();i++) {
-        currentMedia = (Entity)batchEntityList.elementAt(i);
-        try {
-          Entity currentMediaType =
-                DatabaseUploadedMedia.getInstance().getMediaType(currentMedia);
-          currentMediaHandler = MediaHelper.getHandler( currentMediaType );
-
-          // now produce
-          currentMediaHandler.produce(currentMedia,currentMediaType);
-          currentMedia.setValueForProperty("publish_server",
-                                        currentMediaHandler.getPublishHost());
-          currentMedia.setValueForProperty("icon_is_produced", "1");
-          currentMedia.setValueForProperty("is_produced", "1");
-          currentMedia.update();
-          logHTML(htmlout,"produced media id "+currentMedia.getId()
-                  +": "+currentMediaType.getValue("mime_type")+" success");
-        } catch (Exception e) {
-          // don't throw and exception here, just log.
-          // we don't want to make the admin interface unuseable
-          theLog.printError("media exception: "+currentMedia.getId()+
-                            e.toString());
-          logHTML(htmlout, "problem with media id: "+currentMedia.getId()+
-                  " <font color=\"Red\"> failed!</font>: "+e.toString());
-          e.printStackTrace(htmlout);
-        }
-      }
-
-      // if next batch get it...
-      if (batchEntityList.hasNextBatch()){
-        batchEntityList = uploadedMediaModule.getByWhereClause(whereClause,
-          orderBy, batchEntityList.getNextBatch(),contentBatchsize);
-      } else {
-        batchEntityList=null;
-      }
-    }
-    // Finish
-    sessionConnectTime = new java.util.Date().getTime() - startTime;
-    logHTML(htmlout, "Producer.Media finished: " + sessionConnectTime + " ms.");
-  }
-*/

@@ -35,7 +35,7 @@ import java.util.List;
 import mir.producer.ProducerFactory;
 
 public interface MirProducerLocalizer {
-  public List factories() throws MirLocalizerException, MirLocalizerFailure;
+  public List factories() throws MirLocalizerExc, MirLocalizerFailure;
   public ProducerFactory getFactoryForName(String aName);
   public void produceAllNew();
 }

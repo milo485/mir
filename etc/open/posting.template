@@ -183,18 +183,18 @@
 	</tr>
 <list data.mediafields as m>
 	<tr>
-		<td>${lang("posting.media.media")} ${m}</td>
-		<td colspan="2">
-			<INPUT TYPE="file" NAME="media${m}">
-			<br><font size="-1">(<i>${lang("optional")}</i>)</font>
-		</td>
-	</tr>
-	<tr>
  		<td>
 		${lang("posting.media.title")} ${m}:
 		</td>
 		<td colspan="2">
 			<input type="text" name="media_title${m}" size="40" maxlength="80" value=""><br>
+		</td>
+	</tr>
+	<tr>
+		<td>${lang("posting.media.media")} ${m}</td>
+		<td colspan="2">
+			<INPUT TYPE="file" NAME="media${m}">
+			<br><font size="-1">(<i>${lang("optional")}</i>)</font>
 		</td>
 	</tr>
 </list>

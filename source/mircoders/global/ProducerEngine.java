@@ -60,8 +60,6 @@ public class ProducerEngine {
 
   public void addJob(String aProducerFactory, String aVerb) {
     producerJobQueue.appendJob(new ProducerJob(aProducerFactory, aVerb));
-    log.println(aProducerFactory+"."+aVerb+" added to queue");
-    log.flush();
   }
 
   public void addTask(ProducerTask aTask) {

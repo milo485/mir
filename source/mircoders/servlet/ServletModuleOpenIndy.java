@@ -74,28 +74,8 @@ import mircoders.localizer.*;
  *    adding comments to articles &
  *    open-postings to the newswire
  *
- * @author $Author: bruno $
- * @version $Revision: 1.41 $ $Date: 2002/09/03 14:30:37 $
- *
- * $Log: ServletModuleOpenIndy.java,v $
- * Revision 1.41  2002/09/03 14:30:37  bruno
- * seperation of admin and open posting bundles
- *
- * Revision 1.40  2002/09/01 22:05:57  mh
- * Mir goes GPL
- *
- * Revision 1.39  2002/08/25 19:00:11  mh
- * merge of localization branch into HEAD. mh and zap
- *
- * Revision 1.38  2002/07/21 22:50:14  mh
- * cleanup coding style of getpdf() method
- *
- * Revision 1.37  2002/07/21 22:41:45  mh
- * make use of new MediaRequest class. A big cleanup and optimization.
- *
- * Revision 1.36  2002/06/29 15:45:20  mh
- * cvs macros
- *
+ * @author mir-coders group
+ * @version $Id: ServletModuleOpenIndy.java,v 1.42 2002/11/04 04:35:22 mh Exp $
  *
  */
 
@@ -313,12 +293,15 @@ public class ServletModuleOpenIndy extends ServletModule
     boolean setTopic = false;
 
     try {
-      WebdbMultipartRequest mp = new WebdbMultipartRequest(req);
+
+      WebdbMultipartRequest mp = null;
       EntityList mediaList = null;
       try {
         // new MediaRequest, "1" is the id for the openPosting user
-        mediaList = new MediaRequest(mp, "1").getMedia(true, true);
-      } catch (MirMediaUserException e) {
+        MediaRequest mediaReq = new MediaRequest("1", true, true);
+        mp = new WebdbMultipartRequest(req, (FileHandler)mediaReq);
+        mediaList = mediaReq.getEntityList();
+      } catch (FileHandlerUserException e) {
         throw new ServletModuleUserException(e.getMsg());
       }
           
@@ -416,7 +399,7 @@ public class ServletModuleOpenIndy extends ServletModule
         throw new ServletModuleException(t.getMessage());
       }
     }
-    catch (MirMediaException e) { throw new ServletModuleException("MediaException: "+ e.toString());}
+    catch (FileHandlerException e) { throw new ServletModuleException("MediaException: "+ e.toString());}
     catch (IOException e) { throw new ServletModuleException("IOException: "+ e.toString());}
     catch (StorageObjectException e) { throw new ServletModuleException("StorageObjectException" + e.toString());}
     catch (ModuleException e) { throw new ServletModuleException("ModuleException"+e.toString());}

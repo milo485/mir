@@ -50,23 +50,9 @@ import mircoders.storage.*;
  * this class implements mapping of one line of the database table content
  * to a java object
  *
- * @version $Revision: 1.10 $ $Date: 2002/09/01 22:05:53 $
- * @author $Author: mh $
+ * @version $Id: EntityContent.java,v 1.11 2002/11/04 04:35:21 mh Exp $
+ * @author mir-coders group
  *
- * $Log: EntityContent.java,v $
- * Revision 1.10  2002/09/01 22:05:53  mh
- * Mir goes GPL
- *
- * Revision 1.9.2.1  2002/09/01 21:31:43  mh
- * Mir goes GPL
- *
- * Revision 1.9  2002/07/19 20:55:49  mh
- * commented out decodeHTML, as we don't encodeHTML anymore
- *
- * Revision 1.8  2002/06/28 20:37:33  mh
- * make date_formatted be webdb_create_short instead to be more consistent. also make date2webdb.. use webdb_create
- *
- * 
  */
 
 
@@ -397,8 +383,8 @@ public class EntityContent extends Entity
           tinyIcon = MirConfig.getProp("Producer.Icon.TinyAudio");
           iconAlt = "Audio";
         } else if (tinyIcon == null && !mediaHandler.isImage()) {
-          tinyIcon = mediaHandler.getTinyIcon();
-          iconAlt = mediaHandler.getIconAlt();
+          tinyIcon = mediaHandler.getTinyIconName();
+          iconAlt = mediaHandler.getIconAltName();
         }
 
       }

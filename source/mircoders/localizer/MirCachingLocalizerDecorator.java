@@ -44,7 +44,7 @@ public class MirCachingLocalizerDecorator implements MirLocalizer {
     localizer = aLocalizer;
   }
 
-  public MirProducerLocalizer producers() throws MirLocalizerFailure, MirLocalizerException {
+  public MirProducerLocalizer producers() throws MirLocalizerFailure, MirLocalizerExc {
     if (producerLocalizer==null) {
       producerLocalizer = localizer.producers();
     }
@@ -52,7 +52,7 @@ public class MirCachingLocalizerDecorator implements MirLocalizer {
     return producerLocalizer;
   }
 
-  public MirGeneratorLocalizer generators() throws MirLocalizerFailure, MirLocalizerException {
+  public MirGeneratorLocalizer generators() throws MirLocalizerFailure, MirLocalizerExc {
     if (generatorLocalizer==null) {
       generatorLocalizer = localizer.generators();
     }
@@ -60,7 +60,7 @@ public class MirCachingLocalizerDecorator implements MirLocalizer {
     return generatorLocalizer;
   }
 
-  public MirOpenPostingLocalizer openPostings() throws MirLocalizerFailure, MirLocalizerException {
+  public MirOpenPostingLocalizer openPostings() throws MirLocalizerFailure, MirLocalizerExc {
     if (openPostingsLocalizer==null) {
       openPostingsLocalizer = localizer.openPostings();
     }
@@ -68,7 +68,7 @@ public class MirCachingLocalizerDecorator implements MirLocalizer {
     return openPostingsLocalizer;
   }
 
-  public MirProducerAssistantLocalizer producerAssistant() throws MirLocalizerFailure, MirLocalizerException {
+  public MirProducerAssistantLocalizer producerAssistant() throws MirLocalizerFailure, MirLocalizerExc {
     if (producerAssistantLocalizer==null) {
       producerAssistantLocalizer = localizer.producerAssistant();
     }
@@ -76,7 +76,7 @@ public class MirCachingLocalizerDecorator implements MirLocalizer {
     return producerAssistantLocalizer;
   }
 
-  public MirDataModelLocalizer dataModel() throws MirLocalizerFailure, MirLocalizerException {
+  public MirDataModelLocalizer dataModel() throws MirLocalizerFailure, MirLocalizerExc {
     if (dataModelLocalizer==null) {
       dataModelLocalizer = localizer.dataModel();
     }
@@ -84,7 +84,7 @@ public class MirCachingLocalizerDecorator implements MirLocalizer {
     return dataModelLocalizer;
   }
 
-  public MirAdminInterfaceLocalizer adminInterface() throws MirLocalizerFailure, MirLocalizerException {
+  public MirAdminInterfaceLocalizer adminInterface() throws MirLocalizerFailure, MirLocalizerExc {
     if (adminInterfaceLocalizer==null) {
       adminInterfaceLocalizer = localizer.adminInterface();
     }

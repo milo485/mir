@@ -46,7 +46,7 @@ public class MirGlobal {
     if (localizer == null ) {
       synchronized(MirGlobal.class) {
         if (localizer == null ) {
-          localizerClassName = getConfigPropertyWithDefault("Mir.Localizer", "mirlocal.loaclizer.basic.MirBasicLocalizer");
+          localizerClassName = getConfigPropertyWithDefault("Mir.Localizer", "mirlocal.localizer.basic.MirBasicLocalizer");
 
           try {
             localizerClass = Class.forName(localizerClassName);

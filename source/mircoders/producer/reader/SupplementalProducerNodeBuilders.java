@@ -41,22 +41,26 @@ import mircoders.producer.*;
 
 public class SupplementalProducerNodeBuilders {
 
-  public static void registerBuilders(ProducerNodeBuilderLibrary aBuilderLibrary, EntityAdapterModel aModel) {
+  public static void registerBuilders(ProducerNodeBuilderLibrary aBuilderLibrary, EntityAdapterModel aModel) throws ProducerConfigExc {
     aBuilderLibrary.registerBuilder("ModifyContent", ContentModifyingProducerNodeBuilder.class);
-    aBuilderLibrary.registerBuilder("MarkContent", ContentMartkingProducerNodeBuilder.class);
+    aBuilderLibrary.registerBuilder("MarkContent", ContentMarkingProducerNodeBuilder.class);
+    aBuilderLibrary.registerBuilder("GenerateMedia", MediaGeneratingProducerNodeBuilder.class);
+
+
     aBuilderLibrary.registerBuilder("PDFPreFormat", PDFPreFormattingProducerNodeBuilder.class);
     aBuilderLibrary.registerBuilder("PDFGenerate", PDFGeneratingProducerNodeBuilder.class);
   }
 
-  public static class ContentMartkingProducerNodeBuilder extends DefaultProducerNodeBuilders.AbstractProducerNodeBuilder {
-    private final static String   MARKER_KEY_ATTRIBUTE = DefaultProducerNodeBuilders.KEY_ATTRIBUTE;
-    private final static String[] MARKER_REQUIRED_ATTRIBUTES = { MARKER_KEY_ATTRIBUTE };
-    private final static String[] MARKER_OPTIONAL_ATTRIBUTES = {};
-    private final static String[] MARKER_SUBNODES = {};
+  private final static String   MARKER_KEY_ATTRIBUTE = DefaultProducerNodeBuilders.KEY_ATTRIBUTE;
+  private final static String[] MARKER_REQUIRED_ATTRIBUTES = { MARKER_KEY_ATTRIBUTE };
+  private final static String[] MARKER_OPTIONAL_ATTRIBUTES = {};
+  private final static String[] MARKER_SUBNODES = {};
+
+  public static class ContentMarkingProducerNodeBuilder extends DefaultProducerNodeBuilders.AbstractProducerNodeBuilder {
 
     private String key;
 
-    public ContentMartkingProducerNodeBuilder() {
+    public ContentMarkingProducerNodeBuilder() {
       super(MARKER_SUBNODES);
     }
 
@@ -72,32 +76,57 @@ public class SupplementalProducerNodeBuilders {
   }
 
 
+  private final static String   CONTENT_MODIFIER_KEY_ATTRIBUTE = DefaultProducerNodeBuilders.KEY_ATTRIBUTE;
+  private final static String   CONTENT_MODIFIER_FIELD_ATTRIBUTE = "field";
+  private final static String   CONTENT_MODIFIER_VALUE_ATTRIBUTE = "value";
+  private final static String[] CONTENT_MODIFIER_REQUIRED_ATTRIBUTES = { CONTENT_MODIFIER_KEY_ATTRIBUTE, CONTENT_MODIFIER_FIELD_ATTRIBUTE, CONTENT_MODIFIER_VALUE_ATTRIBUTE };
+  private final static String[] CONTENT_MODIFIER_OPTIONAL_ATTRIBUTES = {};
+  private final static String[] CONTENT_MODIFIER_SUBNODES = {};
+
   public static class ContentModifyingProducerNodeBuilder extends DefaultProducerNodeBuilders.AbstractProducerNodeBuilder {
-    private final static String   MODIFYER_KEY_ATTRIBUTE = DefaultProducerNodeBuilders.KEY_ATTRIBUTE;
-    private final static String   MODIFYER_FIELD_ATTRIBUTE = "field";
-    private final static String   MODIFYER_VALUE_ATTRIBUTE = "value";
-    private final static String[] MODIFYER_REQUIRED_ATTRIBUTES = { MODIFYER_KEY_ATTRIBUTE, MODIFYER_FIELD_ATTRIBUTE, MODIFYER_VALUE_ATTRIBUTE };
-    private final static String[] MODIFYER_OPTIONAL_ATTRIBUTES = {};
-    private final static String[] MODIFYER_SUBNODES = {};
 
     private String key;
     private String field;
     private String value;
 
     public ContentModifyingProducerNodeBuilder() {
-      super(MODIFYER_SUBNODES);
+      super(CONTENT_MODIFIER_SUBNODES);
     }
 
     public void setAttributes(Map anAttributes) throws ProducerConfigExc {
-      ReaderTool.checkAttributes(anAttributes, MODIFYER_REQUIRED_ATTRIBUTES, MODIFYER_OPTIONAL_ATTRIBUTES);
+      ReaderTool.checkAttributes(anAttributes, CONTENT_MODIFIER_REQUIRED_ATTRIBUTES, CONTENT_MODIFIER_OPTIONAL_ATTRIBUTES);
 
-      key = (String) anAttributes.get(MODIFYER_KEY_ATTRIBUTE);
-      field = (String) anAttributes.get(MODIFYER_FIELD_ATTRIBUTE);
-      value = (String) anAttributes.get(MODIFYER_VALUE_ATTRIBUTE);
+      key = (String) anAttributes.get(CONTENT_MODIFIER_KEY_ATTRIBUTE);
+      field = (String) anAttributes.get(CONTENT_MODIFIER_FIELD_ATTRIBUTE);
+      value = (String) anAttributes.get(CONTENT_MODIFIER_VALUE_ATTRIBUTE);
     };
 
     public ProducerNode constructNode() {
       return new ContentModifyingProducerNode(key, field, value);
+    };
+  }
+
+  private final static String   MEDIA_KEY_ATTRIBUTE = DefaultProducerNodeBuilders.KEY_ATTRIBUTE;
+  private final static String[] MEDIA_REQUIRED_ATTRIBUTES = { MEDIA_KEY_ATTRIBUTE };
+  private final static String[] MEDIA_OPTIONAL_ATTRIBUTES = {};
+  private final static String[] MEDIA_SUBNODES = {};
+
+  public static class MediaGeneratingProducerNodeBuilder extends DefaultProducerNodeBuilders.AbstractProducerNodeBuilder {
+
+    private String key;
+
+    public MediaGeneratingProducerNodeBuilder() {
+      super(MEDIA_SUBNODES);
+    }
+
+    public void setAttributes(Map anAttributes) throws ProducerConfigExc {
+      ReaderTool.checkAttributes(anAttributes, MEDIA_REQUIRED_ATTRIBUTES, MEDIA_OPTIONAL_ATTRIBUTES);
+
+      key = (String) anAttributes.get(MEDIA_KEY_ATTRIBUTE);
+    };
+
+    public ProducerNode constructNode() {
+      return new MediaGeneratingProducerNode(key);
     };
   }
 
@@ -141,7 +170,7 @@ public class SupplementalProducerNodeBuilders {
     };
   }
 
-public static class PDFGeneratingProducerNodeBuilder extends DefaultProducerNodeBuilders.AbstractProducerNodeBuilder {
+  public static class PDFGeneratingProducerNodeBuilder extends DefaultProducerNodeBuilders.AbstractProducerNodeBuilder {
     private final static String   MARKER_KEY_ATTRIBUTE = DefaultProducerNodeBuilders.KEY_ATTRIBUTE;
     private final static String   PDF_GENERATOR_ATTRIBUTE = "generator";
     private final static String   PDF_DESTINATION_ATTRIBUTE = "destination";
@@ -171,13 +200,6 @@ public static class PDFGeneratingProducerNodeBuilder extends DefaultProducerNode
       return new PDFGeneratingProducerNode(generator,destination,stylesheet);
     };
   }
-
-
-/*
-  TODO:
-        [ ] Media Producing
-*/
-
 }
 
 

@@ -52,14 +52,15 @@ public class WebdbMultipartRequest
   HttpServletRequest    req=null;
   Hashtable             parameters = new Hashtable();
   MultipartParser       mp=null;
-  public static ArrayList requestList;
+  FileHandler           _fHandler;
 
-  public WebdbMultipartRequest(HttpServletRequest theReq) throws IOException
+  public WebdbMultipartRequest(HttpServletRequest theReq, FileHandler handler)
+    throws FileHandlerException, FileHandlerUserException, IOException
   {
     req=theReq;
     int maxSize = Integer.parseInt(MirConfig.getProp("MaxMediaUploadSize"));
     mp = new MultipartParser(req, 1024*maxSize);
-    requestList = new ArrayList();
+    _fHandler = handler;
     _evaluateRequest();
   }
 
@@ -123,10 +124,11 @@ public class WebdbMultipartRequest
     }
   }
 
-  private void _evaluateRequest() throws IOException{
+  private void _evaluateRequest() throws FileHandlerException,
+    FileHandlerUserException, IOException {
 
     Part part;
-    int i = 0;
+    int i = 1;
     while ((part = mp.readNextPart()) != null) {
       String name = part.getName();
       if (part.isParam()) {
@@ -145,9 +147,8 @@ public class WebdbMultipartRequest
         FilePart filePart = (FilePart) part;
         String fn = filePart.getFileName();
         if (filePart.getFileName() != null) {
-          ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-          filePart.writeTo(byteStream);
-          requestList.add(i,new MpRequest(byteStream.toByteArray(),filePart.getFileName(),filePart.getContentType()));
+          if (_fHandler != null)
+            _fHandler.setFile(filePart, i, getParameters());
           i++;
         }
       }

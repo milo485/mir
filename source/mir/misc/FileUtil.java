@@ -62,28 +62,87 @@ public final class FileUtil {
   private FileUtil () {
   }
 
-  public static boolean write(String filename, byte[] in)
+  public static File getFile(String filename)
     throws IOException {
 
-		boolean retVal = false;
+    try {
+      File f = null;
+      f = new File(filename);
+      File dir = new File(f.getParent());
+      dir.mkdirs();
+
+      return f;
+    } catch(Exception e) {
+      throw new IOException(e.toString());
+    }
+
+  }
+
+  public static long write(File f, InputStream in)
+    throws IOException {
+
+    long size = 0;
 
 		if (in!=null) {
 			try {
-        File f = null;
-        f = new File(filename);
-				File dir = new File(f.getParent());
-				dir.mkdirs();
+        FileOutputStream out = new FileOutputStream(f);
 
-				FileOutputStream outStream;
-				outStream = new FileOutputStream(f);
-				outStream.write(in);
-				outStream.close();
-				retVal = true;
+        int read;
+        byte[] buf = new byte[8 * 1024];
+        while((read = in.read(buf)) != -1) {
+          out.write(buf, 0, read);
+          size += read;
+        }
+
+        in.close();
+				out.close();
 			} catch(IOException e) {
         throw new IOException(e.toString());
       }
     }
-		return retVal;
+		return size;
+	}
+
+  public static long write(String filename, InputStream in)
+    throws IOException {
+
+    long size = 0;
+
+		if (in!=null) {
+			try {
+        File f = getFile(filename);
+        size = write(f, in);
+			} catch(IOException e) {
+        throw new IOException(e.toString());
+      }
+    }
+		return size;
+	}
+
+  public static long write(String filename, Reader in, String encoding)
+    throws IOException {
+
+    long size = 0;
+
+		if (in!=null) {
+			try {
+        File f = getFile(filename);
+        FileOutputStream fOut = new FileOutputStream(f);
+        OutputStreamWriter out = new OutputStreamWriter(fOut, encoding);
+        int read;
+        char[] cbuf = new char[8*1024];
+        while((read = in.read(cbuf)) != -1) {
+          out.write(cbuf, 0, read);
+          size += read;
+        }
+
+				out.close();
+        in.close();
+			} catch(IOException e) {
+        throw new IOException(e.toString());
+      }
+    }
+		return size;
 	}
 
   public static boolean read(String filename, byte out[])

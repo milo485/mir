@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001, 2002  The Mir-coders group
+ * Copyright (C) 2001, 2002 The Mir-coders group
  *
  * This file is part of Mir.
  *
@@ -66,27 +66,8 @@ import mir.log.Log;
 /**
  * Mir.java - main servlet, that dispatches to servletmodules
  *
- * @author $Author: zapata $
- * @version $Revision: 1.21 $ $Date: 2002/10/25 03:25:13 $
- *
- * $Log: Mir.java,v $
- * Revision 1.21  2002/10/25 03:25:13  zapata
- * - producer links are moved to an "advanced" page, not intended for normal
- *   users. Normal users have only 1 link "generate all new"
- * - used br1's support for log4j at 1 place (ServletModuleDispatch)
- * - misc. small changes/fixes here and there
- *
- * Revision 1.20  2002/10/09 16:09:05  bruno
- * contains only admin templates which should not be changed by users
- *
- * Revision 1.19  2002/09/01 22:05:47  mh
- * Mir goes GPL
- *
- * Revision 1.18  2002/08/25 19:00:06  mh
- * merge of localization branch into HEAD. mh and zap
- *
- * Revision 1.17  2002/07/21 22:27:39  mh
- * make the user error msg look nicer
+ * @author $Author: mh $
+ * @version $Id: Mir.java,v 1.22 2002/11/04 04:35:20 mh Exp $
  *
  */
 

@@ -57,19 +57,8 @@ import mircoders.entity.*;
  *  ServletModuleContent -
  *  deliver html for the article admin form.
  *
- * @version $Revision: 1.21 $
- * @author $Author: mh $
- *
- * $Log: ServletModuleContent.java,v $
- * Revision 1.21  2002/09/01 22:05:57  mh
- * Mir goes GPL
- *
- * Revision 1.20  2002/08/25 19:00:11  mh
- * merge of localization branch into HEAD. mh and zap
- *
- * Revision 1.19  2002/07/20 22:24:25  mh
- * made the add() method use _showObject. Fixes a bug that cause the popUps not to show up when adding an article in the admin
- *
+ * @version $Id: ServletModuleContent.java,v 1.22 2002/11/04 04:35:22 mh Exp $
+ * @author rk, mir-coders
  *
  */
 
@@ -515,8 +504,8 @@ public class ServletModuleContent extends ServletModule
                   tinyIcon = MirConfig.getProp("Producer.Icon.TinyAudio");
                   iconAlt = "Audio";
                 } else if (tinyIcon == null && !mediaHandler.isImage()) {
-                  tinyIcon = mediaHandler.getTinyIcon();
-                  iconAlt = mediaHandler.getIconAlt();
+                  tinyIcon = mediaHandler.getTinyIconName();
+                  iconAlt = mediaHandler.getIconAltName();
                 }
             }
           }

@@ -41,8 +41,13 @@ public class ProducerNodeBuilderLibrary {
     nodeBuilders = new HashMap();
   }
 
-  public void registerBuilder(String aName, Class aProducerNodeBuilderClass) {
-    registerFactory(aName, new ProducerNodeBuilder.DefaultProducerNodeBuilderFactory( aProducerNodeBuilderClass ));
+  public void registerBuilder(String aName, Class aProducerNodeBuilderClass) throws ProducerConfigExc, ProducerConfigFailure {
+    try {
+      registerFactory(aName, new ProducerNodeBuilder.DefaultProducerNodeBuilderFactory( aProducerNodeBuilderClass ));
+    }
+    catch (Throwable t) {
+      throw new ProducerConfigFailure("Error while registering builder '"+aName+"': "+t.getMessage(), t);
+    }
   }
 
   public void registerFactory(String aName, ProducerNodeBuilder.ProducerNodeBuilderFactory aFactory) {

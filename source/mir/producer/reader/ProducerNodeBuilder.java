@@ -47,7 +47,10 @@ public interface ProducerNodeBuilder  {
   public class DefaultProducerNodeBuilderFactory implements ProducerNodeBuilderFactory {
     private Class producerNodeBuilderClass;
 
-    public DefaultProducerNodeBuilderFactory(Class aProducerNodeBuilderClass) {
+    public DefaultProducerNodeBuilderFactory(Class aProducerNodeBuilderClass) throws ProducerConfigExc {
+      if (!ProducerNodeBuilder.class.isAssignableFrom(aProducerNodeBuilderClass))
+        throw new ProducerConfigExc("supplied class is not a ProducerNodeBuilder class but a " + aProducerNodeBuilderClass.getClass().getName());
+
       producerNodeBuilderClass = aProducerNodeBuilderClass;
     }
 

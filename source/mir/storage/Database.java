@@ -55,28 +55,8 @@ import  mir.misc.*;
  * Treiber, Host, User und Passwort, ueber den der Zugriff auf die
  * Datenbank erfolgt.
  *
- * @version $Revision: 1.23 $ $Date: 2002/09/01 22:05:52 $
- * @author $Author: mh $
- *
- * $Log: Database.java,v $
- * Revision 1.23  2002/09/01 22:05:52  mh
- * Mir goes GPL
- *
- * Revision 1.22  2002/08/25 19:00:09  mh
- * merge of localization branch into HEAD. mh and zap
- *
- * Revision 1.21  2002/08/04 23:38:22  mh
- * fix up the webdb_create update stuff
- *
- * Revision 1.20  2002/07/21 22:32:25  mh
- * on insert, the "webdb_lastchange" field should get a value
- *
- * Revision 1.19  2002/06/29 15:44:46  mh
- * make the webdb_create update be called webdb_create_update. it breaks things otherwise. a fixme case I know..
- *
- * Revision 1.18  2002/06/28 20:42:13  mh
- * added necessary bits in templates and Database.java to make webdb_create modifiable. make the conversion from sql/Timestamp to String more robust
- *
+ * @version $Id: Database.java,v 1.24 2002/11/04 04:35:21 mh Exp $
+ * @author rk
  *
  */
 public class Database implements StorageObject {

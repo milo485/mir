@@ -20,7 +20,7 @@
         <input type="hidden" name="do" value="update">
 
 
-	 <textarea cols="66" rows="40" name="text" wrap=virtual>${data.text}</textarea>
+	 <textarea cols="120" rows="40" name="text" wrap=virtual>${data.text}</textarea>
 
 <br>
 

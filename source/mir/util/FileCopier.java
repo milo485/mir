@@ -17,6 +17,10 @@ public class FileCopier {
 
     inputStream = new FileInputStream(aSourceFile);
     try {
+      File directory = new File(aDestinationFile.getParent());
+        if (directory!=null && !directory.exists()){
+          directory.mkdirs();
+      }
       outputStream = new FileOutputStream(aDestinationFile);
       try {
         do {
@@ -55,6 +59,18 @@ public class FileCopier {
       else {
         copyFile(sourceFile, destinationFile);
       }
+    }
+  }
+
+  public static void copy(File aSource, File aDestination) throws IOException {
+    if (aSource.isDirectory()) {
+      copyDirectory(aSource, aDestination);
+    }
+    else if (aDestination.isDirectory()) {
+      copyFile(aSource, new File(aDestination, aSource.getName()));
+    }
+    else {
+      copyFile(aSource, aDestination);
     }
   }
 

@@ -40,22 +40,8 @@ import  gnu.regexp.*;
 /**
  * Statische Hilfsmethoden zur Stringbehandlung
  *
- * @version $Revision: 1.25 $ $Date: 2002/09/14 03:32:12 $
- * @author $Author: zapata $
- *
- * $Log: StringUtil.java,v $
- * Revision 1.25  2002/09/14 03:32:12  zapata
- * fixed a small email address filtering bug
- *
- * Revision 1.24  2002/09/01 22:05:50  mh
- * Mir goes GPL
- *
- * Revision 1.23.2.1  2002/09/01 21:31:40  mh
- * Mir goes GPL
- *
- * Revision 1.23  2002/06/28 20:39:37  mh
- * added numberformat helper. make webdbDate2readableDate use webdb_create instead. make the order and appearance of it more consistent. cvs macros. and finally code tidying
- *
+ * @version $Id: StringUtil.java,v 1.26 2002/11/04 04:35:21 mh Exp $
+ * @author mir-coders group
  *
  */
 public final class StringUtil {

@@ -47,11 +47,15 @@ public class EntityIteratorAdapter implements RewindableIterator {
     definitionName = aDefinitionName;
   }
 
-  public EntityIteratorAdapter(String aWhereClause, String anOrderByClause, int aBatchSize, EntityAdapterModel aModel, String aDefinitionName ) throws StorageObjectException {
+  public EntityIteratorAdapter(String aWhereClause, String anOrderByClause,
+          int aBatchSize, EntityAdapterModel aModel, String aDefinitionName )
+          throws StorageObjectException, EntityAdapterExc {
     this(new EntityBrowser(aModel.getMappingForName(aDefinitionName).getStorage(), aWhereClause, anOrderByClause, aBatchSize), aModel, aDefinitionName);
   }
 
-  public EntityIteratorAdapter(String aWhereClause, String anOrderByClause, int aBatchSize, EntityAdapterModel aModel, String aDefinitionName, int aLimit, int aSkip) throws StorageObjectException {
+  public EntityIteratorAdapter(String aWhereClause, String anOrderByClause,
+          int aBatchSize, EntityAdapterModel aModel, String aDefinitionName,
+          int aLimit, int aSkip) throws StorageObjectException, EntityAdapterExc {
     this(new EntityBrowser(aModel.getMappingForName(aDefinitionName).getStorage(), aWhereClause, anOrderByClause, aBatchSize, aLimit, aSkip), aModel, aDefinitionName);
   }
 
@@ -60,7 +64,12 @@ public class EntityIteratorAdapter implements RewindableIterator {
   }
 
   public Object next() {
-    return model.makeEntityAdapter(definitionName, (Entity) iterator.next());
+    try {
+      return model.makeEntityAdapter(definitionName, (Entity) iterator.next());
+    }
+    catch (EntityAdapterExc e) {
+      return null;
+    }
   }
 
   public void remove() {

@@ -53,7 +53,7 @@ import mir.storage.*;
  * This class handles storage of audio data and meta data
  *
  * @author mh
- * @version 11.11.2000
+ * @version $Id: EntityAudio.java,v 1.4 2002/11/04 04:35:21 mh Exp $
  */
 
 
@@ -68,102 +68,6 @@ public class EntityAudio extends EntityUploadedMedia
 		this();
 		setStorage(theStorage);
 	}
-
-	//
-	// methods
-
-
-
-	public byte[] getAudio() throws StorageObjectException
-	{
-		theLog.printDebugInfo("--getaudio started");
-		java.sql.Connection con=null;Statement stmt=null;
-		byte[] data=null;
-
-		try {
-			con = theStorageObject.getPooledCon();
-			con.setAutoCommit(false);
-			LargeObjectManager lom;
-            java.sql.Connection jCon;
-            stmt = con.createStatement();
-			ResultSet rs = theStorageObject.executeSql(stmt,
-                            "select audio_data from audio where id="+getId());
-            jCon = ((com.codestudio.sql.PoolManConnectionHandle)con)
-                    .getNativeConnection();
-            lom = ((org.postgresql.Connection)jCon).getLargeObjectAPI();
-			if(rs!=null) {
-              if (rs.next()) {
-                LargeObject lob = lom.open(rs.getInt(1));
-                data = lob.read(lob.size());
-                lob.close();
-                //data = rs.getBytes(1);
-              }
-            rs.close();
-			}
-		} catch (Exception e) {
-          e.printStackTrace();
-          theLog.printError("EntityAudio -- getAudio failed"+e.toString()); 
-          throwStorageObjectException(e, "EntityAudio -- getAudio failed: ");
-        }
-        finally {
-          try {
-            con.setAutoCommit(true);
-          } catch (Exception e) {
-            e.printStackTrace();
-            theLog.printError(
-                    "EntityAudio -- getAudio reseting transaction mode failed"
-                    +e.toString()); 
-          }
-          theStorageObject.freeConnection(con,stmt);
-        }
-
-		return data;
-	}
-
-	public void setAudio(byte[] uploadData)
-	    throws StorageObjectException {
-
-		if (uploadData!=null) {
-			java.sql.Connection con=null;PreparedStatement pstmt=null;
-			try {
-
-				if (uploadData!=null) {
-					con = theStorageObject.getPooledCon();
-					con.setAutoCommit(false);
-					theLog.printDebugInfo("setaudio :: trying to insert audio");
-
-					// setting values
-                    LargeObjectManager lom;
-                    java.sql.Connection jCon;
-                    jCon = ((com.codestudio.sql.PoolManConnectionHandle)con)
-                            .getNativeConnection();
-                    lom = ((org.postgresql.Connection)jCon).getLargeObjectAPI();
-                    int oid = lom.create();
-                    LargeObject lob = lom.open(oid);
-                    lob.write(uploadData);
-                    lob.close();
-                    String sql = "update images set"
-                                 +" audio_data="+oid
-                                 +" where id="+getId();
-					theLog.printDebugInfo("setaudio :: updating: "+ sql);
-					pstmt = con.prepareStatement(sql);
-					//pstmt.setBytes(1, imageData);
-					//pstmt.setBytes(2, iconData);
-					pstmt.executeUpdate();
-					sql="update content set is_produced='0' where to_media="+getId();
-					pstmt = con.prepareStatement(sql);
-					pstmt.executeUpdate();
-				}
-			}
-			catch (Exception e) {
-                throwStorageObjectException(e,"setaudio ::failed: ");
-            }
-			finally {
-				try { if (con!=null) con.setAutoCommit(true); } catch (Exception e) {;}
-				theStorageObject.freeConnection(con,pstmt); }
-		}
-	}
-
 
 	public void update() throws StorageObjectException {
 		super.update();

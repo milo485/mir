@@ -593,7 +593,7 @@ public class ParameterExpander {
             currentValue = ((Map) currentValue).get(qualifier);
           }
           else {
-            throw new RuntimeException("cannot reference into anything other than a map");
+            throw new RuntimeException("cannot reference into anything other than a map ('"+qualifier+"')");
           }
         }
         else if (token instanceof IdentifierToken) {
@@ -604,7 +604,7 @@ public class ParameterExpander {
             currentValue = ((Map) currentValue).get(qualifier);
           }
           else {
-            throw new RuntimeException("cannot reference into anything other than a map");
+            throw new RuntimeException("cannot reference into anything other than a map ('"+qualifier+"')");
           }
         }
         else if (token instanceof LeftParenthesisToken) {
@@ -687,7 +687,7 @@ public class ParameterExpander {
       return value;
     }
 
-    private static final int MAX_OPERATOR_LEVEL = 1000;               // && || !
+    private static final int MAX_OPERATOR_LEVEL = 1000;                //
     private static final int LOGICAL_OPERATOR_LEVEL = 5;               // && || !
     private static final int COMPARISON_OPERATOR_LEVEL = 4;            // == <= >= in < >
     private static final int ADDITION_OPERATOR_LEVEL = 3;              // + - &

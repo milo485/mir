@@ -77,7 +77,7 @@ public class MirBasicProducerLocalizer implements MirProducerLocalizer {
     }
   }
 
-  public List factories() throws MirLocalizerException {
+  public List factories() throws MirLocalizerExc {
     if (fileMonitor==null || producerFactories == null || fileMonitor.hasChanged()) {
       try {
         List newProducers = new Vector();
@@ -103,14 +103,19 @@ public class MirBasicProducerLocalizer implements MirProducerLocalizer {
     return producerFactories;
   };
 
-  protected void setupProducerNodeBuilderLibrary(ProducerNodeBuilderLibrary aLibrary) {
-    DefaultProducerNodeBuilders.registerBuilders(
-      aLibrary, model, generatorLibrary, writerEngine,
-      MirGlobal.getConfigProperty("Home"), MirGlobal.getConfigProperty("Producer.StorageRoot"));
-    SupplementalProducerNodeBuilders.registerBuilders(aLibrary, model);
+  protected void setupProducerNodeBuilderLibrary(ProducerNodeBuilderLibrary aLibrary) throws MirLocalizerFailure {
+    try {
+      DefaultProducerNodeBuilders.registerBuilders(
+          aLibrary, model, generatorLibrary, writerEngine,
+          MirGlobal.getConfigProperty("Home"), MirGlobal.getConfigProperty("Producer.StorageRoot"));
+      SupplementalProducerNodeBuilders.registerBuilders(aLibrary, model);
+    }
+    catch (Throwable t) {
+      throw new MirLocalizerFailure(t.getMessage(), t);
+    }
   }
 
-  protected void setupFactories(List aFactories, FileMonitor aFileMonitor) throws MirLocalizerException, MirLocalizerFailure {
+  protected void setupFactories(List aFactories, FileMonitor aFileMonitor) throws MirLocalizerExc, MirLocalizerFailure {
     ProducerConfigReader reader;
     ProducerNodeBuilderLibrary library = new ProducerNodeBuilderLibrary();
     setupProducerNodeBuilderLibrary(library);
@@ -128,7 +133,7 @@ public class MirBasicProducerLocalizer implements MirProducerLocalizer {
     setupFactories(aFactories);
   }
 
-  protected void setupFactories(List aFactories) throws MirLocalizerException, MirLocalizerFailure {
+  protected void setupFactories(List aFactories) throws MirLocalizerExc, MirLocalizerFailure {
     CompositeProducerNode node;
 
     try {
