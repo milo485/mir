@@ -1,0 +1,16 @@
+Dupe check Trigger
+by Matthias "Trigger Hippy" Jordan <mjordan@code-fu.de>
+
+The files in this directory are needed to create a PostgreSQL trigger that
+is used to ensure that no comment and no article is posted twice. This
+happens very often by accident and is very disturbing so we have to prevent
+this somehow. Because Indymedia databases will hopefully grow big very fast,
+we want to do this check as fast as possible. 
+
+So Mir simply issues the INSERT. By this INSERT statement, a trigger gets,
+well, triggered that calculates a CRC-32 checksum of the comment and
+searches for rows with the same checksum. If it finds the checksum, the
+INSERT gets aborted. If the checksum isn't found, it is appended to the row
+and the INSERT is executed.
+
+The trigger works for INSERTs and UPDATEs.

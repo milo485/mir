@@ -1,0 +1,33 @@
+# Makefile
+
+# Set the following directory so that it contains spi.h and trigger.h
+PGINC=/usr/include/postgresql/server
+
+#PGVERSION=-DPG70
+PGVERSION=-DPG71
+
+# If changed, also change postgresql.script
+INSTALLDIR=/var/lib/postgres/data
+
+
+
+CC=gcc
+CFLAGS=-I$(PGINC) $(PGVERSION)
+
+install: dupetrigger.so
+	cp dupetrigger.so $(INSTALLDIR)
+	chmod 644 $(INSTALLDIR)/dupetrigger.so
+	#
+	# Now, change the path to dupetrigger.so in postgresql.script to the
+	# absolute path where dupetrigger.so is installed (${INSTALLDIR})
+
+dupetrigger.so: dupetrigger.o
+	$(CC) -shared -dynamic -o dupetrigger.so dupetrigger.o
+
+clean:
+	rm -rf dupetrigger.o dupetrigger.so
+
+
+tidy: clean
+	rm -rf *~
+	

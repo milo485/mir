@@ -1,0 +1,58 @@
+<html>
+<head>
+        <title>${config["Mir.Name"]} | ${lang("topic.htmltitle")}</title>
+        <link rel="stylesheet" type="text/css" href="${config.docRoot}/style/admin.css">
+<head>
+
+<body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
+
+<include "templates/admin/head.template">
+<form action="${config.actionRoot}" method="post">
+	<input type=hidden name=module value=Topics>
+	<input type="hidden" name="id" value="${data.id}">
+	<if data.new><input type="hidden" name="do" value="insert">
+	<else><input type="hidden" name="do" value="update"></if>
+<table border="0">
+  <tr>
+    <td align="right" class="darkgrey"><span class="witesmall">
+		<B>${lang("topic.title")}:</B></span></td>
+    <td>
+      <input type="text" size="40" name="title" value="${data.title}">
+    </td>
+  </tr>
+    <tr>
+      <td align="right" valign="top" class="darkgrey"><span class="witetext"><B>${lang("topic.description")}:</B></span></td>
+      <td>
+        <textarea cols="40" rows="3" name="description">${data.description}</textarea>
+      </td>
+  </tr>
+  <tr>
+    <td align="right" class="darkgrey"><span class="witetext"><B>${lang("topic.filename")}:</B></span></td>
+    <td>
+      <input type="text" size="20" name="filename" value="${data.filename}">
+    </td>
+  </tr>
+  <tr>
+    <td align="right" class="darkgrey"><span class="witetext"><B>${lang("topic.main_url")}
+      </B></span></td>
+    <td>
+      <input type="text" size="40" name="main_url" value="${data.main_url}">
+    </td>
+  </tr>
+  <tr>
+    <td align="right" class="darkgrey"><span class="witetext"><B>${lang("topic.archive_url")}:</B></span></td>
+    <td>
+      <input type="text" size="40" name="archiv_url" value="${data.archiv_url}">
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2" align="right"> <span class="witetext"><if new>
+      <input type="submit" name="save" value="${lang("insert")}">
+    <else>
+    <input type="submit" name="save" value="${lang("save")}">
+    </if> </span></form></span>
+    </td>
+</table>
+<include "templates/admin/foot.template">
+</body>
+</html>

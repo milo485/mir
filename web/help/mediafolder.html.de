@@ -1,0 +1,32 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<title>mir  | mediafolder</title>
+</head>
+
+<body bgcolor="#ffffff">
+<HR ALIGN="center" SIZE="1">
+<font face="Verdana, Arial, Helvetica, sans-serif" size="-1"> 
+<h3><center>DIE MEDIAFOLDERMASKEN</center></h3>
+<h4><center><a href="mediafolder.html.en">english version</a></center></h4>
+<HR ALIGN="center" SIZE="1">
+ <font face="Verdana, Arial, Helvetica, sans-serif" color="black">In der &Uuml;bersicht der Medienfolder, gibt es die Funktionen <EM>edit</EM>, <EM>delete</EM> und <EM>browse</EM>. &Uuml;ber <EM>edit</EM> kommst Du zu den unten beschriebenen Funktionen. Mit <EM>delete</EM> löscht Du einen Medienfolder (Vorsicht)! <EM>browse</EM> bietet dir die <STRONG>entscheidende</STRONG> Funktion, den Medienfolder nach Bildern zu durchsuchen.</font>
+ <BR><BR>
+ <h5>Folgende Funktionen besitzt die Maske eines Mediafolders:</h5>
+<OL>
+	<LI>&nbsp;<STRONG>datum</STRONG>:&nbsp;Datum des Mediafolders.
+	<BR><BR>
+	<LI>&nbsp;<STRONG>name</STRONG>:&nbsp;eine Benennung, die den Mediafolder m&ouml;glichst gut eingrenzt bzw. bestimmt, z.B. 'Aktion zur Residenzpflicht am xx.xx.2001'.
+	<BR><BR>
+	<LI>&nbsp;<STRONG>ort</STRONG>:&nbsp;bei "ort" sollen immer nur geographische 
+	Orte eingetragen werden. Also nicht so etwas wie "bundesweit", "netz" oder
+	"ueberall". 
+	<BR><BR>
+	<LI>&nbsp;<STRONG>kommentar</STRONG>:&nbsp;ein interner Kommentar kann anderen, die im Prodsys arbeiten, den gew&uuml;nschten Umgang mit dem jeweiligen Mediafolder erkl&auml;ren, z.B. dass kein item des Folders vor einem bestimmten Datum ver&ouml;ffenticht werden darf
+	<BR><BR>
+	<LI>&nbsp;<STRONG>stichworte</STRONG>:&nbsp;nach Stichworten kann in der Datenbank gesucht werden, deshalb ist eine kleine Liste signifikanter Stichworte f&uuml;r den Mediafolder  sehr sinnvoll.
+	
+	<BR><BR>
+</OL>
+</body>
+</html>

@@ -1,0 +1,26 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<title>mir  | article</title>
+</head>
+
+<body bgcolor="#ffffff">
+<HR ALIGN="center" SIZE="1">
+<font face="Verdana, Arial, Helvetica, sans-serif" size="-1"> 
+<h3><center>FEATURE, THEMENSPECIAL & STARTSPECIAL</center></h3>
+<h4><center><a href="article.html.en">english version</a></center></h4>
+<HR ALIGN="center" SIZE="1">
+<OL>
+	<LI>&nbsp;<STRONG>feature:</STRONG>&nbsp;ein Feature ist ein Artikel, 
+	der unter dem ersten Artikel der Startseite oder Themenseite 
+	erscheint. Ein Feature rutscht,  wenn ein neues Features produziert wurde, immer 
+	weiter nach unten. Es kann einem Thema zugeordnet sein, dann erscheint es
+	 auf der entsprechenden Themenseite <STRONG>und</STRONG> der Startseite. Ohne Thema erscheint
+	  es <STRONG>nur</STRONG> auf der Startseite. Feature ist hierarisch gesehen ein <EM>gemeiner</EM> Artikel
+	  <BR><BR>
+	<LI>&nbsp;<STRONG>themenspezial:</STRONG>&nbsp;Ist  <EM>themenspezial</EM>angew&auml;hlt, <STRONG>sowie ein Thema</STRONG>, dann wird dieser Artikel der erste und immer oben stehende Artikel des Themas. Er wird erst verschwinden, wenn ein anderer diesen Status bekommt. Dann sollte er in ein feature umgewandelt werden, um nicht verloren zu gehen. Dem Themenspezial <STRONG>bitte immer ein Thema zuordnen</STRONG>!
+	<BR><BR>
+	<LI>&nbsp;<STRONG>startspezial:</STRONG>&nbsp;ist <EM>startspezial</EM> angew&auml;hlt und<STRONG> kein thema</STRONG>, so wird dies der erste und wichtigtste Artikel der Startseite und somit der gesamten Site. Erst wenn ein anderer Artikel diese Klassifizierung erh&auml;lt, verschwindet er von der pole position. Es macht keinen Sinn, einem startspezial ein Thema zuzuordnen, er wird trotzdem nur auf der Startseite erscheinen.<BR><BR>
+</OL>
+</body>
+</html>

@@ -1,0 +1,23 @@
+MIR UPGRADING HOWTO
+----------------------------------------------------------------
+
+Due to weaknesses of the current Mir configuration system, many folks get
+bitten after doing an update of their cvs tree. Suddenly Mir starts throwing
+weird exceptions, etc.. The cause is usually a new config option in the
+source/config.properties-dist that is missing from your
+source/config.properties file (the one that is actually used).
+
+a good way to check for this is to do the following (in the mir/ directory):
+
+cd source
+diff -u config.properties config.properties-dist
+
+for this unfamiliar with the diff(1) program, you'll see a bunch of lines, some
+starting with a "+" or "-". Look for a bunch of consecutive "+" symbols not
+immeadiately followed by a "-". that usually is a new config option that you
+should copy/paste (without the "+"'s of course) over to your existing
+config.properties file and modify if necessary.
+
+----------------------------------------------------------------
+
+$Date: 2002/07/03 12:09:20 $ - the Mir coders

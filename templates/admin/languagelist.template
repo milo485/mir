@@ -1,0 +1,49 @@
+<html>
+<head>
+	<title>${config["Mir.Name"]} | ${lang("languagelist.htmltitle")}</title>
+        <link rel="stylesheet" type="text/css" href="${config.docRoot}/style/admin.css">
+</head>
+
+<body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
+
+<include "templates/admin/head.template">
+<if data.contentlist>
+<table border="0" cellpadding="2" cellspacing="1">
+  <tr class="darkgrey">
+    <td><span class="witesmall"><b>${lang("language.name")}</b></span></td>
+    <td><span class="witesmall"><b>${lang("language.code")}</b></span></td>
+  	<td>&nbsp;</td>
+  </tr>
+
+  <list data.contentlist as entry>
+  <tr>
+       <if grey=="1"><assign grey="0">class="list1"<else>class="list2"<assign grey="1"> </if>>
+  <td>${entry.name}&nbsp;</td>
+  <td>${entry.code}&nbsp;</td>
+  <td><span class="text">&nbsp;<a href="${config.actionRoot}?module=Language&do=delete&id=${entry.id}">${lang("delete")}</a>
+    | <a href="${config.actionRoot}?module=Language&do=edit&id=${entry.id}">${lang("edit")}</a></span></td>
+  </tr>
+  </list>
+  <tr>
+    <td colspan="3" class="darkgrey"><span class="witetext">${data.count} ${lang("records")}
+      / ${lang("show_from_to", data.from, data.to)}</span></td>
+    <td>&nbsp;</td>
+  </tr>
+</table>
+
+      <P>
+<if data.prev>
+	<a href="${config.actionRoot}?module=Language&do=list&where=${data.where}&prevoffset=${data.prev}&prev=zur&uuml;ck">${lang("list.previous")}</a>&nbsp;
+</if>
+<if data.next>
+<a href="${config.actionRoot}?module=Language&do=list&where=${data.where}&nextoffset=${data.next}&next=weiter">${lang("list.next")}</a>
+</if>
+
+<else>
+  <P align="center">${lang("no_matches_found")}</p>
+</if>
+<include "templates/admin/foot.template">
+</body>
+</html>
+
+

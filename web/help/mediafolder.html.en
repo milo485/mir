@@ -1,0 +1,30 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<title>mir  | mediafolder</title>
+</head>
+
+<body bgcolor="#ffffff">
+<HR ALIGN="center" SIZE="1">
+<font face="Verdana, Arial, Helvetica, sans-serif" size="-1"> 
+<h3><center>THE MASKS FOR THE MEDIAFOLDERS</center></h3>
+<h4><center><a href="mediafolder.html.de">deutsche version</a></center></h4>
+<HR ALIGN="center" SIZE="1">
+ <font face="Verdana, Arial, Helvetica, sans-serif" color="black"> <EM>edit</EM>, <EM>delete</EM> and <EM>browse</EM> are the three functions in the overview of all mediafolders. <EM>edit</EM> brings you to the parameters described below.  <EM>delete</EM> deletes a folder (be careful!). <EM>browse</EM> <STRONG>shows you all pictures</STRONG>, that a mediafolder contains.</font>
+  <BR><BR>
+ <h5>A mediafolder mask offers the following functions:</h5>
+<OL>
+	<LI>&nbsp;<STRONG>datum</STRONG>:&nbsp;date of the mediafolder.
+	<BR><BR>
+	<LI>&nbsp;<STRONG>name</STRONG>:&nbsp;a name, which signifies the contents of the mediafolder as close as possible, e.g. 'Aktion zur Residenzpflicht am xx.xx.2001'.
+	<BR><BR>
+	<LI>&nbsp;<STRONG>ort</STRONG>:&nbsp;place where the picture of the mediafolder are taken.
+	<BR><BR>
+	<LI>&nbsp;<STRONG>kommentar</STRONG>:&nbsp;an internal comment may help others who are working in the production system to use the mediafolder in the way it is intended, e.g. that no item of this mediafolder should be published before a special date.
+	<BR><BR>
+	<LI>&nbsp;<STRONG>stichworte</STRONG>:&nbsp;a keyword, that is used in the databank-search. It is very useful to provide significant keywords for a mediafolder to help finding it again in the right context.
+	
+	<BR><BR>
+</OL>
+</body>
+</html>

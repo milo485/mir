@@ -1,0 +1,5 @@
+a {  color: #0000CC; text-decoration: underline}
+a:hover {  color: #333333; text-decoration: none}
+td {  font-family: "Times New Roman", Times, serif}
+.small {  font-size: x-small}
+pre {  font-family: "Courier", Courier, serif}

@@ -1,0 +1,39 @@
+To dump mir database <dbname>:
+	pg_dumplo -a -d <dbname> -s /dumpdir/dir
+	pg_dump -c -D -f /dumpdir/<dbname>.sql <dbname>
+this generates a dir with all blobs and a sql-file with all data.
+
+To restore the database:
+	psql <dbname> < <dbname>.sql
+	pgdump_lo -i -d <dbname> -s /dumpdir/dir
+
+Every once in a while (or make a script) postgresql database should
+be "cleaned". See postgresql docs for commands VACUUM and VACUUM ANALYZE
+
+Every once in a while (or make a script) postgresql database should
+be "cleaned". See postgresql docs for commands VACUUM and VACUUM ANALYZE
+
+We also have misc. perl scripts to merge Large Objects from other DB's.
+these can be used as a basis to write your own custom scripts.
+
+USER MANAGMENT IN POSTGRESQL
+
+-- set owner of datbase
+select * from pg_database;
+select * from pg_user;
+update pg_database set datdba=ID_FROM_PG_USER where datname=DATABASENAME
+
+-- find all tables to grant privs / select is just building sql
+-- to be exectued
+
+select 'grant all on '||relname||' to "de_indy";'
+from pg_class
+where relname not like 'pg%'
+order by relname;
+
+-- alter table owner / select is just building sql
+-- to be exectued
+select 'alter table '||relname||' owner to "de_indy";'
+from pg_class
+where relname not like 'pg%'
+order by relname;

@@ -1,0 +1,48 @@
+The dupetrigger
+
+MOTIVATION
+
+Often, users commit their comments and articles multiple times if they
+don't believe the comment has been inserted into the databases. This is
+clearly one of the disadvantages of the otherwise clever caching strategy
+used by Mir. Without proper handling, this duplicate content will enlarge
+the database and make the appearance of the generated web pages be less
+satisfactory. 
+
+
+SOLUTIONS
+
+There are two approaches to get rid of these duplicate entries
+(hereafter called "dupes"). The first approach is the dupetrigger that 
+ensures that no entries in a given table are the same. This is the approach
+currently pursued in Mir. If this trigger cannot be compiled or doesn't work
+for any reason, you may work-around this problem by issuing the following
+commands on your psql prompt:
+
+CREATE UNIQUE INDEX idx_content_dupe ON content (title, subtitle, creator, description, content_data);
+CREATE UNIQUE INDEX idx_comment_dupe ON comment (creator, to_media, description, title);
+
+Please note that this approach will work but the implications on the Mir 
+software have not been tested, yet. Maybe Mir will respond with an error 
+or with other unexpected behaviour, but it should do no harm to the
+database. The dupetrigger has been tested with Mir and is currently being 
+operated on de.indymedia.org.
+
+
+HOW TO INSTALL THE DUPE TRIGGER
+
+To install the trigger do the following:
+
+# cp Makefile-dist Makefile
+
+# edit Makefile
+(and change pathnames and PGVERSION if neccessary).
+
+# make
+(This makes the trigger binary and places it in INSTALLDIR with permissions 644)
+
+# edit postgresql.script
+(And change the path to dupetrigger.so to INSTALLDIR)
+
+# psql -Upostgres -f postgresql.script Mir 
+(This installs the the trigger binary and creates a new trigger.)

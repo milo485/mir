@@ -1,0 +1,21 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<title>mir  | article </title>
+</head>
+
+<body bgcolor="#ffffff">
+<HR ALIGN="center" SIZE="1">
+<font face="Verdana, Arial, Helvetica, sans-serif" size="-1"> 
+<h3><center>FEATURE, THEMENSPECIAL & STARTSPECIAL</center></h3>
+<h4><center><a href="article.html.de">deutsche version</a></center></h4>
+<HR ALIGN="center" SIZE="1">
+<OL>
+	<LI>&nbsp;<STRONG>feature:</STRONG>&nbsp;a feature is always situated  under the first article of the startpage or a theme-page. After a new feature is being produced, the new one will be the most upper feature on a page, all other features move downwards. It is not possible to keep a feature precisely on one position. A feature may be associated to a themepage, then it appaers on this themepage <STRONG>and</STRONG> the startpage. Without a theme, it appears <STRONG>only</STRONG> on the startpage. A feature is, seen in a hierarchical view, an <EM>ordinary article</EM>.
+	  <BR><BR>
+	<LI>&nbsp;<STRONG>themenspezial:</STRONG>&nbsp;if <EM>themenspezial</EM>&nbsp;<STRONG>and a theme</STRONG> is marked, then this article will be the leading article of the theme. It will only vanish, if a new one is being marked as <EM>themenspezial</EM>. Then it should be classified as feature, else it gets lost. Please do <STRONG>always assign a theme to a themenspezial</STRONG>.
+	<BR><BR>
+	<LI>&nbsp;<STRONG>startspezial:</STRONG>&nbsp;if <EM>startspezial</EM>&nbsp;<STRONG>and nothing else (no theme)</STRONG> is marked, then this article will be the first and leading article of the startpage. It will only vanish, if a new one is being marked as <EM>startspezial</EM>. It doesn't make any sense to connect a startspezial with a theme. <BR><BR>
+</OL>
+</body>
+</html>

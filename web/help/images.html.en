@@ -1,0 +1,54 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<title>mir  | images</title>
+</head>
+
+<body bgcolor="#ffffff">
+<HR ALIGN="center" SIZE="1">
+<font face="Verdana, Arial, Helvetica, sans-serif" size="-1"> 
+<h3><center>THE MASKS FOR THE PICTURES</center></h3>
+<h4><center><a href="images.html.de">deutsche version</a></center></h4>
+<HR ALIGN="center" SIZE="1">
+<H4><center>The more textual attributes a picture has, the better is the chance to find it again!  </center></H4>
+<BR><BR><H5>The mask for the search of a picture has the following parameters:</H5>
+
+<OL>
+	<LI>&nbsp;<STRONG>Texteingabe</STRONG>:&nbsp;enter the word you search for here.
+	<BR><BR>
+	<LI>&nbsp;<STRONG>Text suchen in</STRONG>:&nbsp; search for  <EM>Titel (title)</EM>, <EM>UrheberIn (author)</EM>, <EM>Ort (place)</EM> or <EM>Stichworte (keyword)</EM>.
+	<BR><BR>
+	<LI>&nbsp;<STRONG>ver&ouml;ffentlicht</STRONG>:&nbsp; search for published, not-published or any (<EM>egal</EM>) picture?
+	<BR><BR>
+	<LI>&nbsp;<STRONG>medienmappe</STRONG>:&nbsp; If known, in which <a href="mediafolder.html.en">mediafolder</a> the picture is layed down, you may mark it here.
+	<BR><BR>
+	<LI>&nbsp;<STRONG>filter</STRONG>:&nbsp;to start the search, click <EM>filter</EM>!
+	<BR><BR>
+</OL>
+
+<BR><BR><H5>The mask for editing pictures has the following functions:</H5>
+<OL>
+	<LI>&nbsp;<STRONG>medienmappe</STRONG>:&nbsp;
+	the picture may be referenced to a  <a href="mediafolder.html.en">mediafolder</a>.
+	<BR><BR>
+	<LI>&nbsp;<STRONG>titel</STRONG>:&nbsp;a strong and expressive title, that also may be published, helps the picture to become more interesting and relevant.
+	<BR><BR>
+	<LI>&nbsp;<STRONG>beschreibung</STRONG>:&nbsp;a picture itself may not express its context, therefore here should be told in short, what the picture contains.
+	<BR><BR>
+	<LI>&nbsp;<STRONG>datum</STRONG>:&nbsp;the date, when the picture has been shot.
+	<BR><BR>
+	<LI>&nbsp;<STRONG>ort</STRONG>:&nbsp;place should always indicate a geographical place. Do not write "internet" or "world-wide".
+	<BR><BR>
+	<LI>&nbsp;<STRONG>urheberIn</STRONG>:&nbsp;who has taken the picture?
+	<BR><BR>
+	<LI>&nbsp;<STRONG>stichworte</STRONG>:&nbsp;a keyword, that is used in the databank-search. It is very useful to provide significant keywords for a picture to help finding it again in the right context.
+	<BR><BR>  
+	<LI>&nbsp;<STRONG>kommentar</STRONG>:&nbsp;an internal comment may help others who are working in the production system to use the picture in the way it is intended, e.g. that this picture should be published before a special date.
+	<BR><BR>
+	<LI>&nbsp;<STRONG>quelle</STRONG>:&nbsp;if the picture has not been taken by you, but by third persons, e.g. press-agencies, a remark can be made here. Because the persecution of illegally published stuff, which is copyrighted by others, is being on the rise, it is strongly advised to limit the publication of pictures to those, whose copyright-owners do agree with the (re-)publication. If in doubt, leave 'quelle' empty and write an internal comment (see 8.).
+	<BR><BR>
+	<LI>&nbsp;<STRONG>freigegeben</STRONG>:&nbsp;if checked, the picture has been marked to be published in the www.
+	<BR><BR>
+</OL>
+</body>
+</html>

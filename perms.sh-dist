@@ -1,0 +1,48 @@
+#!/bin/sh
+
+# Where the installed system resides
+INSTDIR=../Mir
+
+# The group all files belong to
+GROUP=www-data
+
+
+# No config required after this point. Hopefully.
+##################################################################
+
+# Needed to correct permissions
+
+function chm()
+{
+	# Parameters. $1 permissions
+	#			  $2 directory or file
+	#			  $3 mode: [d|f] (dir or file)
+
+	LIST=$(find $2 -type $3) 
+	if [ "$LIST" != "" ]; then
+		echo "$LIST"
+		chmod $1 $LIST
+	fi
+}
+
+function grant()
+{
+	# Parameters: $1: permissions for dirs
+	#			  $2: permissions for files
+	#             $3: directory or file
+
+	chmod $1 $3
+    UMASK=$(umask)
+	umask 044
+#	chmod $1 $(find $3 -type d) 
+#	chmod $2 $(find $3 -type f) 
+	chm $1 $3 d 
+	chm $2 $3 f
+	umask $UMASK
+}
+
+chgrp $GROUP $INSTDIR -R #> /dev/null 2>&1
+grant 775 664 $INSTDIR > /dev/null 2>&1
+grant 750 640 $INSTDIR/WEB-INF/etc/config.properties
+
+echo "Permissions set."

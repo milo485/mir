@@ -1,0 +1,102 @@
+<html>
+<head>
+	<title>${config["Mir.Name"]} | ${lang("commentlist.htmltitle")}</title>
+	<link rel="stylesheet" type="text/css" href="${config.docRoot}/style/admin.css">
+
+</head>
+
+<body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
+
+<include "templates/admin/head.template">
+
+<table border="0" cellpadding="2" cellspacing="1">
+  <tr>
+    <td colspan="5">
+        <form method="post" action="${config.actionRoot}">
+	<input type="hidden" name="module" value="Comment">
+	<input type="hidden" name="do" value="list">
+	<input type="hidden" name="offset" value="${data.offset}">
+	<input type="text" size="10" maxlength="20" name="query_text" value="${data.query_text}">
+	<select name="query_field">
+    <option value="title"<if data.query_field=="title"> selected</if>>${lang("comment.title")}</option>
+    <option value="creator"<if data.query_field=="creator"> selected</if>>${lang("comment.creator")}</option>
+    <option value="description"<if data.query_field=="description"> selected</if>>${lang("comment.text")}</option>
+    </select>
+	<select name="query_is_published">
+    <option value="">--</option>
+    <option value="0" <if data.query_is_published=="0"> selected</if>>${lang("commentlist.hidden")}</option>
+    <option value="1" <if data.query_is_published=="1"> selected</if>>${lang("commentlist.produced")}</option>
+    </select>
+    <select name="order">
+    <option value="webdb_create" <if data.order=="webdb_create"> selected</if>>${lang("comment.date")}</option>
+    <option value="articletitle" <if data.order=="articletitle"> selected</if>>${lang("comment.title")}</option>
+    </select>
+	<input type="submit" name="search" value="${lang("commentlist.search")}">
+	</form>
+	</td>
+  </tr>
+
+  <tr class="pink">
+  	<td><p class="head">${lang("comment.date")}</p></td>
+		<td><p class="head">${lang("comment.title")}/ ${lang("comment.creator")}<br>
+					${lang("comment.text")}</p></td>
+    <td><p class="head">${lang("comment.article")}</P></td>
+  </tr>
+
+<if data.contentlist>
+
+  <list data.contentlist as entry>
+  <tr <if grey=="1"><assign grey="0">class="list1"<else><assign grey="1">class="list2"</if>>
+
+		<td>${entry.webdb_create_short}<br>
+  	<if entry.is_published=="0"><span class="spezialtext">hidden</span><else>-</if>
+		</td>
+
+		<td>
+			<if entry.title><b>${entry.title}</b><br></if>
+			<if entry.creator>Von: ${entry.creator}<br></if>
+			<span class="small">${entry.description}</span>
+			<if entry.main_url><br>URL: ${entry.main_url}</if>
+			<br><a href="${config.actionRoot}?module=Comment&do=edit&order=${data.order}&offset=${data.offset}&id=${entry.id}">${lang("edit")}</a>
+		</td>
+
+
+		<td>
+				${data.articleHash[entry.to_media]["title"]}<br>
+				<a href="${config.actionRoot}?module=Content&do=edit&id=${data.articleHash[entry.to_media]["id"]}">
+				edit</a> |
+				<a href="${config["Producer.ProductionHost"]}${config["Producer.DocRoot"]}${data.articleHash[entry.to_media]["publish_path"]}${data.articleHash[entry.to_media]["id"]}.shtml">
+				view</a>
+		</td>
+
+		<td><span class="text">&nbsp;<a href="${config.actionRoot}?module=Comment&do=delete&id=${entry.id}">${lang("delete")}</a>
+			</span></td>
+
+	</tr>
+  </list>
+
+  <tr>
+    <td colspan="3" class="darkgrey"><span class="wite">${data.count} ${lang("records")}
+      / ${lang("show_from_to", data.from, data.to)}</span></td>
+    <td>&nbsp;</td>
+  </tr>
+<tr><td>
+
+<if data.prev>
+<a href="${config.actionRoot}?module=Comment&do=list&order=${data.order}&query_text=${data.query_text_encoded}&query_field=${data.query_field}&query_is_published=${data.query_is_published}&query_media_folder=${data.query_media_folder}&offset=${data.prev}&prev=zur&uuml;ck">zurueck</a>&nbsp;
+</if>
+<if data.next>
+<a href="${config.actionRoot}?module=Comment&do=list&order=${data.order}&query_text=${data.query_text_encoded}&query_field=${data.query_field}&query_is_published=${data.query_is_published}&query_media_folder=${data.query_media_folder}&offset=${data.next}&next=weiter">weiter</a>
+</if>
+</td></tr>
+<else>
+  <tr><td align="center">${lang("no_matches_found")}</td></tr>
+</if>
+</table>
+
+<include "templates/admin/foot.template">
+
+</body>
+</html>
+
+

@@ -1,0 +1,133 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+  <head>
+    <title>Help: Content</title>
+  </head>
+
+  <body bgcolor="#ffffff"><font face="Verdana, Arial, Helvetica, sans-serif" >
+  <HR ALIGN="center" SIZE="1">
+    <h3><center>ANLEITUNG ZUM EINGEBEN ODER BEARBEITEN EINES ARTIKELS</center></h3>
+     <h4><center><a href="content.html.en">english version</a></center></h4>
+<HR ALIGN="center" SIZE="1">
+ <font face="Verdana, Arial, Helvetica, sans-serif" color="red"><center>Wenn Du Deinen Artikel eingegeben hast, musst du ganz unten auf <STRONG>einf&uuml;gen</STRONG> bzw. <STRONG>speichern</STRONG> klicken!</center></font>
+    <p>
+      <a name="thema"><b>
+      thema</b><br>
+        <font face="Verdana, Arial, Helvetica, sans-serif" size="-1">
+        Thema ist eine Rubrik, z.b. 'Flughafenerweiterung'. Wenn hier etwas ausgew&auml;hlt wird, dann wird der Artikel automatisch in diese Rubrik reinproduziert. Es muss aber nichts angegeben werden.</font>
+    </p>
+    
+     <p>
+      <a name="artikelart"><b>
+      artikelart</b><br>
+        <font face="Verdana, Arial, Helvetica, sans-serif" size="-1">
+        In der Artikelart wird bestimmt, von welcher Sorte der Beitrag sein soll. Ein Feature ist hierarchisch gesehen ein normaler Artikel. Wenn ihm ein Thema zugeordnet ist, erscheint er auf der Themenseite und der Startseite, ohne Thema nur auf der Startseite.Das Startspezial ist der Artikel, der auf der Startseite ganz oben steht. Er ist hierarchisch ganz oben, etwas gr&ouml;sser layoutet und bleibt an oberster Stelle. Ihm darf nie ein Thema zugeordnet werden. Er veschwindet komplett, sowie ein neues Startspezial erstellt wurde. Das Themenspezial ist der oberste Artikel der jeweiligen Themenseite. Ihm muss immer ein Thema zugeordnet sein. Er verschwindet ebenso, wenn ein neuer Themenspezialartikel desselben Themas gefertigt wird. Gegenfalls sollte er dann in ein Feature umgewandelt werden.  </font>
+    </p>
+   
+   
+     <p>
+      <a name="title"><b>
+      haupttitel/untertitel</b><br>
+        <font face="Verdana, Arial, Helvetica, sans-serif" size="-1">
+        Der Haupttitel des Artikels wird in grosser Schrift dem Artikel vorangestellt. Der Untertitel kann l&auml;nger sein (max 255 zeichen). Er steht zwischen langem Titel und Abstract.</font>
+    </p>
+    <!--  
+    <p>
+      <a name="datum"><b>
+      datum</b><br>
+        <font face="Verdana, Arial, Helvetica, sans-serif" size="-1">
+        Als Datum sollte immer das Datum der Einspielung angegeben werden.
+        Das aktuelle Datum ist immer auch schon in die Maske eingetragen.
+        In Ausnahmefaellen koennen auch Artikel        rueckdatiert werden.
+         Die Datumsangabe muss immer im format <i>yyyymmdd</i> sein.</font>
+    </p>
+        -->
+            <p>
+      <a name="ort"><b>ort</b><br>
+        <font face="Verdana, Arial, Helvetica, sans-serif" size="-1">
+        Bei "ort" sollen immer nur geographische Orte eingetragen
+        werden. Also nicht so etwas wie "bundesweit", "netz" oder
+        "ueberall". Der Ort wird beim Produzieren der Seiten immer vor
+        den Titel gestellt. Bitte achtet darauf, dass es zu keiner
+        Doppelnennung des Ortes kommt.</font>
+    </p>
+
+    <p>
+      <a name="urheber"><b>urheberIn</b><br>
+        <font face="Verdana, Arial, Helvetica, sans-serif" size="-1">
+        Wenn einE UrheberIn im Textfeld angegeben ist, so hat dieseR Vorrang 
+        vor einer Auswahl aus dem Popupmenu.
+         Bei einem neuen Artikel seid immer Ihr als UrheberIn
+        voreingestellt. Bitte achtet darauf, dass nicht Namen, bzw. Mailadressen zur
+        Veroeffentlichung kommen, wo das nicht gewuenscht ist. In dem Feld
+        sollte sowieso keine Mailadresse stehen. Bei Privatpersonen sollte
+        immer die Zeile "anonym zugesandt" aus dem Popup benutzt werden und
+        die entsprechende Person aus dem Textfeld entfernt werden. Gruppen,
+        die oefter Artikel zusenden, sollten als Gruppen incl. Mailadresse
+        und Homepage in "Gruppen" eingetragen werden.</font>
+    </p>
+    
+ <p>
+      <a name="contact"><b>kontaktinfos</b><br>
+        <font face="Verdana, Arial, Helvetica, sans-serif" size="-1">
+        Hier k&ouml;nnen, wenn vorhanden, Infos zum Kontakt angegeben werden. Bitte denkt an die Sensibilit&auml;t solcher Daten!<br>
+        </font>
+    </p>
+    
+  <p>
+      <a name="abstract"><b>abstract</b><br>
+        <font face="Verdana, Arial, Helvetica, sans-serif" size="-1">
+        Ein Abstract ist ein dem Artikel vorangestellter Texteil, der kurz umreisst, um was es in dem Artikel geht. Das/der Abstract ist auf den &Uuml;bersichtsseiten nach Titel etc. aufgef&uuml;hrt. Er dient also auch als teaser, um Leute zum Artikel zu bringen.<br>
+        </font>
+    </p>
+    
+    <p>
+      <a name="inhalt"><b>inhalt / html</b><br>
+        <font face="Verdana, Arial, Helvetica, sans-serif" size="-1">
+        Hier steht die eigentliche Nachricht. Mit dem Umschaltknopf
+        "html" koennt ihr einstellen, dass es sich um eine Nachricht aus HTML
+        handelt. Die normale Annahme (default) ist, dass es ich um Text handelt.<br>
+        Im Falle einer HTML-Nachricht sollten alle sog. franz&ouml;sischen Quotezeichen (">", "<")
+         und die unn&ouml;tigen  Header und Footer entfernt werden.<br>
+        </font>
+    </p>
+ 
+    <p>
+      <a name="comment"><b>kommentar</b><br>
+    <font face="Verdana, Arial, Helvetica, sans-serif" size="-1">
+        Ein interner Kommentar kann benutzt werden, um anderen, die im Prodsys arbeiten, Infos zu einem Artiekl mitzuteilen, z.B. dass ein Artikel ge&auml;ndert wurde, noch nicht oder &uuml;berhaupt nicht ver&ouml;ffentlicht werden soll. Auch wenn es Trouble zu einem Artikel gab oder gibt, kann das hier vermerkt werden. Nutzt diese Funktion, um untereinander zu kommunzieren!</font>
+    </p>
+ <!--
+    <p>
+      <a name="termin_name"><b>termin name</b><br>
+        <font face="Verdana, Arial, Helvetica, sans-serif" size="-1">
+        Ist ein Terminname angegeben, so erscheint dieser in der rechten
+        Navigation auf den Startseiten, ansonsten wird der wirkliche Titel 
+        der Nachricht verwendet.</font>
+    </p>
+
+    <p>
+      <a name="oldstyle"><b>oldstyle</b><br>
+          <font face="Verdana, Arial, Helvetica, sans-serif" size="-1">
+      Der Umschaltknopf <i>oldstyle</i> gibt an, ob es sich um automatisch
+      eingespielte Daten aus dem alten Aktuell-System handelt, bei einer
+      entsprechenden Bearbeitung von Nachrichten aus dem alten System 
+      sollte der Knopf deselektiert werden (und freigeschaltet) selektiert.
+           </font>
+    </p>
+-->
+    <p>
+      <a name="freigeschaltet"><b>freigeschaltet</b><br>
+      <font face="Verdana, Arial, Helvetica, sans-serif" size="-1">
+          Der Umschaltknopf <i>freigeschaltet</i> gibt an, ob die Nachricht aktiv
+        ist, d.h. also, da&szlig; bei der naechsten Produktion der HTML-Seiten
+        aus der Datenbank die Nachricht auf die www- Seiten eingespielt wird. Er kann auch deaktiviert werden und folglich wird der Artikel bei der naechsten Produktion der HTML-Seiten nicht mehr dabei sein. 
+        </font>
+    </p>
+
+
+    <hr>
+    <address><a href="mailto:webdb-l@mail.nadir.org">webdb-l@mail.nadir.org</a></address>
+  </font>
+  </body>
+</html>

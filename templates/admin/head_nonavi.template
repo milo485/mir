@@ -1,0 +1,14 @@
+<a name="top">
+<table width="100%" cellspacing="0" cellpadding="0">
+ <tr class="dark">
+  <td>
+   <img src="${config.docRoot}/img/logo_small.gif" border="0" align="middle">&nbsp;
+    <span class="witesmall">
+	<b>${config["Mir.Name"]}</b></span></td></tr>
+<if login_user><tr><td align="right"><span class="spezialtext">
+	<b>${login_user.login}</b> ${lang("head.logged_in")} /
+	<a href="${actionRoot}?module=logout">${lang("head.logout")}</a></span>
+	</td></tr>
+</if>
+<tr><td><hr></td></tr>
+</table>

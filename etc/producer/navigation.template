@@ -1,0 +1,45 @@
+
+			<table cellpadding="8" cellspacing="0" border="0" width="100%" bgcolor="#aaaaaa"><tr><td>
+				<b>${lang("navigation.languages")}</b>
+				  <list languages as l> 
+				    <br><a href="${config["Producer.DocRoot"]}/${l.code}">${l.name}</a>
+				  </list> 
+			</td></tr></table>
+
+			<br>
+			<form action="${lang("navigation.search.url")}" method="post">
+			<table cellpadding="8" cellspacing="0" border="0" width="100%" bgcolor="#aaaaaa"><tr><td>
+				<b>${lang("navigation.search.title")}</b><br>
+				<input type="hidden" name="config" value="de_indy">
+					<input type="text" name="words" size="10" id="searchfield"><br>
+					<select name="keywords" id="searchselect" size="1" > 
+						<option value="" selected>${lang("navigation.search.all")}
+						<option value="hasImages">${lang("navigation.search.images")}
+						<option value="hasVideo">${lang("navigation.search.video")}
+						<option value="hasAudio">${lang("navigation.search.audio")}
+					</select> 
+				<input type="submit" value="${lang("navigation.search.button")}" name="searchbutton" size="16">
+			</td></tr></table>
+			</form>
+			
+			<table cellpadding="8" cellspacing="0" border="0" width="100%" bgcolor="#cc6666"><tr><td>
+				<b><a href="${config["Producer.OpenAction"]}">${lang("navigation.publish")}&nbsp;&gt;&gt;</a></b>
+			</td></tr></table>
+			<br>
+			<table cellpadding="8" cellspacing="0" border="0" width="100%" bgcolor="#cc6666"><tr><td>
+				<b><a href="${config["Producer.DocRoot"]}/${language.code}/newswire/archive.shtml">${lang("navigation.newswirearchive")} &gt;&gt;</a>&nbsp;</b>
+			</td></tr></table>
+			<br>
+			<table cellpadding="8" cellspacing="0" border="0" width="100%" bgcolor="#cc6666"><tr><td>
+				<b><a href="${config["Producer.DocRoot"]}/${language.code}/feature/archive.shtml">${lang("navigation.featurearchive")} &gt;&gt;</a>&nbsp;</b>
+			</td></tr></table>
+			<br>
+			
+			<table cellpadding="8" cellspacing="0" border="0" width="100%" bgcolor="#cc9999"><tr><td>
+			  <b>${lang("navigation.topics")}</b>
+				  <list topics as t> 
+				    <br><a href="${config["Producer.DocRoot"]}/${language.code}/${t.filename}/archive.shtml">${t.title}</a>
+				  </list> 
+			</td></tr></table>
+			<br>
+			

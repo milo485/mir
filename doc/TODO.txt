@@ -1,0 +1,76 @@
+[Updated $Date: 2002/10/09 16:09:05 $]
+
+v 1.1
+
+* producers merged (done, max, mh)
+* bundle cleanup (done, br1)
+* new templates with css (thomas - max)
+* seperation of things that should be edited and things that dont change:
+    admin templates in templates, producer templates in templates-dist?
+* utf8 encoding (mh)
+
+
+before 2.0
+
+* logging: log4j (max)
+* configuration (mh)
+* searching (john)
+* HTML validation, struts (br1)
+* PDF generation (john)
+* better user interface (br1)
+
+
+v 2.0
+
+* persistence layer: OJB (mh,...)
+* data model
+* struts (br1)
+* users / roles (max)
+
+
+general
+
+* mir website maintainance
+* website design / mir default templates
+* documentation
+
+
+--- misc ---
+
+c) Coverage: Alternative start-page for e.g. a event like genua. every article that has
+something to do with this event can be seen on this page. (nn)
+b) P2P-Data-Transfer/Content-Syndication: Implementing RDF/RSS-Support or a own
+indymedia-protocoll.
+d) email-article-to-a-friend-servlet
+e) semidynamic create-pdf-from-article-servlet: every requested pdf should be cached (underway, john)
+f) servletapi-2.3: Filters for file upload (also in cos.jar)
+g) servletapi-2.3: use web.xml for simpler/better error handling.
+h) servletapi-2.3: set character encoding properly based on what the template says
+i) servletapi-2.3: servletapi-2.3 requires tomcat-4.x, so require it
+k) better transaction support in the DB/Persistance layer for more efficient
+use of DB.
+m) Editing producer-templates in the mir-servlet. (idfx)
+n) Media infrastructure stuff:
+  - make a sort of Factory to get handler perhaps in EntiyMediaType
+  - MediaHandler should take care of storage tablename, the entry in SQL is
+    redundant. -> get rid of it
+  - maybe get rid of the MediaTypeTable entirely and have it in a config file?
+  - use FM's TemplateMethodModel to access the MediaHandler method in templates
+    instead of the crude way it's done now.
+
+*) move log to WEB-INF!!! (security problem)
+*)
+
+--- wishlist ---
+
+* search engine: foto small thumbnails
+* comments: mark last read comments
+* comments: allow some HTML (let user choose)
+* allow HTML in abstracts
+* more formats for media uploads
+* preview for video
+* protection against spam
+	possibility to block submissions in case of spam attacks
+	apache: 1-2 postings / IP / minute
+	close artice for comments
+	image with password

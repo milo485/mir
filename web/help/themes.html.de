@@ -1,0 +1,25 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<title>mir  | themes</title>
+</head>
+
+<body bgcolor="#ffffff">
+<HR ALIGN="center" SIZE="1">
+<font face="Verdana, Arial, Helvetica, sans-serif" size="-1"> 
+<h3><center>DIE THEMENMASKEN</center></h3>
+<h4><center><a href="themes.html.en">english version</a></center></h4>
+<HR ALIGN="center" SIZE="1">
+<OL>
+	<LI>&nbsp;<STRONG>name</STRONG>:&nbsp;Der Name des Themas, z.B. 'Flughafenerweiterung'.
+	<BR><BR>
+	<LI>&nbsp;<STRONG>beschreibung</STRONG>:&nbsp;Eine kurze Beschreibung des Themas f&uuml;r den Hausgebrauch.
+	<BR><BR>
+	<LI>&nbsp;<STRONG>filename</STRONG>:&nbsp;der Dateiname, den das Thema haben soll. Bitte immer in Kleinschreibung, z.b. 'flughafen'.
+	<BR><BR>
+	<LI>&nbsp;<STRONG>hauptinfoseite</STRONG>:&nbsp;Eine externe www-site, die zu diesem Thema viel arbeitet. Wird in den Kopf der Themenseite reinproduziert. 
+	<BR><BR>
+	</OL>
+
+</body>
+</html>

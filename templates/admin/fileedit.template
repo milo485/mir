@@ -1,0 +1,51 @@
+<html>
+<head>
+	<title>${config["Mir.Name"]} | ${lang("fileedit")}</title>
+  <link rel="stylesheet" type="text/css" href="${config.docRoot}/style/admin.css">
+</head>
+
+<body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
+
+<include "templates/admin/head.template">
+
+<br>
+<b>${lang("fileedit")} :</b> ${data.filename}
+
+<br>
+
+<form action="${config.actionRoot}" method="post">
+
+	<input type="hidden" name="module" value="FileEdit">
+	<input type="hidden" name="filename" value="${data.filename}">
+        <input type="hidden" name="do" value="update">
+
+
+	 <textarea cols="66" rows="40" name="text" wrap=virtual>${data.text}</textarea>
+
+<br>
+
+
+
+        <input type="submit" name="save" value="${lang("save")}"> &nbsp;
+        <input type="reset" value="${lang("reset")}">
+
+
+</form>
+<br>
+<br>
+
+${lang("preview")}
+
+<hr size="2" width="90%" noshade>
+
+${data.text}
+
+<hr size="2" width="90%" noshade>
+<br>
+
+<include "templates/admin/foot.template">
+
+</body>
+</html>
+
+

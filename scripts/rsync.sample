@@ -1,0 +1,10 @@
+#!/bin/bash
+LOCKFILE=/tmp/rsynclock
+
+lockfile -r 1 $LOCKFILE || exit 23
+
+/usr/bin/rsync -e 'ssh -p 1113' --timeout=60 --exclude=news.de.html  -Crlptzv /var/www/sites/preview.indymedia.de/ germany@217.114.68.254:/www/germany/
+/usr/bin/rsync -e 'ssh -p 1113' --timeout=60 --exclude=news.de.html  -Crlptzv /var/www/copydir/ germany@217.114.68.254:/www/uploads/germany/
+/usr/bin/rsync -e 'ssh -p 1113' --timeout=60 --exclude=news.de.html  -Crlptzv /var/media/ germany@217.114.68.254:/www/uploads/germany/metafiles/
+	
+rm -f $LOCKFILE

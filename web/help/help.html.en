@@ -1,0 +1,87 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<title>mir  | globalhelp</title>
+</head>
+
+<body bgcolor="#ffffff">
+<HR ALIGN="center" SIZE="1">
+<font face="Verdana, Arial, Helvetica, sans-serif" size="-1"> 
+<h3><center>HOW TO WORK WITH THIS PRODUCTIONSYSTEM</center></h3>
+<h4><center><a href="help.html">deutsche version</a></center></h4>
+<HR ALIGN="center" SIZE="1">
+<br>
+The  <STRONG>Adminmask</STRONG> offers a wide variety of functions. To publish a new article, you only need the function <EM>neue Nachricht</EM> in the left-top corner. This function contains its <a href="content.html">own helppage</a>.<BR><BR>
+<center><H4>Below, all functions of the adminmask are listed and described</H4></center>
+<OL >
+	<LI><H4>BEITR&Auml;GE (article)</H4>
+	<OL type=a>
+	
+	<LI>&nbsp;<STRONG>neue nachricht:</STRONG>&nbsp;insert a new article. Howto is <a href="content.html.en">here</a>.
+	<LI>&nbsp;<STRONG>feature</STRONG>:&nbsp;all contributions, that are classified as <a href="article.html.en">feature</a>  are being listed. They may be edited and changed. The mask is the same as the <a href="content.html.en">new article mask</a>. They also may be deleted. But be careful! A deleted article is lost forever! Therefore it is better to mark them as <a href="content.html.en#freigeschaltet">not free</a> and to write an internal comment on this.
+	<LI>&nbsp;<STRONG>themenspecials</STRONG>:&nbsp;same as 1b, except that it is a <a href="article.html.en">themenspecial</a>.
+	<LI>&nbsp;<STRONG>startspecials</STRONG>:&nbsp;same as 1b, except that it is a <a href="article.html.en">startspecial</a>.
+	<LI>&nbsp;<STRONG>nicht ver&ouml;ffentlichte nachrichten</STRONG>:&nbsp;all contributions, that are marked as <a href="content.html.en#freigeschaltet">not free</a> are being listed and may be edited.
+	<LI>&nbsp;<STRONG>mit medien</STRONG>:&nbsp;all contributions, that are combined with e.g. a picture are being listed and may be edited.
+	<LI>&nbsp;<STRONG>letzte &auml;nderung</STRONG>:&nbsp;all contributions in order of the last time they have been edited and changed are being listed and may be edited. The contribution, which has been edited most recently, is listed on top.
+	<LI>&nbsp;<STRONG>mit internen kommentaren</STRONG>:&nbsp;all contributions, that have an internal comment, are being listed and may be edited.
+	
+</OL>
+<BR><BR>
+	<LI><H4>ALLE &Uuml;BRIGEN BEITR&Auml;GE (all other contributions)</H4>
+	<OL type=a>
+	<LI>&nbsp;<STRONG>bearbeiten</STRONG>:&nbsp;if articles exist, which are neither a  <a href="article.html.en">themenspecial</a>, nor a <a href="article.html.en">startspecial</a> nor a <a href="article.html.en">feature</a>, they are being listed and may be edited.
+	</OL>
+	<BR><BR>
+	<LI><H4>BREAKING NEWS</H4>
+	<OL type=a>
+	<LI>&nbsp;<STRONG>bearbeiten</STRONG>:&nbsp;breaking news are at maximum 255 icons of breaking information, that are being placed on the startpage right on top. They serve the needs of those, who seek for hottest news, and they give the people at home the feeling of being synchronized to the events on and around the real place. They are being listed here and may be edited.
+	<LI>&nbsp;<STRONG>neue nachricht</STRONG>:&nbsp;to formulate a new breaking news. short messages like 'campingplace occupied - cops confused' may be written here. But pay attention: the enemy uses our information tools as well, this means that a published information, that endagers any of our actions or plans, must not be published. With <EM>bearbeiten</EM> (see 3a) it may be edited and deleted.
+	</OL>
+	<BR><BR>
+	<LI><H4>MANUELL GENERIEREN (generate manually)</H4>
+	<OL type=a>
+	<LI>Usually, all is being produed automatically, that's why we use computers! But in case of urgency (and only in this case!) parts may be produced immediately. Ask the friendly service people around you!  
+	
+</OL>
+<BR><BR>
+	<LI><H4>SUCHE (search)</H4>
+	<OL type=a>
+	<LI>The search works itself through the databank, collecting items in terms of <EM>Titel (title)</EM>, <EM>UrheberIn (author)</EM>, <EM>Ort (place)</EM>, <EM>Abstract</EM>, <EM>internem Kommentar (internal comment)</EM> or even <EM> Inhalt (content)</EM>. Just enter the word you seek after, choose the searchcategory and press  <EM>Enter</EM>.
+</OL>
+<BR><BR>
+	<LI><H4>THEMEN</H4>
+	<OL type=a>
+	<LI>&nbsp;<STRONG>bearbeiten</STRONG>:&nbsp;Themen are categories such as "Residenzpflicht". They may be edited and changed here. We provide a  <a href="themes.html.en">special mask</a>. 
+	<LI>&nbsp;<STRONG>hinzuf&uuml;gen</STRONG>:&nbsp;To add a new category. We provide a  <a href="themes.html.en">special mask</a>.
+</OL>
+<BR><BR>
+	<LI><H4>GRUPPEN (groups)</H4>
+	<OL type=a>
+	<LI>&nbsp;<STRONG>bearbeiten</STRONG>:&nbsp;Groups are authors who often contribute and therefore are being listed in the <a href="content.html.en#urheber">popup-menu of the articlemask</a> . Groups may be edited and changed. We provide a  <a href="group.html.en">special mask</a>.
+	<LI>&nbsp;<STRONG>hinzuf&uuml;gen</STRONG>:&nbsp;To add a new group. We provide a  <a href="group.html.en">special mask</a>. 
+</OL>
+<BR><BR>
+	<LI><H4>BILDER (picures)</H4>
+	<OL type=a>
+	<LI>&nbsp;<STRONG>bearbeiten</STRONG>:&nbsp;picture-files (*.jpg) can not processed here, but their textual attributes may be edited and changed here. We provide a  <a href="images.html.en">special mask</a>. 
+	<LI>&nbsp;<STRONG>hinzuf&uuml;gen</STRONG>:&nbsp;To add a new picture to the databank. We provide a  <a href="images.html.en">special mask</a>. 
+</OL>
+<BR><BR>
+	<LI><H4>MEDIAFOLDER</H4>
+	<OL type=a>
+	<LI>&nbsp;<STRONG>bearbeiten</STRONG>:&nbsp;A mediafolder is a collection of e.g. pictures, combined as a folder. The criteria for the collection would be e.g. pictures of the actions against Residenzpflicht.  The mediafolder should help organize the assemblance of pictures to make it easier to find them again. We provide a  <a href="mediafolder.html.en">special mask</a>. 
+	<LI>&nbsp;<STRONG>hinzuf&uuml;gen</STRONG>:&nbsp;to formulate a new mediafolder. We provide a  <a href="mediafolder">special mask</a>. 
+</OL>
+<BR><BR>
+</OL>
+
+
+
+
+
+
+</body>
+</html>
+

@@ -1,0 +1,13 @@
+<a name="top">
+<table width="100%" cellspacing="0" cellpadding="0">
+ <tr class="dark">
+  <td>
+   <img src="${config.docRoot}/img/logo_small.gif" border="0" align="middle">&nbsp;
+    <span class="witesmall">
+	<b>${config["Mir.Name"]}</b></span></td></tr>
+<tr><td align="right"><span class="spezialtext">
+	<a href="${config.actionRoot}"><span class="spezialtext">${lang("head.start")}</span></a> |
+	<a href="${config.actionRoot}?module=logout"><span class="spezialtext">${lang("head.logout")}</span></a> |
+	<a href="${config.docRoot}/help/help.html"><span class="spezialtext">${lang("head.help")}</span></a> | ${lang("head.search")}</span></td></tr>
+<tr><td><hr></td></tr>
+</table>

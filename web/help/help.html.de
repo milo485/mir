@@ -1,0 +1,87 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<title>mir  | globalhelp</title>
+</head>
+
+<body bgcolor="#ffffff">
+<HR ALIGN="center" SIZE="1">
+<font face="Verdana, Arial, Helvetica, sans-serif" size="-1"> 
+<h3><center>ANLEITUNG ZUM ARBEITEN MIT DEN FUNKTIONEN DES PRODSYSTEMS</center></h3>
+<h4><center><a href="help.html.en">english version</a></center></h4>
+<HR ALIGN="center" SIZE="1">
+<br>
+Die <STRONG>Adminmaske</STRONG> bietet eine Vielzahl von Funktionen. Wichtig, <STRONG>um einen neuen Text zu ver&ouml;ffentlichen</STRONG>, ist nur die Funktion <EM>neue Nachricht</EM> links oben. Sie enth&auml;lt eine detailierte <a href="content.html.de">Hilfefunktion</a>.<BR><BR>
+<center><H4>Im Folgenden sind alle Funktionen der Adminmaske aufgelistet und kurz beschrieben</H4></center>
+<OL >
+	<LI><H4>BEITR&Auml;GE</H4>
+	<OL type=a>
+	
+	<LI>&nbsp;<STRONG>neue nachricht:</STRONG>&nbsp;einen neuen Beitrag eingeben. Anleitung dazu <a href="content.html.de">hier</a>.
+	<LI>&nbsp;<STRONG>feature</STRONG>:&nbsp;alle Beitr&auml;ge, die als <a href="article.html.de">feature</a> klassifiziert sind, werden in einer Übersicht angezeigt. Sie k&ouml;nnen <EM>editiert</EM> und dann &uuml;berarbeitet werden. Das passiert in derselben Maske, in der auch ein <a href="content.html.de">neuer Beitrag</a> eingegeben wird. Ausserdem k&ouml;nnen sie auch gel&ouml;scht werden. Aber Vorsicht: dann sind sie wirklich verschwunden. Besser ist es, sie als <a href="content.html.de#freigeschaltet">nicht freigeschaltet</a> zu markieren und einen internen Kommentar zu schreiben.
+	<LI>&nbsp;<STRONG>themenspecials</STRONG>:&nbsp;wie 1b, nur handelt es sich um <a href="article.html.de">themenspecials</a>.
+	<LI>&nbsp;<STRONG>startspecials</STRONG>:&nbsp;wie 1b, nur handelt es sich um <a href="article.html.de">startspecials</a>.
+	<LI>&nbsp;<STRONG>nicht ver&ouml;ffentlichte nachrichten</STRONG>:&nbsp;alle Beitr&auml;ge, die als <a href="content.html.de#freigeschaltet">nicht freigeschaltet</a> markiert sind, werden aufgelistet und k&ouml;nnen editiert werden.
+	<LI>&nbsp;<STRONG>mit medien</STRONG>:&nbsp;alle Beitr&auml;ge, die ein Foto oder ein anderes Medium beinhalten, werden aufgelistet und k&ouml;nnen editiert werden.
+	<LI>&nbsp;<STRONG>letzte &auml;nderung</STRONG>:&nbsp;alle Beitr&auml;ge in der Reihenfolge ihrer letzten Bearbeitung werden aufgelistet und k&ouml;nnen editiert werden. Der zuletzt ge&auml;nderte Beitrag steht oben. 
+	<LI>&nbsp;<STRONG>mit internen kommentaren</STRONG>:&nbsp;alle Beitr&auml;ge, die einen internen Kommentar enthalten, werden aufgelistet und k&ouml;nnen editiert werden. 
+	
+</OL>
+<BR><BR>
+	<LI><H4>ALLE &Uuml;BRIGEN BEITR&Auml;GE</H4>
+	<OL type=a>
+	<LI>&nbsp;<STRONG>bearbeiten</STRONG>:&nbsp;sollte es Artikel geben, die keiner der Klassifizierungen <a href="article.html.de">themenspecial</a>, <a href="article.html.de">startspecial</a> oder <a href="article.html.de">feature</a> zugeordnet sind, werden sie hier aufgelistet und k&ouml;nnen editiert werden
+	</OL>
+	<BR><BR>
+	<LI><H4>BREAKING NEWS</H4>
+	<OL type=a>
+	<LI>&nbsp;<STRONG>bearbeiten</STRONG>:&nbsp;die Breaking News sind maximal 255 Zeichen lange Tickertexte, die auf der Startseite ganz oben in der Mitte stehen. Sie sind f&uuml;r Aktualit&auml;tsfetischistInnen gedacht und vermitteln allen das Flair des Livedabeiseins, die zuhause am Rechner sitzen. Sie k&ouml;nnen hier bearbeitet und gel&ouml;scht werden.
+	<LI>&nbsp;<STRONG>neue nachricht</STRONG>:&nbsp;eine neue Breaking News texten. Kurznachrichten wie etwa 'Platz besetzt - Bullen ratlos' k&ouml;nnen hier reingesetzt werden. Doch Vorsicht: Der Feind liest mit, d.h. eine Info, die unseren Aktionen, wenn sie ver&ouml;ffentlicht ist, schaden kann, darf hier niemals rein. Mit <EM>bearbeiten</EM> (siehe 3a) kann sie editiert und gel&ouml;scht werden.
+	</OL>
+	<BR><BR>
+	<LI><H4>MANUELL GENERIEREN</H4>
+	<OL type=a>
+	<LI>Eigentlich wird alles automatisch produziert, schlie&szlig;lich sind es ja Computer! Wenn es aber mal eilig ist (und <EM>nur</EM> dann), k&ouml;nnen hier Teilbereiche sofort produziert werden. Bei Fragen bitte an das freundliche Servicepersonal wenden.  
+	
+</OL>
+<BR><BR>
+	<LI><H4>SUCHE</H4>
+	<OL type=a>
+	<LI>Die Suche durchforstet die Datenbank nach dem eingegebenen Begriff, und zwar nach <EM>Titel</EM>, <EM>UrheberIn</EM>, <EM>Ort</EM>, <EM>Abstract</EM>, <EM>internem Kommentar</EM> oder sogar<EM> Inhalt</EM>. Einfach gesuchtes Wort eingegen, Suchkategorie w&auml;hlen und <EM>Enter</EM> dr&uuml;cken!
+</OL>
+<BR><BR>
+	<LI><H4>THEMEN</H4>
+	<OL type=a>
+	<LI>&nbsp;<STRONG>bearbeiten</STRONG>:&nbsp;Themen bzw. Rubriken k&ouml;nnen hier editiert und ge&auml;ndert werden. Dazu gibt es eine <a href="themes.html.de">eigene Maske</a>.
+	<LI>&nbsp;<STRONG>hinzuf&uuml;gen</STRONG>:&nbsp;Eine neue Rubrik/Thema hinzuf&uuml;gen. Dazu gibt es eine <a href="themes.html.de">eigene Maske</a>.
+</OL>
+<BR><BR>
+	<LI><H4>GRUPPEN</H4>
+	<OL type=a>
+	<LI>&nbsp;<STRONG>bearbeiten</STRONG>:&nbsp;Gruppen sind UrheberInnen von Artikeln, die h&auml;ufiger Artikel schreiben und deshalb im <a href="content.html.de#urheber">Popup-Men&uuml; der Artikeleingabemaske</a> aufgelistet sein sollen. Gruppen k&ouml;nnen editiert und ge&auml;ndert werden. Dazu gibt es eine <a href="group.html.de">eigene Maske</a>.
+	<LI>&nbsp;<STRONG>hinzuf&uuml;gen</STRONG>:&nbsp;Eine neue Gruppe hinzuf&uuml;gen. Dazu gibt es eine <a href="group.html.de">eigene Maske</a>. 
+</OL>
+<BR><BR>
+	<LI><H4>BILDER</H4>
+	<OL type=a>
+	<LI>&nbsp;<STRONG>bearbeiten</STRONG>:&nbsp;Bilddateien k&ouml;nnen hier nicht wirklich bearbeitet werden, aber ihre Text-Attribute k&ouml;nnen ver&auml;ndert werden, in einer <a href="images.html.de">eigenen Maske</a>.
+	<LI>&nbsp;<STRONG>hinzuf&uuml;gen</STRONG>:&nbsp;Ein neues Bild der Datenbank hinzuf&uuml;gen, in einer <a href="images.html.de">eigenen Maske</a>.
+</OL>
+<BR><BR>
+	<LI><H4>MEDIAFOLDER</H4>
+	<OL type=a>
+	<LI>&nbsp;<STRONG>bearbeiten</STRONG>:&nbsp;Ein Mediafolder ist eine Sammlung von Medien, zusammengefasst als Ordner. Kriterium der Zusammenfassung w&auml;re z.B. Fotos von der Auftaktdemo.  Der Mediafolder soll das inhaltliche Ablegen von Bilder erleichtern, damit sie schneller wiedergefunden werden. Besitzt auch eine <a href="mediafolder.html.de">eigene Maske</a>.
+	<LI>&nbsp;<STRONG>hinzuf&uuml;gen</STRONG>:&nbsp;Einen neuen Mediafolder formulieren. In einer <a href="mediafolder.html.de">eigenen Maske</a>.
+</OL>
+<BR><BR>
+</OL>
+
+
+
+
+
+
+</body>
+</html>
+

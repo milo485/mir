@@ -1,0 +1,37 @@
+
+ 	
+ 	body    	{margin: 6px; background-color: #ffffff; url(../img/bgimage.jpg) no-repeat;}
+	h1, h2, h3, h4, h5, h6, p, li, dt, dd, div, td, blockquote
+				{font-family:arial, helvetica, sans-serif;}
+	h6, p, li, dt, dd, div, td, blockquote
+				{font-size: small;}
+	
+	a:link			{color: #cc0033;text-decoration:none;}
+	a:visited		{color: #660033;text-decoration:none;}
+	a:hover			{color: #ff3333;text-decoration:none;}
+
+	.dark		{background-color: #990000; color: #ffffff; text-decoration:none;}
+	.middle         {background-color: #cc0033; color: #ffffff; text-decoration:none;}
+        .pink           {background-color: #FF9966; color: #ffffff; text-decoration:none;}
+        .darkgrey	{background-color: #999966; color: #000000; text-decoration:none;}
+	.grey		{background-color: #dddddd; color: #000000; text-decoration:none;}
+	.litegrey	{background-color: #eeeeee; color: #990000; text-decoration:none;}
+        .wite           {background-color: #ffffff; color: #990000; text-decoration:none;}
+        .list1          {background-color: #FFFFCC; color: #000000; text-decoration:none;}
+        .list2          {background-color: #FFCC99; color: #000000; text-decoration:none;}
+        .list3          {background-color: #FFFF99; color: #000000; text-decoration:none;}
+        .list4          {background-color: #CCCC99; color: #000000; text-decoration:none;}
+
+	.pagetitle	{font-size: x-large; color: #cc0033; font-weight: bold;}
+        .litetitel      {font-size: large;   color: #ffffff; font-weight: bold;}
+        .darktitel      {font-size: large;   color: #cc0033; font-weight: bold;}
+        .spezialtext    {font-size: small;   color: #CC0000;}
+        .text           {font-size: small;}
+        .small	        {font-size: x-small;}
+        .x-small	{font-size: xx-small;}
+
+	.witetext	{font-size: large; color: #ffffff; text-decoration:none;}
+	.witesmall	{font-size: small; color: #ffffff; text-decoration:none;}
+	.witex-small	{font-size: x-small; color: #ffffff; text-decoration:none;}
+
+	.lynx	        {display:none;}

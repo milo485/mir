@@ -1,0 +1,106 @@
+<html>
+<head>
+	<title>${config["Mir.Name"]} | ${lang("audiolist.htmltitle")}</title>
+        <link rel="stylesheet" type="text/css" href="${config.docRoot}/style/admin.css">
+</head>
+
+<body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
+
+<include "templates/admin/head.template">
+
+<table border="0" cellpadding="2" cellspacing="1">
+  <tr>
+    <td colspan="5"><form method="post" action="${config.actionRoot}">
+	<input type="hidden" name="module" value="Audio">
+	<input type="hidden" name="do" value="list">
+	<input type="hidden" name="cid" value="${data.cid}">
+	<table border="0">
+	<tr class="pink">
+		<td>${lang("medialist.search_text_in")}:</td>
+		<td>${lang("media.published")}:</td>
+		<td>${lang("media.mediafolder")}:</td>
+		<td>&nbsp;</td>
+	</tr>
+
+	<tr>
+	<td>
+		<input type="text" size="10" maxlength="20" name="query_text" value="${data.query_text}">
+		<select name="query_field">
+    		<option value="title"<if data.query_field=="title"> selected</if>>${lang("media.title")}</option>
+    		<option value="creator"<if data.query_field=="creator"> selected</if>>${lang("media.creator")}</option>
+    		<option value="place"<if data.query_field=="place"> selected</if>>${lang("media.location")}</option>
+    		<option value="keywords"<if data.query_field=="keywords"> selected</if>>${lang("media.keywords")}</option>
+    	</select>
+	</td>
+	<td>
+		<select name="query_is_published">
+		    <option value="">${lang("dontcare")}</option>
+    		<option value="0" <if data.query_is_published=="0"> selected</if>>${lang("no")}</option>
+		    <option value="1" <if data.query_is_published=="1"> selected</if>>${lang("yes")}</option>
+	    </select>
+	</td>
+	<td>
+	<select name="query_media_folder">
+ 	<list extra.mediafolderPopupData as m>
+	<option value="${m.key}" <if m.key == query_media_folder>selected</if>>${m.value}</option>
+  	</list>
+   	</select>
+	</td>
+	<td>
+		<input type="submit" name="search" value="${lang("filter")}">
+	</td>
+	</tr>
+	</table>
+	</form>
+	</td>
+  </tr>
+
+  <tr class="darkgrey" >
+  	<td><span class="witesmall">
+	<b>${lang("media.icon")}</b></span></td>
+	<td><span class="witesmall">
+	<b>${lang("media.title")}</b></span></td>
+    <td><span class="witesmall">
+	<b>${lang("media.mediafolder")}</b></span></td>
+    <td><span class="witesmall">
+	<b>${lang("media.creator")}</b></span></td>
+  </tr>
+  <if data.contentlist>
+  <list data.contentlist as entry>
+  <tr <if grey=="1"><assign grey="0">class="list1"<else>class="list2"<assign grey="1"> </if>>
+  <td>
+	  <img src="${config.docRoot}/img/${entry.big_icon}" border=0></span></td>
+  <td>${entry.title}&nbsp;
+  	  <if entry.decription><br>${entry.description}</if></td>
+  <td>${data.mediafolderHashdata[entry.to_media_folder]["name"]}&nbsp;</td>
+  <td>${entry.creator}&nbsp;</td>
+  <td><span class="text">&nbsp;
+	<if data.cid><a href="${config.actionRoot}?module=Content&do=attach&mid=${entry.id}&cid=${data.cid}">${lang("attach")}</a>
+	<else>
+	<a href="${config.actionRoot}?module=Audio&do=delete&id=${entry.id}">${lang("delete")}</a>
+    | <a href="${config.actionRoot}?module=Audio&do=edit&id=${entry.id}">${lang("edit")}</a>
+	</if>
+	</span></td>
+  </tr>
+  </list>
+  <tr>
+    <td colspan="4" class="darkgrey"><span class="witetext">${data.count} ${lang("records")}
+      / ${lang("show_from_to", data.from, data.to)}</span></td>
+    <td>&nbsp;</td>
+  </tr>
+
+<tr><td>
+<if data.prev>
+	<a href="${config.actionRoot}?module=Audio&do=list&query_text=${data.query_text_encoded}&query_field=${data.query_field}&query_is_published=${data.query_is_published}&query_media_folder=${data.query_media_folder}&offset=${data.prev}&prev=zur&uuml;ck&cid=${data.cid}">zurueck</a>&nbsp;
+</if>
+<if data.next>
+<a href="${config.actionRoot}?module=Audio&do=list&query_text=${data.query_text_encoded}&query_field=${data.query_field}&query_is_published=${data.query_is_published}&query_media_folder=${data.query_media_folder}&offset=${data.next}&next=weiter&cid=${data.cid}">weiter</a>
+</if>
+</td></tr>
+<else>
+  <tr><td align="center">${lang("no_matches_found")}</td></tr>
+</if>
+</table>
+<include "templates/admin/foot.template">
+</body>
+</html>

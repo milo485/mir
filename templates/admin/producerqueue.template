@@ -1,0 +1,80 @@
+<html>
+<head>
+	<title>${config["Mir.Name"]} | ${lang("producerqueue.htmltitle")}</title>
+  <link rel="stylesheet" type="text/css" href="${config.docRoot}/style/admin.css">
+</head>
+
+<body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
+<include "head.template">
+
+<span class="spezialtext"><b>${lang("producer.jobqueue.title")}</b></span>
+<p>
+<table border="0">
+  <tr class="darkgrey">
+    <td colspan="2"><span class="witesmall">${lang("producer.job.name")}</span></td>
+    <td><span class="witesmall">${lang("producer.job.status")}</span></td>
+    <td><span class="witesmall">${lang("producer.job.date")}</span></td>
+<comment>    
+    <td>&nbsp;</td>
+</comment>    
+  </tr>
+  
+  <if queue>
+    <assign grey="1">
+    <list queue as q>
+      <tr <if grey=="1">class="list1"<else>class="list2"</if>>
+        <td><span><b>${q.factory}</b></span></td>
+        <td><span><b>${q.verb}</b></span></td>
+        <td><span>${q.status}</span></td>
+        <td><span>${q.lastchange["HH:mm:ss"]}</span></td>
+<comment> ML: needs to be implemented       
+        <td><span><a href="${config.actionRoot}?module=Producer&do=abort">${lang("producer.job.cancel")}</a></span></td>
+</comment>        
+      </tr>
+      <if grey=="1"><assign grey="0"><else><assign grey="1"></if>
+    </list>
+  <else>
+      <tr class="list1">
+        <td colspan="5">Queue is empty</td>
+      </tr>
+  </if>
+  
+</table>
+<a href="${config.actionRoot}?${thisurl}">${lang("producer.jobqueue.refresh")}</a><br><br>
+
+<br><br>
+
+<span class="spezialtext"><b>${lang("producer.producerlist.title")}</b></span>
+<p>
+<table border="0">
+  <tr class="darkgrey">
+    <td>&nbsp;</td>
+    <td><span class="witesmall">${lang("producer.verb.name")}</span></td>
+    <td><span class="witesmall">${lang("producer.verb.description")}</span></td>
+    <td><span class="witesmall">&nbsp;</span></td>
+  </tr>
+
+  <assign grey="1">
+  <list producers as p>
+    <tr <if grey=="1">class="list1"<else>class="list2"</if>>
+      <td colspan="4"><span><b>${p.name}</b></span></td>
+    </tr>
+    
+    <list p.verbs as v>
+      <tr <if grey=="1">class="list1"<else>class="list2"</if>>
+        <td width="25"></td>
+        <td><span class="small">${v.name}</span></td>
+        <td><span class="small">${v.description}</span></td>
+        <td><span class="small"><a href="${config.actionRoot}?module=Producer&do=enqueue&producer=${utility.encodeURI(p.name)}&verb=${utility.encodeURI(v.name)}">${lang("producer.verb.enqueue")}</a>&nbsp;</span></td>
+      </tr>
+    </list>
+    <if grey=="1"><assign grey="0"><else><assign grey="1"></if>
+  </list>
+</table>
+
+<include "foot.template">
+
+</body>
+</html>
+
+

@@ -1,0 +1,53 @@
+MIR INTERNATIONALIZATION HOWTO
+----------------------------------------------------------------
+
+this short howto explains how to use the internationalization 
+features of mir and how you can translate mir to other 
+languages. this is actually very easy:
+
+
+* properties files (step 1)
+
+add a new file to the bundles/ directory. it should
+be called exactly like the other files there, except
+for the language code, which is the part after the underscore.
+at the moment these files are called 'admin_XX.properties', so
+
+admin_de.properties contains the strings for the german language
+admin_en.properties is the one for english.
+admin.properties is always used as a fallback and contains imc
+spcific information at the moment (this should probably change)
+
+the correct language code for your language can be found at
+http://www.w3.org/WAI/ER/IG/ert/iso639.htm, for example.
+
+
+* translation (step 2)
+
+the files just contain key and value pairs of the form 
+key=value. if a value contains something like {0}, {1}, and so
+on, this means, that these placeholders are replaced when the
+phrase is used. this is for example used for the key 
+show_from_to=showing from {0} to {1}. {0} and {1} get replaced 
+with the number of the first and the last record shown.
+
+in you new file (say admin_es.properties) you translate every key
+into the appropriate phrase in your language.
+
+
+* adding keys to templates
+
+you can define additional keys just by adding them to the 
+properties file and by referncing them in the freemaker template
+with ${lang("keyname")}. you should do that every time you need
+a language specific string!
+
+
+* renaming keys
+
+some keys might not have a perfectly fitting name at the moment.
+if you want to rename a key, please take care that you rename it
+in ALL properties files and ALL templates. take care.
+
+----------------------------------------------------------------
+27.3.2002, br1

@@ -1,0 +1,35 @@
+<html>
+  <head>
+        <title>${config["Mir.Name"]} | ${lang("confirm.htmltitle")}</title>
+        <link rel="stylesheet" type="text/css" href="${config.docRoot}/style/admin.css">
+  </head>
+
+<body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
+
+  <include "templates/admin/head_nonavi.template">
+<table width="100%" border="0" align="center">
+  <tr class="darkgrey">
+    <td colspan="2"> 
+      <h2 align="center"><span class="litetitel">${lang("confirm.really_delete")}</span></h2>
+    </td>
+  </tr>
+  <tr> 
+    <td colspan="2">
+      <form method="post" action="${config.actionRoot}">
+        <div align="center">
+          <input type="hidden" name="module" value=${data.module}>
+          <input type="hidden" name="do" value="delete">
+          <input type="hidden" name="id" value="${data.id}">
+          <input type="hidden" name="where" value="${data.where}">
+          <input type="hidden" name="order" value="${data.order}">
+          <input type="hidden" name="offset" value="${data.offset}">
+          <input type="submit" name="cancel" value="${lang("cancel")}">
+          <input type="submit" name="confirm" value="${lang("delete")}">
+        </div>
+      </form>
+    </td>
+  </tr>
+</table>
+<include "templates/admin/foot.template">
+  </body>
+</html>

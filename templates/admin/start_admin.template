@@ -1,0 +1,237 @@
+<html>
+  <head>
+    <title>${config["Mir.Name"]} | ${lang("start.htmltitle")}</title>
+    <link rel="stylesheet" type="text/css" href="${config.docRoot}/style/admin.css"
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  </head>
+
+<body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
+
+  <include "templates/admin/head.template">
+  <table border="0" width="100%">
+	<tr>
+		<td valign="top" width="40%" class="grey">
+
+
+		<span class="spezialtext">
+		<b>${lang("start.openpostings.title")}</b></span>
+
+	 <p>
+	 	<a href="${config.actionRoot}?module=Content&do=listop&order=webdb_create+desc">
+		<img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp;${lang("edit")}</a>
+
+		<p>
+			<span class="spezialtext">
+			<b>${lang("start.comments.title")}</b></span>
+		<p>
+			<a href="${config.actionRoot}?module=Comment&do=list">
+			<img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp;${lang("edit")}</a>
+	    <p>
+			<span class="spezialtext">
+			<b>${lang("start.breaking.title")}</b></span>
+		<p>
+			<img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp;
+			<a href="${config.actionRoot}?module=Breaking&do=list">${lang("edit")}</a>
+	    	<img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp;
+			<a href="${config.actionRoot}?module=Breaking&do=add">${lang("start.breaking.new")}</a>
+
+			<table width="100%" border="0">
+		<tr><td bgcolor="white">&nbsp;</td></tr>
+		</table>
+
+	    <span class="spezialtext">
+			<b>${lang("start.content.title")}</b></span>
+
+  		<p>
+			<img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp;
+			<a href="${config.actionRoot}?module=Content&do=add&where=aktuell">${lang("start.content.new")}</a>
+	    <p>
+			<b>${lang("start.show")}:</b><br>
+      <list data.articletypes as a>
+    			<img src="${config.docRoot}/img/pointgris.gif" border=0>
+    			<a href="${config.actionRoot}?module=Content&do=list&where=is_published%3d'1'%20and%20to_article_type%3D${a.id}&order=webdb_create%20desc">${a.name}</a><br>
+      </list>
+
+      <br>
+	    <img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp;
+			<a href="${config.actionRoot}?module=Content&do=list&where=nfrei" >${lang("start.content.not_published")}</a><br>
+			<img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp;
+			<a href="${config.actionRoot}?module=Content&do=list&where=media">${lang("start.content.with_media")}</a><br>
+			<img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp;
+			<a href="${config.actionRoot}?module=Content&do=list&where=lastchange">${lang("start.content.last_changes")}</a><br>
+			<img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp;
+			<a href="${config.actionRoot}?module=Content&do=list&where=comments">${lang("start.content.with_comments")}</a><br>
+                        <br>
+                        <img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp;
+                        <a href="${config.actionRoot}?module=Hidden&do=list">${lang("start.content.hidden")}</a><br><br>
+
+			<b>here to edit all the include files:</b>
+			<br>
+			<img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp;
+		        <a href="${config.actionRoot}?module=FileEdit&do=list">${lang("edit")} ${lang("file")}</a>
+
+			<br><br>
+
+     <form action="${config.actionRoot}" method="post">
+	     <input type="hidden" name="module" value="Content">
+       <input type="hidden" name="do" value="search">
+       <input type="hidden" name="order" value="date desc">
+		    ${lang("start.content.search")}: <span class="small">
+       <input type="text" name="fieldvalue" size="15">
+       <select name="field">
+       	<option value="title">${lang("content.title")}</option>
+        <option value="creator">${lang("content.creator")}</option>
+        <option value="place">${lang("content.location")}</option>
+        <option value="description">${lang("content.abstract")}</option>
+				<option value="comment">${lang("content.comment")}</option>
+        <option value="content_data">${lang("content.content")}</option>
+       </select></span>
+      </form>
+
+		<table width="100%" border="0">
+		<tr><td bgcolor="white">&nbsp;</td></tr>
+		</table>
+
+		<span class="spezialtext">
+		<b>${lang("start.producers.title")}</b></span>
+    <p>
+      <a href="${config.actionRoot}?module=Producer&do=produceAllNew">${lang("start.producers.produceAllNew")}</a><br>
+      <a href="${config.actionRoot}?module=Producer&do=showProducerQueueStatus">${lang("start.producers.advanced")}</a>
+
+    </td>
+
+
+			<td bgcolor="white" width="5%">&nbsp;
+			</td>
+			<td valign="top" width="30%" class="grey">
+
+<comment> -- not finished yet --
+  	<span class="spezialtext">
+		<b>${lang("start.coverage.title")}</b></span>
+
+		<P>
+			<a href="${config.actionRoot}?module=Schwerpunkt&do=list" >
+      <img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp; ${lang("edit")}</a><br>
+      <a href="${config.actionRoot}?module=Schwerpunkt&do=add" >
+		  <img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp; ${lang("add")}</a>
+    <p>
+</comment>
+
+			<span class="spezialtext">
+			<b>${lang("start.topics.title")}</b></span>
+
+		<p>
+			<a href="${config.actionRoot}?module=Topics&do=list">
+      <img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp; ${lang("edit")}</a><br>
+      <a href="${config.actionRoot}?module=Topics&do=add" >
+			<img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp; ${lang("add")}</a>
+
+		<p>
+			<span class="spezialtext">
+		  <b>${lang("start.images.title")}</b></span>
+
+    <p>
+			<a href="${config.actionRoot}?module=Images&do=list">
+      <img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp; ${lang("edit")}</a><br>
+      <a href="${config.actionRoot}?module=Images&do=add" >
+			<img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp; ${lang("add")}</a>
+
+		<p>
+
+        <span class="spezialtext">
+		  <b>${lang("start.audio.title")}</b></span>
+
+    <p>
+			<a href="${config.actionRoot}?module=Audio&do=list">
+      <img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp; ${lang("edit")}</a><br>
+      <a href="${config.actionRoot}?module=Audio&do=add" >
+			<img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp; ${lang("add")}</a>
+
+		<p>
+
+        <span class="spezialtext">
+		  <b>${lang("start.video.title")}</b></span>
+
+    <p>
+			<a href="${config.actionRoot}?module=Video&do=list">
+      <img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp; ${lang("edit")}</a><br>
+      <a href="${config.actionRoot}?module=Video&do=add" >
+			<img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp; ${lang("add")}</a>
+
+		<p>
+
+        <span class="spezialtext">
+		  <b>${lang("start.other_media.title")}</b></span>
+
+    <p>
+			<a href="${config.actionRoot}?module=OtherMedia&do=list">
+      <img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp; ${lang("edit")}</a><br>
+      <a href="${config.actionRoot}?module=OtherMedia&do=add" >
+			<img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp; ${lang("add")}</a>
+
+		<p>
+
+			<span class="spezialtext">
+		  <b>${lang("start.mediafolder.title")}</b></span>
+
+		<p>
+			<a href="${config.actionRoot}?module=Mediafolder&do=list">
+      <img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp; ${lang("edit")}</a><br>
+      <a href="${config.actionRoot}?module=Mediafolder&do=add" >
+			<img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp; ${lang("add")}</a>
+
+    <p>
+<comment> -- not finished yet --
+		<span class="spezialtext">
+		  <b>${lang("start.languages.title")}</b></span>
+
+		<p>
+			<a href="${config.actionRoot}?module=Language&do=list">
+      <img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp; ${lang("edit")}</a><br>
+      <a href="${config.actionRoot}?module=Language&do=add" >
+			<img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp; ${lang("add")}</a>
+
+		<p>
+</comment> 
+			<span class="spezialtext">
+		  <b>${lang("start.imcs.title")}</b></span>
+
+		<p>
+			<a href="${config.actionRoot}?module=LinksImcs&do=list">
+      <img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp; ${lang("edit")}</a><br>
+      <a href="${config.actionRoot}?module=LinksImcs&do=add" >
+			<img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp; ${lang("add")}</a>
+			</td>
+
+
+			<td bgcolor="white" width="5%">&nbsp;
+			</td>
+			<td valign="top" width="20%" class="pink">
+
+	<comment>internal messageboard</comment>
+
+		<span class="spezialtext">
+		<b>${lang("start.messageboard.title")}</b>
+		<span class="small"><br><a href="${config.actionRoot}?module=Message&do=add">${lang("add")}</a>
+		<a href="${config.actionRoot}?module=Message&do=list">${lang("edit")}</a></span>
+		<if data.messages>
+			<list data.messages as m>
+				<p>
+				<if m.title><b>${m.title}</b><br></if>
+				${m.description}<br>
+				<span class="x-small">
+				<if m.creator><i>von: ${m.creator}</i> / </if>${m.webdb_create}<br>
+				</span>
+			</list>
+		<else>
+			<p><i>${lang("start.messageboard.no_messages")}</i>
+		</if></span>
+	</td>
+
+ 	</tr>
+	</table>
+
+	<include "templates/admin/foot.template">
+
+	</body>
+</html>

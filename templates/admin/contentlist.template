@@ -1,0 +1,78 @@
+<html>
+<head>
+	<title>${config["Mir.Name"]} | ${lang("contentlist.htmltitle")}</title>
+        <link rel="stylesheet" type="text/css" href="${config.docRoot}/style/admin.css">
+</head>
+
+<body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
+
+<include "templates/admin/head.template">
+<if data.contentlist>
+	<table border="0" width="100%" cellspacing="0" cellpadding="2">
+	  <tr class="darkgrey">
+	    <td><span class="witesmall">
+			${lang("content.creationdate")}<br>
+			${lang("content.modificationdate")}<br>
+			${lang("content.status")}</span></td>
+	    <td><span class="witesmall">
+			${lang("content.type")} / ${lang("content.location")}: ${lang("content.title")}<br>
+			${lang("content.creator")}</span></td>
+	    <td ><span class="witesmall">${lang("content.topic")}<br>${lang("content.feature")}</span></td>
+	    <td width="25%"><span class="witesmall">
+			${lang("content.comment")}</span></td>
+		<td class="darkgrey">&nbsp;</td>
+	  </tr>
+
+	<list data.contentlist as entry>
+	  <tr <if grey=="1"><assign grey="0">class="list1"<else>class="list2"<assign grey="1"></if>>
+	    <td><span class="x-small">
+			${entry.webdb_create_formatted}<br>
+			<if entry.webdb_lastchange>${entry.webdb_lastchange_formatted}<else>-</if><br>
+			<if entry.is_published!="0">F<else>-</if>
+			<if entry.is_html!="0">H<else>-</if>
+			</span></td>
+	    <td><span class="small"><b>
+			<span class="x-small">${articletypeHash[entry.to_article_type]["name"]} -- </span><if entry.place>${entry.place}: </if>${entry.title}</b><br>
+			${entry.creator}&nbsp;
+			<a href="${config.actionRoot}?module=Content&do=edit&id=${entry.id}&where=${data.where_encoded}&order=${data.order_encoded}&offset=${data.offset}">${lang("edit")}</a>
+			<if entry.to_article_type=="0">&nbsp;|&nbsp;<a href="${config.actionRoot}?module=Content&do=newswire&id=${entry.id}&where=${data.where_encoded}&order=${data.order_encoded}&offset=${data.offset}">newswire</a></if></span></td>
+	    <td><span class="small">
+			<if entry.thema_id!="0">${themenHashData[entry.thema_id]["name"]}</if>&nbsp;<br>
+			<if entry.to_feature!="0">${schwerpunktHashData[entry.to_feature]["title"]}</if>&nbsp;</span></td>
+	    <td width="20%" <if grey=="1">class="list3"<else>class="list4"</if> valign="top"><span class="x-small">
+			${entry.comment}&nbsp;</span></td>
+	    <td class0"litegrey"><span class="text">
+  	      <a href="${config.actionRoot}?module=Content&do=delete&id=${entry.id}&where=${data.where_encoded}&order=${data.order_encoded}&offset=${data.offset}">${lang("delete")}</a>
+	      </span></td>
+	</tr>
+	</list>
+	<tr class="darkgrey">
+	    <td colspan="4"><span class="witesmall">${data.count} ${lang("records")}
+      / ${lang("show_from_to", data.from, data.to)}</span></td></tr>
+	</table>
+
+      <P>
+<if data.prev || data.next>
+ <form method="post" action="${config.actionRoot}">
+ <input type="hidden" name="module" value="Content">
+ <input type="hidden" name="do" value="listop">
+ <input type="hidden" name="where" value="${data.where}">
+ <input type="hidden" name="order" value="${data.order}">
+<if data.prev>
+ <input type="hidden" name="prevoffset" value="${data.prev}">
+ <input type="submit" name="prev" value="${lang("list.previous")}">
+</if>
+<if data.next>
+ <input type="hidden" name="nextoffset" value="${data.next}">
+ <input type="submit" name="next" value="${lang("list.next")}">
+</if>
+ </form>
+</if>
+
+<else>
+  <P align="center">${lang("no_matches_found")}</p>
+</if>
+
+<include "templates/admin/foot.template">
+</body>
+</html>

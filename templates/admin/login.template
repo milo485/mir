@@ -1,0 +1,80 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+  <head>
+        <title>${config["Mir.Name"]} | ${lang("login.htmltitle")}</title>
+        <link rel="stylesheet" type="text/css" href="${config.docRoot}/style/admin.css">
+	<script language="JavaScript">
+	function placeFocus() {
+			document.forms[0].elements[1].focus();
+	}
+	</script>
+
+  </head>
+  <body onLoad="placeFocus()" marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
+
+  	<include "templates/admin/head_nonavi.template">
+    <center>
+	<p><span class="small">
+        ${lang("login.info")}
+        <a href="mailto:${config["Mir.Contact-email.address"]}"><span class="spezialtext">${config["Mir.Contact-email.name"]}</span></a>.
+        </span></p>
+	<hr>
+    <form method="post" action="${config.actionRootLogin}">
+    	<input type="hidden" name="module" value="login">
+		<table border="0" cellpadding="2" cellspacing="0" class="dark">
+	  		<tr class="darkgrey">
+	  			<td colspan="2" align="center">
+	  				<span class="witetext">
+		  			<b>${lang("login.title")}</b></span>
+	  			</td>
+	  		</tr>
+	  		<tr>
+	  			<td align="right">
+	  				<span class="witetext">${lang("login.name")}</span>
+	  			</td>
+	  			<td>
+	  				<input type="text" name="login" size="15">
+	  			</td>
+	  		</tr>
+	  		<tr>
+	  			<td align="right">
+	  				<span class="witetext">${lang("login.password")}</span>
+	  			</td>
+	  			<td>
+	  				<input type="password" name="password" size="15">
+	  			</td>
+	  		</tr>
+	  		<tr>
+	  			<td align="right">
+	  				<span class="witetext">${lang("login.language")}</span>
+	  			</td>
+	  			<td>
+	  				<select name="lang">
+                    <!-- this language selection should be solved better
+                            - list all available languages
+                    -->
+
+	  				<option value="en">${lang("login.language.en")}</option>
+	  				<option value="de">${lang("login.language.de")}</option>
+            <option value="es">${lang("login.language.es")}</option>
+            <option value="ay">${lang("login.language.ay")}</option>
+            <option value="gn"">${lang("login.language.gn")}</option>
+            <option value="qu"">${lang("login.language.qu")}</option>
+            <option value="tr">${lang("login.language.tr")}</option>
+
+            </select>
+
+	  			</td>
+	  		</tr>
+	  		<tr>
+	  			<td align="left">&nbsp;</td>
+	  			<td align="left">
+	  				<input type="submit" value="${lang("login.submit")}">
+	  			</td>
+	  		</tr>
+		</table>
+    </form>
+	<include "templates/admin/foot.template">
+  </body>
+</html>
+

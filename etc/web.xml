@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!DOCTYPE web-app
+    PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.2//EN"
+    "http://java.sun.com/j2ee/dtds/web-app_2_2.dtd">
+
+<web-app>
+    <servlet>
+        <servlet-name>
+            Mir
+        </servlet-name>
+        <servlet-class>
+            Mir
+        </servlet-class>
+
+        <init-param>
+            <param-name>Config</param-name>
+            <param-value>etc/config.properties</param-value>
+        </init-param>
+
+    </servlet>
+
+    <servlet>
+        <servlet-name>
+            OpenMir
+        </servlet-name>
+        <servlet-class>
+            OpenMir
+        </servlet-class>
+
+        <init-param>
+            <param-name>Config</param-name>
+            <param-value>etc/config.properties</param-value>
+        </init-param>
+
+    </servlet>
+    
+    <servlet>
+        <servlet-name>
+            OutputMir
+        </servlet-name>
+        <servlet-class>
+            OutputMir
+        </servlet-class>
+
+        <init-param>
+            <param-name>Config</param-name>
+            <param-value>config</param-value>
+        </init-param>
+
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>
+            Mir
+        </servlet-name>
+        <url-pattern>
+            /Mir
+        </url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>OpenMir</servlet-name>
+        <url-pattern>/OpenMir</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>OutputMir</servlet-name>
+        <url-pattern>/OutputMir</url-pattern>
+    </servlet-mapping>
+
+    <mime-mapping>
+      <extension>
+        mp3 
+      </extension>
+      <mime-type>
+        audio/x-mp3
+      </mime-type>
+    </mime-mapping>
+    <mime-mapping>
+      <extension>
+        ra
+      </extension>
+      <mime-type>
+        audio/vnd.rn-realaudio
+      </mime-type>
+    </mime-mapping>
+    <mime-mapping>
+      <extension>
+        rm
+      </extension>
+      <mime-type>
+        application/vnd.rn-realmedia
+      </mime-type>
+    </mime-mapping>
+    <mime-mapping>
+      <extension>
+        mov
+      </extension>
+      <mime-type>
+        video/quicktime 
+      </mime-type>
+    </mime-mapping>
+    <mime-mapping>
+      <extension>
+        mpg
+      </extension>
+      <mime-type>
+        video/mpeg
+      </mime-type>
+    </mime-mapping>
+    <mime-mapping>
+      <extension>
+        avi
+      </extension>
+      <mime-type>
+        video/x-msvideo
+      </mime-type>
+    </mime-mapping>
+    <mime-mapping>
+      <extension>
+        asf
+      </extension>
+      <mime-type>
+        video/x-ms-asf
+      </mime-type>
+    </mime-mapping>
+    <mime-mapping>
+      <extension>
+        pdf
+      </extension>
+      <mime-type>
+        application/pdf
+      </mime-type>
+    </mime-mapping>
+
+    <security-constraint>
+      <web-resource-collection>
+         <web-resource-name>Protected Area</web-resource-name>
+	 <!-- Define the context-relative URL(s) to be protected -->
+         <url-pattern>/jsp/security/protected/*</url-pattern>
+	 <!-- If you list http methods, only those methods are protected -->
+	 <http-method>DELETE</http-method>
+         <http-method>GET</http-method>
+         <http-method>POST</http-method>
+	 <http-method>PUT</http-method>
+      </web-resource-collection>
+      <auth-constraint>
+         <!-- Anyone with one of the listed roles may access this area -->
+         <role-name>tomcat</role-name>
+	 <role-name>role1</role-name>
+      </auth-constraint>
+    </security-constraint>
+
+    <!-- Default login configuration uses BASIC authentication -->
+    <!--
+    <login-config>
+      <auth-method>BASIC</auth-method>
+      <realm-name>Example Basic Authentication Area</realm-name>
+    </login-config>
+    -->
+
+    <!-- Form-based login is enabled by default.  If you wish to
+         try Basic authentication, comment out the <login-config>
+         section below and uncomment the one above. -->
+    <login-config>
+      <auth-method>FORM</auth-method>
+      <realm-name>Example Form-Based Authentication Area</realm-name>
+      <form-login-config>
+        <form-login-page>/jsp/security/login/login.jsp</form-login-page>
+        <form-error-page>/jsp/security/login/error.jsp</form-error-page>
+      </form-login-config>
+    </login-config>
+
+</web-app>

@@ -1,0 +1,128 @@
+Dublin Core (http://purl.org/DC)
+----------------------------------------------------------------
+
+Bei der Dublin Core Metadata Initiative handelt es sich um ein 
+Projekt, dass einen "common core of semantics for resource 
+description" schafft. Selbstdarstellung unter 
+
+	http://purl.org/DC/about/index.htm
+
+
+Die Datenbankstruktur von Webdb/NA von der Bennenung soweit moeglich
+an das
+
+ "Dublin Core Metadata Element Set, Version 1.1: Reference Description
+  Beschreibung unter http://purl.org/DC/documents/rec-dces-19990702.htm"
+
+angelehnt. Dublin Core Metadaten werden entsprechend untenstehendem Matching
+in die Header der produzierten Seiten geschrieben...
+
+
+Matching:
+
+Dublin Core umfasst 15 Attribute. Beschreibung der Attribute siehe oben.
+Angaben in eckigen Klammern beziehen sich auf Funktionalitaeten, die z.Z.
+noch nicht implementiert sind.
+
+Im folgenden, wie die DC-Attribute in den Tabellen repraesentiert sind:
+
+MEDIA/IMAGE Tabelle:
+
+1.	DC Element: Title  
+	MEDIA Element: title
+
+2. 	DC Element: Creator
+	MEDIA Element: creator / to_creator
+
+3.	DC Element: Subject
+	MEDIA Element: keywords [/ keywords n:m]
+
+4.	DC Element: Description
+	MEDIA Element: desciption
+
+5.	DC Element: Publisher
+	MEDIA Element: to_publisher
+
+6. 	DC Element: Contributor
+	MEDIA Element: to_publisher
+
+7.	DC Element: Date
+	MEDIA Element: publish_date
+
+8.	DC Element: Type
+	MEDIA Element: to_media_type.dcname
+
+9.	DC Element: Format
+	MEDIA Element: to_img_format.mimetype
+	[fuer video/audio dann analog]
+
+10.	Element: Identifier
+	MEDIA Element: publish_server + publish_path
+
+11.	DC Element: Source
+	MEDIA Element: source
+
+12. 	DC Element: Language
+	MEDIA Element to_lang
+
+13.	DC Element: Relation
+	MEDIA Element: to_media_folder
+
+14.	DC Element: Coverage
+	MEDIA Element: place [ / to_place]
+
+15.	DC Element: Rights
+	MEDIA Element: to_rights
+
+-------------------------------------------------------------------------
+
+
+CONTENT Tabelle:
+MEDIA/IMAGE Tabelle:
+
+1.	DC Element: Title  
+	MEDIA Element: title
+
+2. 	DC Element: Creator
+	MEDIA Element: creator / to_creator
+
+3.	DC Element: Subject
+	MEDIA Element: keywords [/ keywords n:m]
+
+4.	DC Element: Description
+	MEDIA Element: desciption
+
+5.	DC Element: Publisher
+	MEDIA Element: to_publisher
+
+6. 	DC Element: Contributor
+	MEDIA Element: to_publisher
+
+7.	DC Element: Date
+	MEDIA Element: publish_date
+
+8.	DC Element: Type
+	MEDIA Element: to_media_type.dcname
+
+9.	DC Element: Format
+	MEDIA Element: to_img_format.mimetype
+	[fuer video/audio dann analog]
+
+10.	Element: Identifier
+	MEDIA Element: publish_server + publish_path
+
+11.	DC Element: Source
+	MEDIA Element: source
+
+12. 	DC Element: Language
+	MEDIA Element to_lang
+
+13.	DC Element: Relation
+	MEDIA Element: to_media_folder
+
+14.	DC Element: Coverage
+	MEDIA Element: place [ / to_place]
+
+15.	DC Element: Rights
+	MEDIA Element: to_rights
+

@@ -1,0 +1,28 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<title>mir  | groups</title>
+</head>
+
+<body bgcolor="#ffffff">
+<HR ALIGN="center" SIZE="1">
+<font face="Verdana, Arial, Helvetica, sans-serif" size="-1"> 
+<h3><center>THE MASKS FOR THE GROUPS</center></h3>
+<h4><center><a href="group.html.de">deutsche version</a></center></h4>
+<HR ALIGN="center" SIZE="1">
+<OL>
+	<LI>&nbsp;<STRONG>name</STRONG>:&nbsp;name a group, e.g. 'kein mensch ist illegal'.
+	<BR><BR>
+	<LI>&nbsp;<STRONG>email</STRONG>:&nbsp;e-mail of the group. If given, it will always be published.&nbsp;<EM>optional</EM>.
+	<BR><BR>
+	<LI>&nbsp;<STRONG>homepage</STRONG>:&nbsp;homepage of the group. If given, it will always be published.&nbsp;<EM>optional</EM>.
+	<BR><BR>
+	<LI>&nbsp;<STRONG>adresse</STRONG>:&nbsp;postal adress of the group. If given, it will always be published.&nbsp;<EM>optional</EM>.
+	<BR><BR>
+	<LI>&nbsp;<STRONG>telefon</STRONG>:&nbsp;telephone number of the group. If given, it will always be published.&nbsp;<EM>optional</EM>.
+	<BR><BR>
+</OL>
+
+
+</body>
+</html>

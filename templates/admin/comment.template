@@ -1,0 +1,85 @@
+<html>
+<head>
+        <title>${config["Mir.Name"]} | ${lang("comment.htmltitle")}</title>
+        <link rel="stylesheet" type="text/css" href="${config.docRoot}/style/admin.css">
+<head>
+
+<body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
+
+<include "templates/admin/head.template">
+
+<form method="post" action="${config.actionRoot}">
+	<input type="hidden" name="module" value="Comment">
+	<input type="hidden" name="where" value="${utility.encodeHTML(data.where)}">
+	<input type="hidden" name="offset" value="${utility.encodeHTML(data.offset)}">
+	<input type="hidden" name="order" value="${utility.encodeHTML(data.order)}">
+	<input type="hidden" name="id" value="${utility.encodeHTML(data.id)}">
+	<input type="hidden" name="date" value="${utility.encodeHTML(data.date)}">
+	<input type="hidden" name="to_media" value="${utility.encodeHTML(data.to_media)}">
+	<if new> <input type="hidden" name="do" value="insert">
+	<else>	 <input type="hidden" name="do" value="update">
+	</if>
+
+	<table border="0">  	
+
+	<tr> 
+    <td align="right" class="darkgrey"><span class="witesmall">
+	 <B>${lang("comment.date")}:</B></span></td>
+    <td>${utility.encodeHTML(utility.encodeHTML(data.date))}</td>
+  	</tr>
+
+	<tr>
+    <td align="right" class="darkgrey"><span class="witesmall">
+	 <B>${lang("comment.title")}:</B></span></td>
+    <td><input type="text" size="40" maxlength="255" name="title" value="${utility.encodeHTML(data.title)}"></td>
+  	</tr>
+
+	<tr>
+    <td align="right" class="darkgrey"><span class="witesmall">
+	 <B>${lang("comment.creator")}:</B></span></td>
+    <td><input type="text" size="40" maxlength="80" name="creator" value="${utility.encodeHTML(data.creator)}"></td>
+  	</tr>
+
+	<tr>
+    <td align="right" class="darkgrey"><span class="witesmall">
+	 <B>${lang("comment.url")}:</B></span></td>
+    <td><input type="text" size="40" maxlength="255" name="main_url" value="${utility.encodeHTML(data.main_url)}"></td>
+  	</tr>
+
+	<tr>
+    <td align="right" class="darkgrey"><span class="witesmall">
+	 <B>${lang("comment.email")}:</B></span></td>
+    <td><input type="text" size="40" maxlength="80" name="email" value="${utility.encodeHTML(data.email)}"></td>
+  	</tr>
+
+	<tr>
+    <td align="right" class="darkgrey"><span class="witesmall">
+	 <B>${lang("comment.phone")}:</B></span></td>
+    <td><input type="text" size="40" maxlength="80" name="phone" value="${utility.encodeHTML(data.phone)}"></td>
+  	</tr>
+
+	<tr>
+    <td align="right" class="darkgrey"><span class="witesmall">
+	 <B>${lang("comment.address")}:</B></span></td>
+    <td><input type="text" size="40" maxlength="80" name="address" value="${utility.encodeHTML(data.address)}"></td>
+  	</tr>
+
+	<tr>
+    <td align="right" class="darkgrey"><span class="witesmall">
+	 <B>${lang("comment.text")}:</B></span></td>
+    <td><textarea cols="40" rows="10" name="description" wrap="virtual">${utility.encodeHTML(data.description)}</textarea></td>
+  	</tr>
+
+    <td colspan="2" align="right"> <span class="text">
+	${lang("comment.published")} <input type="checkbox" name="is_published" value="1" <if data.is_published=="1"> checked</if>>
+	<if new>
+      <input type="submit" name="save" value="${lang("insert")}">
+    <else>
+    <input type="submit" name="save" value="${lang("save")}">
+    </if> </span></form></span>
+    </td>
+</table>
+
+<include "templates/admin/foot.template">
+</body>
+</html>

@@ -1,0 +1,74 @@
+<html>
+<head>
+        <title>${config["Mir.Name"]} | ${lang("linkimcs.htmltitle")}</title>
+        <link rel="stylesheet" type="text/css" href="${config.docRoot}/style/admin.css">
+<head>
+
+<body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
+
+<include "templates/admin/head.template">
+<form action="${config.actionRoot}" method="post">
+	<input type=hidden name=module value=LinksImcs>
+	<input type="hidden" name="id" value="${data.entity.id}">
+	<if data.new><input type="hidden" name="do" value="insert">
+	<else><input type="hidden" name="do" value="update"></if>
+<table border="0">
+  <tr>
+    <td align="right" class="darkgrey"><span class="witesmall>
+		<B>${lang("linkimcs.name")}:</B></span></td>
+    <td>
+      	<input type="text" size="40" name="title" value="${data.entity.title}">
+    </td>
+  </tr>
+  <tr>
+    <td align="right" class="darkgrey"><span class="witesmall>
+		<B>${lang("linkimcs.continent")}:</B></span></td>
+    <td>
+		<if data.parentlist>
+     	<select name="to_parent_id" size="1">
+			<option value=NULL> ${lang("linkimcs.new_parent")}
+			<list data.parentlist as entry><option value="${entry.id}"<if entry.id == data.entity.to_parent_id> selected</if>> ${entry.title}</list>
+		</select>
+		</if>
+    </td>
+  </tr>
+  <tr>
+    <td align="right" class="darkgrey"><span class="witetext"><B>${lang("linkimcs.url")}:</B></span></td>
+    <td>
+      <input type="text" size="40" name="url" value="${data.entity.url}">
+    </td>
+  </tr>
+  <tr>
+    <td align="right" class="darkgrey"><span class="witetext"><B>${lang("linkimcs.sort_by")}:</B></span></td>
+    <td>
+      <select name="sortpriority" size="1">
+		<option value="1"<if data.entity.sortpriority == 1> selected</if>> 1
+		<option value="2"<if data.entity.sortpriority == 2> selected</if>> 2
+		<option value="3"<if data.entity.sortpriority == 3> selected</if>> 3
+		<option value="4"<if data.entity.sortpriority == 4> selected</if>> 4
+		</select>
+    </td>
+  </tr>
+  <tr>
+    <td align="right" class="darkgrey"><span class="witetext"><B>${lang("linkimcs.language")}:</B></span></td>
+    <td>
+      <select name="to_language" size="1">
+	  	<list data.languagelist as language>
+			<option value="${language.id}"<if data.entity.to_language == language.id> selected</if>> ${language.name}
+		</list>
+	  </select>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2" align="right"><span class="witetext">
+		<if data.new>
+      		<input type="submit" name="save" value="${lang("insert")}">
+    	<else>
+    		<input type="submit" name="save" value="${lang("save")}">
+    	</if> </span></form></span>
+    </td>
+  </tr>
+</table>
+<include "templates/admin/foot.template">
+</body>
+</html>

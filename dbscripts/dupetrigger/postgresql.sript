@@ -1,0 +1,6 @@
+DROP TRIGGER commdupetrigger ON comment;
+DROP TRIGGER contentdupetrigger ON content;
+DROP FUNCTION dupecheck();
+CREATE FUNCTION dupecheck() RETURNS OPAQUE AS '/var/lib/postgres/data/dupetrigger.so' LANGUAGE 'C';
+CREATE TRIGGER contentdupetrigger BEFORE INSERT OR UPDATE ON content FOR EACH ROW EXECUTE PROCEDURE dupecheck("no", "title", "subtitle", "creator", "description", "content_data");
+CREATE TRIGGER commdupetrigger BEFORE INSERT OR UPDATE ON comment FOR EACH ROW EXECUTE PROCEDURE dupecheck("no", "creator", "to_media", "description", "title");

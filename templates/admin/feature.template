@@ -1,0 +1,65 @@
+<html>
+<head>
+        <title>${config["Mir.Name"]} | ${lang("feature.htmltitle")}</title>
+        <link rel="stylesheet" type="text/css" href="${config.docRoot}/style/admin.css">
+<head>
+
+<body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
+
+<include "templates/admin/head.template">
+
+<table border="0">
+  <form method="post" action="${config.actionRoot}">
+    <input type="hidden" name="module" value="Schwerpunkt">
+    <input type="hidden" name="where" value="${data.where}">
+    <input type="hidden" name="offset" value="${data.offset}">
+    <input type="hidden" name="order" value="${data.order}">
+    <if data.new>
+    <input type="hidden" name="do" value="insert">
+    <else>
+    <input type="hidden" name="do" value="update">
+    </if>
+    <input type="hidden" name="id" value="${data.id}">
+    <tr>
+      <td align="right" valign="top" class="darkgrey"><span class="witetext"><B>${lang("feature.title")}:</B></span></td>
+      <td>
+        <input type="text" size="40" name="title" value="${data.title}">
+        <select name="is_published">
+			<option value="1"<if data.is_published!="0">selected</if>>${lang("feature.is_published")}</option>
+			<option value="0" <if data.is_published=="0">selected</if>>${lang("feature.is_not_published")}</option>
+        </select>
+      </td>
+    </tr>
+
+    <tr>
+      <td align="right" valign="top" class="darkgrey"><span class="witetext"><B>${lang("feature.filename")}:</B></span></td>
+      <td>
+         <input type="text" size="20" name="filename" value="${data.filename}">
+      </td>
+    </tr>
+
+    <tr>
+      <td align="right" valign="top" class="darkgrey"><span class="witetext"><B>${lang("feature.abstract")}:</B></span></td>
+      <td>
+        <textarea cols="40" rows="3" name="description">${data.description}</textarea>
+      </td>
+    </tr>
+
+    <tr>
+      <td align="right" valign="top" class="darkgrey"><span class="witetext"><B>${lang("feature.link")}:</B></span></td>
+      <td>
+        <input type="text" size="40" name="main_url" value="${data.main_url}">
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2" align="right" valign="top" bgcolor="#ffffff"> <span class="witetext"><if new>
+        <input type="submit" name="save" value="${lang("insert")}">
+        <else>
+        <input type="submit" name="save" value="${lang("save")}">
+        </if></span></td>
+    </tr>
+  </form>
+</table>
+<include "templates/admin/foot.template">
+</body>
+</html>

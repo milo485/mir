@@ -1,0 +1,267 @@
+<project name="Mir" default="compile" basedir=".">
+
+
+<!-- What this file is all about
+
+     You can use this version of build.xml to use directly with ant
+     i.e. without the build.sh script. Simply call ant and let it all
+     happen.
+-->
+
+<!-- Property Definitions
+
+     Please not that only the first couple of properties have to be defined.
+     The rest, residing below the "no customization needed" line may be
+     customized if you know what you are doing. Else, leave the defaults
+     and use them to look up where ant places all the files.
+
+     app.name          Base name of this application, used to
+                       construct filenames and directories.
+
+     deploy.home       The name of the directory into which the
+                       deployment hierarchy will be created.
+                       Normally, this will be the name of a
+                       subdirectory under $TOMCAT_HOME/webapps.
+
+     deploy.classes    The name of the directory that will contain
+                       the class files.
+
+     dist.home	       The name of the base directory in which
+                       distribution files are created.
+
+     dist.src          The name of the distribution JAR file
+                       containing the application source code,
+                       to be stored in the "dist.home" directory.
+                       This filename should end with ".jar".
+
+     dist.war          The name of the Web ARchive (WAR) file
+                       containing our deployable application.
+                       This filename should end with ".war".
+
+     javadoc.home      The name of the base directory in which
+                       the JavaDoc documentation for this application
+                       is generated.
+
+     tomcat.home       The name of the base directory in which
+                       Tomcat has been installed.  This value is
+                       normally set automatically from the value
+                       of the TOMCAT_HOME environment variable.
+
+	java.home          The location of your Java SDK.
+
+	java.localhome     Where your local java classes and jar files
+                       are located.
+
+	tomcat.home        The location of the tomcat root directory.
+
+-->
+
+  <property name="app.name"       value="Mir"/>
+  <property name="deploy.home"    value="../${app.name}"/>
+
+  <!-- If you want to use the very good jikes compiler, uncomment this -->
+  <!-- <property name="build.compiler"   value="jikes"/>-->
+
+
+<!-- No customization required after this line -->
+
+  <property environment="env"/>
+  <property name="dist.home"      value="${deploy.home}"/>
+  <property name="deploy.webinf"  value="${deploy.home}/WEB-INF"/>
+  <property name="deploy.classes" value="${deploy.webinf}/classes"/>
+  <property name="dist.src"       value="${app.name}.jar"/>
+  <property name="dist.war"       value="${app.name}.war"/>
+  <property name="javadoc.home"   value="${deploy.home}/javadoc"/>
+  <property name="tomcat.home"    value="${env.TOMCAT_HOME}"/>
+
+
+
+  <!-- Construct the classpath -->
+  <path id="project.class.path">
+    <pathelement path="${deploy.home}"/>
+    <pathelement path="${deploy.classes}"/>
+    <pathelement path="source"/>
+    <fileset dir="lib">
+      <include name="*.jar"/>
+    </fileset>
+    <pathelement path="${tomcat.home}/lib/tomcat.jar"/>
+  <!-- for libs shared between tomcat and webapps (tomcat 3.3.x) -->
+	<fileset dir="${tomcat.home}">
+		<include name="lib/common/*.jar" />
+	</fileset>
+  <!-- for libs shared between webapps (tomcat 3.3.x) -->
+	<fileset dir="${tomcat.home}">
+		<include name="lib/apps/*.jar" />
+	</fileset>
+  <!-- for libs shared between tomcat and webapps (tomcat 4.0.x) -->
+	<fileset dir="${tomcat.home}">
+		<include name="common/lib/*.jar" />
+	</fileset>
+  <!-- for libs shared between webapps (tomcat 4.0.x) -->
+	<fileset dir="${tomcat.home}">
+		<include name="lib/*.jar" />
+	</fileset>
+  </path>
+
+
+
+<!-- The "prepare" target is used to construct the deployment home
+     directory structure (if necessary), and to copy in static files
+     as required.  In the example below, Ant is instructed to create
+     the deployment directory, copy the contents of the "web/" source
+     hierarchy, and set up the WEB-INF subdirectory appropriately.
+-->
+
+  <target name="prepare">
+    <mkdir  dir="${deploy.home}"/>
+    <mkdir  dir="${deploy.webinf}"/>
+    <mkdir  dir="${deploy.classes}"/>
+    <mkdir  dir="${deploy.webinf}/log"/>
+
+    <copy todir="${deploy.home}">
+      <fileset dir="web"/>
+    </copy>
+
+    <copy todir="${deploy.webinf}/etc">
+      <fileset dir="etc" excludes="bundles/** web.xml"/>
+    </copy>
+    <copy todir="${deploy.classes}/bundles">
+        <fileset dir="etc/bundles"/>
+    </copy>
+    <copy todir="${deploy.webinf}" file="etc/web.xml"/>
+
+    <copy todir="${deploy.webinf}/templates">
+      <fileset dir="templates"/>
+    </copy>
+
+    <copy todir="${deploy.classes}/bundles">
+      <fileset dir="bundles"/>
+    </copy>
+
+    <copy todir="${deploy.home}/WEB-INF/lib">
+      <fileset dir="lib">
+        <exclude name="ant.jar"/>
+        <exclude name="xerces.jar"/>
+        <exclude name="servlet-2.2.jar"/>
+      </fileset>
+    </copy>
+  </target>
+
+
+
+<!-- The "clean" target removes the deployment home directory structure,
+     so that the next time the "compile" target is requested, it will need
+     to compile everything from scratch.
+-->
+
+
+  <target name="clean">
+    <delete dir="${deploy.classes}"/>
+    <mkdir dir="${deploy.classes}"/>
+  </target>
+
+
+
+<!-- The "mrproper" target removes the entire deploy dir - including all
+	built pages and images.
+-->
+
+  <target name="mrproper">
+    <delete dir="${deploy.home}"/>
+  </target>
+
+  <!-- drop out if $TOMCAT_HOME is not set>-->
+  <target name="testtomcat" unless="tomcat.present">
+    <fail message="the $$TOMCAT_HOME environment variable is not set or is set to the wrong path. Please set it first. giving up!"/>
+  </target>
+
+<!-- The "compile" target is used to compile (or recompile) the Java classes
+     that make up this web application.  The recommended source code directory
+     structure makes this very easy because the <javac> task automatically
+     works its way down a source code hierarchy and compiles any class that
+     has not yet been compiled, or where the source file is newer than the
+     class file.
+
+     Feel free to adjust the compilation option parameters (debug,
+     optimize, and deprecation) to suit your requirements.  It is also
+     possible to base them on properties, so that you can adjust this
+     behavior at runtime.
+
+     The "compile" task depends on the "prepare" task, so the deployment
+     home directory structure will be created if needed the first time.
+-->
+
+  <target name="compile" depends="prepare">
+    <!-- check to see if $TOMCAT_HOME was set to something useful.. -->
+    <available file="${tomcat.home}/conf" property="tomcat.present"/>
+    <antcall target="testtomcat"/>
+
+    <!--<antcall target="clean"/>-->
+    <dependset>
+      <srcfileset
+        dir="source"
+        includes="**/*.java"/>
+      <srcfileset
+        dir="lib"
+        includes="*.jar"/>
+      <targetfileset
+        dir="${deploy.classes}"
+        includes="**/*.class"/>
+    </dependset>
+    <javac srcdir="source" destdir="${deploy.classes}"
+           debug="on" optimize="off" deprecation="on">
+      <classpath refid="project.class.path"/>
+    </javac>
+  </target>
+
+
+
+  <target name="perms">
+    <exec executable="./perms.sh"/>
+  </target>
+
+
+<!-- The "javadoc" target is used to create the Javadoc API documentation
+     for the Java classes in this web application.  It is assumed that
+     this documentation is included in the deployed application, so the
+     example below generates the Javadoc HTML files in a subdirectory under
+     the deployment home directory.  Feel free to customize the options for
+     the JavaDoc task, after consulting the Ant documentation.
+-->
+
+  <target name="javadoc" depends="prepare">
+    <javadoc packagenames="mir.*, mircoders.*"
+	     sourcefiles="source/${app.name}.java,source/Open${app.name}.java"
+	     sourcepath="source"
+             destdir="${javadoc.home}">
+	  <classpath refid="project.class.path"/>
+	</javadoc>
+  </target>
+
+
+<!-- The "all" target rebuilds everything by executing the "clean"
+     target first, which forces the "compile" target to compile all
+     source code instead of just the files that have been changed.
+-->
+
+  <target name="all" depends="clean,prepare,compile,javadoc"/>
+
+
+<!-- The "dist" target builds the distribution Web ARchive (WAR) file
+     for this application, suitable for distribution to sites that wish
+     to install your application.  It also creates a JAR file containing
+     the source code for this application, if you wish to distribute
+     that separately.
+-->
+  <target name="dist" depends="prepare,compile">
+    <jar jarfile="${dist.home}/mirbase.jar"
+	 includes="mir/**"
+	 basedir="${deploy.classes}"/>
+    <jar jarfile="${dist.home}/${dist.src}"
+         basedir="./source"/>
+    <jar jarfile="${dist.home}/${dist.war}"
+         basedir="${deploy.home}"
+         excludes="${dist.war}"/>
+  </target>
+
+</project>

@@ -1,0 +1,125 @@
+<html>
+<head><title>${lang("comment.htmltitle")}</title></head>
+<body bgcolor="white" text="black" link="#006600" vlink="#009900" alink="red">
+
+<form action="${config["Producer.OpenAction"]}" method=post>
+<input type="hidden" name="do" value="inscomment">
+
+<table width="100%" border="0" cellspacing="0" cellpadding="4" bgcolor="silver">
+	<tr>
+		<td bgcolor="#663399" colspan="3">
+			<font color="White"><b>${lang("comment.header")}</b></font>
+		</td>
+	</tr>
+	<tr>
+		<td bgcolor="#003300" colspan="3">
+			<p>
+				<font color="white"">
+					${lang("comment.note")}
+                                        <br>${data.passwd}
+				</font>
+			</p>
+
+		</td>
+	</tr>
+	<tr>
+		<td bgcolor="#663399" colspan="3">
+			<font face="Helvetica, Arial" color="white" size=+2><b>${lang("comment.formtitle")}</b></font>
+		</td>
+	</tr>
+	<if config["PasswdProtection"]=="yes" || config["PasswdProtection"]=="1">
+	<tr>
+		<td><td>${lang("comment.password")}:</td>
+		<td><input type="text" name="passwd" size="10"></td>
+	</tr>
+	</if>
+	<tr>
+ 		<td>
+			<b>${lang("comment.title")}:</b>
+		</td>
+		<td colspan="2">
+			<input type="text" name="title" size="45" maxlength="45"> <font size="-1" color="#663399">(${lang("required")})</font>
+		</td>
+	</tr>
+	<tr>
+ 		<td>
+			<b>${lang("comment.name")}:</b>
+		</td>
+		<td colspan="2">
+			<input type="text" name="creator" size="20" maxlength="45"> <font size="-1" color="#663399">(${lang("required")})</font>
+		</td>
+	</tr>
+	<tr>
+ 		<td>
+			${lang("comment.email")}:
+		</td>
+		<td colspan="2">
+			<input type="text" name="email" size="30" maxlength="80"> <font size="-1">(<i>${lang("optional")}</i>)</font>
+		</td>
+	</tr>
+	<tr>
+ 		<td>
+			${lang("comment.url")}:
+		</td>
+		<td colspan="2">
+			<input type="text" name="main_url" size="40" maxlength="160" value="http://"> <font size="-1">(<i>${lang("optional")}</i>)</font>
+		</td>
+	</tr>
+	<tr>
+ 		<td>
+			${lang("comment.phone")}:
+		</td>
+		<td colspan="2">
+			<input type="text" name="phone" size="30" maxlength="80"> <font size="-1">(<i>${lang("optional")}</i>)</font>
+		</td>
+	</tr>
+	<tr>
+ 		<td>
+			${lang("comment.address")}:
+		</td>
+		<td colspan="2">
+			<input type="text" name="address" size="40" maxlength="160"><font size="-1"> <i>(${lang("optional")})</i></font>
+		</td>
+	</tr>
+	<tr>
+ 		<td>
+			${lang("comment.language")}:
+		</td>
+		<td colspan="2">
+			<select name="to_language">
+				<option value="0">de</option>
+				<option value="1">en</option>
+			</select>
+			<font size="-1"><i>(${lang("optional")})</i></font>
+		</td>
+	</tr>
+	<tr>
+		<td valign="top">
+			<b>${lang("comment.text")}:</b>
+		</td>
+		<td bgcolor="#003300" colspan="2">
+			&nbsp;<textarea name="description" rows="20" cols="60" wrap=virtual></textarea>
+			<br><br>
+		</td>
+	</tr>
+	<tr>
+		<td>&nbsp;
+		</td>
+		<td bgcolor="#663399" valign="top" align="center">
+			<br>
+			&nbsp;<input type="submit" value="${lang("comment.submit")}"><br>
+
+		</td>
+		<td bgcolor="#003300" valign="top" align="center">
+			<br>
+			&nbsp;<input type="reset" value="${lang("comment.reset")}"><br>
+			<input type="hidden" name="to_media" value="${data.aid}">
+			<br>
+		</td>
+	</tr>
+</table>
+
+</form>
+
+</body>
+</html>

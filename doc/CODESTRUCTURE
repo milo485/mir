@@ -1,0 +1,153 @@
+-------------------------------------------------------------------------------
+
+A short intro to the code-structure of Mir
+
+-------------------------------------------------------------------------------
+
+In the java-source tree you will find the following:
+
+ - two classes (OpenMir and Mir)
+ - two packages (mir and mircoders)
+
+
+Servlets:
+-------------------------------------------------------------------------------
+
+Looking from the request of a client browser onto MIR, the http-request is
+passed via Apache/Tomcat to either Mir.class or OpenMir.class. Mir.class
+handles all request that deal with internal administration tasks of MIR.
+OpenMir is the Servlet that deals with all open tasks: adding comments or
+articles/media to the system.
+
+These servlets don't do much but dispatching the tasks to an underlying
+code level, called ServletModules. OpenMir.class is basically a special
+case of Mir.class, no authentication is needed, and only two underlying
+ServletModule are used.
+
+The following explanation is about how requests are passed through, and
+responses to the client-browser are generated. The request has to pass
+through up to four levels of code (and from there asking the database),
+until it collected all the necessary data or performed all necessary
+tasks, to be able to respond.
+
+
+ServletModules:
+-------------------------------------------------------------------------------
+
+The ServletModules are called via reflection java-api. The http-request
+parameter "module=XXX" and "do=YYY" are evaluated. A method
+YYY(HttpRequest,HttpResponse) is called in ServletModuleXXX.
+
+A common mistake for those new to Java is to look for usage of a class in 
+the code by doing a "grep -r ClassName" or something like that. In this 
+case, grep -r ServletModuleImages for example will turn up nothing except 
+for ServletModuleImages itself.. that is because of reflection as 
+explained above.
+
+The media handlers in mir.media.* work the same way as well. 
+
+ Database/Entity:
+-------------------------------------------------------------------------------
+- db: singeltons, object-representation of db-table, *low-level* access, 
+generating entities, does all the dirty JDBC work. There is a Database 
+Class for every table in the DB.
+
+If an Entity wants to store itself in the media table, it has to have a 
+storage object of type DatabaseMedia....
+
+When you ask a storage object to get something, it hands back an Entity.
+[through Database*.selectByWhereClause(), selectById().]
+
+- entity: representation of row. Contains the contents of "select * from
+dbname where id=rowid" in a HashMap. accessible via
+Entity.getValue("keyname"). One can do Entity.setValue(...,
+Entity.update() which syncs the Hash with the DB row and Entity.insert()  
+to insert the HashMap as a new row, etc... basically high level DB access.
+The text component of an article is an entity (EntityContent, a row from
+the content table.) In short this is how we fetch content (whatever that
+may be: actual data, media meta-data, media_types, etc..) from the DB and
+write to the DB. Everything has to be reprented as an Entity.
+
+All Entities must have a StorageObject (theStorage) which is a Database
+object of the appropriate type. it is the connection between the entity
+data and the DB table itself. The only way to get an Entity other than
+asking a storage object to fetch one is to construct one by passing the
+storage object to the Entity Konstruktor.
+
+There is also EntityList, a list of entities..
+
+Modules:
+-------------------------------------------------------------------------------
+
+- This one is a little grey... It's pretty much a wrapper around Database 
+and Entity combined, so it's a half level higher up or so. It's not always 
+necessary to use/have a Module either.. A usage example: you can do
+ModuleName.getByWhereClause() and it returns a list of Entities that match 
+the query. Like entities you must have a StorageObject to access the DB. 
+but unlike Entity, you can start out without one. Modules use Entity and 
+Database objects internally. [Actually it uses Database object internally 
+and returns Entitys...]
+
+Also I believe the intention was/is that it should be used in place of 
+Entity for any *logic* that would normally have to into an Entity as 
+Entity should be free of a case specific logic in theory. But that's not
+always true if you use EntityImages as an example, but that seems to be 
+because EntityImages needs low-level DB connections.
+
+Producer
+-------------------------------------------------------------------------------
+
+Well, what makes Mir different than other Content Management Systems is
+that it does not generate the content pages dynamically or use simple
+caching methods. Rather it generates static .[s]html files exclusively.  
+This makes mir very fast under high viewing loads as it does not use
+servlets for this at all. It also makes it very easy to mirror as the
+mirrors do not have to run any Mir code, they only have to have a static
+webserver. In fact the first site to use Mir, germany.indymedia.org is on
+a whole other machine on another continent than the machine that
+*produces* the static files. Germany.indymedia.org already has 3 mirrors.
+
+The mircoders.producer.* classes are responsible for creating these static 
+.html files and the filesystem structure that they reside in. This 
+includes files that are article summaries and files that are the whole 
+article themselves. Some media types also require Producers.
+
+If the main content *viewing* server is on another host, the FS tree is
+then rsync'ed to the viewing host.
+
+The Producers are called exclusively from the ServletModules in
+mircoders.servlet.*. They are called when a new article/comment is added,
+or when an administrator/moderator makes modifications to the site or when
+a manual update is desired. The method "handle()" is the one that does all
+work it takes parameters that tell it to force update all files even if
+their contents is unchanged, etc.. some Producers take an article ID as an
+argument telling them to create the html page representing the article and
+any summary pages that might be changed due to the addition of the
+article.
+
+Producers of course use Entities, Database, MediaHandler and Module
+objects internally.
+
+A dB field called is_produced is used to determine wether or not an Object 
+needs to be produced.
+
+Oh and before I forget, it generates the pages based on a template. It 
+uses the Freemarker templating system. Doc on freemarker is available at 
+freemarker.sourceforge.net I believe. 
+
+TODO: In theory it would be cool if we could abstract the output mechanism
+further to use other types of templates and to generate content other than
+HTML (like WAP for example). 
+
+Media Handlers
+-------------------------------------------------------------------------------
+They are kind of helper classes to deal with different representations of
+media types. They are called via the java reflection API. The class names 
+are resolved through the media_type table. See 
+source/mir/media/MirMedia.java for documentation.
+
+Helper classes
+-------------------------------------------------------------------------------
+mir.misc.* (source/mir/misc/*) contains a bunch of classes that do Regexp, 
+file handling and those sorts of things. Always look here first before 
+writing such a thing.

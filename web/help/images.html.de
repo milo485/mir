@@ -1,0 +1,56 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<title>mir  | images</title>
+</head>
+
+<body bgcolor="#ffffff">
+<HR ALIGN="center" SIZE="1">
+<font face="Verdana, Arial, Helvetica, sans-serif" size="-1"> 
+<h3><center>DIE BILDERMASKEN</center></h3>
+<h4><center><a href="images.html.en">english version</a></center></h4>
+<HR ALIGN="center" SIZE="1">
+<H4><center>Mehr Angaben/Beschreibungen zum Bild erh&ouml;hen die Chance, es wiederzufinden!</center></H4>
+<BR><BR><H5>Die Bildersuchmaske hat folgende Funktionen:</H5>
+
+<OL>
+	<LI>&nbsp;<STRONG>Texteingabe</STRONG>:&nbsp;gib hier Deinen Suchbegriff ein.
+	<BR><BR>
+	<LI>&nbsp;<STRONG>Text suchen in</STRONG>:&nbsp; Suche in den Feldern <EM>Titel</EM>, <EM>UrheberIn</EM>, <EM>Ort</EM> oder <EM>Stichworte</EM>.
+	<BR><BR>
+	<LI>&nbsp;<STRONG>ver&ouml;ffentlicht</STRONG>:&nbsp; soll nach ver&ouml;ffentlichten, nicht-ver&ouml;ffentlichten oder nach allen (<EM>egal</EM>) Bildern gesucht werden?
+	<BR><BR>
+	<LI>&nbsp;<STRONG>medienmappe</STRONG>:&nbsp; Wenn bekannt ist, in welcher <a href="mediafolder.html.de">Medienmappe</a> das Bild abgelegt ist, kann sie hier angegeben werden.
+	<BR><BR>
+	<LI>&nbsp;<STRONG>filter</STRONG>:&nbsp;zum starten der Suche, <EM>filter</EM> klicken!
+	<BR><BR>
+</OL>
+
+<BR><BR><H5>Die eigentliche Bildermaske hat folgende Funktionen:</H5>
+<OL>
+	<LI>&nbsp;<STRONG>medienmappe</STRONG>:&nbsp;
+	das Bild kann einem <a href="mediafolder.html.de">mediafolder</a> zugeordnet werden.
+	<BR><BR>
+	<LI>&nbsp;<STRONG>titel</STRONG>:&nbsp;ein ausdrucksstarker Titel, der auch ver&ouml;ffentlicht werden kann, macht ein Bild erst prickelig.
+	<BR><BR>
+	<LI>&nbsp;<STRONG>beschreibung</STRONG>:&nbsp;nicht immer ist klar, in welchem Kontext ein Bild steht. Hier sollte in knappen Worten erl&auml;utert werden, was auf dem Bild zu sehen ist.
+	<BR><BR>
+	<LI>&nbsp;<STRONG>datum</STRONG>:&nbsp;tja, das Datum, an dem das Bild geschossen wurde.
+	<BR><BR>
+	<LI>&nbsp;<STRONG>ort</STRONG>:&nbsp;Bei "ort" sollen immer nur geographische 
+	Orte eingetragen werden. Also nicht so etwas wie "bundesweit", "netz" oder
+	"ueberall". 
+	<BR><BR>
+	<LI>&nbsp;<STRONG>urheberIn</STRONG>:&nbsp;wer hat das Bild geschossen?
+	<BR><BR>
+	<LI>&nbsp;<STRONG>stichworte</STRONG>:&nbsp;nach Stichworten kann in der Datenbank gesucht werden, deshalb ist eine kleine Liste signifikanter Stichworte f&uuml;r das Bild  sehr sinnvoll.
+	<BR><BR>  
+	<LI>&nbsp;<STRONG>kommentar</STRONG>:&nbsp;ein interner Kommentar kann anderen, die im Prodsys arbeiten, helfen, mit Bildern korrekt umzugehen, z.B. ein Bild nicht vor einem bestimtmen Datum zu ver&ouml;ffentlichen.
+	<BR><BR>
+	<LI>&nbsp;<STRONG>quelle</STRONG>:&nbsp;Wenn das Bild nicht selbstgeschossen wurde, sondern von Dritten stammt, z.B. einer Nachrichtenagentur, kann hier eine Angabe stehen. Da die rechtliche Verfolgung unerlaubt publiziertem 'geistigen Eigentums' derzeit ziemlich stringent vonstatten geht, ist es angeraten, nur Bilder zu ver&ouml;ffentlichen, deren UrheberIn einverstanden damit sind. Im Zweifelsfall 'quelle' leerlassen und einen internen Kommentar schreiben (siehe 9.).
+	<BR><BR>
+	<LI>&nbsp;<STRONG>freigegeben</STRONG>:&nbsp;das Bild wird zur Ver&ouml;ffentlichung im www freigegeben.
+	<BR><BR>
+</OL>
+</body>
+</html>

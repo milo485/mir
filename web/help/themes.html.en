@@ -1,0 +1,25 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<title>mir  | themes</title>
+</head>
+
+<body bgcolor="#ffffff">
+<HR ALIGN="center" SIZE="1">
+<font face="Verdana, Arial, Helvetica, sans-serif" size="-1"> 
+<h3><center>THE MASKS FOR THEMES/CATEGORIES</center></h3>
+<h4><center><a href="themes.html.de">deutsche version</a></center></h4>
+<HR ALIGN="center" SIZE="1">
+<OL>
+	<LI>&nbsp;<STRONG>name</STRONG>:&nbsp;The name of the category, e.g. 'Residenzpflicht'.
+	<BR><BR>
+	<LI>&nbsp;<STRONG>beschreibung</STRONG>:&nbsp;A short description of the category for internal use.
+	<BR><BR>
+	<LI>&nbsp;<STRONG>filename</STRONG>:&nbsp;the filename of the category. Please use only small letters, e.g. 'residenzpflicht'.
+	<BR><BR>
+	<LI>&nbsp;<STRONG>hauptinfoseite</STRONG>:&nbsp;An external www-site which contains more on this category may be announced here. This reference is being produced into the head of the themesite.
+	<BR><BR>
+	</OL>
+
+</body>
+</html>
