@@ -1,0 +1,43 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<title>${lang("email.prepare.htmltitle")}</title>
+</head>
+
+<body bgcolor="White" text="Black" link="#006600" vlink="#666666" alink="Red">
+
+<table width="100%" border="0" cellspacing="0" cellpadding="4" bgcolor="#cccccc">
+	<tr>
+		<td align="center" bgcolor="#666666">
+		<font color="White">${lang("email.prepare.title")}</font></td>
+	</tr>
+	<tr>
+		<td bgcolor="#eeeeee"><font color="#000000">
+${lang("email.prepare.description")}<BR>
+<FORM method="post" action="${config["Producer.OpenAction"]}">
+<input type="hidden" name="do" value="mail">
+<input type="hidden" name="mail_aid" value="${data.mail_aid}">
+${lang("email.prepare.sendtowhom")}  <input type="text" size="20" name="mail_to" value="${data.mail_to}"> <BR> 
+${lang("email.prepare.from.email")} <input type="text" size="20" name="mail_from" value="${data.mail_from}"> <BR> 
+${lang("email.prepare.from.name")} <input type="text" size="20" name="mail_from_name" value="${data.mail_from_name}"> <BR> 
+${lang("email.prepare.comment")} <textarea name="mail_comment" rows="5" cols="40">${data.mail_comment}</textarea><BR>
+${lang("email.prepare.chooselanguage")}
+<select name="mail_language">
+	<option value="en" <if data.mail_language=="en">selected</if>>english</option>
+	<option value="de" <if data.mail_language=="de">selected</if>>deutsch</option>	
+</select>
+
+<input type="submit" value='${lang("email.prepare.send")}'> 
+</FORM>
+	</td>
+</tr>
+
+<tr>
+	<td valign="top" align="center" bgcolor="#666666">
+	<a href="javascript:history.go(-1)"><font color="White"><b>&gt;&gt; ${lang("postingdone.back")}</b></font></a>
+		</td>
+	</tr>
+</table>
+</body>
+</html>

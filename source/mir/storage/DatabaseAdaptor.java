@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001, 2002  The Mir-coders group
+ * Copyright (C) 2001, 2002 The Mir-coders group
  *
  * This file is part of Mir.
  *
@@ -18,86 +18,78 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with the com.oreilly.servlet library, any library
- * licensed under the Apache Software License, The Sun (tm) Java Advanced
- * Imaging library (JAI), The Sun JIMI library (or with modified versions of
- * the above that use the same license as the above), and distribute linked
- * combinations including the two.  You must obey the GNU General Public
- * License in all respects for all of the code used other than the above
- * mentioned libraries.  If you modify this file, you may extend this exception
- * to your version of the file, but you are not obligated to do so.  If you do
- * not wish to do so, delete this exception statement from your version.
+ * the code of this program with  any library licensed under the Apache Software License, 
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
+ * (or with modified versions of the above that use the same license as the above), 
+ * and distribute linked combinations including the two.  You must obey the 
+ * GNU General Public License in all respects for all of the code used other than 
+ * the above mentioned libraries.  If you modify this file, you may extend this 
+ * exception to your version of the file, but you are not obligated to do so.  
+ * If you do not wish to do so, delete this exception statement from your version.
  */
+package mir.storage;
 
-package  mir.storage;
+import java.util.Properties;
 
-import java.util.*;
+import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
 
 
 /**
- * Interfacedefinition für Datenbank-Adpatoren. Die Adaptoren legen
- * jeweils das Verhalten und die Befehlsmächtigkeit der Datenbank
+ * Interfacedefinition f?r Datenbank-Adpatoren. Die Adaptoren legen
+ * jeweils das Verhalten und die Befehlsm?chtigkeit der Datenbank
  * fest.
  *
  * @author <RK>
  *
- * @version $Id: DatabaseAdaptor.java,v 1.1.1.1.6.1 2002/09/01 21:31:41 mh Exp $
+ * @version $Id: DatabaseAdaptor.java,v 1.7 2003/04/21 12:42:47 idfx Exp $
  */
+public interface DatabaseAdaptor {
+  /* Liefert den Namen der Adaptorklasse
+   * @return Adaptorklasse als String
+   */
+  public abstract String getDriver() throws PropertiesConfigExc;
 
-public interface  DatabaseAdaptor{
+  /**
+   * Liefert die URL f?r JDBC zur?ck, in den die Parameter user, pass und host
+   * eingef?gt werden. Die URL wird aus der Konfiguration geholt.
+   *
+   * @param user user als String
+   * @param pass passwort als String
+   * @param host host als String
+   * @return url als String
+   */
+  public abstract String getURL(String user, String pass, String host)
+    throws PropertiesConfigExc;
 
-	 /* Liefert den Namen der Adaptorklasse
-	 * @return Adaptorklasse als String
-	 */
-	public abstract String getDriver ();
+  /**
+   * Gibt zur?ck, ob das SQL der Datenbank den <code>limit</code>-Befehl beherrscht.
+   * @return true wenn ja, sonst false
+   */
+  public abstract boolean hasLimit();
 
+  /**
+       * Liefert zur?ck, ob der <code>limit</code>-Befehl erst start und dann offset
+       * hat (true), oder umgekehrt. Nur Relevant, wenn hasLimit true zur?ckliefert.
+   *
+   * @return true wenn erstes, sonst false
+   */
+  public abstract boolean reverseLimit();
 
-	/**
-	 * Liefert die URL für JDBC zurück, in den die Parameter user, pass und host
-	 * eingefügt werden. Die URL wird aus der Konfiguration geholt.
-	 *
-	 * @param user user als String
-	 * @param pass passwort als String
-	 * @param host host als String
-	 * @return url als String
-	 */
-	public abstract String getURL (String user, String pass, String host);
+  /**
+   * Liefert ein Properties-Objekt zurueck mit user und password.
+   * @param user
+   * @param password
+   * @return Properties
+   */
+  public abstract Properties getProperties(String user, String password);
 
-
-	/**
-	 * Gibt zurück, ob das SQL der Datenbank den <code>limit</code>-Befehl beherrscht.
-	 * @return true wenn ja, sonst false
-	 */
-	public abstract boolean hasLimit ();
-
-
-	/**
-	 * Liefert zurück, ob der <code>limit</code>-Befehl erst start und dann offset
-	 * hat (true), oder umgekehrt. Nur Relevant, wenn hasLimit true zurückliefert.
-	 *
-	 * @return true wenn erstes, sonst false
-	 */
-	public abstract boolean reverseLimit ();
-
-
-	/**
-	 * Liefert ein Properties-Objekt zurueck mit user und password.
-	 * @param user
-	 * @param password
-	 * @return Properties
-	 */
-	public abstract Properties getProperties (String user, String password);
-
-
-	/**
-	 * Gibt SQL-Stringfragment zurück, mit dem nach einem insert-Befehl ermittelt
-	 * werden kann, wie man den primary-Key des eingefügten Datensatzes bekommt.
-	 *
-	 * @param theDB Database-Objekt, aus dem ggf. noetige Informationen geholt
-	 * werden können, wie z.B. der Tabellenname
-	 * @return SQL-Statement als String
-	 */
-	public abstract String getLastInsertSQL (Database theDB);
+  /**
+   * Gibt SQL-Stringfragment zur?ck, mit dem nach einem insert-Befehl ermittelt
+   * werden kann, wie man den primary-Key des eingef?gten Datensatzes bekommt.
+   *
+   * @param theDB Database-Objekt, aus dem ggf. noetige Informationen geholt
+   * werden k?nnen, wie z.B. der Tabellenname
+   * @return SQL-Statement als String
+   */
+  public abstract String getLastInsertSQL(Database theDB);
 }
-
-

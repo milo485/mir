@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001, 2002  The Mir-coders group
+ * Copyright (C) 2001, 2002 The Mir-coders group
  *
  * This file is part of Mir.
  *
@@ -18,36 +18,23 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with the com.oreilly.servlet library, any library
- * licensed under the Apache Software License, The Sun (tm) Java Advanced
- * Imaging library (JAI), The Sun JIMI library (or with modified versions of
- * the above that use the same license as the above), and distribute linked
- * combinations including the two.  You must obey the GNU General Public
- * License in all respects for all of the code used other than the above
- * mentioned libraries.  If you modify this file, you may extend this exception
- * to your version of the file, but you are not obligated to do so.  If you do
- * not wish to do so, delete this exception statement from your version.
+ * the code of this program with  any library licensed under the Apache Software License,
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library
+ * (or with modified versions of the above that use the same license as the above),
+ * and distribute linked combinations including the two.  You must obey the
+ * GNU General Public License in all respects for all of the code used other than
+ * the above mentioned libraries.  If you modify this file, you may extend this
+ * exception to your version of the file, but you are not obligated to do so.
+ * If you do not wish to do so, delete this exception statement from your version.
  */
-
 package mircoders.module;
 
-import java.io.*;
-import java.lang.*;
-import java.util.*;
-import java.sql.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
-
-import freemarker.template.*;
-
-import mir.servlet.*;
-import mir.module.*;
-import mir.entity.*;
-import mir.misc.*;
-import mir.storage.*;
-
-import mir.entity.*;
-import mir.storage.*;
+import mir.log.LoggerWrapper;
+import mir.module.AbstractModule;
+import mir.module.ModuleExc;
+import mir.module.ModuleFailure;
+import mir.storage.StorageObject;
+import mir.util.JDBCStringRoutines;
 
 /**
  * Title:        mir - another content management system
@@ -59,17 +46,21 @@ import mir.storage.*;
  */
 
 public class ModuleLanguage extends AbstractModule {
+  static LoggerWrapper logger = new LoggerWrapper("Module.Language");
 
-  static Logfile theLog;
+  public ModuleLanguage (StorageObject theStorage)	{
+    if (theStorage == null)
+      logger.warn("ModuleLanguage -- StorageObject was null!");
 
-	// Kontruktor
-	public ModuleLanguage (StorageObject theStorage)	{
+    this.theStorage = theStorage;
+  }
 
-		if (theLog == null) theLog = Logfile.getInstance(MirConfig.getProp("Home") + MirConfig.getProp("Module.Language.Logfile"));
-		if (theStorage == null) theLog.printWarning("ModuleLanguage -- StorageObject was null!");
-
-		this.theStorage = theStorage;
-	}
-
-	// Methoden
+  public String languageIdForCode(String aCode) throws ModuleExc, ModuleFailure {
+    try {
+      return theStorage.executeFreeSingleValueSql("select id from language where code = '" + JDBCStringRoutines.escapeStringLiteral(aCode) + "'");
+    }
+    catch (Throwable t) {
+      throw new ModuleFailure(t);
+    }
+  }
 }

@@ -1,0 +1,52 @@
+<html>
+<head>
+  <title>${config["Mir.Name"]} | ${lang("user.htmltitle")}</title>
+  <link rel="stylesheet" type="text/css" href="${config.docRoot}/style/admin.css">
+<head>
+
+<body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
+  
+  <include "FUNCTIONS.template">
+  <include "head.template">
+
+<form action="${config.actionRoot}" method="post">
+  <input type="hidden" name="module" value="Users">
+  <input type="hidden" name="id" value="${data.id}">
+  <if data.new>
+    <input type="hidden" name="do" value="insert">
+  <else>
+    <input type="hidden" name="do" value="update">
+  </if>
+
+  <table border="0">
+    <call TextInputTableRow (lang("user.login"), 40, 40, "login", data.login)>
+    <call PasswordTextInputTableRow (lang("user.password"), 40, 40, "newpassword", "")>
+    <call PasswordTextInputTableRow (lang("user.password2"), 40, 40, "newpassword2", "")>
+    <tr>
+      <td align="right" class="table-left">
+        <b>${lang("user.admin")}:</b>
+      </td>
+      <td class="listrow2">
+        <input type="checkbox" name="is_admin" value="1"<if data.is_admin=="1"> checked</if>>
+      </td>
+    </tr>
+    <tr>
+    <td colspan="2" align="right" class="table-foot"> 
+      <span class="witetext">
+      <if data.new>
+        <input type="submit" name="save" value="${lang("insert")}">
+      <else>
+        <input type="submit" name="save" value="${lang("save")}">
+      </if> 
+      </span>
+    </td>
+    </tr>
+  </table>
+</form>
+  
+  <p><a class="link-box" href="${config.actionRoot}?module=Users&do=list">[&lt;] ${lang("back")} </a> &nbsp;</p>
+  
+  <include "foot.template">
+
+</body>
+</html>

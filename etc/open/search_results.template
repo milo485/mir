@@ -1,0 +1,166 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<title>${lang("search.htmltitle")}</title>
+</head>
+
+<body bgcolor="White" text="Black" link="#006600" vlink="#666666" alink="Red">
+
+<table width="100%" border="0" cellspacing="0" cellpadding="4" bgcolor="#cccccc">
+	<tr>
+		<td align="center" bgcolor="#666666">
+		<font color="White">${lang("search.title")}</font></td>
+	</tr>
+	<tr>
+		<td bgcolor="#eeeeee"><font color="#000000">
+
+<form method="get" action="${config["Producer.OpenAction"]}">
+<input type="hidden" name="do" value="search"/>
+<center>
+  <b>${lang("search.mainsearchfield")}</b><br>
+  <input type="text" size="40" name="search_content" value="${data.search_content}" /><input type="submit" name="search_submit" value="${lang("search.searchbutton")}" />
+</center>
+<br>
+<b>${lang("search.refine")}</b><br>
+<table>
+  <tr>
+    <td><b>${lang("search.all_or_any")}</b></td>
+    <td>
+      <if data.search_boolean == "and">
+        <input type="radio" name="search_boolean" value="and" checked="true">${lang("search.all")}
+        <input type="radio" name="search_boolean" value="or">${lang("search.any")}
+      <else>
+        <input type="radio" name="search_boolean" value="and">${lang("search.all")}
+        <input type="radio" name="search_boolean" value="or" checked="true">${lang("search.any")}
+      </if>
+    </td>
+  </tr> 
+  <tr>
+    <td><b>${lang("search.by_author")}</b></td>
+    <td>
+      <input type="text" name="search_creator" value="${data.search_creator}" />
+    </td>
+  </tr>
+  <tr>
+    <td><b>${lang("search.by_topic")}</b></td>
+    <td>
+      <select name="search_topic">
+        <if (!data.search_topic) || (data.search_topic == "") >
+          <option value="" selected>${lang("search.all_topics")}
+        <else>
+          <option value="">${lang("search.all_topics")}
+        </if>
+        <list data.topics as topic>
+          <if topic.value != "--" >
+            <if data.search_topic == topic.value>
+              <option selected>${topic.value}
+            <else>
+              <option>${topic.value}
+            </if>
+          </if>
+        </list>
+      </select>
+    </td>
+  </tr>
+</table>
+<table>
+  <tr>
+    <td><b>${lang("search.with_images")}</b></td>
+    <td>
+      <if data.search_hasImages == "y">
+        <input type="radio" name="search_hasImages" value="y" checked="true">${lang("search.yes")}
+        <input type="radio" name="search_hasImages" value="n">${lang("search.no")}
+      <else>
+        <input type="radio" name="search_hasImages" value="y">${lang("search.yes")}
+        <input type="radio" name="search_hasImages" value="n" checked="true">${lang("search.no")}
+      </if>
+    </td>
+  </tr>
+  <tr>
+    <td><b>${lang("search.with_audio")}</b></td>
+    <td>
+      <if data.search_hasAudio == "y">
+        <input type="radio" name="search_hasAudio" value="y" checked="true">${lang("search.yes")}
+        <input type="radio" name="search_hasAudio" value="n">${lang("search.no")}
+      <else>
+        <input type="radio" name="search_hasAudio" value="y">${lang("search.yes")}
+        <input type="radio" name="search_hasAudio" value="n" checked="true">${lang("search.no")}
+      </if>
+    </td>
+  </tr>
+  <tr>
+    <td><b>${lang("search.with_video")}</b></td>
+    <td>
+      <if data.search_hasVideo == "y">
+        <input type="radio" name="search_hasVideo" value="y" checked="true">${lang("search.yes")}
+        <input type="radio" name="search_hasVideo" value="n">${lang("search.no")}
+      <else>
+        <input type="radio" name="search_hasVideo" value="y">${lang("search.yes")}
+        <input type="radio" name="search_hasVideo" value="n" checked="true">${lang("search.no")}
+      </if>
+    </td>
+  </tr>
+</table>
+
+<b>${lang("search.sort_how")}</b>
+<input type="radio" name="search_sort" value="score" <if data.search_sort =="score" || !data.search_sort || data.search_sort == "" >checked="true"</if>>${lang("search.by_score")}
+<input type="radio" name="search_sort" value="date_desc" <if data.search_sort =="date_desc">checked="true"</if>>${lang("search.new_first")}
+<input type="radio" name="search_sort" value="date_asc" <if data.search_sort =="date_asc">checked="true"</if>>${lang("search.old_first")}
+<input type="submit" name="search_submit" value="${lang("search.searchbutton")}" />
+<br>
+<if data.queryString>
+<!--Lucene Query was: ${data.queryString} <br>-->
+<hr>
+<if data.hasPrevious=="y">	
+<input type="submit" name="search_back" value="${lang("search.back")}" />	
+</if>
+<if data.hasNext=="y">	
+<input type="submit" name="search_forward" value="${lang("search.forward")}" />	
+</if>
+</form>
+<br>
+<b>${lang("search.info")}</b>
+<br>
+<b>${lang("search.numhits")} = ${data.numberOfHits}</b>
+<br>
+<br>
+</if>
+<list data.hits as h>
+  <table>
+    <tr>
+      <td>
+        ${lang("search.result.title")} <a href='/${lang("langcode")}${h.where}'>${h.title}</a> 
+        <if h.hasAudio=="y">
+          <img src="/img/audio_big.gif">
+        </if>
+        <if h.hasVideo == "y">
+          <img src="/img/video_big.gif">
+        </if>
+        <br>
+        ${lang("search.result.author")} ${h.creator}<br >
+        ${lang("search.result.date")} ${h.webdb_create_formatted}<br>
+        ${lang("search.result.description")} ${h.description} <br>
+      </td>
+      <td>
+        <list h.images as image>
+          <img src="${image}">
+        </list>
+      </td>
+    </tr>
+  </table>
+  <br>
+</list>
+	</font>
+	</td>
+</tr>
+
+<tr>
+	<td valign="top" align="center" bgcolor="#666666">
+	<a href="/"><font color="White"><b>&gt;&gt; ${lang("postingdone.back")}</b></font></a>
+		</td>
+	</tr>
+</table>
+</body>
+</html>
+

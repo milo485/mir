@@ -1,0 +1,37 @@
+<html>
+<head>
+    <title>${config["Mir.Name"]} | ${lang("error.htmltitle")}</title>
+    <link rel="stylesheet" type="text/css" href="${config.docRoot}/style/admin.css">
+</head>
+<body>
+<include "head.template">
+<table width="100%" border="0" align="center">
+	<tr class="grey">
+		<td>
+			<div align="center"><h2><font class="specialtext">${lang("error.title")}</font></h2>
+			</div>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<p>${lang("error.text", config["Mir.Tech-email.address"], config["Mir.Tech-email.name"])}
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<p>
+			<p align="center"><font color="red">${data.date} -- ${data.errorstring}</font>
+			<p>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<p align="center">
+            ${lang("error.text2", config["Mir.Tech-email.address"], config["Mir.Tech-email.name"])}
+			<p>
+		</td>
+	</tr>
+</table>
+<include "foot.template">
+</body>
+</html>

@@ -1,0 +1,191 @@
+<html>
+<head>
+  <title>${lang("content.htmltitle")}</title>
+  <link rel="stylesheet" type="text/css" href="${config.docRoot}/style/admin.css"
+</head>
+
+<body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
+
+<include "FUNCTIONS.template">
+<include "head.template">
+
+<form method="post" action="${config.actionRoot}">
+  <input type="hidden" name="module" value="Content">
+  <input type="hidden" name="id" value="${utility.encodeHTML(article.id)}">
+  <input type="hidden" name="returnurl" value="${utility.encodeHTML(returnurl)}">
+  <if new=="1">
+    <input type="hidden" name="do" value="insert">
+  <else>
+    <input type="hidden" name="do" value="update">
+  </if>
+
+<table width="90%" cellspacing="3" cellpadding="2">
+  <tr>
+    <td align="left" valign="top">
+      <if new=="0">
+        [ <a href="${config.actionRoot}?module=Comment&do=articlecomments&articleid=${article.id}&returnurl=${thisurl}">${lang("content.comments")}</a> ] &nbsp;&nbsp;
+          [ <a href="${article.publicurl}">${lang("preview")}</a> ]
+      </if>
+      
+    </td>
+    <td align="right" valign="top">
+      ${lang("content.published")} :
+      <input type="checkbox" name="is_published" value="1"<if article.is_published!="0" && article.is_published!=""> checked</if>>
+      <if new=="1">
+        <input type="submit" name="save" value="${lang("insert")}">
+      <else>
+        <input type="submit" name="save" value="${lang("save")}">
+      </if>
+    </td>
+  </tr>
+
+  <tr>
+    <td align="right" class="table-left">
+      id # :
+    </td>
+    <td class="listrow2">
+      ${article.id}
+    </td>
+  </tr>
+  
+  <tr>
+    <td align="right" class="table-left">
+      ${lang("content.lastchange_date")}:
+    </td>
+    <td class="listrow2">
+      ${utility.encodeHTML(article.webdb_lastchange)}<br>
+    </td>
+  </tr>
+
+  <tr>
+    <td align="right" valign="top" class="table-left">
+      ${lang("content.create_date")}:
+    </td>
+    <td class="listrow2">
+      ${utility.encodeHTML(article.webdb_create)}<br>${lang("edit")}:
+      <input type="text" size="10" maxlength="16" name="webdb_create" value=""> &nbsp; <span class="small">(yyyy-mm-dd [HH:mm])</span>
+    </td>
+  </tr>
+
+
+  <call PulldownTableRow (lang("content.articletype"), "to_article_type", articletypes, "id", "name", article.to_article_type, "articletypes.")>
+  <call PulldownTableRow (lang("content.language"), "to_language", languages, "id", "name", article.to_language, "")>
+  
+  <tr>
+    <td align="right" valign="top" class="table-left">
+      ${lang("content.topic")}:
+    </td>
+    <td class="listrow2" >
+      <if config["Mir.Localizer.Admin.TopicListFlavor"]!="0">      
+      <table border=0 cellpadding="2" cellspacing="0">
+        <tr> 
+          <assign col=config["Mir.Localizer.Admin.TopicListColumns"]>
+          <list topics as t>
+            <if col=="0">
+        </tr>
+        <tr>
+          <assign col=config["Mir.Localizer.Admin.TopicListColumns"]>
+            </if>
+          <td title="${utility.encodeHTML(t.description)}">
+            <input type="checkbox" name="to_topic" value="${t.id}" <list article.to_topics as to><if (t.id == to["id"])>checked</if></list>>
+            <span class="small"> ${t.title}</span>
+          </td>
+          <assign col=utility.increment(col, "-1")>
+          </list>
+            <if col!="0">
+              <td colspan="${col}">
+                &nbsp;
+              </td>
+            </if>
+        </tr>
+      </table>
+      <else>
+      <select name="to_topic" size="5" multiple>
+        <list topics as t>
+          <option value="${t.id}" <list article.to_topics as to><if (t.id == to["id"])>selected</if></list>>${t.title}</option>
+        </list>
+      </select>
+      </if>        
+    </td>
+  </tr>
+  
+  <call TextInputTableRow      (lang("content.title"), 40, 255, "title", article.title)>
+  <call TextInputTableRowLight (lang("content.subtitle"), 40, 255, "subtitle", article.subtitle)>
+  <call TextInputTableRowLight (lang("content.edittitle"), 40, 255, "edittitle", article.edittitle)>
+  <comment>
+    <call TextInputTableRowLight ("", 20, 20, "subtitle", article.edittitle)>
+  </comment>
+  <call TextInputTableRowLight (lang("content.location"), 40, 255, "source", article.source)>
+  <call TextInputTableRow      (lang("content.creator"), 40, 80, "creator", article.creator)>
+  <call TextInputTableRowLight (lang("content.creator.email"), 40, 80, "creator_email", article.creator_email)>
+  <call TextInputTableRowLight (lang("content.creator.url"), 40, 255, "creator_main_url", article.creator_main_url)>
+  <call TextInputTableRowLight (lang("content.creator.address"), 20, 80, "creator_address", article.creator_address)>
+  <call TextInputTableRowLight (lang("content.creator.telephone"), 20, 20, "creator_phone", article.creator_phone)>
+  <call CheckboxTableRow       (lang("content.html"), "is_html", article.is_html )>
+  <call TextAreaTableRow       (lang("content.abstract"), "", 70, 15, "description", article.description)>
+  <call TextAreaTableRow       (lang("content.content"), "", 70, 20, "content_data", article.content_data)>
+  <call TextAreaTableRow       (lang("content.comment"), lang("content.internal"), 70, 6, "comment", article.comment)>
+
+  <tr>
+    <td colspan="2" align="right" valign="top">
+      <if new=="1">
+        <input type="submit" name="save" value="${lang("insert")}">
+      <else>
+        <input type="submit" name="save" value="${lang("save")}">
+      </if>
+    </td>
+  </tr>
+</table>
+  
+<if new=="0">
+
+<table width="90%" cellspacing="0" cellpadding="0">
+
+<tr>
+<td align="left" valign="top">
+
+<table cellspacing="3" cellpadding="2">
+  <tr>
+    <td class="table-head" colspan="2">
+      ${lang("content.family")}
+    </td>
+  </tr>
+    
+  <tr>
+    <td align=right valign=top class="table-left">
+      ${lang("content.parent")}:
+    </td>
+    <td align="left" valign="top" class="listrow2">
+      <if article.parent>
+        <b>${utility.encodeHTML(article.parent.title)}</b><br>
+        <a href="${config.actionRoot}?module=Content&do=edit&id=${article.parent.id}&returnurl=${utility.encodeURI(thisurl)}">${lang("content.viewparent")}</a> |
+        <a href="${config.actionRoot}?module=Content&do=clearparent&id=${article.id}&returnurl=${utility.encodeURI(thisurl)}">${lang("content.clearparent")}</a> |
+      </if>    
+        &nbsp;<a href="${config.actionRoot}?module=Content&do=selectparent&id=${article.id}&returnurl=${utility.encodeURI(thisurl)}">${lang("content.selectparent")}</a>
+    </td>
+  </tr>
+    
+  <tr>
+    <td align=right valign=top class="table-left">
+      ${lang("content.children")}:
+    </td>
+    <td align="left" valign="top" class="listrow2">
+      <a href="${config.actionRoot}?module=Content&do=listchildren&article_id=${article.id}">${lang("content.viewchildren")}</a>
+    </td>
+  </tr>
+</table>
+
+</td>
+<td align="right" valign="top">
+<call showArticleAttachments(article)>
+</td>
+</tr>
+</table>
+
+</if>          
+
+</form>
+
+  <include "foot.template">
+</body>
+</html>

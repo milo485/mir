@@ -27,7 +27,7 @@
 
 
 
-#ifdef PG71
+#ifndef PG70
 	extern Datum dupecheck(PG_FUNCTION_ARGS);
 	PG_FUNCTION_INFO_V1(dupecheck);
 #else
@@ -117,7 +117,7 @@ static u_long crc32(u_char *buf, unsigned len)
 
 
 
-#ifdef PG71
+#ifndef PG70
 Datum dupecheck(PG_FUNCTION_ARGS)
 {
 	TriggerData *trigdata = (TriggerData *) fcinfo->context;
@@ -252,9 +252,20 @@ Datum dupecheck(void)
 	}
 	
 	sprintf(query, "SELECT count(*) FROM %s WHERE checksum='%ld';", relation, crc);
+	if (debug_on)
+	{
+		elog(DEBUG, "dupecheck: %s", query);
+	}
 	ret = SPI_exec(query, 2);
-	num = SPI_getbinval(SPI_tuptable->vals[0], SPI_tuptable->tupdesc, 1, &isnull);
-	elog(DEBUG, "dupecheck: %s", query);
+	
+	if ((ret == SPI_OK_SELECT) && (SPI_processed > 0))
+	{
+#ifdef PG72
+		num = (int) DatumGetInt64(SPI_getbinval(SPI_tuptable->vals[0], SPI_tuptable->tupdesc, 1, &isnull));
+#else		
+		num = SPI_getbinval(SPI_tuptable->vals[0], SPI_tuptable->tupdesc, 1, &isnull);
+#endif	
+	}
 
 	if ((ret == SPI_OK_SELECT) && (num > 0) && !(TRIGGER_FIRED_BY_UPDATE(trigdata->tg_event)))
 	{

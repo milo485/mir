@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001, 2002  The Mir-coders group
+ * Copyright (C) 2001, 2002 The Mir-coders group
  *
  * This file is part of Mir.
  *
@@ -18,35 +18,31 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with the com.oreilly.servlet library, any library
- * licensed under the Apache Software License, The Sun (tm) Java Advanced
- * Imaging library (JAI), The Sun JIMI library (or with modified versions of
- * the above that use the same license as the above), and distribute linked
- * combinations including the two.  You must obey the GNU General Public
- * License in all respects for all of the code used other than the above
- * mentioned libraries.  If you modify this file, you may extend this exception
- * to your version of the file, but you are not obligated to do so.  If you do
- * not wish to do so, delete this exception statement from your version.
+ * the code of this program with  any library licensed under the Apache Software License, 
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
+ * (or with modified versions of the above that use the same license as the above), 
+ * and distribute linked combinations including the two.  You must obey the 
+ * GNU General Public License in all respects for all of the code used other than 
+ * the above mentioned libraries.  If you modify this file, you may extend this 
+ * exception to your version of the file, but you are not obligated to do so.  
+ * If you do not wish to do so, delete this exception statement from your version.
  */
 
 package mircoders.entity;
 
-import java.lang.*;
-import java.io.*;
-import java.util.*;
-import java.sql.*;
+import java.util.Map;
 
-import mir.entity.*;
-import mir.misc.*;
-import mir.storage.*;
-
-import mir.storage.*;
+import mir.entity.Entity;
+import mir.storage.StorageObject;
+import mir.storage.StorageObjectFailure;
+import mircoders.storage.DatabaseCommentToMedia;
+import mircoders.storage.DatabaseContent;
 
 /**
  * This class maps one line of the comment-table to a java-object.
  *
- * @author $Author: mh $
- * @version $Revision: 1.9.2.1 $ $Date: 2002/09/01 21:31:43 $
+ * @author $Author: idfx $
+ * @version $Revision: 1.16 $ $Date: 2003/04/21 12:42:53 $
  */
 
 
@@ -67,54 +63,68 @@ public class EntityComment extends Entity
   /**
    * overridden method setValues to patch creator_main_url
    */
-  public void setValues(HashMap theStringValues)
+  public void setValues(Map theStringValues)
   {
     if (theStringValues != null) {
       if (!theStringValues.containsKey("is_published")) {
-       theStringValues.put("is_published","0");
-			}
+        theStringValues.put("is_published","0");
+      }
 
-			if (theStringValues.containsKey("main_url")){
-				if (((String)theStringValues.get("main_url")).equalsIgnoreCase("http://")) {
-					theStringValues.remove("main_url");
-				} else if ((!((String)theStringValues.get("main_url")).startsWith("http://"))
-									&& ((String)theStringValues.get("main_url")).length()>0){
-					theStringValues.put("main_url","http://"+((String)theStringValues.get("main_url")));
-				}
-			}
+      if (theStringValues.containsKey("main_url")){
+        if (((String)theStringValues.get("main_url")).equalsIgnoreCase("http://")) {
+          theStringValues.remove("main_url");
+        }
+        else if ((!((String)theStringValues.get("main_url")).startsWith("http://"))
+                     && ((String)theStringValues.get("main_url")).length()>0) {
+            theStringValues.put("main_url","http://"+((String)theStringValues.get("main_url")));
+        }
+      }
 
     }
     super.setValues(theStringValues);
   }
 
-  	/**
-	 * overridden method getValue to include formatted date into every
-	 * entityContent
-	 */
-
-	public String getValue(String field)
+  /**
+   * Deattaches media from a comment
+   *
+   * @param aCommentId
+   * @param aMediaId
+   * @throws StorageObjectFailure
+   */
+  public void dettach(String aCommentId,String aMediaId) throws StorageObjectFailure
   {
-    String returnField = null;
-    if (field!=null)
-    {
-      if (field.equals("date_formatted") || field.equals("webdb_create_short"))
-      {
-  		  if (hasValueForField("webdb_create"))
-      	  returnField = StringUtil.dateToReadableDate(getValue("webdb_create"));
-  		}
-      else if (field.equals("description_parsed")) {
-        /** @todo the config stuff should be moved to StringUtil */
-        String extLinkName = MirConfig.getProp("Producer.ExtLinkName");
-        String intLinkName = MirConfig.getProp("Producer.IntLinkName");
-        String mailLinkName = MirConfig.getProp("Producer.MailLinkName");
-        String imageRoot = MirConfig.getProp("Producer.ImageRoot");
-        returnField = StringUtil.createHTML(getValue("description"),imageRoot,mailLinkName,extLinkName,intLinkName);
+    if (aMediaId!=null){
+      try{
+        DatabaseCommentToMedia.getInstance().delete(aCommentId, aMediaId);
       }
-      else
-        return super.getValue(field);
+      catch (Exception e){
+        throwStorageObjectFailure(e, "dettach: failed to get instance");
+      }
+
+      DatabaseContent.getInstance().setUnproduced("id="+getValue("to_media"));
     }
-    return returnField;
-	}
+  }
 
+  /**
+   *
+   * @param aMediaId
+   * @throws StorageObjectFailure
+   */
 
+  public void attach(String aMediaId) throws StorageObjectFailure
+  {
+    if (aMediaId!=null) {
+      try{
+        DatabaseCommentToMedia.getInstance().addMedia(getId(), aMediaId);
+      }
+      catch(StorageObjectFailure e){
+        throwStorageObjectFailure(e, "attach: could not get the instance");
+      }
+
+      DatabaseContent.getInstance().setUnproduced("id="+getValue("to_media"));
+    }
+    else {
+      logger.error("EntityContent: attach without mid");
+    }
+  }
 }

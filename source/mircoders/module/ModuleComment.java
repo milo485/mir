@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001, 2002  The Mir-coders group
+ * Copyright (C) 2001, 2002 The Mir-coders group
  *
  * This file is part of Mir.
  *
@@ -18,35 +18,28 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with the com.oreilly.servlet library, any library
- * licensed under the Apache Software License, The Sun (tm) Java Advanced
- * Imaging library (JAI), The Sun JIMI library (or with modified versions of
- * the above that use the same license as the above), and distribute linked
- * combinations including the two.  You must obey the GNU General Public
- * License in all respects for all of the code used other than the above
- * mentioned libraries.  If you modify this file, you may extend this exception
- * to your version of the file, but you are not obligated to do so.  If you do
- * not wish to do so, delete this exception statement from your version.
+ * the code of this program with  any library licensed under the Apache Software License, 
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
+ * (or with modified versions of the above that use the same license as the above), 
+ * and distribute linked combinations including the two.  You must obey the 
+ * GNU General Public License in all respects for all of the code used other than 
+ * the above mentioned libraries.  If you modify this file, you may extend this 
+ * exception to your version of the file, but you are not obligated to do so.  
+ * If you do not wish to do so, delete this exception statement from your version.
  */
-
 package mircoders.module;
 
-import java.io.*;
-import java.lang.*;
-import java.util.*;
-import java.sql.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
+import java.util.Map;
 
-import freemarker.template.*;
-
-import mir.servlet.*;
-import mir.module.*;
-import mir.entity.*;
-import mir.misc.*;
-import mir.storage.*;
-
-import mircoders.storage.*;
+import mir.entity.Entity;
+import mir.log.LoggerWrapper;
+import mir.module.AbstractModule;
+import mir.module.ModuleExc;
+import mir.module.ModuleFailure;
+import mir.storage.StorageObject;
+import mircoders.storage.DatabaseComment;
+import mircoders.storage.DatabaseContent;
+import freemarker.template.SimpleList;
 
 
 /*
@@ -57,40 +50,56 @@ import mircoders.storage.*;
 
 public class ModuleComment extends AbstractModule
 {
-  static Logfile theLog;
+  static LoggerWrapper logger = new LoggerWrapper("Module.Comment");
 
-  // Contructor
   public ModuleComment(StorageObject theStorage)
   {
-    if (theLog == null) theLog = Logfile.getInstance(MirConfig.getProp("Home") + MirConfig.getProp("Module.Comment.Logfile"));
-    if (theStorage == null) theLog.printWarning("StorageObject was null!");
+    if (theStorage == null) logger.warn("StorageObject was null!");
     this.theStorage = theStorage;
   }
 
-  // Methoden
-  public SimpleList getCommentAsSimpleList() throws ModuleException {
+  public SimpleList getCommentAsSimpleList() throws ModuleExc, ModuleFailure {
     try {
       return ((DatabaseComment)theStorage).getPopupData();
-    } catch (StorageObjectException e) {
-      throw new ModuleException(e.toString());
+    }
+    catch (Throwable e) {
+      throw new ModuleFailure(e);
     }
   }
-  
+
+  public void deleteById (String anId) throws ModuleExc, ModuleFailure {
+    try {
+      Entity theEntity = theStorage.selectById((String)anId);
+      if (theEntity != null)
+        DatabaseContent.getInstance().setUnproduced("id=" + theEntity.getValue("to_media"));
+
+      super.deleteById(anId);
+    }
+    catch (Throwable e) {
+      throw new ModuleFailure(e);
+    }
+  }
+
   /**
-   * setValues in the Entity and updates them on the StorageObject
+   *
+   * @param theValues
+   * @return
+   * @throws ModuleExc
+   * @throws ModuleFailure
    */
-  public String set(HashMap theValues) throws ModuleException {
+
+  public String set(Map theValues) throws ModuleExc, ModuleFailure {
     try {
       Entity theEntity = theStorage.selectById((String)theValues.get("id"));
       if (theEntity == null)
-         throw new ModuleException("No Objekt with id in Database id: " + theValues.get("id"));
+         throw new ModuleExc("No Object in the database with id " + theValues.get("id"));
       DatabaseContent.getInstance().setUnproduced("id=" + theEntity.getValue("to_media"));
       theEntity.setValues(theValues);
       theEntity.update();
       return theEntity.getId();
-    } catch (StorageObjectException e){
-      e.printStackTrace(System.err);
-      throw new ModuleException(e.toString());
+    }
+    catch (Throwable e) {
+      throw new ModuleFailure(e);
     }
   }
 }

@@ -1,0 +1,89 @@
+/*
+ * Copyright (C) 2001, 2002 The Mir-coders group
+ *
+ * This file is part of Mir.
+ *
+ * Mir is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Mir is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Mir; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * In addition, as a special exception, The Mir-coders gives permission to link
+ * the code of this program with  any library licensed under the Apache Software License, 
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
+ * (or with modified versions of the above that use the same license as the above), 
+ * and distribute linked combinations including the two.  You must obey the 
+ * GNU General Public License in all respects for all of the code used other than 
+ * the above mentioned libraries.  If you modify this file, you may extend this 
+ * exception to your version of the file, but you are not obligated to do so.  
+ * If you do not wish to do so, delete this exception statement from your version.
+ */
+package mir.misc;
+
+/**
+ * Stores the file name and line number in a file.
+ *
+ * @version $Id: Location.java,v 1.3 2003/04/21 12:42:52 idfx Exp $
+ *
+ */
+public class Location {
+    private String fileName;
+    private int lineNumber;
+    private int columnNumber;
+
+    public static final Location UNKNOWN_LOCATION = new Location();
+
+    /**
+     * Creates an "unknown" location.
+     */
+    private Location() {
+        this(null, 0, 0);
+    }
+
+    /**
+     * Creates a location consisting of a file name but no line number.
+     */
+    public Location(String fileName) {
+        this(fileName, 0, 0);
+    }
+
+    /**
+     * Creates a location consisting of a file name and line number.
+     */
+    public Location(String fileName, int lineNumber, int columnNumber) {
+        this.fileName = fileName;
+        this.lineNumber = lineNumber;
+        this.columnNumber = columnNumber;
+    }
+
+    /**
+     * Returns the file name, line number and a trailing space. An error
+     * message can be appended easily. For unknown locations, returns
+     * an empty string.
+     */
+    public String toString() {
+        StringBuffer buf = new StringBuffer();
+
+        if (fileName != null) {
+            buf.append(fileName);
+
+            if (lineNumber != 0) {
+                buf.append(":");
+                buf.append(lineNumber);
+            }
+
+            buf.append(": ");
+        }
+
+        return buf.toString();
+    }
+}

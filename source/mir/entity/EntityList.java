@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001, 2002  The Mir-coders group
+ * Copyright (C) 2001, 2002 The Mir-coders group
  *
  * This file is part of Mir.
  *
@@ -18,27 +18,30 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with the com.oreilly.servlet library, any library
- * licensed under the Apache Software License, The Sun (tm) Java Advanced
- * Imaging library (JAI), The Sun JIMI library (or with modified versions of
- * the above that use the same license as the above), and distribute linked
- * combinations including the two.  You must obey the GNU General Public
- * License in all respects for all of the code used other than the above
- * mentioned libraries.  If you modify this file, you may extend this exception
- * to your version of the file, but you are not obligated to do so.  If you do
- * not wish to do so, delete this exception statement from your version.
+ * the code of this program with  any library licensed under the Apache Software License, 
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
+ * (or with modified versions of the above that use the same license as the above), 
+ * and distribute linked combinations including the two.  You must obey the 
+ * GNU General Public License in all respects for all of the code used other than 
+ * the above mentioned libraries.  If you modify this file, you may extend this 
+ * exception to your version of the file, but you are not obligated to do so.  
+ * If you do not wish to do so, delete this exception statement from your version.
  */
-
 package  mir.entity;
 
-import  java.lang.*;
-import  java.util.*;
+import java.util.ArrayList;
+import java.util.Set;
 
-import  freemarker.template.*;
-
-import  mir.misc.*;
-import  mir.storage.*;
-import  mir.storage.store.*;
+import mir.config.MirPropertiesConfiguration;
+import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
+import mir.log.LoggerWrapper;
+import mir.storage.StorageObject;
+import mir.storage.store.StorableObject;
+import mir.storage.store.StoreContainerType;
+import mir.storage.store.StoreIdentifier;
+import mir.storage.store.StoreUtil;
+import freemarker.template.TemplateListModel;
+import freemarker.template.TemplateModel;
 
 /**
  *
@@ -52,8 +55,8 @@ import  mir.storage.store.*;
  *  @version 1.0 (freemarker compliant & and storable in ObjectStore)
  */
 public class EntityList implements TemplateListModel, StorableObject {
-
-  private static Logfile      theLog;
+  protected static MirPropertiesConfiguration configuration;
+  protected LoggerWrapper logger;
   private ArrayList           theEntityArrayList = new ArrayList();
   private String              whereClause, orderClause;
   private StorageObject       theStorage;
@@ -63,151 +66,158 @@ public class EntityList implements TemplateListModel, StorableObject {
 
 
   static {
-    theLog = Logfile.getInstance(MirConfig.getProp("Home") + MirConfig.getProp("Entity.Logfile"));
+    try {
+      configuration = MirPropertiesConfiguration.instance();
+    }
+    catch (PropertiesConfigExc e) {
+      throw new RuntimeException("Unable to get configuration: " + e.getMessage());
+    }
   }
 
-	/**
-	 * Constructor.
-	 */
-  public EntityList(){		}
+  /**
+   * Constructor.
+   */
+  public EntityList(){
+    logger = new LoggerWrapper("Entity.List");
+  }
 
-  /* get/set EntityClass of Objects stored in EntityList */
+/* get/set EntityClass of Objects stored in EntityList */
   public void setStorage(StorageObject storage) { this.theStorage=storage; }
   public StorageObject getStorage() { return theStorage; }
 
   public void setLimit(int limit) { this.limit = limit; }
 
-	/**
-	 * Sets the WHERE clause that fetched the Entities of this EntityList from the database.
-	 * @param wc The string that contains the WHERE clause
-	 */
-		public void setWhere(String wc) {
-			this.whereClause = wc;
-		}
+  /**
+   * Sets the WHERE clause that fetched the Entities of this EntityList from the database.
+   * @param wc The string that contains the WHERE clause
+   */
+  public void setWhere(String wc) {
+    this.whereClause = wc;
+  }
 
-	/**
-	 * Returns the WHERE clause that returned this EntityList from the database
-	 * @return whereClause The WHERE clause
-	 */
-		public String getWhere() {
-			return whereClause;
-		}
+  /**
+   * Returns the WHERE clause that returned this EntityList from the database
+   * @return whereClause The WHERE clause
+   */
+  public String getWhere() {
+    return whereClause;
+  }
 
 
-	/**
-	 * Sets the sorting criterium of this EntityList
-	 * @param oc
-	 */
-		public void setOrder(String oc) {
-			this.orderClause = oc;
-		}
+  /**
+   * Sets the sorting criterium of this EntityList
+   * @param oc
+   */
+  public void setOrder(String oc) {
+    this.orderClause = oc;
+  }
 
-	/**
-	 * Returns the sorting criterium.
-	 * @return orderClause The sort order
-	 */
-		public String getOrder() {
-			return orderClause;
-		}
+  /**
+   * Returns the sorting criterium.
+   * @return orderClause The sort order
+   */
+  public String getOrder() {
+    return orderClause;
+  }
 
-	/**
-	 * Sets the number of rows that match the WHERE clause
-	 * @param i The number of rows that match the WHERE clause
-	 */
-		public void setCount(int i) {
-			this.count = i;
-		}
+  /**
+   * Sets the number of rows that match the WHERE clause
+   * @param i The number of rows that match the WHERE clause
+   */
+  public void setCount(int i) {
+    this.count = i;
+  }
 
-	/**
-	 * Returns the number of rows that match the WHERE clause
-	 * @return The number of rows ...
-	 */
-		public int getCount() {
-			return count;
-		}
+  /**
+   * Returns the number of rows that match the WHERE clause
+   * @return The number of rows ...
+   */
+  public int getCount() {
+    return count;
+  }
 
-	/**
-	 * Sets the offset
-	 * @param i The offset
-	 */
-		public void setOffset(int i) {
-			offset = i;
-		}
+  /**
+   * Sets the offset
+   * @param i The offset
+   */
+  public void setOffset(int i) {
+    offset = i;
+  }
 
-	/**
-	 * Returns the offset
-	 * @return offset
-	 */
-		public int getOffset() {
-			return offset;
-		}
+  /**
+   * Returns the offset
+   * @return offset
+   */
+  public int getOffset() {
+    return offset;
+  }
 
-	/**
-	 * Sets the offset of the next batch of Entities.
-	 * @param i The next offset
-	 */
-		public void setNextBatch(int i) {
-			offsetnext = i;
-		}
+  /**
+   * Sets the offset of the next batch of Entities.
+   * @param i The next offset
+   */
+  public void setNextBatch(int i) {
+    offsetnext = i;
+  }
 
-	/**
-	 * Returns the offset of the next batch of Entities.
-	 * @return offset of the next batch
-	 */
-		public int getNextBatch() {
-			return offsetnext;
-		}
+  /**
+   * Returns the offset of the next batch of Entities.
+   * @return offset of the next batch
+   */
+  public int getNextBatch() {
+    return offsetnext;
+  }
 
-	/**
-	 * Returns whether there is a next batch within the WHERE clause
-	 * @return true if yes, false if no.
-	 */
-		public boolean hasNextBatch() {
-			return (offsetnext >= 0);
-		}
+  /**
+   * Returns whether there is a next batch within the WHERE clause
+   * @return true if yes, false if no.
+   */
+  public boolean hasNextBatch() {
+    return (offsetnext >= 0);
+  }
 
-	/**
-	 * Sets the offset of the previous batch.
-	 * @param i the previous offset
-	 */
-		public void setPrevBatch(int i) {
-			offsetprev = i;
-		}
+  /**
+   * Sets the offset of the previous batch.
+   * @param i the previous offset
+   */
+  public void setPrevBatch(int i) {
+    offsetprev = i;
+  }
 
-	/**
-	 * Returns the offset of the previous batch.
-	 * @return offset of the previous batch
-	 */
-		public int getPrevBatch() {
-			return offsetprev;
-		}
+  /**
+   * Returns the offset of the previous batch.
+   * @return offset of the previous batch
+   */
+  public int getPrevBatch() {
+    return offsetprev;
+  }
 
-	/**
-	 * Returns whether there is a previous batch.
-	 * @return true if yes, false if no
-	 */
-		public boolean hasPrevBatch() {
-			return (offsetprev >= 0);
-		}
+  /**
+   * Returns whether there is a previous batch.
+   * @return true if yes, false if no
+   */
+  public boolean hasPrevBatch() {
+    return (offsetprev >= 0);
+  }
 
-	/**
-	 * Returns the start index of the batch.
-	 * @return
-	 */
-		public int getFrom() {
-			return offset+1;
-		}
+  /**
+   * Returns the start index of the batch.
+   * @return
+   */
+  public int getFrom() {
+    return offset+1;
+  }
 
-	/**
-	 * Returns the end index of the batch.
-	 * @return
-	 */
-		public int getTo() {
-			if (hasNextBatch())
-				return offsetnext;
-			else
-				return count;
-		}
+  /**
+   * Returns the end index of the batch.
+   * @return
+   */
+  public int getTo() {
+    if (hasNextBatch())
+      return offsetnext;
+    else
+      return count;
+  }
 
   /**
    * Inserts an Entity into the EntityList.
@@ -216,9 +226,9 @@ public class EntityList implements TemplateListModel, StorableObject {
 
   public void add (Entity anEntity) {
     if (anEntity!=null)
-        theEntityArrayList.add(anEntity);
+      theEntityArrayList.add(anEntity);
     else
-	theLog.printWarning("EntityList: add called with empty Entity");
+      logger.warn("EntityList: add called with empty Entity");
   }
 
 
@@ -243,9 +253,9 @@ public class EntityList implements TemplateListModel, StorableObject {
   }
 
 
-  // The following methods have to be implemented
-  // for this class to be an implementation of the
-  // TemplateListModel of the Freemarker packages
+// The following methods have to be implemented
+// for this class to be an implementation of the
+// TemplateListModel of the Freemarker packages
 
   public TemplateModel get(int i) { return elementAt(i); }
   public boolean isRewound() { return (freemarkerListPointer==-1) ? true : false; }
@@ -253,7 +263,7 @@ public class EntityList implements TemplateListModel, StorableObject {
 
   public TemplateModel next() {
     if (hasNext()) {
-      freemarkerListPointer++;return get(freemarkerListPointer); }
+    freemarkerListPointer++;return get(freemarkerListPointer); }
     else return null;
   }
 
@@ -280,18 +290,18 @@ public class EntityList implements TemplateListModel, StorableObject {
   }
 
 
-  // Methods to implement StorableObject
+// Methods to implement StorableObject
 
   public Set getNotifyOnReleaseSet() { return null; }
 
   public StoreIdentifier getStoreIdentifier() {
     if ( theStorage!=null ) {
       return
-        new StoreIdentifier( this, StoreContainerType.STOC_TYPE_ENTITYLIST,
-            StoreUtil.getEntityListUniqueIdentifierFor( theStorage.getTableName(),
-                       whereClause, orderClause, offset, limit ));
+      new StoreIdentifier( this, StoreContainerType.STOC_TYPE_ENTITYLIST,
+      StoreUtil.getEntityListUniqueIdentifierFor( theStorage.getTableName(),
+      whereClause, orderClause, offset, limit ));
     }
-    theLog.printWarning("EntityList could not return StoreIdentifier");
+    logger.warn("EntityList could not return StoreIdentifier");
     return null;
   }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001, 2002  The Mir-coders group
+ * Copyright (C) 2001, 2002 The Mir-coders group
  *
  * This file is part of Mir.
  *
@@ -18,36 +18,21 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with the com.oreilly.servlet library, any library
- * licensed under the Apache Software License, The Sun (tm) Java Advanced
- * Imaging library (JAI), The Sun JIMI library (or with modified versions of
- * the above that use the same license as the above), and distribute linked
- * combinations including the two.  You must obey the GNU General Public
- * License in all respects for all of the code used other than the above
- * mentioned libraries.  If you modify this file, you may extend this exception
- * to your version of the file, but you are not obligated to do so.  If you do
- * not wish to do so, delete this exception statement from your version.
+ * the code of this program with  any library licensed under the Apache Software License, 
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
+ * (or with modified versions of the above that use the same license as the above), 
+ * and distribute linked combinations including the two.  You must obey the 
+ * GNU General Public License in all respects for all of the code used other than 
+ * the above mentioned libraries.  If you modify this file, you may extend this 
+ * exception to your version of the file, but you are not obligated to do so.  
+ * If you do not wish to do so, delete this exception statement from your version.
  */
 
 package mircoders.entity;
 
-import java.lang.*;
-import java.io.*;
-import java.util.*;
-import java.sql.*;
+import java.util.Map;
 
-/*
- * kind of hack for postgres non-standard LargeObjects that Poolman
- * doesn't know about. see all the casting, LargeObj stuff in getIcon, getOther
- * at some point when postgres has normal BLOB support, this should go.
- */
-import org.postgresql.Connection;
-import org.postgresql.largeobject.LargeObject;
-import org.postgresql.largeobject.LargeObjectManager;
-
-import mir.entity.*;
-import mir.misc.*;
-import mir.storage.*;
+import mir.storage.StorageObject;
 
 /**
  * This class handles storage of other data and meta data
@@ -59,32 +44,21 @@ import mir.storage.*;
 
 public class EntityOther extends EntityUploadedMedia
 {
-	public EntityOther()
-	{
-		super();
-	}
+  public EntityOther() {
+    super();
+  }
 
-	public EntityOther(StorageObject theStorage) {
-		this();
-		setStorage(theStorage);
-	}
+  public EntityOther(StorageObject theStorage) {
+    this();
+    setStorage(theStorage);
+  }
 
-	public void update() throws StorageObjectException {
-		super.update();
-		try {
-			theStorageObject.executeUpdate("update content set is_produced='0' where to_media="+getId());
-		} catch (SQLException e) {
-			throwStorageObjectException(e, "EntityOther :: update :: failed!! ");
-		}
-	}
-
-	public void setValues(HashMap theStringValues)
-	{
-		if (theStringValues != null) {
-			if (!theStringValues.containsKey("is_published"))
-			 theStringValues.put("is_published","0");
-		}
-		super.setValues(theStringValues);
-	}
+  public void setValues(Map theStringValues) {
+    if (theStringValues != null) {
+      if (!theStringValues.containsKey("is_published"))
+        theStringValues.put("is_published", "0");
+    }
+    super.setValues(theStringValues);
+  }
 
 }

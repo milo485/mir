@@ -1,0 +1,328 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html>
+<head>
+	<title>${lang("posting.htmltitle")}</title>	
+	<meta name="description" content="${lang("posting.meta.description")}>
+	<meta name="author" content="${lang("posting.meta.author")}>
+	<meta name="keywords" content="${lang("posting.meta.keywords")}>
+	<meta http-equiv="Content-Type" content="text/html; charset=${lang("htmlcharset")}>
+	<meta name="robots" content="index">
+	<meta name="robots" content="follow">
+	<style type="text/css" media="all">@import "forms.css";</style>
+</head>
+
+<body marginwidth="0" marginheight="0" leftmargin="0" topmargin="0" bgcolor="#dddddd">
+
+	<table cellspacing="0" cellpadding="0" width="100%">
+		<tr>
+			<td colspan="3" class="pad4x"><span class="size2px">&nbsp;</span></td>
+		</tr>
+    <if errors>
+      <tr>
+        <td colspan="3">
+          Your input had the following errors:<br><br>
+          <list errors as e>
+            <font color="red">
+              <if e.field>
+                ${lang("content."+e.field)}:
+              </if>
+              ${lang(e.message)} <br>
+            </font>
+          </list>
+        </td>
+      </tr>
+    </if>
+
+		<form enctype="multipart/form-data" action="${actionURL}&do=opensession&sessiontype=article" method="post">
+    <if password>
+      <tr>
+        <td align="right">&nbsp;</td>
+        <td>
+          ${lang("comment.note")}
+          <br>
+          ${password}<br>
+          <br>
+        </td>
+        <td>&nbsp;</td>
+      </tr>
+      <tr>
+        <td></td>
+        <td valign="top">
+           ${lang("comment.password")}: <input type="text" name="password" size="10">
+        </td>
+        <td>&nbsp;</td>
+      </tr>
+    </if>
+		<tr>
+			<td colspan="3" width="100%">&nbsp;</td>
+		</tr>
+		<tr>
+			<td width="20%" bgcolor="#cc0033">
+				&nbsp;
+			</td>
+			<td width="60%" bgcolor="#cc0033" class="pad4x">
+				<span id="title"><b>${lang("posting.form.title")}</b></span>
+			</td>
+			<td width="20%">&nbsp;</td>
+		</tr>
+		<tr>
+			<td colspan="3" class="pad4x"><span class="size2px">&nbsp;</span></td>
+		</tr>
+		<tr>
+			<td align="right">&nbsp;</td>
+			<td class="pad5L">
+				<b>Please follow this form step by step. 
+				Especially if this is the first time you post something on indymedia, 
+				be sure to read the introductory remarks. 
+				Then come back to this form!<br>
+				<a href="#intro">intro &gt;&gt;</a><br><br></b>
+			</td>
+			<td>&nbsp;</td>
+		</tr>
+		<tr>
+			<td>&nbsp;</td>
+			<td bgcolor="#cc6666" class="pad4x">
+				<span class="subtitle"><b><a name="form" id="form">Number of media files</a></b></span>
+			</td>
+			<td>&nbsp;</td>
+		</tr>
+		<tr>
+			<td colspan="3" class="pad4x"><span class="size2px">&nbsp;</span></td>
+		</tr>
+		<tr>
+			<td align="right">&nbsp;</td>
+			<td class="pad5L">
+				<font color="#FF0000">First of all</font> if you want to upload more than one media files 
+				please change the following number accordingly! Than press the button to reload this page. <br><br>
+			</td>
+			<td>&nbsp;</td>
+		</tr>
+  		<tr>
+  			<td align="right">
+  				<b>${lang("posting.nr_of_media")}</b><br><br>
+  			</td>
+  			<td class="pad5L" >
+  				<input type="text" name="nrmediaitems" value="${utility.encodeHTML(nrmediaitems)}" size="2" class="r">&nbsp;<input type="submit" value="${lang("posting.nr_of_media.submit")}"><br><br>
+  			</td>
+  			<td>&nbsp;</td>
+  		</tr>
+  		<tr>
+  			<td align="right" valign="top">&nbsp;</td>
+  			<td valign="top" bgcolor="#cc9999" class="pad4x">
+  				<b><font color="#cc0033">R E Q U I R E D</font> information</b>
+  			</td>
+  			<td>&nbsp;</td>
+  		</tr>
+  		<tr>
+  			<td colspan="3" class="pad2x"><span class="size2px">&nbsp;</span></td>
+  		</tr>
+  		<tr>
+  			<td align="right">
+  				${lang("posting.title")}:
+  			</td>
+  			<td class="pad5L">
+  				<input type="text" name="title" class="w95r" maxlength="45" value="${utility.encodeHTML(title)}">
+  			</td>
+  			<td valign="top"><font size="1">${lang("posting.title.info")}</font></td>
+  		</tr>
+  		<tr>
+  			<td align="right" valign="top">
+  				${lang("posting.abstract")}:
+  			</td>
+  			<td class="pad5L">
+  				<textarea name="description" rows="6" wrap="virtual" class="w95rs">${utility.encodeHTML(description)}</textarea>
+  			</td>
+  			<td valign="top"><font size="1">${lang("posting.abstract.info")}</font></td>
+  		</tr>
+  		<tr>
+  			<td align="right" valign="top">
+  				${lang("posting.text")}:
+  			</td>
+  			<td class="pad5L"> 
+  				<textarea name="content_data" rows="20" wrap="soft" class="w95rf">${utility.encodeHTML(content_data)}</textarea>
+  			</td>
+  			<td valign="top"><font size="1">${lang("posting.text.info")}</font></td>
+  		</tr>
+  		<tr>
+  			<td align="right">
+  				${lang("posting.author")}:<br><br>
+  			</td>
+  			<td class="pad5L">
+  				<input type="text" name="creator" value="${utility.encodeHTML(creator)}" class="w95r" maxlength="45">
+  				<br><br>
+  			</td>
+  			<td valign="top"></td>
+  		</tr>
+  		
+  		<tr>
+  			<td align="right" valign="top">&nbsp;</td>
+  			<td valign="top" bgcolor="#cc9999" class="pad4x">
+  				<b>Additional information</b>
+  			</td>
+  			<td>&nbsp;</td>
+  		</tr>
+  		<tr>
+  			<td colspan="3" class="pad2x"><span class="size2px">&nbsp;</span></td>
+  		</tr>
+  		<tr>
+  			<td align="right">
+  				${lang("posting.language")}:<br><br>
+  			</td>
+  			<td class="pad5L">			
+  				<select name="to_language" class="w60" size="1">
+  					<list languages as l>
+              <option <if to_language==l.id>selected</if> value="${l.id}">${l.name}</option>
+  					</list>
+  				</select>
+  				<br><br>
+  			</td>
+  			<td>&nbsp;</td>
+  		</tr>
+  		<tr>
+  			<td align="right" valign="top">
+  				${lang("posting.topic")}:<br><br>
+  			</td>
+  			<td class="pad5L">
+  				<list topics as t>
+  					<input type="checkbox" name="to_topic" value="${t.id}" <list to_topic as to><if (t.id == to)>checked</if></list>>&nbsp;${t.title}<br>
+  				</list>
+  				<br>
+  			</td>
+  			<td valign="top"><font size="1">${lang("posting.topic.info")}</font></td>
+  		</tr>
+  		
+  		<tr>
+  			<td align="right" valign="top">&nbsp;</td>
+  			<td valign="top" bgcolor="#cc9999" class="pad4x">
+  				<b>Contact information</b>
+  			</td>
+  			<td>&nbsp;</td>
+  		</tr>
+  		<tr>
+  			<td colspan="3" class="pad2x"><span class="size2px">&nbsp;</span></td>
+  		</tr>
+  		<tr>
+  			<td align="right">&nbsp;</td>
+  			<td class="pad5L">
+  				 ${lang("posting.contact.info")}
+  			</td>
+  			<td>&nbsp;</td>
+  		</tr>
+  		<tr>
+  			<td align="right">
+  				${lang("posting.email")}:
+  			</td>
+  			<td class="pad5L">
+  				<input type="text" name="creator_email" maxlength="80" value="${utility.encodeHTML(creator_email)}" class="w60">
+  			</td>
+  			<td>&nbsp;</td>
+  		</tr>
+  		<tr>
+  			<td align="right">
+  				${lang("posting.url")}:
+  			</td>
+  			<td class="pad5L">
+  				<input type="text" name="creator_main_url" maxlength="160" value="${utility.encodeHTML(creator_main_url)}" class="w60">
+  			</td>
+  			<td>&nbsp;</td>
+  		</tr>
+  		<tr>
+  			<td align="right">
+  				${lang("posting.address")}:
+  			</td>
+  			<td class="pad5L">
+  				<input type="text" name="creator_address" maxlength="160" value="${utility.encodeHTML(creator_address)}" class="w60">
+  			</td>
+  			<td>&nbsp;</td>
+  		</tr>
+  		<tr>
+  			<td align="right">
+  				${lang("posting.phone")}<br><br>
+  			</td>
+  			<td class="pad5L">
+  				<input type="text" name="creator_phone" maxlength="20" value="${utility.encodeHTML(creator_phone)}" class="w60"><br><br>
+  			</td>
+  			<td>&nbsp;</td>
+  		</tr>
+  		
+  		<tr>
+  			<td align="right" valign="top">&nbsp;</td>
+  			<td valign="top" bgcolor="#cc9999" class="pad4x">
+  				<b>${lang("posting.media")}</b>
+  			</td>
+  			<td>&nbsp;</td>
+  		</tr>
+  		<tr>
+  			<td colspan="3" class="pad2x"><span class="size2px">&nbsp;</span></td>
+  		</tr>
+  		<tr>
+  			<td align="right"></td>
+  			<td class="pad5L">
+  				 ${lang("posting.media.howto")}
+  			</td>
+  			<td valign="top"><font size="-2">${lang("posting.media.info")}</font></td>
+  		</tr>
+  
+  	<list mediaitems as m>
+  		<tr>
+  			<td align="right">${lang("posting.media.title")} ${m}:</td>
+  			<td class="pad5L">
+  				<input type="text" name="media${m}_title" maxlength="80" value="" class="w60">
+  			</td>
+  			<td valign="top"></font></td>
+  		</tr>
+  		<tr>
+  			<td align="right">${lang("posting.media.media")} ${m}:</td>
+  			<td class="pad5L">
+  				<input type="file" name="media${m}" maxlength="80" value="" class="w60"><br><br>
+  			</td>
+  			<td valign="top"></font></td>
+  		</tr>
+  	</list>
+  		
+  		<tr>
+  			<td align="right" valign="top">&nbsp;</td>
+  			<td valign="top" bgcolor="#cc9999" class="pad4x">
+  				<b>Publish this!</b>
+  			</td>
+  			<td>&nbsp;</td>
+  		</tr>
+  		<tr>
+  			<td colspan="3" class="pad4x"><span class="size2px">&nbsp;</span></td>
+  		</tr>
+  		<tr>
+  			<td align="right">&nbsp;</td>
+  			<td class="pad5L">
+  				${lang("posting.submit.info")}<br><br>
+  			</td>
+  			<td>&nbsp;</td>
+  		</tr>
+  		<tr>
+  			<td align="right">&nbsp;</td>
+  			<td class="pad5Lx" bgcolor="#cc0033">
+  				<input id="button" type="submit" name="post" value="${lang("posting.submit")}">
+  			</td>
+  			<td bgcolor="#cc0033">&nbsp;</td>
+  		</tr>
+  		<tr>
+  			<td colspan="3" class="pad2x"><span class="size2px">&nbsp;</span></td>
+  		</tr>
+    </form>
+		<tr>
+			<td align="right">&nbsp;</td>
+			<td class="pad5L">
+				${lang("posting.criteria")}
+				<br><br><br><br><br>
+				<b><font size="+1"><a name="intro" id="intro">${lang("posting.title")}</a></font></b><br><br>
+				
+				<include "open/disclaimer.inc.de"><br><br>
+				
+				<a href="#form"><b>${lang("posting.jump_to_form")}</b></a>
+				
+			</td>
+			<td>&nbsp;</td>
+		</tr>
+	</table>
+</body>
+</html>

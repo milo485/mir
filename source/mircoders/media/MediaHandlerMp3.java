@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001, 2002  The Mir-coders group
+ * Copyright (C) 2001, 2002 The Mir-coders group
  *
  * This file is part of Mir.
  *
@@ -18,109 +18,112 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with the com.oreilly.servlet library, any library
- * licensed under the Apache Software License, The Sun (tm) Java Advanced
- * Imaging library (JAI), The Sun JIMI library (or with modified versions of
- * the above that use the same license as the above), and distribute linked
- * combinations including the two.  You must obey the GNU General Public
- * License in all respects for all of the code used other than the above
- * mentioned libraries.  If you modify this file, you may extend this exception
- * to your version of the file, but you are not obligated to do so.  If you do
- * not wish to do so, delete this exception statement from your version.
+ * the code of this program with  any library licensed under the Apache Software License, 
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
+ * (or with modified versions of the above that use the same license as the above), 
+ * and distribute linked combinations including the two.  You must obey the 
+ * GNU General Public License in all respects for all of the code used other than 
+ * the above mentioned libraries.  If you modify this file, you may extend this 
+ * exception to your version of the file, but you are not obligated to do so.  
+ * If you do not wish to do so, delete this exception statement from your version.
  */
-
 package  mircoders.media;
 
-import java.util.*;
 import java.io.StringReader;
 
-import freemarker.template.SimpleList;
+import mir.entity.Entity;
+import mir.log.LoggerWrapper;
+import mir.media.MediaExc;
+import mir.media.MediaFailure;
+import mir.media.MirMedia;
+import mir.misc.FileUtil;
+import mir.misc.StringUtil;
 import freemarker.template.SimpleHash;
-
-import mir.media.*;
-import mir.entity.*;
-import mir.misc.*;
-import mir.storage.*;
-
+import freemarker.template.SimpleList;
 
 /**
- * Please note: this media handler produces 
- * 3 media files, the raw .mp3, a .m3u which is 
+ * Please note: this media handler produces
+ * 3 media files, the raw .mp3, a .m3u which is
  * contains the URL for the mp3 and a .pls which
  * contains the URL to the mp3 in shoutcast playlist
- * format. What's important is that the web server (of 
- * the media host) must recognize the .m3u and .pls file 
+ * format. What's important is that the web server (of
+ * the media host) must recognize the .m3u and .pls file
  * extensions and send the proper "audio/x-mpegurl"
  * and "audio/x-scpls" mime-types respectively.
- * If the web server is apache, it's easy, just 
+ * If the web server is apache, it's easy, just
  * add:
  *
  * audio/x-mpegurl                 m3u
  * audio/x-scpl                    pls
  *
- * to the file pointed to by the "TypesConfig" 
- * command in your apache config file. Or add 
+ * to the file pointed to by the "TypesConfig"
+ * command in your apache config file. Or add
  * and equivalent AddType command to your httpd.conf.
  * Of course this assumes that the mod_mime is loaded.
  *
  * If the web server is not apache, then your on your own.
- * 
+ *
  * @see mir.media.MirMedia
- * @author mh <heckmann@hbe.ca>
- * @version 01.12.2001
+ * @author mh <mh@nadir.org>
+ * @version $Id: MediaHandlerMp3.java,v 1.15 2003/04/21 12:42:48 idfx Exp $
  */
 
 public class MediaHandlerMp3 extends MediaHandlerAudio implements MirMedia
 {
+  protected LoggerWrapper logger;
 
-    public void produce (Entity ent, Entity mediaTypeEnt )
-      throws MirMediaException {
-      
-      // first check if the file exists
-      super.produce(ent, mediaTypeEnt);
+  public MediaHandlerMp3() {
+    logger = new LoggerWrapper("Media.Audio.Mp3");
+  }
 
-      String baseName = ent.getId();
-      String date = ent.getValue("date");
-      String datePath = StringUtil.webdbDate2path(date);
-      String mp3Pointer = getPublishHost()+ent.getValue("publish_path");
-      String mpegURLFile = baseName+".m3u"; 
-      String playlistFile = baseName+".pls"; 
+  public void produce(Entity ent, Entity mediaTypeEnt) throws MediaExc, MediaFailure {
 
-      try {
-        //write the "meta" files
-        //first the .m3u since it only contains one line
-        FileUtil.write(getStoragePath()+"/"+datePath+"/"+mpegURLFile,
-                      new StringReader(mp3Pointer), "US-ASCII");
-        //now the .pls file
-        FileUtil.write(getStoragePath()+"/"+datePath+"/"+playlistFile,
-                      new StringReader(mp3Pointer), "US-ASCII");
-      } catch (Exception e) {
-          theLog.printError(e.toString()); 
-          throw new MirMediaException(e.toString());
-      }
+    // first check if the file exists
+    super.produce(ent, mediaTypeEnt);
+
+    String baseName = ent.getId();
+    String date = ent.getValue("date");
+    String datePath = StringUtil.webdbDate2path(date);
+    String mp3Pointer = getPublishHost() + ent.getValue("publish_path");
+    String mpegURLFile = baseName + ".m3u";
+    String playlistFile = baseName + ".pls";
+
+    try {
+      //write the "meta" files
+      //first the .m3u since it only contains one line
+      FileUtil.write(getStoragePath() + "/" + datePath + "/" + mpegURLFile,
+                     new StringReader(mp3Pointer), "US-ASCII");
+      //now the .pls file
+      FileUtil.write(getStoragePath() + "/" + datePath + "/" + playlistFile,
+                     new StringReader(mp3Pointer), "US-ASCII");
     }
+    catch (Throwable e) {
+      logger.error("MediaHandlerMp3.produce: " + e.toString());
 
-  public SimpleList getURL(Entity ent, Entity mediaTypeEnt)
-  {
+      throw new MediaFailure(e);
+    }
+  }
+
+  public SimpleList getURL(Entity ent, Entity mediaTypeEnt) {
     SimpleList theList = new SimpleList();
 
     //String stringSize = ent.getValue("size");
     //int size = Integer.parseInt(stringSize, 10)/1024;
     theList.add(ent);
-   
-    String basePath=StringUtil.regexpReplace(ent.getValue("publish_path"),
-                                            ".mp3$","");
+
+    String basePath = StringUtil.regexpReplace(ent.getValue("publish_path"),
+                                               ".mp3$", "");
 
     // @todo the texts ("title") below urgently need to be sanely localizaeble
     // somehow
     SimpleHash m3uHash = new SimpleHash();
-    m3uHash.put("publish_path", basePath+".m3u");
+    m3uHash.put("publish_path", basePath + ".m3u");
     m3uHash.put("publish_server", ent.getValue("publish_server"));
     m3uHash.put("title", "stream URL");
     theList.add(m3uHash);
 
     SimpleHash plsHash = new SimpleHash();
-    plsHash.put("publish_path", basePath+".pls");
+    plsHash.put("publish_path", basePath + ".pls");
     plsHash.put("publish_server", ent.getValue("publish_server"));
     plsHash.put("title", "playlist URL");
     theList.add(plsHash);
@@ -129,12 +132,10 @@ public class MediaHandlerMp3 extends MediaHandlerAudio implements MirMedia
 
   }
 
-  public String getDescr(Entity mediaType)
-  {
+  public String getDescr(Entity mediaType) {
     return "mp3";
   }
-
 }
-        
-        
+
+
 

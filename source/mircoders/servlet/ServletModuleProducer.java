@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001, 2002  The Mir-coders group
+ * Copyright (C) 2001, 2002 The Mir-coders group
  *
  * This file is part of Mir.
  *
@@ -18,84 +18,177 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with the com.oreilly.servlet library, any library
- * licensed under the Apache Software License, The Sun (tm) Java Advanced
- * Imaging library (JAI), The Sun JIMI library (or with modified versions of
- * the above that use the same license as the above), and distribute linked
- * combinations including the two.  You must obey the GNU General Public
- * License in all respects for all of the code used other than the above
- * mentioned libraries.  If you modify this file, you may extend this exception
- * to your version of the file, but you are not obligated to do so.  If you do
- * not wish to do so, delete this exception statement from your version.
+ * the code of this program with  any library licensed under the Apache Software License,
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library
+ * (or with modified versions of the above that use the same license as the above),
+ * and distribute linked combinations including the two.  You must obey the
+ * GNU General Public License in all respects for all of the code used other than
+ * the above mentioned libraries.  If you modify this file, you may extend this
+ * exception to your version of the file, but you are not obligated to do so.
+ * If you do not wish to do so, delete this exception statement from your version.
  */
-
 package mircoders.servlet;
 
-import java.io.*;
-import java.sql.*;
-import java.util.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
+import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Vector;
 
-import freemarker.template.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-import mir.servlet.*;
-import mir.misc.*;
+import mir.generator.Generator;
+import mir.log.LoggerWrapper;
+import mir.producer.ProducerFactory;
+import mir.servlet.ServletModule;
+import mir.servlet.ServletModuleFailure;
+import mir.util.ResourceBundleGeneratorFunction;
+import mircoders.global.MirGlobal;
 
-import mircoders.producer.*;
-import mircoders.entity.*;
-
-/* Verteilerservlet, dass je nach Parameter task die Klasse Producer"TASK"
- * ueber die Methode handle(); aufruft
- *
- * @author RK
- */
+import org.apache.struts.util.MessageResources;
 
 public class ServletModuleProducer extends ServletModule
 {
+  private static ServletModuleProducer instance = new ServletModuleProducer();
+  public static ServletModule getInstance() { return instance; }
 
-	private static ServletModuleProducer instance = new ServletModuleProducer();
-	public static ServletModule getInstance() { return instance; }
+  Object comments;
+  Map generationData;
+  Generator generator;
+  int totalNrComments;
+  List producersData;
 
-	private ServletModuleProducer() {
-		theLog = Logfile.getInstance(MirConfig.getProp("Home") + MirConfig.getProp("ServletModule.Producer.Logfile"));
-		defaultAction="produce";
-	}
+  void generateResponse(String aGeneratorIdentifier, PrintWriter aWriter, Map aResponseData, Locale aLocale) {
+    try {
+      generator = MirGlobal.localizer().generators().makeAdminGeneratorLibrary().makeGenerator(aGeneratorIdentifier);
+      MirGlobal.localizer().producerAssistant().initializeGenerationValueSet(aResponseData);
+      aResponseData.put( "lang", new ResourceBundleGeneratorFunction( aLocale, MessageResources.getMessageResources("bundles.admin")));
+      generator.generate(aWriter, aResponseData, logger);
+    }
+    catch (Throwable t) {
+      throw new ServletModuleFailure(t);
+    }
+  }
+
+  private ServletModuleProducer() {
+    super();
+    logger = new LoggerWrapper("ServletModule.Producer");
+    defaultAction="showProducerQueueStatus";
+  }
+
+  public void showMessage(PrintWriter aWriter, Locale aLocale, String aMessage, String anArgument1, String anArgument2) {
+    Map responseData;
+    try {
+      responseData = new HashMap();
+      responseData.put("message", aMessage);
+      responseData.put("argument1", anArgument1);
+      responseData.put("argument2", anArgument2);
+      generateResponse("infomessage.template", aWriter, responseData, aLocale);
+    }
+    catch (Throwable t) {
+      throw new ServletModuleFailure(t);
+    }
+  }
 
 
-	public void produce(HttpServletRequest req, HttpServletResponse res)
-		throws ServletModuleException
-	{
-		try {
-			PrintWriter out = res.getWriter();
-			String taskParam = req.getParameter("task");
-			String forcedParam = req.getParameter("forced");
-      String syncParam = req.getParameter("sync");
-			theLog.printInfo("Starting Task: " + taskParam);
-			if (taskParam == null) {
-				throw new ServletModuleException("Kein Task angegeben!");
-			} else {
-        Class producerModule = Class.forName("mircoders.producer.Producer" + taskParam);
-        Producer producer = (Producer)producerModule.newInstance();
-        HttpSession session=req.getSession(false);
-				EntityUsers user = (EntityUsers)session.getAttribute("login.uid");
+  public void showProducerQueueStatus(HttpServletRequest aRequest, HttpServletResponse aResponse) {
+    Object comments;
+    Map generationData;
+    Generator generator;
+    int totalNrComments;
+    List producersData;
 
-        if (forcedParam!=null && !forcedParam.equals("")) {
-          if (syncParam!=null && !syncParam.equals("")) {
-            producer.handle(out, user, true, true);
-          } else {
-            producer.handle(out, user, true,false);
-          }
-				} else {
-					producer.handle(out, user, false,false);
+    try {
+      generator = MirGlobal.localizer().generators().makeAdminGeneratorLibrary().makeGenerator("producerqueue.template");
+
+      generationData = ServletHelper.makeGenerationData(aResponse, new Locale[] { getLocale(aRequest), getFallbackLocale(aRequest)});
+      generationData.put( "thisurl", "module=Producer&do=showProducerQueueStatus");
+
+      producersData = new Vector();
+      Iterator i = MirGlobal.localizer().producers().factories().iterator();
+      while (i.hasNext()) {
+        ProducerFactory factory = (ProducerFactory) i.next();
+
+        List producerVerbs = new Vector();
+        Iterator j = factory.verbs();
+        while (j.hasNext()) {
+          Map verbData = new HashMap();
+          ProducerFactory.ProducerVerb verb = (ProducerFactory.ProducerVerb) j.next();
+          verbData.put("name", verb.getName());
+          verbData.put("description", verb.getDescription());
+
+          producerVerbs.add(verbData);
         }
 
-			}
-		}
-		catch (Exception e) {
-      throw new ServletModuleException(e.toString());
+        Map producerData = new HashMap();
+        producerData.put("name", factory.getName());
+        producerData.put("verbs", producerVerbs);
+
+        producersData.add(producerData);
+      }
+      generationData.put("producers", producersData);
+
+      generationData.put("queue", MirGlobal.producerEngine().getQueueStatus());
+      generator.generate(aResponse.getWriter(), generationData, logger);
     }
-	}
+    catch (Throwable t) {
+      throw new ServletModuleFailure(t);
+    }
+  }
 
+  public void produce(HttpServletRequest req, HttpServletResponse res) {
+    /*
+     * This method will only be called by external scripts (e.g. from cron jobs).
+     * The output therefore is very simple.
+     *
+     */
 
+    try {
+      PrintWriter out = res.getWriter();
+
+      if (req.getParameter("producer")!=null) {
+        String producerParam = req.getParameter("producer");
+        String verbParam = req.getParameter("verb");
+
+        MirGlobal.producerEngine().addJob(producerParam, verbParam);
+        out.println("job added");
+      }
+    }
+    catch (Throwable t) {
+      throw new ServletModuleFailure(t);
+    }
+  }
+
+  public void produceAllNew(HttpServletRequest aRequest, HttpServletResponse aResponse) {
+    try {
+      MirGlobal.localizer().producers().produceAllNew();
+      showMessage(aResponse.getWriter(), getLocale(aRequest), "produceAllNewAddedToQueue", "", "");
+    }
+    catch (Throwable t) {
+      throw new ServletModuleFailure(t);
+    }
+  }
+
+  public void enqueue(HttpServletRequest aRequest, HttpServletResponse aResponse) {
+    try {
+      if (aRequest.getParameter("producer")!=null) {
+        String producerParam = aRequest.getParameter("producer");
+        String verbParam = aRequest.getParameter("verb");
+
+        MirGlobal.producerEngine().addJob(producerParam, verbParam);
+
+        showProducerQueueStatus(aRequest, aResponse);
+      }
+    }
+    catch (Throwable t) {
+      throw new ServletModuleFailure(t);
+    }
+  }
+
+  public void cancelAbortJob(HttpServletRequest aRequest, HttpServletResponse aResponse)  {
+    // ML: to be coded
+  }
 }

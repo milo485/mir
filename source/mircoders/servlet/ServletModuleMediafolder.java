@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001, 2002  The Mir-coders group
+ * Copyright (C) 2001, 2002 The Mir-coders group
  *
  * This file is part of Mir.
  *
@@ -18,65 +18,68 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with the com.oreilly.servlet library, any library
- * licensed under the Apache Software License, The Sun (tm) Java Advanced
- * Imaging library (JAI), The Sun JIMI library (or with modified versions of
- * the above that use the same license as the above), and distribute linked
- * combinations including the two.  You must obey the GNU General Public
- * License in all respects for all of the code used other than the above
- * mentioned libraries.  If you modify this file, you may extend this exception
- * to your version of the file, but you are not obligated to do so.  If you do
- * not wish to do so, delete this exception statement from your version.
+ * the code of this program with  any library licensed under the Apache Software License, 
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
+ * (or with modified versions of the above that use the same license as the above), 
+ * and distribute linked combinations including the two.  You must obey the 
+ * GNU General Public License in all respects for all of the code used other than 
+ * the above mentioned libraries.  If you modify this file, you may extend this 
+ * exception to your version of the file, but you are not obligated to do so.  
+ * If you do not wish to do so, delete this exception statement from your version.
  */
-
 package mircoders.servlet;
 
 /**
  * Title:        Mir
- * Description:  liefert Webseiten zur Verwaltung von Mediafoldern aus.
+ * Description:
  * @author       rk
  * @version      02
  */
 
-import java.util.*;
-import javax.servlet.http.*;
-import freemarker.template.*;
+import java.util.GregorianCalendar;
 
-import mir.servlet.*;
-import mir.misc.*;
-import mir.storage.*;
-import mircoders.storage.*;
-import mircoders.module.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import mir.log.LoggerWrapper;
+import mir.misc.StringUtil;
+import mir.servlet.ServletModule;
+import mir.storage.StorageObjectFailure;
+import mircoders.module.ModuleMediafolder;
+import mircoders.storage.DatabaseMediafolder;
+import freemarker.template.SimpleHash;
+import freemarker.template.SimpleScalar;
 
 
 public class ServletModuleMediafolder extends ServletModule
 {
+  public static ServletModule getInstance() { return instance; }
+  private static ServletModuleMediafolder instance = new ServletModuleMediafolder();
 
-	// Singelton / Kontruktor
-	public static ServletModule getInstance() { return instance; }
-	private static ServletModuleMediafolder instance = new ServletModuleMediafolder();
+  private ServletModuleMediafolder() {
+    super();
+    logger = new LoggerWrapper("ServletModule.Mediafolder");
 
-	private ServletModuleMediafolder() {
-		theLog = Logfile.getInstance(MirConfig.getProp("Home") + MirConfig.getProp("ServletModule.Mediafolder.Logfile"));
-		templateListString = MirConfig.getProp("ServletModule.Mediafolder.ListTemplate");
-		templateObjektString = MirConfig.getProp("ServletModule.Mediafolder.ObjektTemplate");
-		templateConfirmString = MirConfig.getProp("ServletModule.Mediafolder.ConfirmTemplate");
-		try {
-			mainModule = new ModuleMediafolder(DatabaseMediafolder.getInstance());
-		}
-		catch (StorageObjectException e) {
-			theLog.printDebugInfo("ServletModuleMediafolder konnte nicht initialisiert werden");
-		}
-	}
+    templateListString = configuration.getString("ServletModule.Mediafolder.ListTemplate");
+    templateObjektString = configuration.getString("ServletModule.Mediafolder.ObjektTemplate");
+    templateConfirmString = configuration.getString("ServletModule.Mediafolder.ConfirmTemplate");
 
-	public void add(HttpServletRequest req, HttpServletResponse res) throws ServletModuleException
-	{
-			SimpleHash mergeData = new SimpleHash();
-			mergeData.put("new", "1");
-			String now = StringUtil.date2webdbDate(new GregorianCalendar());
-			// date auf now
-			mergeData.put("date", new SimpleScalar(now));
-			deliver(req, res, mergeData, templateObjektString);
-	}
+    try {
+      mainModule = new ModuleMediafolder(DatabaseMediafolder.getInstance());
+    }
+    catch (StorageObjectFailure e) {
+      logger.error("Failed to initialize ServletModuleMediafolder: " + e.getMessage());
+    }
+  }
+
+  public void add(HttpServletRequest req, HttpServletResponse res)
+  {
+    SimpleHash mergeData = new SimpleHash();
+    mergeData.put("new", "1");
+    String now = StringUtil.date2webdbDate(new GregorianCalendar());
+// date auf now
+    mergeData.put("date", new SimpleScalar(now));
+    deliver(req, res, mergeData, templateObjektString);
+  }
 
 }

@@ -1,0 +1,23 @@
+<hr>  
+<table width="99%" cellspacing="0">
+  <tbody>
+  <tr>
+    <td align="left" class="table-head">
+      <a href="#top"><span class="table-head"> ${lang("foot.top")}</span></a>
+      <if returnurl>
+        <a href="${config.actionRoot}?${returnurl}"><span class="table-head"> | &nbsp;&nbsp;${lang("back")} [ &lt; ]</span></a>&nbsp;&nbsp;
+      </if>
+    </td>
+    <td align="right" class="table-head">
+      <a href="mailto:${config["Mir.Contact-email.address"]}"><span class="table-head">${config["Mir.Shortname"]}</span></a> - ${config["Mir.Version"]}
+    </td>
+  </tr>
+</tbody>
+</table>
+
+
+  
+  
+  
+
+

@@ -1,0 +1,37 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<title>${lang("postingdupe.htmltitle")}</title>
+</head>
+
+<body bgcolor="White" text="Black" link="white" vlink="#009900" alink="Red">
+
+<table width="100%" border="0" cellspacing="0" cellpadding="10">
+	<tr>
+		<td valign="top" align="center" bgcolor="#663399">
+			<font color="White"><b>
+				${lang("postingdupe.title")}
+			</b></font
+		</td>
+	</tr>
+	<tr>
+		<td bgcolor="003300" width=70%>
+			<font color="White">
+				<br>
+                    ${lang("postingdupe.explanation")}
+				<br>
+				<center><em>${lang("postingdupe.no_panic")}</em></center><br>
+				<br>
+			</font>
+		</td>
+	</tr>
+	<tr>
+		<td valign="top" align="center" bgcolor="#663399">
+			<a href="javascript:history.go(-2)"><font color="White"><b>&gt;&gt; ${lang("postingdupe.back")}</b></font></a>
+		</td>
+	</tr>
+</table>
+
+</body>
+</html>

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001, 2002  The Mir-coders group
+ * Copyright (C) 2001, 2002 The Mir-coders group
  *
  * This file is part of Mir.
  *
@@ -18,32 +18,31 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with the com.oreilly.servlet library, any library
- * licensed under the Apache Software License, The Sun (tm) Java Advanced
- * Imaging library (JAI), The Sun JIMI library (or with modified versions of
- * the above that use the same license as the above), and distribute linked
- * combinations including the two.  You must obey the GNU General Public
- * License in all respects for all of the code used other than the above
- * mentioned libraries.  If you modify this file, you may extend this exception
- * to your version of the file, but you are not obligated to do so.  If you do
- * not wish to do so, delete this exception statement from your version.
+ * the code of this program with  any library licensed under the Apache Software License,
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library
+ * (or with modified versions of the above that use the same license as the above),
+ * and distribute linked combinations including the two.  You must obey the
+ * GNU General Public License in all respects for all of the code used other than
+ * the above mentioned libraries.  If you modify this file, you may extend this
+ * exception to your version of the file, but you are not obligated to do so.
+ * If you do not wish to do so, delete this exception statement from your version.
  */
-
-
 package mircoders.media;
 
-import java.lang.*;
-import java.io.*;
-import java.util.*;
-import java.lang.reflect.*;
+import java.io.File;
+import java.io.InputStream;
 
-import freemarker.template.SimpleList;
-
-import mir.media.*;
-import mir.misc.*;
-import mir.entity.*;
-import mir.storage.StorageObjectException;
+import mir.config.MirPropertiesConfiguration;
+import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
+import mir.entity.Entity;
+import mir.log.LoggerWrapper;
+import mir.media.MediaExc;
+import mir.media.MediaFailure;
+import mir.media.MirMedia;
+import mir.misc.FileUtil;
+import mir.misc.StringUtil;
 import mircoders.entity.EntityImages;
+import freemarker.template.SimpleList;
 
 /**
  * This class handles saving, fetching creating representations
@@ -59,52 +58,67 @@ import mircoders.entity.EntityImages;
  *
  * @see mir.media.MirMedia
  * @author mh
- * @version $Date: 2002/11/27 06:52:47 $ $Revision: 1.9.2.3 $
+ * @version $Id: MediaHandlerImages.java,v 1.23 2003/04/30 00:37:27 zapata Exp $
  */
 
 
 public abstract class MediaHandlerImages implements MirMedia
 {
-  static Logfile theLog = Logfile.getInstance(MirConfig.getProp("Home")+
-                                                "log/media.log");
-  static final String PNG = "PNG"; 
-  static final String JPEG = "JPEG"; 
+  protected static MirPropertiesConfiguration configuration;
+  protected static final String PNG = "PNG";
+  protected static final String JPEG = "JPEG";
+
+  protected LoggerWrapper logger;
+
+  static {
+    try {
+      configuration = MirPropertiesConfiguration.instance();
+    }
+    catch (PropertiesConfigExc e) {
+      throw new RuntimeException("Can't get configuration: " + e.getMessage());
+    }
+  }
 
   abstract String getType();
 
-	public InputStream getMedia(Entity ent, Entity mediaTypeEnt)
-    throws MirMediaException
-	{
-    InputStream in;
-    try {
-      in = ((EntityImages)ent).getImage();
-    } catch ( StorageObjectException e) {
-      theLog.printDebugInfo("MediaHandlerImages.getImage: "+e.toString()); 
-      throw new MirMediaException(e.toString());
-    }
-
-    return in;
+  public MediaHandlerImages() {
+    logger = new LoggerWrapper("Media.Images");
   }
 
-	public void set(InputStream in, Entity ent, Entity mediaTypeEnt)
-    throws MirMediaException {
+  public InputStream getMedia(Entity ent, Entity mediaTypeEnt) throws MediaExc, MediaFailure {
+    InputStream inputStream;
+
+    try {
+      inputStream = ((EntityImages)ent).getImage();
+    }
+    catch (Throwable e) {
+      logger.error("MediaHandlerImages.getImage: " + e.toString());
+
+      throw new MediaFailure(e);
+    }
+
+    return inputStream;
+  }
+
+  public void set(InputStream in, Entity ent, Entity mediaTypeEnt) throws MediaExc, MediaFailure {
 
     try {
       ((EntityImages)ent).setImage(in, getType());
-    } catch ( StorageObjectException e) {
-      theLog.printError("MediaHandlerImages.set: "+e.toString()); 
-      throw new MirMediaException(e.toString());
     }
+    catch (Throwable e) {
+      logger.error("MediaHandlerImages.set: "+e.getMessage());
+      e.printStackTrace(logger.asPrintWriter(LoggerWrapper.DEBUG_MESSAGE));
 
-	}
+      throw new MediaFailure(e);
+    }
+  }
 
-  public void produce(Entity ent, Entity mediaTypeEnt) throws MirMediaException
-  {
+  public void produce(Entity ent, Entity mediaTypeEnt) throws MediaExc, MediaFailure {
     String date = ent.getValue("date");
     String datePath = StringUtil.webdbDate2path(date);
     String ext = "."+mediaTypeEnt.getValue("name");
     String filepath = datePath+ent.getId()+ext;
-    String iconFilePath = MirConfig.getProp("Producer.StorageRoot")
+    String iconFilePath = configuration.getString("Producer.StorageRoot")
                           +getIconStoragePath() + filepath;
     String productionFilePath = getStoragePath() + File.separator + filepath;
 
@@ -120,87 +134,76 @@ public abstract class MediaHandlerImages implements MirMedia
         ent.setValueForProperty("icon_path",getIconStoragePath()+filepath);
         ent.setValueForProperty("publish_path",filepath);
         ent.update();
-      } catch ( Exception e) {
-        String msg = "MediaHandlerImages.produce - Error: " + e.toString();
-        theLog.printError(msg);
-        throw new MirMediaException(msg);
       }
-    } else {
-      String msg="MediaHandlerImages.produce - missing image or icon OID for: "+
-                  ent.getId();
-      theLog.printError(msg);
-      throw new MirMediaException(msg);
+      catch (Throwable e) {
+        logger.error("MediaHandlerImages.produce: " + e.toString());
+        throw new MediaFailure("MediaHandlerImages.produce: " + e.toString(), e);
+      }
+    }
+    else {
+      logger.error("MediaHandlerImages.produce: missing image or icon OID for: " + ent.getId());
+
+      throw new MediaExc("MediaHandlerImages.produce: missing image or icon OID for: " + ent.getId());
     }
   }
-                        
 
-	public InputStream getIcon(Entity ent) throws MirMediaException
-	{
+
+  public InputStream getIcon(Entity ent) throws MediaExc, MediaFailure {
     InputStream in;
     try {
       in = ((EntityImages)ent).getIcon();
-    } catch ( StorageObjectException e) {
-      theLog.printDebugInfo("MediaHandlerImages.getIcon: "+e.toString()); 
-      throw new MirMediaException(e.toString());
+    }
+    catch (Throwable e) {
+      logger.error("MediaHandlerImages.getIcon: " + e.toString());
+      throw new MediaFailure(e);
     }
 
     return in;
   }
 
-  public SimpleList getURL(Entity ent, Entity mediaTypeEnt)
-  {
+  public SimpleList getURL(Entity ent, Entity mediaTypeEnt) {
     SimpleList theList = new SimpleList();
     theList.add(ent);
     return theList;
   }
 
-  public String getStoragePath()
-  {
-    return MirConfig.getProp("Producer.Image.Path");
+  public String getStoragePath() {
+    return configuration.getString("Producer.Image.Path");
   }
 
-  public String getIconStoragePath()
-  {
-    return MirConfig.getProp("Producer.Image.IconPath");
+  public String getIconStoragePath() {
+    return configuration.getString("Producer.Image.IconPath");
   }
 
-  public String getPublishHost()
-  {
-    return StringUtil.removeSlash(MirConfig.getProp("Producer.Image.Host"));
+  public String getPublishHost() {
+    return StringUtil.removeSlash(configuration.getString("Producer.Image.Host"));
   }
 
-  public String getTinyIconName()
-  {
-    return MirConfig.getProp("Producer.Icon.TinyImage");
-  } 
+  public String getTinyIconName() {
+    return configuration.getString("Producer.Icon.TinyImage");
+  }
 
-  public String getBigIconName()
-  {
-    return MirConfig.getProp("Producer.Icon.BigImage");
-  } 
+  public String getBigIconName() {
+    return configuration.getString("Producer.Icon.BigImage");
+  }
 
-  public String getIconAltName()
-  {
+  public String getIconAltName() {
     return "Image";
-  } 
+  }
 
-  public boolean isVideo()
-  {
+  public boolean isVideo() {
     return false;
-  } 
+  }
 
-  public boolean isAudio()
-  {
+  public boolean isAudio() {
     return false;
-  } 
+  }
 
-  public boolean isImage ()
-  {
+  public boolean isImage () {
     return true;
-  } 
+  }
 
-  public String getDescr(Entity mediaType)
-  {
+  public String getDescr(Entity mediaType) {
     return "image/jpeg";
   }
 

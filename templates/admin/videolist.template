@@ -1,0 +1,17 @@
+<html>
+<head>
+  <title>${config["Mir.Name"]} | ${lang("video.htmltitle")}</title>
+        <link rel="stylesheet" type="text/css" href="${config.docRoot}/style/admin.css">
+</head>
+
+<body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
+
+<include "head.template">
+<include "FUNCTIONS_media.template">
+<call MediaSearch ("Video")>
+<p>&nbsp;</p>
+<call MediaList   ("Video")>
+
+<include "foot.template">
+</body>
+</html>

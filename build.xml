@@ -56,10 +56,10 @@
 
 -->
 
-  <property name="app.name"       value="Mir"/>
-  <property name="deploy.home"    value="../${app.name}"/>
+  <property name="app.name"       value="mir"/>
+  <property name="deploy.home"    value="./bin/${app.name}"/>
 
-  <!-- If you want to use the very good jikes compiler, uncomment this -->
+  <!-- don't use unless your Jikes is >= v1.18 -->
   <!-- <property name="build.compiler"   value="jikes"/>-->
 
 
@@ -81,6 +81,7 @@
     <pathelement path="${deploy.home}"/>
     <pathelement path="${deploy.classes}"/>
     <pathelement path="source"/>
+    <pathelement path="etc/extrasource"/>
     <fileset dir="lib">
       <include name="*.jar"/>
     </fileset>
@@ -93,13 +94,17 @@
 	<fileset dir="${tomcat.home}">
 		<include name="lib/apps/*.jar" />
 	</fileset>
-  <!-- for libs shared between tomcat and webapps (tomcat 4.0.x) -->
+  <!-- for libs shared between tomcat and webapps (tomcat 4.x.x) -->
 	<fileset dir="${tomcat.home}">
 		<include name="common/lib/*.jar" />
 	</fileset>
   <!-- for libs shared between webapps (tomcat 4.0.x) -->
 	<fileset dir="${tomcat.home}">
 		<include name="lib/*.jar" />
+	</fileset>
+  <!-- for libs shared between webapps (tomcat 4.1.x) -->
+	<fileset dir="${tomcat.home}">
+		<include name="shared/lib/*.jar" />
 	</fileset>
   </path>
 
@@ -114,31 +119,38 @@
 
   <target name="prepare">
     <mkdir  dir="${deploy.home}"/>
+    <mkdir  dir="${deploy.webinf}"/>
+    <mkdir  dir="${deploy.classes}"/>
+    <mkdir  dir="${deploy.webinf}/log"/>
+
     <copy todir="${deploy.home}">
       <fileset dir="web"/>
     </copy>
-    <mkdir  dir="${deploy.home}/templates"/>
-    <copy todir="${deploy.home}/templates">
+
+    <copy todir="${deploy.webinf}/etc">
+      <fileset dir="etc" excludes="bundles/** web.xml"/>
+    </copy>
+    <copy todir="${deploy.classes}/bundles">
+        <fileset dir="etc/bundles"/>
+    </copy>
+    <copy todir="${deploy.webinf}" file="etc/web.xml"/>
+
+    <copy todir="${deploy.webinf}/templates">
       <fileset dir="templates"/>
     </copy>
-    <mkdir  dir="${deploy.home}/src"/>
-    <copy todir="${deploy.home}/src">
-      <fileset dir="source"/>
+    
+    <copy todir="${deploy.webinf}" file="source/default.properties" />
+    
+    <copy todir="${deploy.classes}/bundles">
+      <fileset dir="bundles"/>
     </copy>
-
-    <mkdir  dir="${deploy.home}/WEB-INF"/>
-    <copy  file="etc/web.xml"          tofile="${deploy.home}/WEB-INF/web.xml"/>
-    <mkdir  dir="${deploy.classes}"/>
-    <mkdir  dir="${deploy.home}/WEB-INF/lib"/>
+    
     <copy todir="${deploy.home}/WEB-INF/lib">
       <fileset dir="lib">
         <exclude name="ant.jar"/>
         <exclude name="xerces.jar"/>
       </fileset>
     </copy>
-    <mkdir  dir="${javadoc.home}"/>
-    <mkdir  dir="${deploy.home}/log"/>
-
   </target>
 
 
@@ -151,7 +163,7 @@
 
   <target name="clean">
     <delete dir="${deploy.classes}"/>
-	<mkdir dir="${deploy.classes}"/>
+    <mkdir dir="${deploy.classes}"/>
   </target>
 
 
@@ -195,6 +207,10 @@
       <srcfileset
         dir="source"
         includes="**/*.java"/>
+<!-- ML: now why can't this be added?
+      <srcfileset
+        dir="etc/extrasource"
+        includes="**/*.java"/> -->
       <srcfileset
         dir="lib"
         includes="*.jar"/>
@@ -202,26 +218,18 @@
         dir="${deploy.classes}"
         includes="**/*.class"/>
     </dependset>
-    <javac srcdir="source" destdir="${deploy.classes}"
+    <javac destdir="${deploy.classes}"
            debug="on" optimize="off" deprecation="on">
+      <src path="source"/>
+      <src path="etc/extrasource"/>
       <classpath refid="project.class.path"/>
     </javac>
-    <copy   todir="${deploy.classes}">
-      <fileset dir="source" includes="**/*.properties"/>
-    </copy>
-    <copy   todir="${deploy.home}">
-      <fileset dir="source" includes="**/content-types.properties"/>
-      <fileset dir="source" includes="**/server.xml"/>
-    </copy>
-    <copy   todir="${deploy.classes}/bundles">
-      <fileset dir="bundles" includes="**/*.properties"/>
-    </copy>
   </target>
 
 
 
   <target name="perms">
-	<exec executable="./perms.sh"/>
+    <exec executable="./perms.sh"/>
   </target>
 
 

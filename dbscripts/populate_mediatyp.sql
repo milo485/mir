@@ -10,9 +10,6 @@
 
 -- \connect - de_indy
 
--- Disable triggers
-UPDATE "pg_class" SET "reltriggers" = 0 WHERE "relname" = 'media_type';
-
 INSERT INTO "media_type" VALUES (4,'mp3','audio/mp3','Mp3','Audio',NULL);
 INSERT INTO "media_type" VALUES (13,'mp3','audio/x-mp3','Mp3','Audio',NULL);
 INSERT INTO "media_type" VALUES (14,'mp3','audio/x-mpeg','Mp3','Audio',NULL);
@@ -31,14 +28,3 @@ INSERT INTO "media_type" VALUES (17,'rm','application/vnd.rn-realmedia','RealVid
 INSERT INTO "media_type" VALUES (18,'mp3','audio/mpeg','Mp3','Audio',NULL);
 INSERT INTO "media_type" VALUES (19,'png','image/gif','ImagesPng','Images',NULL);
 INSERT INTO "media_type" VALUES (20,'avi','video/avi','Video','Video',NULL);
--- Enable triggers
-UPDATE pg_class SET reltriggers = (SELECT count(*) FROM pg_trigger where pg_class.oid = tgrelid) WHERE relname = 'media_type';
-
---
--- TOC Entry ID 1 (OID 46923)
---
--- Name: media_type_id_seq Type: SEQUENCE SET Owner: 
---
-
-SELECT setval ('"media_type_id_seq"', 1, 't');
-

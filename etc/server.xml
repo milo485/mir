@@ -1,0 +1,10 @@
+<!-- Example Mir Configuration File -->
+ <mir name="t">
+  <class name="mircoders.servlet.ServletModuleOpenIndy">
+    <property name="directOp" value="yes"/>
+  </class>
+  <class name="mir.storage.DatabaseConfig">
+      <property name="username" value="postgres"/>
+      <property name="password" value=""/>
+  </class>
+</mir>

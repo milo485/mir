@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001, 2002  The Mir-coders group
+ * Copyright (C) 2001, 2002 The Mir-coders group
  *
  * This file is part of Mir.
  *
@@ -18,33 +18,54 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with the com.oreilly.servlet library, any library
- * licensed under the Apache Software License, The Sun (tm) Java Advanced
- * Imaging library (JAI), The Sun JIMI library (or with modified versions of
- * the above that use the same license as the above), and distribute linked
- * combinations including the two.  You must obey the GNU General Public
- * License in all respects for all of the code used other than the above
- * mentioned libraries.  If you modify this file, you may extend this exception
- * to your version of the file, but you are not obligated to do so.  If you do
- * not wish to do so, delete this exception statement from your version.
+ * the code of this program with  any library licensed under the Apache Software License,
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library
+ * (or with modified versions of the above that use the same license as the above),
+ * and distribute linked combinations including the two.  You must obey the
+ * GNU General Public License in all respects for all of the code used other than
+ * the above mentioned libraries.  If you modify this file, you may extend this
+ * exception to your version of the file, but you are not obligated to do so.
+ * If you do not wish to do so, delete this exception statement from your version.
  */
-
 package mir.storage;
 
-import  java.sql.*;
-import  java.lang.*;
-import  java.io.*;
-import  java.util.*;
-import  java.text.SimpleDateFormat;
-import  java.text.ParseException;
-import  freemarker.template.*;
-import  com.codestudio.sql.*;
-import  com.codestudio.util.*;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.*;
+import java.util.Map;
 
-import  mir.storage.StorageObject;
-import  mir.storage.store.*;
-import  mir.entity.*;
-import  mir.misc.*;
+import com.codestudio.util.SQLManager;
+
+import freemarker.template.SimpleHash;
+import freemarker.template.SimpleList;
+
+import mir.config.MirPropertiesConfiguration;
+import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
+import mir.entity.Entity;
+import mir.entity.EntityList;
+import mir.entity.StorableObjectEntity;
+import mir.log.LoggerWrapper;
+import mir.misc.HTMLTemplateProcessor;
+import mir.misc.StringUtil;
+import mir.storage.store.ObjectStore;
+import mir.storage.store.StorableObject;
+import mir.storage.store.StoreContainerType;
+import mir.storage.store.StoreIdentifier;
+import mir.storage.store.StoreUtil;
+import mir.util.JDBCStringRoutines;
 
 
 /**
@@ -55,1213 +76,1476 @@ import  mir.misc.*;
  * Treiber, Host, User und Passwort, ueber den der Zugriff auf die
  * Datenbank erfolgt.
  *
- * @version $Revision: 1.21.2.4 $ $Date: 2002/12/20 03:01:01 $
- * @author $Author: mh $
+ * @version $Id: Database.java,v 1.44 2003/05/06 18:08:05 zapata Exp $
+ * @author rk
  *
  */
 public class Database implements StorageObject {
+  private static Class GENERIC_ENTITY_CLASS = mir.entity.StorableObjectEntity.class;
+  private static Class STORABLE_OBJECT_ENTITY_CLASS = mir.entity.StorableObjectEntity.class;
 
-	protected String                    theTable;
-	protected String                    theCoreTable=null;
-	protected String                    thePKeyName="id";
-	protected int                       thePKeyType, thePKeyIndex;
-	protected boolean                   evaluatedMetaData=false;
-	protected ArrayList                 metadataFields,metadataLabels,
-																			metadataNotNullFields;
-	protected int[]                     metadataTypes;
-	protected Class                     theEntityClass;
-	protected StorageObject             myselfDatabase;
-	protected SimpleList                popupCache=null;
-	protected boolean                   hasPopupCache = false;
-	protected SimpleHash                hashCache=null;
-	protected boolean                   hasTimestamp=true;
-	private String                      database_driver, database_url;
-	private int                         defaultLimit;
-	protected DatabaseAdaptor           theAdaptor;
-	protected Logfile                   theLog;
-	private static Class                GENERIC_ENTITY_CLASS=null,
-                                      STORABLE_OBJECT_ENTITY_CLASS=null;
-  private static SimpleHash           POPUP_EMTYLINE=new SimpleHash();
-  protected static final ObjectStore  o_store=ObjectStore.getInstance();
-  private SimpleDateFormat _dateFormatterOut = 
-                                    new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-  private SimpleDateFormat _dateFormatterIn = 
-                                    new SimpleDateFormat("yyyy-MM-dd HH:mm");
-  private Calendar _cal = new GregorianCalendar();
 
+  private static SimpleHash POPUP_EMPTYLINE = new SimpleHash();
+  protected static final ObjectStore o_store = ObjectStore.getInstance();
   private static final int _millisPerHour = 60 * 60 * 1000;
   private static final int _millisPerMinute = 60 * 1000;
 
-	static {
-		// always same object saves a little space
-		POPUP_EMTYLINE.put("key", ""); POPUP_EMTYLINE.put("value", "--");
+  static {
+    // always same object saves a little space
+    POPUP_EMPTYLINE.put("key", "");
+    POPUP_EMPTYLINE.put("value", "--");
+  }
+
+  protected LoggerWrapper logger;
+  protected MirPropertiesConfiguration configuration;
+  protected String theTable;
+  protected String theCoreTable = null;
+  protected String thePKeyName = "id";
+  protected int thePKeyType;
+  protected int thePKeyIndex;
+  protected boolean evaluatedMetaData = false;
+  protected ArrayList metadataFields;
+  protected ArrayList metadataLabels;
+  protected ArrayList metadataNotNullFields;
+  protected int[] metadataTypes;
+  protected Class theEntityClass;
+  protected SimpleList popupCache = null;
+  protected boolean hasPopupCache = false;
+  protected SimpleHash hashCache = null;
+  protected boolean hasTimestamp = true;
+  private String database_driver;
+  private String database_url;
+  private int defaultLimit;
+  protected DatabaseAdaptor theAdaptor;
+  private SimpleDateFormat _dateFormatterOut =
+    new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+  private SimpleDateFormat _dateFormatterIn =
+    new SimpleDateFormat("yyyy-MM-dd HH:mm");
+  private Calendar _cal = new GregorianCalendar();
+
+  /**
+   * Kontruktor bekommt den Filenamen des Konfigurationsfiles ?bergeben.
+   * Aus diesem file werden <code>Database.Logfile</code>,
+   * <code>Database.Username</code>,<code>Database.Password</code>,
+   * <code>Database.Host</code> und <code>Database.Adaptor</code>
+   * ausgelesen und ein Broker f?r die Verbindugen zur Datenbank
+   * erzeugt.
+   *
+   * @param   String confFilename Dateiname der Konfigurationsdatei
+   */
+  public Database() throws StorageObjectFailure {
     try {
-      GENERIC_ENTITY_CLASS = Class.forName("mir.entity.StorableObjectEntity");
-      STORABLE_OBJECT_ENTITY_CLASS = Class.forName("mir.entity.StorableObjectEntity");
+      configuration = MirPropertiesConfiguration.instance();
     }
-    catch (Exception e) {
-      System.err.println("FATAL: Database.java could not initialize" + e.toString());
+    catch (PropertiesConfigExc e) {
+      throw new StorageObjectFailure(e);
+    }
+    logger = new LoggerWrapper("Database");
+
+    String theAdaptorName = configuration.getString("Database.Adaptor");
+    defaultLimit = Integer.parseInt(configuration.getString("Database.Limit"));
+
+    try {
+      theEntityClass = GENERIC_ENTITY_CLASS;
+      theAdaptor = (DatabaseAdaptor) Class.forName(theAdaptorName).newInstance();
+    }
+    catch (Throwable e) {
+      logger.error("Error in Database() constructor with " + theAdaptorName + " -- " + e.getMessage());
+      throw new StorageObjectFailure("Error in Database() constructor.", e);
     }
   }
 
+  /**
+   * Liefert die Entity-Klasse zur?ck, in der eine Datenbankzeile gewrappt
+   * wird. Wird die Entity-Klasse durch die erbende Klasse nicht ?berschrieben,
+   * wird eine mir.entity.GenericEntity erzeugt.
+   *
+   * @return Class-Objekt der Entity
+   */
+  public java.lang.Class getEntityClass() {
+    return theEntityClass;
+  }
 
-	/**
-	 * Kontruktor bekommt den Filenamen des Konfigurationsfiles übergeben.
-	 * Aus diesem file werden <code>Database.Logfile</code>,
-	 * <code>Database.Username</code>,<code>Database.Password</code>,
-	 * <code>Database.Host</code> und <code>Database.Adaptor</code>
-	 * ausgelesen und ein Broker für die Verbindugen zur Datenbank
-	 * erzeugt.
-	 *
-	 * @param   String confFilename Dateiname der Konfigurationsdatei
-	 */
-	public Database() throws StorageObjectException {
-		theLog = Logfile.getInstance(MirConfig.getProp("Home")+
-																MirConfig.getProp("Database.Logfile"));
-		String theAdaptorName=MirConfig.getProp("Database.Adaptor");
-		defaultLimit = Integer.parseInt(MirConfig.getProp("Database.Limit"));
-		try {
-			theEntityClass = GENERIC_ENTITY_CLASS;
-			theAdaptor = (DatabaseAdaptor)Class.forName(theAdaptorName).newInstance();
-		} catch (Exception e){
-			theLog.printError("Error in Database() constructor with "+
-												theAdaptorName + " -- " +e.toString());
-			throw new StorageObjectException("Error in Database() constructor with "
-																			 +e.toString());
-		}
-		/*String database_username=MirConfig.getProp("Database.Username");
-		String database_password=MirConfig.getProp("Database.Password");
-		String database_host=MirConfig.getProp("Database.Host");
-		try {
-			database_driver=theAdaptor.getDriver();
-			database_url=theAdaptor.getURL(database_username,database_password,
-																		database_host);
-			theLog.printDebugInfo("adding Broker with: " +database_driver+":"+
-														database_url  );
-			MirConfig.addBroker(database_driver,database_url);
-			//myBroker=MirConfig.getBroker();
-		}*/
-	}
+  /**
+   * Liefert die Standardbeschr?nkung von select-Statements zur?ck, also
+   * wieviel Datens?tze per Default selektiert werden.
+   *
+   * @return Standard-Anzahl der Datens?tze
+   */
+  public int getLimit() {
+    return defaultLimit;
+  }
 
-	/**
-	 * Liefert die Entity-Klasse zurück, in der eine Datenbankzeile gewrappt
-	 * wird. Wird die Entity-Klasse durch die erbende Klasse nicht überschrieben,
-	 * wird eine mir.entity.GenericEntity erzeugt.
-	 *
-	 * @return Class-Objekt der Entity
-	 */
-	public java.lang.Class getEntityClass () {
-		return  theEntityClass;
-	}
+  /**
+   * Liefert den Namen des Primary-Keys zur?ck. Wird die Variable nicht von
+   * der erbenden Klasse ?berschrieben, so ist der Wert <code>PKEY</code>
+   * @return Name des Primary-Keys
+   */
+  public String getIdName() {
+    return thePKeyName;
+  }
 
-	/**
-	 * Liefert die Standardbeschränkung von select-Statements zurück, also
-	 * wieviel Datensätze per Default selektiert werden.
-	 *
-	 * @return Standard-Anzahl der Datensätze
-	 */
-	public int getLimit () {
-		return  defaultLimit;
-	}
+  /**
+   * Liefert den Namen der Tabelle, auf das sich das Datenbankobjekt bezieht.
+   *
+   * @return Name der Tabelle
+   */
+  public String getTableName() {
+    return theTable;
+  }
 
-	/**
-	 * Liefert den Namen des Primary-Keys zurück. Wird die Variable nicht von
-	 * der erbenden Klasse überschrieben, so ist der Wert <code>PKEY</code>
-	 * @return Name des Primary-Keys
-	 */
-	public String getIdName () {
-		return  thePKeyName;
-	}
+  /*
+  *   Dient dazu vererbte Tabellen bei objectrelationalen DBMS
+  *   zu speichern, wenn die id einer Tabelle in der parenttabelle verwaltet
+  *   wird.
+  *   @return liefert theCoreTabel als String zurueck, wenn gesetzt, sonst
+  *    the Table
+   */
+  public String getCoreTable() {
+    if (theCoreTable != null) {
+      return theCoreTable;
+    }
+    else {
+      return theTable;
+    }
+  }
 
-	/**
-	 * Liefert den Namen der Tabelle, auf das sich das Datenbankobjekt bezieht.
-	 *
-	 * @return Name der Tabelle
-	 */
-	public String getTableName () {
-		return  theTable;
-	}
+  /**
+   * Liefert Feldtypen der Felder der Tabelle zurueck (s.a. java.sql.Types)
+   * @return int-Array mit den Typen der Felder
+   * @exception StorageObjectException
+   */
+  public int[] getTypes() throws StorageObjectFailure {
+    if (metadataTypes == null) {
+      get_meta_data();
+    }
 
-	/*
-	 *   Dient dazu vererbte Tabellen bei objectrelationalen DBMS
-	 *   zu speichern, wenn die id einer Tabelle in der parenttabelle verwaltet
-	 *   wird.
-	 *   @return liefert theCoreTabel als String zurueck, wenn gesetzt, sonst
-	 *    the Table
-	 */
+    return metadataTypes;
+  }
 
-	public String getCoreTable(){
-		if (theCoreTable!=null) return theCoreTable;
-		else return theTable;
-	}
+  /**
+   * Liefert eine Liste der Labels der Tabellenfelder
+   * @return ArrayListe mit Labeln
+   * @exception StorageObjectException
+   */
+  public List getLabels() throws StorageObjectFailure {
+    if (metadataLabels == null) {
+      get_meta_data();
+    }
 
-	/**
-	 * Liefert Feldtypen der Felder der Tabelle zurueck (s.a. java.sql.Types)
-	 * @return int-Array mit den Typen der Felder
-	 * @exception StorageObjectException
-	 */
-	public int[] getTypes () throws StorageObjectException {
-		if (metadataTypes == null)
-			get_meta_data();
-		return  metadataTypes;
-	}
+    return metadataLabels;
+  }
 
-	/**
-	 * Liefert eine Liste der Labels der Tabellenfelder
-	 * @return ArrayListe mit Labeln
-	 * @exception StorageObjectException
-	 */
-	public ArrayList getLabels () throws StorageObjectException {
-		if (metadataLabels == null)
-			get_meta_data();
-		return  metadataLabels;
-	}
+  /**
+   * Liefert eine Liste der Felder der Tabelle
+   * @return ArrayList mit Feldern
+   * @exception StorageObjectException
+   */
+  public List getFields() throws StorageObjectFailure {
+    if (metadataFields == null) {
+      get_meta_data();
+    }
 
-	/**
-	 * Liefert eine Liste der Felder der Tabelle
-	 * @return ArrayList mit Feldern
-	 * @exception StorageObjectException
-	 */
-	public ArrayList getFields () throws StorageObjectException {
-		if (metadataFields == null)
-			get_meta_data();
-		return  metadataFields;
-	}
+    return metadataFields;
+  }
 
+  /*
+  *   Gets value out of ResultSet according to type and converts to String
+  *   @param inValue  Wert aus ResultSet.
+  *   @param aType  Datenbanktyp.
+  *   @return liefert den Wert als String zurueck. Wenn keine Umwandlung moeglich
+  *           dann /unsupported value/
+   */
+  private String getValueAsString(ResultSet rs, int valueIndex, int aType)
+    throws StorageObjectFailure {
+    String outValue = null;
 
-	/*
-	 *   Gets value out of ResultSet according to type and converts to String
-	 *   @param inValue  Wert aus ResultSet.
-	 *   @param aType  Datenbanktyp.
-	 *   @return liefert den Wert als String zurueck. Wenn keine Umwandlung moeglich
-	 *           dann /unsupported value/
-	 */
-	private String getValueAsString (ResultSet rs, int valueIndex, int aType) throws StorageObjectException {
-		String outValue = null;
-		if (rs != null) {
-			try {
-				switch (aType) {
-					case java.sql.Types.BIT:
-						outValue = (rs.getBoolean(valueIndex) == true) ? "1" : "0";
-						break;
-					case java.sql.Types.INTEGER:case java.sql.Types.SMALLINT:case java.sql.Types.TINYINT:case java.sql.Types.BIGINT:
-						int out = rs.getInt(valueIndex);
-						if (!rs.wasNull())
-							outValue = new Integer(out).toString();
-						break;
-					case java.sql.Types.NUMERIC:
+    if (rs != null) {
+      try {
+        switch (aType) {
+          case java.sql.Types.BIT:
+            outValue = (rs.getBoolean(valueIndex) == true) ? "1" : "0";
+
+            break;
+
+          case java.sql.Types.INTEGER:
+          case java.sql.Types.SMALLINT:
+          case java.sql.Types.TINYINT:
+          case java.sql.Types.BIGINT:
+
+            int out = rs.getInt(valueIndex);
+
+            if (!rs.wasNull()) {
+              outValue = new Integer(out).toString();
+            }
+
+            break;
+
+          case java.sql.Types.NUMERIC:
+
             /** @todo Numeric can be float or double depending upon
              *  metadata.getScale() / especially with oracle */
-						long outl = rs.getLong(valueIndex);
-						if (!rs.wasNull())
-							outValue = new Long(outl).toString();
-						break;
-					case java.sql.Types.REAL:
-						float tempf = rs.getFloat(valueIndex);
-						if (!rs.wasNull()) {
-							tempf *= 10;
-							tempf += 0.5;
-							int tempf_int = (int)tempf;
-							tempf = (float)tempf_int;
-							tempf /= 10;
-							outValue = "" + tempf;
-							outValue = outValue.replace('.', ',');
-						}
-						break;
-					case java.sql.Types.DOUBLE:
-						double tempd = rs.getDouble(valueIndex);
-						if (!rs.wasNull()) {
-							tempd *= 10;
-							tempd += 0.5;
-							int tempd_int = (int)tempd;
-							tempd = (double)tempd_int;
-							tempd /= 10;
-							outValue = "" + tempd;
-							outValue = outValue.replace('.', ',');
-						}
-						break;
-					case java.sql.Types.CHAR:case java.sql.Types.VARCHAR:case java.sql.Types.LONGVARCHAR:
-						outValue = rs.getString(valueIndex);
-						break;
-					case java.sql.Types.LONGVARBINARY:
-						outValue = rs.getString(valueIndex);
-						break;
-					case java.sql.Types.TIMESTAMP:
+            long outl = rs.getLong(valueIndex);
+
+            if (!rs.wasNull()) {
+              outValue = new Long(outl).toString();
+            }
+
+            break;
+
+          case java.sql.Types.REAL:
+
+            float tempf = rs.getFloat(valueIndex);
+
+            if (!rs.wasNull()) {
+              tempf *= 10;
+              tempf += 0.5;
+
+              int tempf_int = (int) tempf;
+              tempf = (float) tempf_int;
+              tempf /= 10;
+              outValue = "" + tempf;
+              outValue = outValue.replace('.', ',');
+            }
+
+            break;
+
+          case java.sql.Types.DOUBLE:
+
+            double tempd = rs.getDouble(valueIndex);
+
+            if (!rs.wasNull()) {
+              tempd *= 10;
+              tempd += 0.5;
+
+              int tempd_int = (int) tempd;
+              tempd = (double) tempd_int;
+              tempd /= 10;
+              outValue = "" + tempd;
+              outValue = outValue.replace('.', ',');
+            }
+
+            break;
+
+          case java.sql.Types.CHAR:
+          case java.sql.Types.VARCHAR:
+          case java.sql.Types.LONGVARCHAR:
+            outValue = rs.getString(valueIndex);
+
+            break;
+
+          case java.sql.Types.LONGVARBINARY:
+            outValue = rs.getString(valueIndex);
+
+            break;
+
+          case java.sql.Types.TIMESTAMP:
+
             // it's important to use Timestamp here as getting it
             // as a string is undefined and is only there for debugging
             // according to the API. we can make it a string through formatting.
             // -mh
-					  Timestamp timestamp = (rs.getTimestamp(valueIndex));
-            if(!rs.wasNull()) {
+            Timestamp timestamp = (rs.getTimestamp(valueIndex));
+
+            if (!rs.wasNull()) {
               java.util.Date date = new java.util.Date(timestamp.getTime());
               outValue = _dateFormatterOut.format(date);
               _cal.setTime(date);
-              int offset = _cal.get(Calendar.ZONE_OFFSET)+
-                            _cal.get(Calendar.DST_OFFSET);
-              String tzOffset = StringUtil.zeroPaddingNumber(
-                                                     offset/_millisPerHour,2,2);
-              outValue = outValue+"+"+tzOffset;
+
+              int offset =
+                  _cal.get(Calendar.ZONE_OFFSET) + _cal.get(Calendar.DST_OFFSET);
+              String tzOffset =
+                  StringUtil.zeroPaddingNumber(offset / _millisPerHour, 2, 2);
+              outValue = outValue + "+" + tzOffset;
             }
-						break;
-					default:
-						outValue = "<unsupported value>";
-						theLog.printWarning("Unsupported Datatype: at " + valueIndex +
-								" (" + aType + ")");
-				}
-			} catch (SQLException e) {
-				throw  new StorageObjectException("Could not get Value out of Resultset -- "
-						+ e.toString());
-			}
-		}
-		return  outValue;
-	}
 
-	/*
-	 *   select-Operator um einen Datensatz zu bekommen.
-	 *   @param id Primaerschluessel des Datensatzes.
-	 *   @return liefert EntityObject des gefundenen Datensatzes oder null.
-	 */
-	public Entity selectById(String id)	throws StorageObjectException
-  {
-		if (id==null||id.equals(""))
-			throw new StorageObjectException("id war null");
+            break;
 
-    // ask object store for object
-    if ( StoreUtil.implementsStorableObject(theEntityClass) ) {
-      String uniqueId = id;
-      if ( theEntityClass.equals(StorableObjectEntity.class) )
-        uniqueId+="@"+theTable;
-      StoreIdentifier search_sid = new StoreIdentifier(theEntityClass, uniqueId);
-      theLog.printDebugInfo("CACHE: (dbg) looking for sid " + search_sid.toString());
-      Entity hit = (Entity)o_store.use(search_sid);
-      if ( hit!=null ) return hit;
+          default:
+            outValue = "<unsupported value>";
+            logger.warn("Unsupported Datatype: at " + valueIndex + " (" + aType + ")");
+        }
+      } catch (SQLException e) {
+        throw new StorageObjectFailure("Could not get Value out of Resultset -- ",
+          e);
+      }
     }
 
-		Statement stmt=null;Connection con=getPooledCon();
-		Entity returnEntity=null;
-		try {
-			ResultSet rs;
-			/** @todo better prepared statement */
-			String selectSql = "select * from " + theTable + " where " + thePKeyName + "=" + id;
-			stmt = con.createStatement();
-			rs = executeSql(stmt, selectSql);
-			if (rs != null) {
-				if (evaluatedMetaData==false) evalMetaData(rs.getMetaData());
-				if (rs.next())
-					returnEntity = makeEntityFromResultSet(rs);
-				else theLog.printDebugInfo("Keine daten fuer id: " + id + "in Tabelle" + theTable);
-				rs.close();
-			}
-			else {
-				theLog.printDebugInfo("No Data for Id " + id + " in Table " + theTable);
-			}
-		}
-		catch (SQLException sqe){
-			throwSQLException(sqe,"selectById"); return null;
-		}
-		catch (NumberFormatException e) {
-			theLog.printError("ID ist keine Zahl: " + id);
-		}
-		finally { freeConnection(con,stmt); }
+    return outValue;
+  }
 
-		/** @todo OS: Entity should be saved in ostore */
-		return returnEntity;
-	}
+  /*
+  *   select-Operator um einen Datensatz zu bekommen.
+  *   @param id Primaerschluessel des Datensatzes.
+  *   @return liefert EntityObject des gefundenen Datensatzes oder null.
+   */
+  public Entity selectById(String id) throws StorageObjectExc {
+    if ((id == null) || id.equals("")) {
+      throw new StorageObjectExc("Database.selectById: Missing id");
+    }
 
+    // ask object store for object
+    if (StoreUtil.implementsStorableObject(theEntityClass)) {
+      String uniqueId = id;
 
-	/**
-	 *   select-Operator um Datensaetze zu bekommen, die key = value erfuellen.
-	 *   @param key  Datenbankfeld der Bedingung.
-	 *   @param value  Wert die der key anehmen muss.
-	 *   @return EntityList mit den gematchten Entities
-	 */
-	public EntityList selectByFieldValue(String aField, String aValue)
-		throws StorageObjectException
-	{
-		return selectByFieldValue(aField, aValue, 0);
-	}
+      if (theEntityClass.equals(StorableObjectEntity.class)) {
+        uniqueId += ("@" + theTable);
+      }
 
-	/**
-	 *   select-Operator um Datensaetze zu bekommen, die key = value erfuellen.
-	 *   @param key  Datenbankfeld der Bedingung.
-	 *   @param value  Wert die der key anehmen muss.
-	 *   @param offset  Gibt an ab welchem Datensatz angezeigt werden soll.
-	 *   @return EntityList mit den gematchten Entities
-	 */
-	public EntityList selectByFieldValue(String aField, String aValue, int offset)
-		throws StorageObjectException
-	{
-		return selectByWhereClause(aField + "=" + aValue, offset);
-	}
+      StoreIdentifier search_sid = new StoreIdentifier(theEntityClass, uniqueId);
+      logger.debug("CACHE: (dbg) looking for sid " + search_sid.toString());
 
+      Entity hit = (Entity) o_store.use(search_sid);
 
-	/**
-	 * select-Operator liefert eine EntityListe mit den gematchten Datensätzen zurück.
-	 * Also offset wird der erste Datensatz genommen.
-	 *
-	 * @param wc where-Clause
-	 * @return EntityList mit den gematchten Entities
-	 * @exception StorageObjectException
-	 */
-	public EntityList selectByWhereClause(String where)
-		throws StorageObjectException
-	{
-		return selectByWhereClause(where, 0);
-	}
-
-
-	/**
-	 * select-Operator liefert eine EntityListe mit den gematchten Datensätzen zurück.
-	 * Als maximale Anzahl wird das Limit auf der Konfiguration genommen.
-	 *
-	 * @param wc where-Clause
-	 * @param offset ab welchem Datensatz.
-	 * @return EntityList mit den gematchten Entities
-	 * @exception StorageObjectException
-	 */
-	public EntityList selectByWhereClause(String whereClause, int offset)
-		throws StorageObjectException
-	{
-		return selectByWhereClause(whereClause, null, offset);
-	}
-
-
-	/**
-	 * select-Operator liefert eine EntityListe mit den gematchten Datensätzen zurück.
-	 * Also offset wird der erste Datensatz genommen.
-	 * Als maximale Anzahl wird das Limit auf der Konfiguration genommen.
-	 *
-	 * @param wc where-Clause
-	 * @param ob orderBy-Clause
-	 * @return EntityList mit den gematchten Entities
-	 * @exception StorageObjectException
-	 */
-
-	public EntityList selectByWhereClause(String where, String order)
-		throws StorageObjectException {
-		return selectByWhereClause(where, order, 0);
-	}
-
-
-	/**
-	 * select-Operator liefert eine EntityListe mit den gematchten Datensätzen zurück.
-	 * Als maximale Anzahl wird das Limit auf der Konfiguration genommen.
-	 *
-	 * @param wc where-Clause
-	 * @param ob orderBy-Clause
-	 * @param offset ab welchem Datensatz
-	 * @return EntityList mit den gematchten Entities
-	 * @exception StorageObjectException
-	 */
-
-	public EntityList selectByWhereClause(String whereClause, String orderBy, int offset)
-		throws StorageObjectException {
-		return selectByWhereClause(whereClause, orderBy, offset, defaultLimit);
-	}
-
-
-	/**
-	 * select-Operator liefert eine EntityListe mit den gematchten Datensätzen zurück.
-	 * @param wc where-Clause
-	 * @param ob orderBy-Clause
-	 * @param offset ab welchem Datensatz
-	 * @param limit wieviele Datensätze
-	 * @return EntityList mit den gematchten Entities
-	 * @exception StorageObjectException
-	 */
-
-	public EntityList selectByWhereClause(String wc, String ob, int offset, int limit)
-		throws StorageObjectException
-  {
-
-    // check o_store for entitylist
-    if ( StoreUtil.implementsStorableObject(theEntityClass) ) {
-      StoreIdentifier search_sid =
-        new StoreIdentifier( theEntityClass,
-                             StoreContainerType.STOC_TYPE_ENTITYLIST,
-                             StoreUtil.getEntityListUniqueIdentifierFor(theTable,wc,ob,offset,limit) );
-      EntityList hit = (EntityList)o_store.use(search_sid);
-      if ( hit!=null ) {
-        theLog.printDebugInfo("CACHE (hit): " + search_sid.toString());
+      if (hit != null) {
         return hit;
       }
     }
 
-		// local
-		EntityList    theReturnList=null;
-		Connection    con=null;	Statement stmt=null;
-		ResultSet     rs;
-		int           offsetCount = 0, count=0;
+    Statement stmt = null;
+    Connection con = getPooledCon();
+    Entity returnEntity = null;
 
-		// build sql-statement
+    try {
+      ResultSet rs;
 
-		/** @todo count sql string should only be assembled if we really count
-		 *  see below at the end of method //rk */
+      /** @todo better prepared statement */
+      String selectSql =
+        "select * from " + theTable + " where " + thePKeyName + "=" + id;
+      stmt = con.createStatement();
+      rs = executeSql(stmt, selectSql);
 
-		if (wc != null && wc.length() == 0) {
-			wc = null;
-		}
-		StringBuffer countSql = new StringBuffer("select count(*) from ").append(theTable);
-		StringBuffer selectSql = new StringBuffer("select * from ").append(theTable);
-		if (wc != null) {
-			selectSql.append(" where ").append(wc);
-			countSql.append(" where ").append(wc);
-		}
-		if (ob != null && !(ob.length() == 0)) {
-			selectSql.append(" order by ").append(ob);
-		}
-		if (theAdaptor.hasLimit()) {
-			if (limit > -1 && offset > -1) {
-				selectSql.append(" limit ");
-				if (theAdaptor.reverseLimit()) {
-					selectSql.append(limit).append(",").append(offset);
-				}
-				else {
-					selectSql.append(offset).append(",").append(limit);
-				}
-			}
-		}
+      if (rs != null) {
+        if (evaluatedMetaData == false) {
+          evalMetaData(rs.getMetaData());
+        }
 
-		// execute sql
-		try {
-			con = getPooledCon();
-			stmt = con.createStatement();
+        if (rs.next()) {
+          returnEntity = makeEntityFromResultSet(rs);
+        }
+        else {
+          logger.debug("No data for id: " + id + " in table " + theTable);
+        }
 
-			// selecting...
-			rs = executeSql(stmt, selectSql.toString());
-			if (rs != null) {
-				if (!evaluatedMetaData) evalMetaData(rs.getMetaData());
+        rs.close();
+      }
+      else {
+        logger.debug("No Data for Id " + id + " in Table " + theTable);
+      }
+    }
+    catch (SQLException sqe) {
+      throwSQLException(sqe, "selectById");
+      return null;
+    }
+    catch (NumberFormatException e) {
+      logger.error("ID is no number: " + id);
+    }
+    finally {
+      freeConnection(con, stmt);
+    }
 
-				theReturnList = new EntityList();
-				Entity theResultEntity;
-				while (rs.next()) {
-					theResultEntity = makeEntityFromResultSet(rs);
-					theReturnList.add(theResultEntity);
-					offsetCount++;
-				}
-				rs.close();
-			}
+    return returnEntity;
+  }
 
-			// making entitylist infos
-			if (!(theAdaptor.hasLimit())) count = offsetCount;
+  /**
+   *   select-Operator um Datensaetze zu bekommen, die key = value erfuellen.
+   *   @param key  Datenbankfeld der Bedingung.
+   *   @param value  Wert die der key anehmen muss.
+   *   @return EntityList mit den gematchten Entities
+   */
+  public EntityList selectByFieldValue(String aField, String aValue) throws StorageObjectFailure {
+    return selectByFieldValue(aField, aValue, 0);
+  }
 
-			if (theReturnList != null) {
-				// now we decide if we have to know an overall count...
-				count=offsetCount;
-				if (limit > -1 && offset > -1) {
-					if (offsetCount==limit) {
-						/** @todo counting should be deffered to entitylist
-						 *  getSize() should be used */
-						rs = executeSql(stmt, countSql.toString());
-						if (rs != null) {
-							if ( rs.next() ) count = rs.getInt(1);
-							rs.close();
-						}
-						else theLog.printError("Could not count: " + countSql);
-					}
-				}
-				theReturnList.setCount(count);
-				theReturnList.setOffset(offset);
-				theReturnList.setWhere(wc);
-				theReturnList.setOrder(ob);
+  /**
+   *   select-Operator um Datensaetze zu bekommen, die key = value erfuellen.
+   *   @param key  Datenbankfeld der Bedingung.
+   *   @param value  Wert die der key anehmen muss.
+   *   @param offset  Gibt an ab welchem Datensatz angezeigt werden soll.
+   *   @return EntityList mit den gematchten Entities
+   */
+  public EntityList selectByFieldValue(String aField, String aValue, int offset) throws StorageObjectFailure {
+    return selectByWhereClause(aField + "=" + aValue, offset);
+  }
+
+  /**
+   * select-Operator liefert eine EntityListe mit den gematchten Datens?tzen zur?ck.
+   * Also offset wird der erste Datensatz genommen.
+   *
+   * @param wc where-Clause
+   * @return EntityList mit den gematchten Entities
+   * @exception StorageObjectException
+   */
+  public EntityList selectByWhereClause(String where) throws StorageObjectFailure {
+    return selectByWhereClause(where, 0);
+  }
+
+  /**
+   * select-Operator liefert eine EntityListe mit den gematchten Datens?tzen zur?ck.
+   * Als maximale Anzahl wird das Limit auf der Konfiguration genommen.
+   *
+   * @param wc where-Clause
+   * @param offset ab welchem Datensatz.
+   * @return EntityList mit den gematchten Entities
+   * @exception StorageObjectException
+   */
+  public EntityList selectByWhereClause(String whereClause, int offset) throws StorageObjectFailure {
+    return selectByWhereClause(whereClause, null, offset);
+  }
+
+  /**
+   * select-Operator liefert eine EntityListe mit den gematchten Datens?tzen zur?ck.
+   * Also offset wird der erste Datensatz genommen.
+   * Als maximale Anzahl wird das Limit auf der Konfiguration genommen.
+   *
+   * @param wc where-Clause
+   * @param ob orderBy-Clause
+   * @return EntityList mit den gematchten Entities
+   * @exception StorageObjectException
+   */
+  public EntityList selectByWhereClause(String where, String order) throws StorageObjectFailure {
+    return selectByWhereClause(where, order, 0);
+  }
+
+  /**
+   * select-Operator liefert eine EntityListe mit den gematchten Datens?tzen zur?ck.
+   * Als maximale Anzahl wird das Limit auf der Konfiguration genommen.
+   *
+   * @param wc where-Clause
+   * @param ob orderBy-Clause
+   * @param offset ab welchem Datensatz
+   * @return EntityList mit den gematchten Entities
+   * @exception StorageObjectException
+   */
+  public EntityList selectByWhereClause(String whereClause, String orderBy, int offset) throws StorageObjectFailure {
+    return selectByWhereClause(whereClause, orderBy, offset, defaultLimit);
+  }
+
+  /**
+   * select-Operator liefert eine EntityListe mit den gematchten Datens?tzen zur?ck.
+   * @param aWhereClause where-Clause
+   * @param anOrderByClause orderBy-Clause
+   * @param offset ab welchem Datensatz
+   * @param limit wieviele Datens?tze
+   * @return EntityList mit den gematchten Entities
+   * @exception StorageObjectException
+   */
+  public EntityList selectByWhereClause(String aWhereClause, String anOrderByClause,
+            int offset, int limit) throws StorageObjectFailure {
+
+    // check o_store for entitylist
+    if (StoreUtil.implementsStorableObject(theEntityClass)) {
+      StoreIdentifier search_sid =
+          new StoreIdentifier(
+            theEntityClass, StoreContainerType.STOC_TYPE_ENTITYLIST,
+            StoreUtil.getEntityListUniqueIdentifierFor(theTable, aWhereClause, anOrderByClause, offset, limit));
+      EntityList hit = (EntityList) o_store.use(search_sid);
+
+      if (hit != null) {
+        logger.debug("CACHE (hit): " + search_sid.toString());
+
+        return hit;
+      }
+    }
+
+    // local
+    EntityList theReturnList = null;
+    Connection con = null;
+    Statement stmt = null;
+    ResultSet rs;
+    int offsetCount = 0;
+    int count = 0;
+
+    // build sql-statement
+
+    /** @todo count sql string should only be assembled if we really count
+     *  see below at the end of method //rk */
+    if ((aWhereClause != null) && (aWhereClause.trim().length() == 0)) {
+      aWhereClause = null;
+    }
+
+    StringBuffer countSql =
+      new StringBuffer("select count(*) from ").append(theTable);
+    StringBuffer selectSql =
+      new StringBuffer("select * from ").append(theTable);
+
+    if (aWhereClause != null) {
+      selectSql.append(" where ").append(aWhereClause);
+      countSql.append(" where ").append(aWhereClause);
+    }
+
+    if ((anOrderByClause != null) && !(anOrderByClause.trim().length() == 0)) {
+      selectSql.append(" order by ").append(anOrderByClause);
+    }
+
+    if (theAdaptor.hasLimit()) {
+      if ((limit > -1) && (offset > -1)) {
+        selectSql.append(" LIMIT ").append(limit).append(" OFFSET ").append(offset);
+      }
+    }
+
+    // execute sql
+    try {
+      con = getPooledCon();
+      stmt = con.createStatement();
+
+      // selecting...
+      rs = executeSql(stmt, selectSql.toString());
+
+      if (rs != null) {
+        if (!evaluatedMetaData) {
+          evalMetaData(rs.getMetaData());
+        }
+
+        theReturnList = new EntityList();
+
+        Entity theResultEntity;
+
+        while (rs.next()) {
+          theResultEntity = makeEntityFromResultSet(rs);
+          theReturnList.add(theResultEntity);
+          offsetCount++;
+        }
+
+        rs.close();
+      }
+
+      // making entitylist infos
+      if (!(theAdaptor.hasLimit())) {
+        count = offsetCount;
+      }
+
+      if (theReturnList != null) {
+        // now we decide if we have to know an overall count...
+        count = offsetCount;
+
+        if ((limit > -1) && (offset > -1)) {
+          if (offsetCount == limit) {
+            /** @todo counting should be deffered to entitylist
+             *  getSize() should be used */
+            rs = executeSql(stmt, countSql.toString());
+
+            if (rs != null) {
+              if (rs.next()) {
+                count = rs.getInt(1);
+              }
+
+              rs.close();
+            }
+            else {
+              logger.error("Could not count: " + countSql);
+            }
+          }
+        }
+
+        theReturnList.setCount(count);
+        theReturnList.setOffset(offset);
+        theReturnList.setWhere(aWhereClause);
+        theReturnList.setOrder(anOrderByClause);
         theReturnList.setStorage(this);
         theReturnList.setLimit(limit);
-				if ( offset >= limit )
-					theReturnList.setPrevBatch(offset - limit);
-				if ( offset+offsetCount < count )
-					theReturnList.setNextBatch(offset + limit);
-        if ( StoreUtil.implementsStorableObject(theEntityClass) ) {
-          StoreIdentifier sid=theReturnList.getStoreIdentifier();
-          theLog.printDebugInfo("CACHE (add): " + sid.toString());
+
+        if (offset >= limit) {
+          theReturnList.setPrevBatch(offset - limit);
+        }
+
+        if ((offset + offsetCount) < count) {
+          theReturnList.setNextBatch(offset + limit);
+        }
+
+        if (StoreUtil.implementsStorableObject(theEntityClass)) {
+          StoreIdentifier sid = theReturnList.getStoreIdentifier();
+          logger.debug("CACHE (add): " + sid.toString());
           o_store.add(sid);
         }
-			}
-		}
-		catch (SQLException sqe) { throwSQLException(sqe, "selectByWhereClause"); }
-		finally { freeConnection(con, stmt); }
+      }
+    }
+    catch (SQLException sqe) {
+      throwSQLException(sqe, "selectByWhereClause");
+    }
+    finally {
+      try {
+        if (con != null) {
+          freeConnection(con, stmt);
+        }
+      } catch (Throwable t) {
+      }
+    }
 
-		return  theReturnList;
-	}
+    return theReturnList;
+  }
 
+  /**
+   *  Bastelt aus einer Zeile der Datenbank ein EntityObjekt.
+   *
+   *  @param rs Das ResultSetObjekt.
+   *  @return Entity Die Entity.
+   */
+  private Entity makeEntityFromResultSet(ResultSet rs)
+    throws StorageObjectFailure {
+    /** @todo OS: get Pkey from ResultSet and consult ObjectStore */
+    Map theResultHash = new HashMap();
+    String theResult = null;
+    int theType;
+    Entity returnEntity = null;
 
-	/**
-	 *  Bastelt aus einer Zeile der Datenbank ein EntityObjekt.
-	 *
-	 *  @param rs Das ResultSetObjekt.
-	 *  @return Entity Die Entity.
-	 */
-	private Entity makeEntityFromResultSet (ResultSet rs)
-		throws StorageObjectException
-	{
-		/** @todo OS: get Pkey from ResultSet and consult ObjectStore */
-		HashMap theResultHash = new HashMap();
-		String theResult = null;
-		int theType;
-		Entity returnEntity = null;
-		try {
-			int size = metadataFields.size();
-			for (int i = 0; i < size; i++) {
-				// alle durchlaufen bis nix mehr da
-				theType = metadataTypes[i];
-				if (theType == java.sql.Types.LONGVARBINARY) {
-					InputStreamReader is = (InputStreamReader)rs.getCharacterStream(i + 1);
-					if (is != null) {
-						char[] data = new char[32768];
-						StringBuffer theResultString = new StringBuffer();
-						int len;
-						while ((len = is.read(data)) > 0) {
-							theResultString.append(data, 0, len);
-						}
-						is.close();
-						theResult = theResultString.toString();
-					}
-					else {
-						theResult = null;
-					}
-				}
-				else {
-					theResult = getValueAsString(rs, (i + 1), theType);
-				}
-				if (theResult != null) {
-					theResultHash.put(metadataFields.get(i), theResult);
-				}
-			}
+    try {
+      int size = metadataFields.size();
+
+      for (int i = 0; i < size; i++) {
+        // alle durchlaufen bis nix mehr da
+        theType = metadataTypes[i];
+
+        if (theType == java.sql.Types.LONGVARBINARY) {
+          InputStreamReader is =
+            (InputStreamReader) rs.getCharacterStream(i + 1);
+
+          if (is != null) {
+            char[] data = new char[32768];
+            StringBuffer theResultString = new StringBuffer();
+            int len;
+
+            while ((len = is.read(data)) > 0) {
+              theResultString.append(data, 0, len);
+            }
+
+            is.close();
+            theResult = theResultString.toString();
+          } else {
+            theResult = null;
+          }
+        } else {
+          theResult = getValueAsString(rs, (i + 1), theType);
+        }
+
+        if (theResult != null) {
+          theResultHash.put(metadataFields.get(i), theResult);
+        }
+      }
+
       if (theEntityClass != null) {
-        returnEntity = (Entity)theEntityClass.newInstance();
+        returnEntity = (Entity) theEntityClass.newInstance();
         returnEntity.setValues(theResultHash);
-        returnEntity.setStorage(myselfDatabase);
-        if ( returnEntity instanceof StorableObject ) {
-          theLog.printDebugInfo("CACHE: ( in) " + returnEntity.getId() + " :"+theTable);
-          o_store.add(((StorableObject)returnEntity).getStoreIdentifier());
+        returnEntity.setStorage(this);
+
+        if (returnEntity instanceof StorableObject) {
+          logger.debug("CACHE: ( in) " + returnEntity.getId() + " :" + theTable);
+          o_store.add(((StorableObject) returnEntity).getStoreIdentifier());
         }
       } else {
         throwStorageObjectException("Internal Error: theEntityClass not set!");
       }
-		} catch (IllegalAccessException e) {
-			throwStorageObjectException("Kein Zugriff! -- " + e.toString());
-		} catch (IOException e) {
-			throwStorageObjectException("IOException! -- " + e.toString());
-		} catch (InstantiationException e) {
-			throwStorageObjectException("Keine Instantiiierung! -- " + e.toString());
-		} catch (SQLException sqe) {
-			throwSQLException(sqe, "makeEntityFromResultSet");
-			return  null;
-		}
-		return  returnEntity;
-	}
+    }
+    catch (IllegalAccessException e) {
+      throwStorageObjectException("No access! -- " + e.getMessage());
+    }
+    catch (IOException e) {
+      throwStorageObjectException("IOException! -- " + e.getMessage());
+    }
+    catch (InstantiationException e) {
+      throwStorageObjectException("No Instatiation! -- " + e.getMessage());
+    }
+    catch (SQLException sqe) {
+      throwSQLException(sqe, "makeEntityFromResultSet");
 
-	/**
-	 * insert-Operator: fügt eine Entity in die Tabelle ein. Eine Spalte WEBDB_CREATE
-	 * wird automatisch mit dem aktuellen Datum gefuellt.
-	 *
-	 * @param theEntity
-	 * @return der Wert des Primary-keys der eingefügten Entity
-	 */
-	public String insert (Entity theEntity) throws StorageObjectException {
-		//cache
-		invalidatePopupCache();
+      return null;
+    }
+
+    return returnEntity;
+  }
+
+  /**
+   * Inserts an entity into the database.
+   *
+   * @param theEntity
+   * @return der Wert des Primary-keys der eingef?gten Entity
+   */
+  public String insert(Entity theEntity) throws StorageObjectFailure {
+    //cache
+    invalidatePopupCache();
 
     // invalidating all EntityLists corresponding with theEntityClass
-    if ( StoreUtil.implementsStorableObject(theEntityClass) ) {
+    if (StoreUtil.implementsStorableObject(theEntityClass)) {
       StoreContainerType stoc_type =
-        StoreContainerType.valueOf( theEntityClass,
-                                    StoreContainerType.STOC_TYPE_ENTITYLIST);
+        StoreContainerType.valueOf(theEntityClass,
+          StoreContainerType.STOC_TYPE_ENTITYLIST);
       o_store.invalidate(stoc_type);
     }
 
-		String returnId = null;
-		Connection con = null; PreparedStatement pstmt = null;
+    String returnId = null;
+    Connection con = null;
+    PreparedStatement pstmt = null;
 
     try {
-			ArrayList streamedInput = theEntity.streamedInput();
-			StringBuffer f = new StringBuffer();
-			StringBuffer v = new StringBuffer();
-			String aField, aValue;
-			boolean firstField = true;
-			// make sql-string
-			for (int i = 0; i < getFields().size(); i++) {
-				aField = (String)getFields().get(i);
-				if (!aField.equals(thePKeyName)) {
-					aValue = null;
-					// sonderfaelle
-					if (aField.equals("webdb_create") ||
+      List streamedInput = theEntity.streamedInput();
+      StringBuffer f = new StringBuffer();
+      StringBuffer v = new StringBuffer();
+      String aField;
+      String aValue;
+      boolean firstField = true;
+
+      // make sql-string
+      for (int i = 0; i < getFields().size(); i++) {
+        aField = (String) getFields().get(i);
+
+        if (!aField.equals(thePKeyName)) {
+          aValue = null;
+
+          // exceptions
+          if (aField.equals("webdb_create") ||
               aField.equals("webdb_lastchange")) {
-						aValue = "NOW()";
-					}
-					else {
-						if (streamedInput != null && streamedInput.contains(aField)) {
-							aValue = "?";
-						}
-						else {
-							if (theEntity.hasValueForField(aField)) {
-								aValue = "'" + StringUtil.JDBCescapeStringLiteral((String)theEntity.getValue(aField))
-										+ "'";
-							}
-						}
-					}
-					// wenn Wert gegeben, dann einbauen
-					if (aValue != null) {
-						if (firstField == false) {
-							f.append(",");
-							v.append(",");
-						}
-						else {
-							firstField = false;
-						}
-						f.append(aField);
-						v.append(aValue);
-					}
-				}
-			}         // end for
-			// insert into db
-			StringBuffer sqlBuf = new StringBuffer("insert into ").append(theTable).append("(").append(f).append(") values (").append(v).append(")");
-			String sql = sqlBuf.toString();
-			//theLog.printInfo("INSERT: " + sql);
-			con = getPooledCon();
-			con.setAutoCommit(false);
-			pstmt = con.prepareStatement(sql);
-			if (streamedInput != null) {
-				for (int i = 0; i < streamedInput.size(); i++) {
-					String inputString = (String)theEntity.getValue((String)streamedInput.get(i));
-					pstmt.setBytes(i + 1, inputString.getBytes());
-				}
-			}
-			int ret = pstmt.executeUpdate();
-			if(ret == 0){
-				//insert failed
-				return null;
-			}
-			pstmt = con.prepareStatement(theAdaptor.getLastInsertSQL((Database)myselfDatabase));
-			ResultSet rs = pstmt.executeQuery();
-			rs.next();
-			returnId = rs.getString(1);
-			theEntity.setId(returnId);
-		} catch (SQLException sqe) {
-			throwSQLException(sqe, "insert");
-		} finally {
-			try {
-				con.setAutoCommit(true);
-			} catch (Exception e) {
-				;
-			}
-			freeConnection(con, pstmt);
-		}
+            aValue = "NOW()";
+          }
+          else {
+            if ((streamedInput != null) && streamedInput.contains(aField)) {
+              aValue = "?";
+            } else {
+              if (theEntity.hasValueForField(aField)) {
+                aValue =
+                  "'" +
+                  JDBCStringRoutines.escapeStringLiteral((String) theEntity.getValue(
+                      aField)) + "'";
+              }
+            }
+          }
+
+          // wenn Wert gegeben, dann einbauen
+          if (aValue != null) {
+            if (firstField == false) {
+              f.append(",");
+              v.append(",");
+            }
+            else {
+              firstField = false;
+            }
+
+            f.append(aField);
+            v.append(aValue);
+          }
+        }
+      }
+       // end for
+
+      // insert into db
+      StringBuffer sqlBuf =
+        new StringBuffer("insert into ").append(theTable).append("(").append(f)
+                                        .append(") values (").append(v).append(")");
+      String sql = sqlBuf.toString();
+
+      logger.debug("INSERT: " + sql);
+      con = getPooledCon();
+      con.setAutoCommit(false);
+      pstmt = con.prepareStatement(sql);
+
+      if (streamedInput != null) {
+        for (int i = 0; i < streamedInput.size(); i++) {
+          String inputString =
+            (String) theEntity.getValue((String) streamedInput.get(i));
+          pstmt.setBytes(i + 1, inputString.getBytes());
+        }
+      }
+
+      int ret = pstmt.executeUpdate();
+
+      if (ret == 0) {
+        //insert failed
+        return null;
+      }
+
+      pstmt = con.prepareStatement(theAdaptor.getLastInsertSQL(this));
+
+      ResultSet rs = pstmt.executeQuery();
+      rs.next();
+      returnId = rs.getString(1);
+      theEntity.setId(returnId);
+    }
+    catch (SQLException sqe) {
+      throwSQLException(sqe, "insert");
+    }
+    finally {
+      try {
+        con.setAutoCommit(true);
+      }
+      catch (Exception e) {
+      }
+
+      freeConnection(con, pstmt);
+    }
+
     /** @todo store entity in o_store */
-		return  returnId;
-	}
+    return returnId;
+  }
 
-	/**
-	 * update-Operator: aktualisiert eine Entity. Eine Spalte WEBDB_LASTCHANGE
-	 * wird automatisch mit dem aktuellen Datum gefuellt.
-	 *
-	 * @param theEntity
-	 */
-	public void update (Entity theEntity) throws StorageObjectException
-  {
-		Connection con = null; PreparedStatement pstmt = null;
-		/** @todo this is stupid: why do we prepare statement, when we
-		 *  throw it away afterwards. should be regular statement
-		 *  update/insert could better be one routine called save()
-		 *  that chooses to either insert or update depending if we
-		 *  have a primary key in the entity. i don't know if we
-		 *  still need the streamed input fields. // rk  */
+  /**
+   * Updates an entity in the database
+   *
+   * @param theEntity
+   */
+  public void update(Entity theEntity) throws StorageObjectFailure {
+    Connection con = null;
+    PreparedStatement pstmt = null;
 
-		/** @todo extension: check if Entity did change, otherwise we don't need
+    /** @todo this is stupid: why do we prepare statement, when we
+     *  throw it away afterwards. should be regular statement
+     *  update/insert could better be one routine called save()
+     *  that chooses to either insert or update depending if we
+     *  have a primary key in the entity. i don't know if we
+     *  still need the streamed input fields. // rk  */
+    /** @todo extension: check if Entity did change, otherwise we don't need
      *  the roundtrip to the database */
-
-		/** invalidating corresponding entitylists in o_store*/
-    if ( StoreUtil.implementsStorableObject(theEntityClass) ) {
+    /** invalidating corresponding entitylists in o_store*/
+    if (StoreUtil.implementsStorableObject(theEntityClass)) {
       StoreContainerType stoc_type =
-        StoreContainerType.valueOf( theEntityClass,
-                                    StoreContainerType.STOC_TYPE_ENTITYLIST);
+        StoreContainerType.valueOf(theEntityClass,
+          StoreContainerType.STOC_TYPE_ENTITYLIST);
       o_store.invalidate(stoc_type);
     }
 
-		ArrayList streamedInput = theEntity.streamedInput();
-		String id = theEntity.getId();
-		String aField;
-		StringBuffer fv = new StringBuffer();
-		boolean firstField = true;
-		//cache
-		invalidatePopupCache();
-		// build sql statement
-		for (int i = 0; i < getFields().size(); i++) {
-			aField = (String)metadataFields.get(i);
-			// only normal cases
-			if (!(aField.equals(thePKeyName) || aField.equals("webdb_create") ||
-					aField.equals("webdb_lastchange") || (streamedInput != null && streamedInput.contains(aField)))) {
-				if (theEntity.hasValueForField(aField)) {
-					if (firstField == false) {
-						fv.append(", ");
-					}
-					else {
-						firstField = false;
-					}
-					fv.append(aField).append("='").append(StringUtil.JDBCescapeStringLiteral((String)theEntity.getValue(aField))).append("'");
-				}
-			}
-		}
-		StringBuffer sql = new StringBuffer("update ").append(theTable).append(" set ").append(fv);
-		// exceptions
-		if (metadataFields.contains("webdb_lastchange")) {
-			sql.append(",webdb_lastchange=NOW()");
-		}
+    List streamedInput = theEntity.streamedInput();
+    String id = theEntity.getId();
+    String aField;
+    StringBuffer fv = new StringBuffer();
+    boolean firstField = true;
+
+    //cache
+    invalidatePopupCache();
+
+    // build sql statement
+    for (int i = 0; i < getFields().size(); i++) {
+      aField = (String) metadataFields.get(i);
+
+      // only normal cases
+      if (  !(aField.equals(thePKeyName) ||
+            aField.equals("webdb_create") ||
+            aField.equals("webdb_lastchange") ||
+            ((streamedInput != null) && streamedInput.contains(aField)))) {
+        if (theEntity.hasValueForField(aField)) {
+          if (firstField == false) {
+            fv.append(", ");
+          }
+          else {
+            firstField = false;
+          }
+
+          fv.append(aField).append("='").append(JDBCStringRoutines.escapeStringLiteral((String) theEntity.getValue(aField))).append("'");
+
+          //              fv.append(aField).append("='").append(StringUtil.quote((String)theEntity.getValue(aField))).append("'");
+        }
+      }
+    }
+
+    StringBuffer sql =
+      new StringBuffer("update ").append(theTable).append(" set ").append(fv);
+
+    // exceptions
+    if (metadataFields.contains("webdb_lastchange")) {
+      sql.append(",webdb_lastchange=NOW()");
+    }
+
     // special case: the webdb_create requires the field in yyyy-mm-dd HH:mm
     // format so anything extra will be ignored. -mh
-		if (metadataFields.contains("webdb_create") &&
+    if (metadataFields.contains("webdb_create") &&
         theEntity.hasValueForField("webdb_create")) {
       // minimum of 10 (yyyy-mm-dd)...
       if (theEntity.getValue("webdb_create").length() >= 10) {
         String dateString = theEntity.getValue("webdb_create");
+
         // if only 10, then add 00:00 so it doesn't throw a ParseException
-        if (dateString.length() == 10)
-          dateString=dateString+" 00:00";
+        if (dateString.length() == 10) {
+          dateString = dateString + " 00:00";
+        }
 
         // TimeStamp stuff
         try {
           java.util.Date d = _dateFormatterIn.parse(dateString);
           Timestamp tStamp = new Timestamp(d.getTime());
-          sql.append(",webdb_create='"+tStamp.toString()+"'");
+          sql.append(",webdb_create='" + tStamp.toString() + "'");
         } catch (ParseException e) {
-          throw new StorageObjectException(e.toString());
+          throw new StorageObjectFailure(e);
         }
       }
-		}
-		if (streamedInput != null) {
-			for (int i = 0; i < streamedInput.size(); i++) {
-				sql.append(",").append(streamedInput.get(i)).append("=?");
-			}
-		}
-		sql.append(" where id=").append(id);
-		//theLog.printInfo("UPDATE: " + sql);
-		// execute sql
-		try {
-			con = getPooledCon();
-			con.setAutoCommit(false);
-			pstmt = con.prepareStatement(sql.toString());
-			if (streamedInput != null) {
-				for (int i = 0; i < streamedInput.size(); i++) {
-					String inputString = theEntity.getValue((String)streamedInput.get(i));
-					pstmt.setBytes(i + 1, inputString.getBytes());
-				}
-			}
-			pstmt.executeUpdate();
-		} catch (SQLException sqe) {
-			throwSQLException(sqe, "update");
-		} finally {
-			try {
-				con.setAutoCommit(true);
-			} catch (Exception e) {
-				;
-			}
-			freeConnection(con, pstmt);
-		}
-	}
+    }
 
-	/*
-	 *   delete-Operator
-	 *   @param id des zu loeschenden Datensatzes
-	 *   @return boolean liefert true zurueck, wenn loeschen erfolgreich war.
-	 */
-	public boolean delete (String id) throws StorageObjectException {
+    if (streamedInput != null) {
+      for (int i = 0; i < streamedInput.size(); i++) {
+        sql.append(",").append(streamedInput.get(i)).append("=?");
+      }
+    }
 
-		invalidatePopupCache();
+    sql.append(" where id=").append(id);
+    logger.debug("UPDATE: " + sql);
+
+    try {
+      con = getPooledCon();
+      con.setAutoCommit(false);
+      pstmt = con.prepareStatement(sql.toString());
+
+      if (streamedInput != null) {
+        for (int i = 0; i < streamedInput.size(); i++) {
+          String inputString =
+            theEntity.getValue((String) streamedInput.get(i));
+          pstmt.setBytes(i + 1, inputString.getBytes());
+        }
+      }
+
+      pstmt.executeUpdate();
+    }
+    catch (SQLException sqe) {
+      throwSQLException(sqe, "update");
+    }
+    finally {
+      try {
+        con.setAutoCommit(true);
+      }
+      catch (Exception e) {
+        ;
+      }
+
+      freeConnection(con, pstmt);
+    }
+  }
+
+  /*
+  *   delete-Operator
+  *   @param id des zu loeschenden Datensatzes
+  *   @return boolean liefert true zurueck, wenn loeschen erfolgreich war.
+   */
+  public boolean delete(String id) throws StorageObjectFailure {
+    invalidatePopupCache();
+
     // ostore send notification
-    if ( StoreUtil.implementsStorableObject(theEntityClass) ) {
+    if (StoreUtil.implementsStorableObject(theEntityClass)) {
       String uniqueId = id;
-      if ( theEntityClass.equals(StorableObjectEntity.class) )
-        uniqueId+="@"+theTable;
-			theLog.printInfo("CACHE: (del) " + id);
-			StoreIdentifier search_sid =
-        new StoreIdentifier(theEntityClass, StoreContainerType.STOC_TYPE_ENTITY, uniqueId);
+
+      if (theEntityClass.equals(StorableObjectEntity.class)) {
+        uniqueId += ("@" + theTable);
+      }
+
+      logger.debug("CACHE: (del) " + id);
+
+      StoreIdentifier search_sid =
+        new StoreIdentifier(theEntityClass,
+          StoreContainerType.STOC_TYPE_ENTITY, uniqueId);
       o_store.invalidate(search_sid);
-		}
+    }
 
-		/** @todo could be prepared Statement */
-		Statement stmt = null; Connection con = null;
-		int res = 0;
-		String sql="delete from "+theTable+" where "+thePKeyName+"='"+id+"'";
-		//theLog.printInfo("DELETE " + sql);
-		try {
-			con = getPooledCon(); stmt = con.createStatement();
-			res = stmt.executeUpdate(sql);
-		}
-    catch (SQLException sqe) { throwSQLException(sqe, "delete"); }
-    finally { freeConnection(con, stmt); }
+    /** @todo could be prepared Statement */
+    Statement stmt = null;
+    Connection con = null;
+    int res = 0;
+    String sql =
+      "delete from " + theTable + " where " + thePKeyName + "='" + id + "'";
 
-		return  (res > 0) ? true : false;
-	}
+    //theLog.printInfo("DELETE " + sql);
+    try {
+      con = getPooledCon();
+      stmt = con.createStatement();
+      res = stmt.executeUpdate(sql);
+    } catch (SQLException sqe) {
+      throwSQLException(sqe, "delete");
+    } finally {
+      freeConnection(con, stmt);
+    }
 
-	/* noch nicht implementiert.
-	 * @return immer false
-	 */
-	public boolean delete (EntityList theEntityList) {
-		invalidatePopupCache();
-		return  false;
-	}
+    return (res > 0) ? true : false;
+  }
 
-	/**
-	 * Diese Methode sollte ueberschrieben werden, wenn fuer die abgeleitete Database-Klasse
-	 * eine SimpleList mit Standard-Popupdaten erzeugt werden koennen soll.
-	 * @return null
-	 */
-	public SimpleList getPopupData () throws StorageObjectException {
-		return  null;
-	}
+  /* noch nicht implementiert.
+  * @return immer false
+   */
+  public boolean delete(EntityList theEntityList) {
+    invalidatePopupCache();
 
-	/**
-	 *  Holt Daten fuer Popups.
-	 *  @param name  Name des Feldes.
-	 *  @param hasNullValue  Wenn true wird eine leerer  Eintrag fuer die Popups erzeugt.
-	 *  @return SimpleList Gibt freemarker.template.SimpleList zurueck.
-	 */
-	public SimpleList getPopupData (String name, boolean hasNullValue)
-		throws StorageObjectException {
-		return  getPopupData(name, hasNullValue, null);
-	}
+    return false;
+  }
 
-	/**
-	 *  Holt Daten fuer Popups.
-	 *  @param name  Name des Feldes.
-	 *  @param hasNullValue  Wenn true wird eine leerer  Eintrag fuer die Popups erzeugt.
-	 *  @param where  Schraenkt die Selektion der Datensaetze ein.
-	 *  @return SimpleList Gibt freemarker.template.SimpleList zurueck.
-	 */
-	public SimpleList getPopupData (String name, boolean hasNullValue, String where) throws StorageObjectException {
-	 return  getPopupData(name, hasNullValue, where, null);
-	}
+  /**
+   * Diese Methode sollte ueberschrieben werden, wenn fuer die abgeleitete Database-Klasse
+   * eine SimpleList mit Standard-Popupdaten erzeugt werden koennen soll.
+   * @return null
+   */
+  public SimpleList getPopupData() throws StorageObjectFailure {
+    return null;
+  }
 
-	/**
-	 *  Holt Daten fuer Popups.
-	 *  @param name  Name des Feldes.
-	 *  @param hasNullValue  Wenn true wird eine leerer  Eintrag fuer die Popups erzeugt.
-	 *  @param where  Schraenkt die Selektion der Datensaetze ein.
-	 *  @param order  Gibt ein Feld als Sortierkriterium an.
-	 *  @return SimpleList Gibt freemarker.template.SimpleList zurueck.
-	 */
-	public SimpleList getPopupData (String name, boolean hasNullValue, String where, String order) throws StorageObjectException {
-		// caching
-		if (hasPopupCache && popupCache != null)
-			return  popupCache;
-		SimpleList simpleList = null;
-		Connection con = null;
-		Statement stmt = null;
-		// build sql
-		StringBuffer sql = new StringBuffer("select ").append(thePKeyName)
-																				.append(",").append(name).append(" from ")
-																				.append(theTable);
-		if (where != null && !(where.length() == 0))
-			sql.append(" where ").append(where);
-		sql.append(" order by ");
-		if (order != null && !(order.length() == 0))
-			sql.append(order);
-		else
-			sql.append(name);
-		// execute sql
-		try {
-			con = getPooledCon();
-		} catch (Exception e) {
-			throw new StorageObjectException(e.toString());
-		}
-		try {
-			stmt = con.createStatement();
-			ResultSet rs = executeSql(stmt, sql.toString());
+  /**
+   *  Holt Daten fuer Popups.
+   *  @param name  Name des Feldes.
+   *  @param hasNullValue  Wenn true wird eine leerer  Eintrag fuer die Popups erzeugt.
+   *  @return SimpleList Gibt freemarker.template.SimpleList zurueck.
+   */
+  public SimpleList getPopupData(String name, boolean hasNullValue)
+    throws StorageObjectFailure {
+    return getPopupData(name, hasNullValue, null);
+  }
 
-			if (rs != null) {
-				if (!evaluatedMetaData) get_meta_data();
-				simpleList = new SimpleList();
-				// if popup has null-selector
-				if (hasNullValue) simpleList.add(POPUP_EMTYLINE);
+  /**
+   *  Holt Daten fuer Popups.
+   *  @param name  Name des Feldes.
+   *  @param hasNullValue  Wenn true wird eine leerer  Eintrag fuer die Popups erzeugt.
+   *  @param where  Schraenkt die Selektion der Datensaetze ein.
+   *  @return SimpleList Gibt freemarker.template.SimpleList zurueck.
+   */
+  public SimpleList getPopupData(String name, boolean hasNullValue, String where)
+    throws StorageObjectFailure {
+    return getPopupData(name, hasNullValue, where, null);
+  }
 
-				SimpleHash popupDict;
-				while (rs.next()) {
-					popupDict = new SimpleHash();
-					popupDict.put("key", getValueAsString(rs, 1, thePKeyType));
-					popupDict.put("value", rs.getString(2));
-					simpleList.add(popupDict);
-				}
-				rs.close();
-			}
-		} catch (Exception e) {
-			theLog.printError("getPopupData: "+e.toString());
-			throw new StorageObjectException(e.toString());
-		} finally {
-			freeConnection(con, stmt);
-		}
+  /**
+   *  Holt Daten fuer Popups.
+   *  @param name  Name des Feldes.
+   *  @param hasNullValue  Wenn true wird eine leerer  Eintrag fuer die Popups erzeugt.
+   *  @param where  Schraenkt die Selektion der Datensaetze ein.
+   *  @param order  Gibt ein Feld als Sortierkriterium an.
+   *  @return SimpleList Gibt freemarker.template.SimpleList zurueck.
+   */
+  public SimpleList getPopupData(String name, boolean hasNullValue,
+    String where, String order) throws StorageObjectFailure {
+    // caching
+    if (hasPopupCache && (popupCache != null)) {
+      return popupCache;
+    }
 
-		if (hasPopupCache) popupCache = simpleList;
-		return  simpleList;
-	}
+    SimpleList simpleList = null;
+    Connection con = null;
+    Statement stmt = null;
 
-	/**
-	 * Liefert alle Daten der Tabelle als SimpleHash zurueck. Dies wird verwandt,
-	 * wenn in den Templates ein Lookup-Table benoetigt wird. Sollte nur bei kleinen
-	 * Tabellen Verwendung finden.
-	 * @return SimpleHash mit den Tabellezeilen.
-	 */
-	public SimpleHash getHashData () {
-		/** @todo dangerous! this should have a flag to be enabled, otherwise
-		 *  very big Hashes could be returned */
-		if (hashCache == null) {
-			try {
-				hashCache = HTMLTemplateProcessor.makeSimpleHash(selectByWhereClause("",
-						-1));
-			} catch (StorageObjectException e) {
-				theLog.printDebugInfo(e.toString());
-			}
-		}
-		return  hashCache;
-	}
+    // build sql
+    StringBuffer sql =
+      new StringBuffer("select ").append(thePKeyName).append(",").append(name)
+                                 .append(" from ").append(theTable);
 
-	/* invalidates the popupCache
-	 */
-	protected void invalidatePopupCache () {
-		/** @todo  invalidates toooo much */
-		popupCache = null;
-		hashCache = null;
-	}
+    if ((where != null) && !(where.length() == 0)) {
+      sql.append(" where ").append(where);
+    }
 
-	/**
-	 * Diese Methode fuehrt den Sqlstring <i>sql</i> aus und timed im Logfile.
-	 * @param stmt Statemnt
-	 * @param sql Sql-String
-	 * @return ResultSet
-	 * @exception StorageObjectException
-	 */
-	public ResultSet executeSql (Statement stmt, String sql)
-		throws StorageObjectException, SQLException
-	{
-		long startTime = System.currentTimeMillis();
-		ResultSet rs;
-		try {
-			rs = stmt.executeQuery(sql);
-			theLog.printInfo((System.currentTimeMillis() - startTime) + "ms. for: "
-				+ sql);
-		}
-		catch (SQLException e)
-		{
-			theLog.printDebugInfo("Failed: " + (System.currentTimeMillis()
-														- startTime) + "ms. for: "+ sql);
-			throw e;
-		}
+    sql.append(" order by ");
 
-		return  rs;
-	}
+    if ((order != null) && !(order.length() == 0)) {
+      sql.append(order);
+    } else {
+      sql.append(name);
+    }
 
-	/**
-	 * Fuehrt Statement stmt aus und liefert Resultset zurueck. Das SQL-Statment wird
-	 * getimed und geloggt.
-	 * @param stmt PreparedStatement mit der SQL-Anweisung
-	 * @return Liefert ResultSet des Statements zurueck.
-	 * @exception StorageObjectException, SQLException
-	 */
-	public ResultSet executeSql (PreparedStatement stmt)
-		throws StorageObjectException, SQLException {
+    // execute sql
+    try {
+      con = getPooledCon();
+    } catch (Exception e) {
+      throw new StorageObjectFailure(e);
+    }
 
-		long startTime = (new java.util.Date()).getTime();
-		ResultSet rs = stmt.executeQuery();
-		theLog.printInfo((new java.util.Date().getTime() - startTime) + "ms.");
-		return  rs;
-	}
+    try {
+      stmt = con.createStatement();
 
-		/**
-	 * returns the number of rows in the table
-	 */
-	public int getSize(String where)
-		throws SQLException,StorageObjectException
-	{
-		long  startTime = System.currentTimeMillis();
-		String sql = "SELECT count(*) FROM "+ theTable + " where " + where;
-		Connection con = null;
-		Statement stmt = null;
-		int result = 0;
+      ResultSet rs = executeSql(stmt, sql.toString());
 
-		try {
-			con = getPooledCon();
-			stmt = con.createStatement();
-			ResultSet rs = executeSql(stmt,sql);
-			while(rs.next()){
-				result = rs.getInt(1);
-			}
-		} catch (SQLException e) {
-			theLog.printError(e.toString());
-		} finally {
-			freeConnection(con,stmt);
-		}
-		//theLog.printInfo(theTable + " has "+ result +" rows where " + where);
-		//theLog.printInfo((System.currentTimeMillis() - startTime) + "ms. for: " + sql);
-		return result;
-	}
+      if (rs != null) {
+        if (!evaluatedMetaData) {
+          get_meta_data();
+        }
 
-	public int executeUpdate(Statement stmt, String sql)
-		throws StorageObjectException, SQLException
-	{
-		int rs;
-		long  startTime = (new java.util.Date()).getTime();
-		try
-		{
-			rs = stmt.executeUpdate(sql);
-			//theLog.printInfo((new java.util.Date().getTime() - startTime) + "ms. for: " + sql);
-		}
-		catch (SQLException e)
-		{
-			theLog.printDebugInfo("Failed: " + (new java.util.Date().getTime()
-														- startTime) + "ms. for: "+ sql);
-			throw e;
-		}
-		return rs;
-	}
+        simpleList = new SimpleList();
 
-	public int executeUpdate(String sql)
-		throws StorageObjectException, SQLException
-	{
-		int result=-1;
-		long  startTime = (new java.util.Date()).getTime();
-		Connection con=null;PreparedStatement pstmt=null;
-		try {
-			con=getPooledCon();
-			pstmt = con.prepareStatement(sql);
-			result = pstmt.executeUpdate();
-		}
-		catch (Exception e) {
-			theLog.printDebugInfo("executeUpdate failed: "+e.toString());
-			throw new StorageObjectException("executeUpdate failed: "+e.toString());
-		}
-		finally { freeConnection(con,pstmt); }
-		//theLog.printInfo((new java.util.Date().getTime() - startTime) + "ms. for: " + sql);
-		return result;
-	}
+        // if popup has null-selector
+        if (hasNullValue) {
+          simpleList.add(POPUP_EMPTYLINE);
+        }
 
-	/**
-	 * Wertet ResultSetMetaData aus und setzt interne Daten entsprechend
-	 * @param md ResultSetMetaData
-	 * @exception StorageObjectException
-	 */
-	private void evalMetaData (ResultSetMetaData md)
-		throws StorageObjectException {
+        SimpleHash popupDict;
 
-		this.evaluatedMetaData = true;
-		this.metadataFields = new ArrayList();
-		this.metadataLabels = new ArrayList();
-		this.metadataNotNullFields = new ArrayList();
-		try {
-			int numFields = md.getColumnCount();
-			this.metadataTypes = new int[numFields];
-			String aField;
-			int aType;
-			for (int i = 1; i <= numFields; i++) {
-				aField = md.getColumnName(i);
-				metadataFields.add(aField);
-				metadataLabels.add(md.getColumnLabel(i));
-				aType = md.getColumnType(i);
-				metadataTypes[i - 1] = aType;
-				if (aField.equals(thePKeyName)) {
-					thePKeyType = aType; thePKeyIndex = i;
-				}
-				if (md.isNullable(i) == md.columnNullable) {
-					metadataNotNullFields.add(aField);
-				}
-			}
-		} catch (SQLException e) {
-			throwSQLException(e, "evalMetaData");
-		}
-	}
+        while (rs.next()) {
+          popupDict = new SimpleHash();
+          popupDict.put("key", getValueAsString(rs, 1, thePKeyType));
+          popupDict.put("value", rs.getString(2));
+          simpleList.add(popupDict);
+        }
 
-	/**
-	 *  Wertet die Metadaten eines Resultsets fuer eine Tabelle aus,
-	 *  um die alle Columns und Typen einer Tabelle zu ermitteln.
-	 */
-	private void get_meta_data () throws StorageObjectException {
-		Connection con = null;
-		PreparedStatement pstmt = null;
-		String sql = "select * from " + theTable + " where 0=1";
-		try {
-			con = getPooledCon();
-			pstmt = con.prepareStatement(sql);
-			//theLog.printInfo("METADATA: " + sql);
-			ResultSet rs = pstmt.executeQuery();
-			evalMetaData(rs.getMetaData());
-			rs.close();
-		} catch (SQLException e) {
-			throwSQLException(e, "get_meta_data");
-		} finally {
-			freeConnection(con, pstmt);
-		}
-	}
+        rs.close();
+      }
+    }
+    catch (Exception e) {
+      logger.error("getPopupData: " + e.getMessage());
+      throw new StorageObjectFailure(e);
+    } finally {
+      freeConnection(con, stmt);
+    }
 
+    if (hasPopupCache) {
+      popupCache = simpleList;
+    }
 
-	public Connection getPooledCon() throws StorageObjectException {
-		/* @todo , doublecheck but I'm pretty sure that this is unnecessary. -mh
-			try{
-			Class.forName("com.codestudio.sql.PoolMan").newInstance();
-		} catch (Exception e){
-			throw new StorageObjectException("Could not find the PoolMan Driver"
-																				+e.toString());
-		}*/
-		Connection con = null;
-		try{
-			con = SQLManager.getInstance().requestConnection();
-		} catch(SQLException e){
-			theLog.printError("could not connect to the database "+e.toString());
-			System.err.println("could not connect to the database "+e.toString());
-			throw new StorageObjectException("Could not connect to the database"+
-																				e.toString());
-		}
-		return con;
-	}
+    return simpleList;
+  }
 
-	public void freeConnection (Connection con, Statement stmt)
-		throws StorageObjectException {
-		SQLManager.getInstance().closeStatement(stmt);
-		SQLManager.getInstance().returnConnection(con);
-	}
+  /**
+   * Liefert alle Daten der Tabelle als SimpleHash zurueck. Dies wird verwandt,
+   * wenn in den Templates ein Lookup-Table benoetigt wird. Sollte nur bei kleinen
+   * Tabellen Verwendung finden.
+   * @return SimpleHash mit den Tabellezeilen.
+   */
+  public SimpleHash getHashData() {
+    /** @todo dangerous! this should have a flag to be enabled, otherwise
+     *  very big Hashes could be returned */
+    if (hashCache == null) {
+      try {
+        hashCache =
+          HTMLTemplateProcessor.makeSimpleHash(selectByWhereClause("", -1));
+      }
+      catch (StorageObjectFailure e) {
+        logger.debug(e.getMessage());
+      }
+    }
 
-	/**
-	 * Wertet SQLException aus und wirft dannach eine StorageObjectException
-	 * @param sqe SQLException
-	 * @param wo Funktonsname, in der die SQLException geworfen wurde
-	 * @exception StorageObjectException
-	 */
-	protected void throwSQLException (SQLException sqe, String wo)
-		throws StorageObjectException {
-		String state = "";
-		String message = "";
-		int vendor = 0;
-		if (sqe != null) {
-			state = sqe.getSQLState();
-			message = sqe.getMessage();
-			vendor = sqe.getErrorCode();
-		}
-		theLog.printError(state + ": " + vendor + " : " + message + " Funktion: "
-				+ wo);
-		throw  new StorageObjectException((sqe == null) ? "undefined sql exception" :
-				sqe.toString());
-	}
+    return hashCache;
+  }
 
-	protected void _throwStorageObjectException (Exception e, String wo)
-		throws StorageObjectException {
-		if (e != null) {
-				theLog.printError(e.toString()+ wo);
-				throw  new StorageObjectException(wo + e.toString());
-		} else {
-				theLog.printError(wo);
-				throw  new StorageObjectException(wo);
-		}
+  /* invalidates the popupCache
+   */
+  protected void invalidatePopupCache() {
+    /** @todo  invalidates toooo much */
+    popupCache = null;
+    hashCache = null;
+  }
 
-	}
+  /**
+   * Diese Methode fuehrt den Sqlstring <i>sql</i> aus und timed im Logfile.
+   * @param stmt Statemnt
+   * @param sql Sql-String
+   * @return ResultSet
+   * @exception StorageObjectException
+   */
+  public ResultSet executeSql(Statement stmt, String sql)
+                            throws StorageObjectFailure, SQLException {
+    ResultSet rs;
+    long startTime = System.currentTimeMillis();
 
-	/**
-	 * Loggt Fehlermeldung mit dem Parameter Message und wirft dannach
-	 * eine StorageObjectException
-	 * @param message Nachricht mit dem Fehler
-	 * @exception StorageObjectException
-	 */
-	void throwStorageObjectException (String message)
-		throws StorageObjectException {
-		_throwStorageObjectException(null, message);
-	}
+    try {
+      rs = stmt.executeQuery(sql);
 
+      logger.debug((System.currentTimeMillis() - startTime) + "ms. for: " + sql);
+    }
+    catch (SQLException e) {
+      logger.error(e.getMessage() +"\n" + (System.currentTimeMillis() - startTime) + "ms. for: " + sql);
+      throw e;
+    }
+
+    return rs;
+  }
+/*
+  public ResultSet executeSql(String sql) throws StorageObjectFailure, SQLException {
+    long startTime = System.currentTimeMillis();
+    Connection connection = null;
+    Statement statement = null;
+
+    try {
+      connection = getPooledCon();
+      statement = connection.createStatement();
+      ResultSet result;
+
+      result = statement.executeQuery(sql);
+
+      logger.debug((System.currentTimeMillis() - startTime) + "ms. for: " + sql);
+      return result;
+    }
+    catch (Throwable e) {
+      logger.error(e.getMessage() +"\n" + (System.currentTimeMillis() - startTime) + "ms. for: " + sql);
+      throw new StorageObjectFailure(e);
+    }
+    finally {
+      if (connection!=null) {
+        freeConnection(connection, statement);
+      }
+    }
+  }
+*/
+  private Map processRow(ResultSet aResultSet) throws StorageObjectFailure, StorageObjectExc {
+    try {
+      Map result = new HashMap();
+      ResultSetMetaData metaData = aResultSet.getMetaData();
+      int nrColumns = metaData.getColumnCount();
+      for (int i=0; i<nrColumns; i++) {
+        result.put(metaData.getColumnName(i+1), getValueAsString(aResultSet, i+1, metaData.getColumnType(i+1)));
+      }
+
+      return result;
+    }
+    catch (Throwable e) {
+      throw new StorageObjectFailure(e);
+    }
+  }
+
+  public List executeFreeSql(String sql, int aLimit) throws StorageObjectFailure, StorageObjectExc {
+    Connection connection = null;
+    Statement statement = null;
+    try {
+      List result = new Vector();
+      connection = getPooledCon();
+      statement = connection.createStatement();
+      ResultSet resultset = executeSql(statement, sql);
+      try {
+        while (resultset.next() && result.size() < aLimit) {
+          result.add(processRow(resultset));
+        }
+      }
+      finally {
+        resultset.close();
+      }
+
+      return result;
+    }
+    catch (Throwable e) {
+      throw new StorageObjectFailure(e);
+    }
+    finally {
+      if (connection!=null) {
+        freeConnection(connection, statement);
+      }
+    }
+  };
+
+  public Map executeFreeSingleRowSql(String anSqlStatement) throws StorageObjectFailure, StorageObjectExc {
+    try {
+      List resultList = executeFreeSql(anSqlStatement, 1);
+      try {
+        if (resultList.size()>0)
+          return (Map) resultList.get(0);
+        else
+          return null;
+      }
+      finally {
+      }
+    }
+    catch (Throwable t) {
+      throw new StorageObjectFailure(t);
+    }
+  };
+
+  public String executeFreeSingleValueSql(String sql) throws StorageObjectFailure, StorageObjectExc {
+    Map row = executeFreeSingleRowSql(sql);
+
+    if (row==null)
+      return null;
+
+    Iterator i = row.values().iterator();
+    if (i.hasNext())
+      return (String) i.next();
+    else
+      return null;
+  };
+
+  /**
+   * returns the number of rows in the table
+   */
+  public int getSize(String where) throws SQLException, StorageObjectFailure {
+    long startTime = System.currentTimeMillis();
+    String sql = "SELECT Count(*) FROM " + theTable;
+
+    if ((where != null) && (where.length() != 0)) {
+      sql = sql + " where " + where;
+    }
+
+    Connection con = null;
+    Statement stmt = null;
+    int result = 0;
+
+    try {
+      con = getPooledCon();
+      stmt = con.createStatement();
+
+      ResultSet rs = executeSql(stmt, sql);
+
+      while (rs.next()) {
+        result = rs.getInt(1);
+      }
+    }
+    catch (SQLException e) {
+      logger.error("Database.getSize: " + e.getMessage());
+    }
+    finally {
+      freeConnection(con, stmt);
+    }
+
+    //theLog.printInfo(theTable + " has "+ result +" rows where " + where);
+    logger.debug((System.currentTimeMillis() - startTime) + "ms. for: " + sql);
+
+    return result;
+  }
+
+  public int executeUpdate(Statement stmt, String sql)
+    throws StorageObjectFailure, SQLException {
+    int rs;
+    long startTime = System.currentTimeMillis();
+
+    try {
+      rs = stmt.executeUpdate(sql);
+
+      logger.debug((System.currentTimeMillis() - startTime) + "ms. for: " + sql);
+    }
+    catch (SQLException e) {
+      logger.error("Failed: " + (System.currentTimeMillis() - startTime) + "ms. for: " + sql);
+      throw e;
+    }
+
+    return rs;
+  }
+
+  public int executeUpdate(String sql)
+    throws StorageObjectFailure, SQLException {
+    int result = -1;
+    long startTime = System.currentTimeMillis();
+    Connection con = null;
+    PreparedStatement pstmt = null;
+
+    try {
+      con = getPooledCon();
+      pstmt = con.prepareStatement(sql);
+      result = pstmt.executeUpdate();
+    }
+    catch (Throwable e) {
+      logger.error("Database.executeUpdate(" + sql + "): " + e.getMessage());
+      throw new StorageObjectFailure("Database.executeUpdate(" + sql + "): " + e.getMessage(), e);
+    }
+    finally {
+      freeConnection(con, pstmt);
+    }
+
+    logger.debug((System.currentTimeMillis() - startTime) + "ms. for: " + sql);
+    return result;
+  }
+
+  /**
+   * Wertet ResultSetMetaData aus und setzt interne Daten entsprechend
+   * @param md ResultSetMetaData
+   * @exception StorageObjectException
+   */
+  private void evalMetaData(ResultSetMetaData md) throws StorageObjectFailure {
+    this.evaluatedMetaData = true;
+    this.metadataFields = new ArrayList();
+    this.metadataLabels = new ArrayList();
+    this.metadataNotNullFields = new ArrayList();
+
+    try {
+      int numFields = md.getColumnCount();
+      this.metadataTypes = new int[numFields];
+
+      String aField;
+      int aType;
+
+      for (int i = 1; i <= numFields; i++) {
+        aField = md.getColumnName(i);
+        metadataFields.add(aField);
+        metadataLabels.add(md.getColumnLabel(i));
+        aType = md.getColumnType(i);
+        metadataTypes[i - 1] = aType;
+
+        if (aField.equals(thePKeyName)) {
+          thePKeyType = aType;
+          thePKeyIndex = i;
+        }
+
+        if (md.isNullable(i) == ResultSetMetaData.columnNullable) {
+          metadataNotNullFields.add(aField);
+        }
+      }
+    }
+    catch (SQLException e) {
+      throwSQLException(e, "evalMetaData");
+    }
+  }
+
+  /**
+   *  Wertet die Metadaten eines Resultsets fuer eine Tabelle aus,
+   *  um die alle Columns und Typen einer Tabelle zu ermitteln.
+   */
+  private void get_meta_data() throws StorageObjectFailure {
+    Connection con = null;
+    PreparedStatement pstmt = null;
+    String sql = "select * from " + theTable + " where 0=1";
+
+    try {
+      con = getPooledCon();
+      pstmt = con.prepareStatement(sql);
+
+      logger.debug("METADATA: " + sql);
+      ResultSet rs = pstmt.executeQuery();
+      evalMetaData(rs.getMetaData());
+      rs.close();
+    }
+    catch (SQLException e) {
+      throwSQLException(e, "get_meta_data");
+    }
+    finally {
+      freeConnection(con, pstmt);
+    }
+  }
+
+  public Connection getPooledCon() throws StorageObjectFailure {
+    Connection con = null;
+
+    try {
+      con = SQLManager.getInstance().requestConnection();
+    }
+    catch (SQLException e) {
+      logger.error("could not connect to the database " + e.getMessage());
+
+      throw new StorageObjectFailure("Could not connect to the database", e);
+    }
+
+    return con;
+  }
+
+  public void freeConnection(Connection con, Statement stmt)
+    throws StorageObjectFailure {
+    SQLManager.closeStatement(stmt);
+    SQLManager.getInstance().returnConnection(con);
+  }
+
+  /**
+   * Wertet SQLException aus und wirft dannach eine StorageObjectException
+   * @param sqe SQLException
+   * @param wo Funktonsname, in der die SQLException geworfen wurde
+   * @exception StorageObjectException
+   */
+  protected void throwSQLException(SQLException sqe, String aFunction) throws StorageObjectFailure {
+    String state = "";
+    String message = "";
+    int vendor = 0;
+
+    if (sqe != null) {
+      state = sqe.getSQLState();
+      message = sqe.getMessage();
+      vendor = sqe.getErrorCode();
+    }
+
+    String information =
+        "SQL Error: " +
+        "state= " + state +
+        ", vendor= " + vendor +
+        ", message=" + message +
+        ", function= " + aFunction;
+
+    logger.error(information);
+
+    throw new StorageObjectFailure(information, sqe);
+  }
+
+  protected void _throwStorageObjectException(Exception e, String aFunction)
+    throws StorageObjectFailure {
+
+    if (e != null) {
+      logger.error(e.getMessage() + aFunction);
+      throw new StorageObjectFailure(aFunction, e);
+    }
+  }
+
+  /**
+   * Loggt Fehlermeldung mit dem Parameter Message und wirft dannach
+   * eine StorageObjectException
+   * @param message Nachricht mit dem Fehler
+   * @exception StorageObjectException
+   */
+  void throwStorageObjectException(String aMessage) throws StorageObjectFailure {
+    logger.error(aMessage);
+    throw new StorageObjectFailure(aMessage, null);
+  }
 }
-
-
-

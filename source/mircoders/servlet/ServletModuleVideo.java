@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001, 2002  The Mir-coders group
+ * Copyright (C) 2001, 2002 The Mir-coders group
  *
  * This file is part of Mir.
  *
@@ -18,23 +18,21 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with the com.oreilly.servlet library, any library
- * licensed under the Apache Software License, The Sun (tm) Java Advanced
- * Imaging library (JAI), The Sun JIMI library (or with modified versions of
- * the above that use the same license as the above), and distribute linked
- * combinations including the two.  You must obey the GNU General Public
- * License in all respects for all of the code used other than the above
- * mentioned libraries.  If you modify this file, you may extend this exception
- * to your version of the file, but you are not obligated to do so.  If you do
- * not wish to do so, delete this exception statement from your version.
+ * the code of this program with  any library licensed under the Apache Software License, 
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
+ * (or with modified versions of the above that use the same license as the above), 
+ * and distribute linked combinations including the two.  You must obey the 
+ * GNU General Public License in all respects for all of the code used other than 
+ * the above mentioned libraries.  If you modify this file, you may extend this 
+ * exception to your version of the file, but you are not obligated to do so.  
+ * If you do not wish to do so, delete this exception statement from your version.
  */
 
 package mircoders.servlet;
 
-import mir.misc.Logfile;
-import mir.misc.MirConfig;
+import mir.log.LoggerWrapper;
 import mir.servlet.ServletModule;
-import mir.storage.StorageObjectException;
+import mir.storage.StorageObjectFailure;
 import mircoders.module.ModuleUploadedMedia;
 import mircoders.storage.DatabaseVideo;
 
@@ -57,16 +55,17 @@ public class ServletModuleVideo extends ServletModuleUploadedMedia {
 
 
   private ServletModuleVideo() {
-    theLog = Logfile.getInstance(MirConfig.getProp("Home") + MirConfig.getProp("ServletModule.Video.Logfile"));
-    templateListString = MirConfig.getProp("ServletModule.Video.ListTemplate");
-    templateObjektString = MirConfig.getProp("ServletModule.Video.ObjektTemplate");
-    templateConfirmString = MirConfig.getProp("ServletModule.Video.ConfirmTemplate");
+    super();
+    logger = new LoggerWrapper("ServletModule.Video");
+    templateListString = configuration.getString("ServletModule.Video.ListTemplate");
+    templateObjektString = configuration.getString("ServletModule.Video.ObjektTemplate");
+    templateConfirmString = configuration.getString("ServletModule.Video.ConfirmTemplate");
     try {
       mainModule = new ModuleUploadedMedia(DatabaseVideo.getInstance());
       //dbRights = DatabaseRights.getInstance();
     }
-    catch (StorageObjectException e) {
-      theLog.printDebugInfo("servletmodule video could not be initialized");
+    catch (StorageObjectFailure e) {
+      logger.error("servletmodule video could not be initialized: " + e.getMessage());
     }
   }
 }

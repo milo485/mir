@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001, 2002  The Mir-coders group
+ * Copyright (C) 2001, 2002 The Mir-coders group
  *
  * This file is part of Mir.
  *
@@ -18,38 +18,40 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with the com.oreilly.servlet library, any library
- * licensed under the Apache Software License, The Sun (tm) Java Advanced
- * Imaging library (JAI), The Sun JIMI library (or with modified versions of
- * the above that use the same license as the above), and distribute linked
- * combinations including the two.  You must obey the GNU General Public
- * License in all respects for all of the code used other than the above
- * mentioned libraries.  If you modify this file, you may extend this exception
- * to your version of the file, but you are not obligated to do so.  If you do
- * not wish to do so, delete this exception statement from your version.
+ * the code of this program with  any library licensed under the Apache Software License, 
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
+ * (or with modified versions of the above that use the same license as the above), 
+ * and distribute linked combinations including the two.  You must obey the 
+ * GNU General Public License in all respects for all of the code used other than 
+ * the above mentioned libraries.  If you modify this file, you may extend this 
+ * exception to your version of the file, but you are not obligated to do so.  
+ * If you do not wish to do so, delete this exception statement from your version.
  */
-
 package mir.servlet;
 
-import freemarker.template.SimpleHash;
-import freemarker.template.TemplateModelRoot;
-import freemarker.template.TemplateModel;
-
-import mir.entity.EntityList;
-import mir.misc.*;
-import mir.module.AbstractModule;
-import mir.module.ModuleException;
-import mir.storage.StorageObject;
-import mir.storage.StorageObjectException;
+import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Locale;
+
+import mir.config.MirPropertiesConfiguration;
+import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
+import mir.entity.EntityList;
+import mir.log.LoggerWrapper;
+import mir.misc.HTMLTemplateProcessor;
+import mir.misc.LineFilterWriter;
+import mir.module.AbstractModule;
+import mir.storage.StorageObject;
+import mir.util.HTTPRequestParser;
+import freemarker.template.SimpleHash;
+import freemarker.template.TemplateModelRoot;
+
+
 
 
 /**
@@ -59,7 +61,7 @@ import java.util.Locale;
  *
  *
  *  Abstrakte Klasse ServletModule stellt die Basisfunktionalitaet der
- *  abgeleiteten ServletModule zur Verfügung.
+ *  abgeleiteten ServletModule zur Verf?gung.
  *
  * @version 28.6.1999
  * @author RK
@@ -67,391 +69,412 @@ import java.util.Locale;
 
 public abstract class ServletModule {
 
-    public String defaultAction;
-    protected Logfile theLog;
-    protected AbstractModule mainModule;
-    protected String templateListString;
-    protected String templateObjektString;
-    protected String templateConfirmString;
+  public String defaultAction;
+  protected LoggerWrapper logger;
+  protected MirPropertiesConfiguration configuration;
+  protected AbstractModule mainModule;
+  protected Locale fallbackLocale;
+  protected String templateListString;
+  protected String templateObjektString;
+  protected String templateConfirmString;
 
-    /**
-     * Singelton - Methode muss in den abgeleiteten Klassen ueberschrieben werden.
-     * @return ServletModule
-     */
-    public static ServletModule getInstance() {
-        return null;
+
+  public ServletModule(){
+    try {
+      configuration = MirPropertiesConfiguration.instance();
+    }
+    catch (PropertiesConfigExc e) {
+      throw new RuntimeException("Can't get configuration: " + e.getMessage());
     }
 
-    /**
-     * get the module name to be used for generic operations like delete.
-     */
-    protected String getOperationModuleName() {
-      return getClass().getName().substring((new String("mircoders.servlet.ServletModule")).length());
+    fallbackLocale = new Locale(configuration.getString("Mir.Admin.FallbackLanguage", "en"), "");
+  }
+
+
+  /**
+   * Singelton - Methode muss in den abgeleiteten Klassen ueberschrieben werden.
+   * @return ServletModule
+   */
+  public static ServletModule getInstance() {
+    return null;
+  }
+
+  /**
+   * get the module name to be used for generic operations like delete.
+   */
+  protected String getOperationModuleName() {
+    return getClass().getName().substring((new String("mircoders.servlet.ServletModule")).length());
+  }
+
+  /**
+   * get the locale either from the session or the accept-language header ot the request
+   * this supersedes getLanguage for the new i18n
+   */
+  public Locale getLocale(HttpServletRequest req) {
+    Locale loc = null;
+    HttpSession session = req.getSession(false);
+    if (session != null) {
+      // session can be null in case of logout
+      loc = (Locale) session.getAttribute("locale");
     }
-
-    /**
-     * get the session binded language
-     */
-    public String getLanguage(HttpServletRequest req) {
-        HttpSession session = req.getSession(false);
-        String language = (String) session.getAttribute("Language");
-        if (language == null) {
-            language = MirConfig.getProp("StandardLanguage");
-        }
-        return language;
+    // if there is nothing in the session get it fron the accept-language
+    if (loc == null) {
+      loc = req.getLocale();
     }
+    return loc;
+  }
 
-    /**
-     * get the locale either from the session or the accept-language header ot the request
-     * this supersedes getLanguage for the new i18n
-     */
-    public Locale getLocale(HttpServletRequest req) {
-        Locale loc = null;
-        HttpSession session = req.getSession(false);
-        if (session != null) {
-            // session can be null in case of logout
-            loc = (Locale) session.getAttribute("Locale");
-        }
-        // if there is nothing in the session get it fron the accept-language
-        if (loc == null) {
-            loc = req.getLocale();
-        }
-        return loc;
+  /**
+   * get the locale either from the session or the accept-language header ot the request
+   * this supersedes getLanguage for the new i18n
+   */
+  public Locale getFallbackLocale(HttpServletRequest req) {
+    return fallbackLocale;
+  }
+
+  public void redirect(HttpServletResponse aResponse, String aQuery) throws ServletModuleExc, ServletModuleFailure {
+    try {
+      aResponse.sendRedirect(MirPropertiesConfiguration.instance().getString("RootUri") + "/Mir?"+aQuery);
     }
-
-    // ACHTUNG DEPRECATED::::
-    public void process(HttpServletRequest req, HttpServletResponse res) throws ServletModuleException {
+    catch (Throwable t) {
+      throw new ServletModuleFailure("ServletModule.redirect: " +t.getMessage(), t);
     }
+  }
 
+  /**
+   *  list(req,res) - generische Listmethode. Wennn die Funktionalitaet
+   *  nicht reicht, muss sie in der abgeleiteten ServletModule-Klasse
+   *  ueberschreiben werden.
+   *
+   * @param req Http-Request, das vom Dispatcher durchgereicht wird
+   * @param res Http-Response, die vom Dispatcher durchgereicht wird
+   */
+  public void list(HttpServletRequest req, HttpServletResponse res)
+      throws ServletModuleExc, ServletModuleUserExc, ServletModuleFailure {
+    try {
+      EntityList theList;
+      String offsetParam = req.getParameter("offset");
+      int offset = 0;
+      PrintWriter out = res.getWriter();
 
-    /**
-     *  list(req,res) - generische Listmethode. Wennn die Funktionalitaet
-     *  nicht reicht, muss sie in der abgeleiteten ServletModule-Klasse
-     *  ueberschreiben werden.
-     *
-     * @param req Http-Request, das vom Dispatcher durchgereicht wird
-     * @param res Http-Response, die vom Dispatcher durchgereicht wird
-     */
-    public void list(HttpServletRequest req, HttpServletResponse res)
-            throws ServletModuleException {
-
-        try {
-            EntityList theList;
-            String offsetParam = req.getParameter("offset");
-            int offset = 0;
-            PrintWriter out = res.getWriter();
-
-            // hier offsetcode bearbeiten
-            if (offsetParam != null && !offsetParam.equals("")) {
-                offset = Integer.parseInt(offsetParam);
-            }
-            if (req.getParameter("next") != null) {
-                offset = Integer.parseInt(req.getParameter("nextoffset"));
-            }
-            else {
-                if (req.getParameter("prev") != null) {
-                    offset = Integer.parseInt(req.getParameter("prevoffset"));
-                }
-            }
-
-            theList = mainModule.getByWhereClause(null, offset);
-            //theList = mainModule.getByWhereClause((String)null, offset);
-            if (theList == null || theList.getCount() == 0 || theList.getCount() > 1) {
-                HTMLTemplateProcessor.process(res, templateListString, theList, out, getLocale(req));
-            }
-            else {
-                deliver(req, res, theList.elementAt(0), templateObjektString);
-            }
+      // hier offsetcode bearbeiten
+      if (offsetParam != null && !offsetParam.equals("")) {
+        offset = Integer.parseInt(offsetParam);
+      }
+      if (req.getParameter("next") != null) {
+        offset = Integer.parseInt(req.getParameter("nextoffset"));
+      }
+      else {
+        if (req.getParameter("prev") != null) {
+          offset = Integer.parseInt(req.getParameter("prevoffset"));
         }
-        catch (Exception e) {
-            throw new ServletModuleException(e.toString());
-        }
+      }
+      theList = mainModule.getByWhereClause(null, offset);
+
+      HTMLTemplateProcessor.process(res, templateListString, theList, null, null, out, getLocale(req), getFallbackLocale(req));
     }
-
-    /**
-     *  add(req,res) - generische Addmethode. Wennn die Funktionalitaet
-     *  nicht reicht, muss sie in der abgeleiteten ServletModule-Klasse
-     *  ueberschreiben werden.
-     * @param req Http-Request, das vom Dispatcher durchgereicht wird
-     * @param res Http-Response, die vom Dispatcher durchgereicht wird
-     */
-    public void add(HttpServletRequest req, HttpServletResponse res)
-            throws ServletModuleException {
-
-        try {
-            SimpleHash mergeData = new SimpleHash();
-            mergeData.put("new", "1");
-            deliver(req, res, mergeData, templateObjektString);
-        }
-        catch (Exception e) {
-            throw new ServletModuleException(e.toString());
-        }
+    catch (Throwable e) {
+      throw new ServletModuleFailure(e);
     }
+  }
 
-    /**
-     *  insert(req,res) - generische Insertmethode, folgt auf add.
-     *  Wennn die Funktionalitaet
-     *  nicht reicht, muss sie in der abgeleiteten ServletModule-Klasse
-     *  ueberschreiben werden.
-     *
-     * @param req Http-Request, das vom Dispatcher durchgereicht wird
-     * @param res Http-Response, die vom Dispatcher durchgereicht wird
-     */
-    public void insert(HttpServletRequest req, HttpServletResponse res)
-            throws ServletModuleException, ServletModuleUserException {
-        try {
-            HashMap withValues = getIntersectingValues(req, mainModule.getStorageObject());
-            theLog.printDebugInfo("--trying to add...");
-            String id = mainModule.add(withValues);
-            theLog.printDebugInfo("--trying to deliver..." + id);
+  /**
+   *  add(req,res) - generische Addmethode. Wennn die Funktionalitaet
+   *  nicht reicht, muss sie in der abgeleiteten ServletModule-Klasse
+   *  ueberschreiben werden.
+   * @param req Http-Request, das vom Dispatcher durchgereicht wird
+   * @param res Http-Response, die vom Dispatcher durchgereicht wird
+   */
+  public void add(HttpServletRequest req, HttpServletResponse res)
+      throws ServletModuleExc, ServletModuleUserExc, ServletModuleFailure  {
+
+    try {
+      SimpleHash mergeData = new SimpleHash();
+      mergeData.put("new", "1");
+      deliver(req, res, mergeData, templateObjektString);
+    }
+    catch (Throwable e) {
+      throw new ServletModuleFailure(e);
+    }
+  }
+
+  /**
+   *  insert(req,res) - generische Insertmethode, folgt auf add.
+   *  Wennn die Funktionalitaet
+   *  nicht reicht, muss sie in der abgeleiteten ServletModule-Klasse
+   *  ueberschreiben werden.
+   *
+   * @param req Http-Request, das vom Dispatcher durchgereicht wird
+   * @param res Http-Response, die vom Dispatcher durchgereicht wird
+   */
+  public void insert(HttpServletRequest req, HttpServletResponse res)
+      throws ServletModuleExc, ServletModuleUserExc, ServletModuleFailure  {
+    try {
+      Map withValues = getIntersectingValues(req, mainModule.getStorageObject());
+      logger.debug("--trying to add...");
+      String id = mainModule.add(withValues);
+      logger.debug("--trying to deliver..." + id);
+      list(req, res);
+    }
+    catch (Throwable e) {
+      throw new ServletModuleFailure(e);
+    }
+  }
+
+  /**
+   *  delete(req,res) - generic delete method. Can be overridden in subclasses.
+   *
+   */
+
+  public void delete(HttpServletRequest req, HttpServletResponse res)
+      throws ServletModuleExc, ServletModuleUserExc, ServletModuleFailure  {
+    try {
+      String idParam = req.getParameter("id");
+
+      if (idParam == null)
+        throw new ServletModuleExc("Invalid call to delete: no id supplied");
+
+      String confirmParam = req.getParameter("confirm");
+      String cancelParam = req.getParameter("cancel");
+      if (confirmParam == null && cancelParam == null) {
+        SimpleHash mergeData = new SimpleHash();
+
+        mergeData.put("module", getOperationModuleName());
+        mergeData.put("infoString", getOperationModuleName() + ": " + idParam);
+        mergeData.put("id", idParam);
+        mergeData.put("where", req.getParameter("where"));
+        mergeData.put("order", req.getParameter("order"));
+        mergeData.put("offset", req.getParameter("offset"));
+        // this stuff is to be compatible with the other more advanced
+        // search method used for media and comments
+        mergeData.put("query_media_folder", req.getParameter("query_media_folder"));
+        mergeData.put("query_is_published", req.getParameter("query_is_published"));
+        mergeData.put("query_text", req.getParameter("query_text"));
+        mergeData.put("query_field", req.getParameter("query_field"));
+
+        deliver(req, res, mergeData, templateConfirmString);
+      }
+      else {
+        if (confirmParam != null && !confirmParam.equals("")) {
+          //theLog.printInfo("delete confirmed!");
+          mainModule.deleteById(idParam);
+          list(req, res); // back to list
+        }
+        else {
+          if (req.getParameter("where") != null)
             list(req, res);
+          else
+            edit(req, res);
         }
-        catch (Exception e) {
-            throw new ServletModuleException(e.toString());
-        }
+      }
     }
-
-    /**
-     *  delete(req,res) - generische Deletemethode. Wennn die Funktionalitaet
-     *  nicht reicht, muss sie in der abgeleiteten ServletModule-Klasse
-     *  ueberschreiben werden.
-     *
-     * @param req Http-Request, das vom Dispatcher durchgereicht wird
-     * @param res Http-Response, die vom Dispatcher durchgereicht wird
-     */
-
-    public void delete(HttpServletRequest req, HttpServletResponse res)
-            throws ServletModuleException {
-        try {
-            String idParam = req.getParameter("id");
-            if (idParam == null) throw new ServletModuleException("Invalid call to delete: no id supplied");
-            // Hier code zum Loeschen
-            String confirmParam = req.getParameter("confirm");
-            String cancelParam = req.getParameter("cancel");
-            if (confirmParam == null && cancelParam == null) {
-                // HTML Ausgabe zum Confirmen!
-                SimpleHash mergeData = new SimpleHash();
-                String moduleName = getOperationModuleName();
-                mergeData.put("module", moduleName);
-                mergeData.put("infoString", moduleName + ": " + idParam);
-                mergeData.put("id", idParam);
-                mergeData.put("where", req.getParameter("where"));
-                mergeData.put("order", req.getParameter("order"));
-                mergeData.put("offset", req.getParameter("offset"));
-                // this stuff is to be compatible with the other more advanced
-                // search method used for media and comments
-                mergeData.put("query_media_folder", req.getParameter("query_media_folder"));
-                mergeData.put("query_is_published", req.getParameter("query_is_published"));
-                mergeData.put("query_text", req.getParameter("query_text"));
-                mergeData.put("query_field", req.getParameter("query_field"));
-                deliver(req, res, mergeData, templateConfirmString);
-            }
-            else {
-                if (confirmParam != null && !confirmParam.equals("")) {
-                    //theLog.printInfo("delete confirmed!");
-                    mainModule.deleteById(idParam);
-                    list(req, res); // back to list
-                }
-                else {
-                    if (req.getParameter("where") != null)
-                        list(req, res);
-                    else
-                        edit(req, res);
-                }
-            }
-        }
-        catch (Exception e) {
-            throw new ServletModuleException(e.toString());
-        }
+    catch (Throwable e) {
+      throw new ServletModuleFailure(e);
     }
+  }
 
-    /**
-     *  edit(req,res) - generische Editmethode. Wennn die Funktionalitaet
-     *  nicht reicht, muss sie in der abgeleiteten ServletModule-Klasse
-     *  ueberschreiben werden.
-     *
-     * @param req Http-Request, das vom Dispatcher durchgereicht wird
-     * @param res Http-Response, die vom Dispatcher durchgereicht wird
-     */
-    public void edit(HttpServletRequest req, HttpServletResponse res)
-            throws ServletModuleException {
-        try {
-            String idParam = req.getParameter("id");
-            deliver(req, res, mainModule.getById(idParam), templateObjektString);
-        }
-        catch (ModuleException e) {
-            throw new ServletModuleException(e.toString());
-        }
+  /**
+   *  edit(req,res) - generische Editmethode. Wennn die Funktionalitaet
+   *  nicht reicht, muss sie in der abgeleiteten ServletModule-Klasse
+   *  ueberschreiben werden.
+   *
+   * @param req Http-Request, das vom Dispatcher durchgereicht wird
+   * @param res Http-Response, die vom Dispatcher durchgereicht wird
+   */
+  public void edit(HttpServletRequest req, HttpServletResponse res)
+      throws ServletModuleExc, ServletModuleUserExc, ServletModuleFailure  {
+    edit(req, res, req.getParameter("id"));
+  }
+
+  /**
+   *  edit(req,res) - generische Editmethode. Wennn die Funktionalitaet
+   *  nicht reicht, muss sie in der abgeleiteten ServletModule-Klasse
+   *  ueberschreiben werden.
+   *
+   * @param req Http-Request, das vom Dispatcher durchgereicht wird
+   * @param res Http-Response, die vom Dispatcher durchgereicht wird
+   */
+  public void edit(HttpServletRequest aRequest, HttpServletResponse aResponse, String anIdentifier)
+      throws ServletModuleExc, ServletModuleUserExc, ServletModuleFailure  {
+    try {
+      deliver(aRequest, aResponse, mainModule.getById(anIdentifier), templateObjektString);
     }
-
-    /**
-     *  update(req,res) - generische Updatemethode. Wennn die Funktionalitaet
-     *  nicht reicht, muss sie in der abgeleiteten ServletModule-Klasse
-     *  ueberschreiben werden.
-     *
-     * @param req Http-Request, das vom Dispatcher durchgereicht wird
-     * @param res Http-Response, die vom Dispatcher durchgereicht wird
-     */
-
-    public void update(HttpServletRequest req, HttpServletResponse res)
-            throws ServletModuleException {
-        try {
-            String idParam = req.getParameter("id");
-            HashMap withValues = getIntersectingValues(req, mainModule.getStorageObject());
-            String id = mainModule.set(withValues);
-            //theLog.printInfo("Showing Entity with id: " + id);
-            //edit(req,res);
-            String whereParam = req.getParameter("where");
-            String orderParam = req.getParameter("order");
-            if ((whereParam != null && !whereParam.equals("")) || (orderParam != null && !orderParam.equals(""))) {
-                //theLog.printDebugInfo("update to list");
-                list(req, res);
-            }
-            else {
-                edit(req, res);
-            }
-            //list(req,res);
-        }
-        catch (Exception e) {
-            throw new ServletModuleException(e.toString());
-        }
+    catch (Throwable e) {
+      throw new ServletModuleFailure(e);
     }
+  }
 
-    /**
-     * deliver liefert das Template mit dem Filenamen templateFilename
-     * an den HttpServletResponse res aus, nachdem es mit den Daten aus
-     * TemplateModelRoot rtm gemischt wurde
-     *
-     * @param res Http-Response, die vom Dispatcher durchgereicht wird
-     * @param rtm beinahalten das freemarker.template.TempalteModelRoot mit den
-     *   Daten, die ins Template gemerged werden sollen.
-     * @param tmpl Name des Templates
-     * @exception ServletModuleException
-     */
-	public void deliver(HttpServletRequest req, HttpServletResponse res,
-											TemplateModelRoot rtm, TemplateModelRoot popups,
-											String templateFilename)
-	throws ServletModuleException {
-		if (rtm == null) rtm = new SimpleHash();
-		try {
-			PrintWriter out = res.getWriter();
-			HTMLTemplateProcessor.process(res, templateFilename, rtm, popups, out,
-																		getLocale(req));
-			out.close();
-		}	catch (HTMLParseException e) {
-			throw new ServletModuleException(e.toString());
-		} catch (IOException e) {
-			throw new ServletModuleException(e.toString());
-		}
-	}
+  /**
+   *  update(req,res) - generische Updatemethode. Wennn die Funktionalitaet
+   *  nicht reicht, muss sie in der abgeleiteten ServletModule-Klasse
+   *  ueberschreiben werden.
+   *
+   * @param req Http-Request, das vom Dispatcher durchgereicht wird
+   * @param res Http-Response, die vom Dispatcher durchgereicht wird
+   */
 
-	
-	/**
-	 * deliver liefert das Template mit dem Filenamen templateFilename
-	 * an den HttpServletResponse res aus, nachdem es mit den Daten aus
-	 * TemplateModelRoot rtm gemischt wurde
-	 *
-	 * @param res Http-Response, die vom Dispatcher durchgereicht wird
-	 * @param rtm beinahalten das freemarker.template.TempalteModelRoot mit den
-	 *   Daten, die ins Template gemerged werden sollen.
-	 * @param tmpl Name des Templates
-	 * @exception ServletModuleException
-	 */
-	public void deliver(HttpServletRequest req, HttpServletResponse res,
-											TemplateModelRoot rtm, String templateFilename)
-	throws ServletModuleException {
-		deliver(req, res, rtm, null, templateFilename);
-	}
-	
-    /**
-     * deliver liefert das Template mit dem Filenamen templateFilename
-     * an den HttpServletResponse res aus, nachdem es mit den Daten aus
-     * TemplateModelRoot rtm gemischt wurde
-     *
-     * @param res Http-Response, die vom Dispatcher durchgereicht wird
-     * @param rtm beinahalten das freemarker.template.TempalteModelRoot mit den
-     *   Daten, die ins Template gemerged werden sollen.
-     * @param tmpl Name des Templates
-     * @exception ServletModuleException
-     */
-    public void deliver_compressed(HttpServletRequest req, HttpServletResponse res, TemplateModelRoot rtm, String templateFilename)
-            throws ServletModuleException {
-        if (rtm == null) rtm = new SimpleHash();
-        try {
-            PrintWriter out = new LineFilterWriter(res.getWriter());
-            //PrintWriter out =  res.getWriter();
-            HTMLTemplateProcessor.process(res, templateFilename, rtm, out, getLocale(req));
-            out.close();
-        }
-        catch (HTMLParseException e) {
-            throw new ServletModuleException(e.toString());
-        }
-        catch (IOException e) {
-            throw new ServletModuleException(e.toString());
-        }
+  public void update(HttpServletRequest req, HttpServletResponse res)
+      throws ServletModuleExc, ServletModuleUserExc, ServletModuleFailure  {
+    try {
+      String idParam = req.getParameter("id");
+      Map withValues = getIntersectingValues(req, mainModule.getStorageObject());
+
+      String id = mainModule.set(withValues);
+      String whereParam = req.getParameter("where");
+      String orderParam = req.getParameter("order");
+
+      if ((whereParam != null && !whereParam.equals("")) || (orderParam != null && !orderParam.equals(""))) {
+        list(req, res);
+      }
+      else {
+        edit(req, res);
+      }
     }
-
-    /**
-     * deliver liefert das Template mit dem Filenamen templateFilename
-     * an den HttpServletResponse res aus, nachdem es mit den Daten aus
-     * TemplateModelRoot rtm gemischt wurde
-     *
-     * @param out ist der OutputStream, in den die gergten Daten geschickt werden sollen.
-     * @param rtm beinahalten das freemarker.template.TempalteModelRoot mit den
-     *   Daten, die ins Template gemerged werden sollen.
-     * @param tmpl Name des Templates
-     * @exception ServletModuleException
-     */
-    private void deliver(HttpServletResponse res, HttpServletRequest req, PrintWriter out, TemplateModelRoot rtm, String templateFilename)
-            throws HTMLParseException {
-        HTMLTemplateProcessor.process(res, templateFilename, rtm, out, getLocale(req));
+    catch (Throwable e) {
+      throw new ServletModuleFailure(e);
     }
+  }
 
-    /**
-     *  Wenn die abgeleitete Klasse diese Methode ueberschreibt und einen String mit einem
-     *  Methodennamen zurueckliefert, dann wird diese Methode bei fehlender Angabe des
-     *  doParameters ausgefuehrt.
-     *
-     * @return Name der Default-Action
-     */
-    public String defaultAction() {
-        return defaultAction;
+  /**
+   * deliver liefert das Template mit dem Filenamen templateFilename
+   * an den HttpServletResponse res aus, nachdem es mit den Daten aus
+   * TemplateModelRoot rtm gemischt wurde
+   *
+   * @param res Http-Response, die vom Dispatcher durchgereicht wird
+   * @param rtm beinahalten das freemarker.template.TempalteModelRoot mit den
+   *   Daten, die ins Template gemerged werden sollen.
+   * @param tmpl Name des Templates
+   * @exception ServletModuleException
+   */
+  public void deliver(HttpServletRequest req, HttpServletResponse res, TemplateModelRoot rtm,
+         TemplateModelRoot popups, String templateFilename) throws ServletModuleFailure  {
+    if (rtm == null)
+      rtm = new SimpleHash();
+
+    try {
+      PrintWriter out = res.getWriter();
+      HTMLTemplateProcessor.process(res, templateFilename, rtm, popups, out, getLocale(req), getFallbackLocale(req));
+
+      // we default to admin bundles here, which is not exactly beautiful...
+      // but this whole producer stuff is going to be rewritten soon.
+      // ServletModuleOpenIndy overwrites deliver() to use open bundles
+      // (br1)
+      out.close();
     }
-
-    /**
-     *  Hier kann vor der Datenaufbereitung schon mal ein response geschickt
-     *  werden (um das subjektive Antwortverhalten bei langsamen Verbindungen
-     *  zu verbessern).
-     */
-    public void predeliver(HttpServletRequest req, HttpServletResponse res) {
-        ;
+    catch (Throwable e) {
+      throw new ServletModuleFailure(e);
     }
+  }
 
-    /**
-     * Holt die Felder aus der Metadatenfelderliste des StorageObjects, die
-     * im HttpRequest vorkommen und liefert sie als HashMap zurueck
-     *
-     * @return HashMap mit den Werten
-     */
-    public HashMap getIntersectingValues(HttpServletRequest req, StorageObject theStorage)
-            throws ServletModuleException {
-        ArrayList theFieldList;
-        try {
-            theFieldList = theStorage.getFields();
-        }
-        catch (StorageObjectException e) {
-            throw new ServletModuleException("ServletModule.getIntersectingValues: " + e.toString());
-        }
 
-        HashMap withValues = new HashMap();
-        String aField, aValue;
+  /**
+   * deliver liefert das Template mit dem Filenamen templateFilename
+   * an den HttpServletResponse res aus, nachdem es mit den Daten aus
+   * TemplateModelRoot rtm gemischt wurde
+   *
+   * @param res Http-Response, die vom Dispatcher durchgereicht wird
+   * @param rtm beinahalten das freemarker.template.TempalteModelRoot mit den
+   *   Daten, die ins Template gemerged werden sollen.
+   * @param tmpl Name des Templates
+   * @exception ServletModuleException
+   */
+  public void deliver(HttpServletRequest req, HttpServletResponse res,
+        TemplateModelRoot rtm, String templateFilename) throws ServletModuleFailure {
+    deliver(req, res, rtm, null, templateFilename);
+  }
 
-        for (int i = 0; i < theFieldList.size(); i++) {
-            aField = (String) theFieldList.get(i);
-            aValue = req.getParameter(aField);
-            if (aValue != null) withValues.put(aField, aValue);
-        }
-        return withValues;
+  /**
+   * deliver liefert das Template mit dem Filenamen templateFilename
+   * an den HttpServletResponse res aus, nachdem es mit den Daten aus
+   * TemplateModelRoot rtm gemischt wurde
+   *
+   * @param res Http-Response, die vom Dispatcher durchgereicht wird
+   * @param rtm beinahalten das freemarker.template.TempalteModelRoot mit den
+   *   Daten, die ins Template gemerged werden sollen.
+   * @param tmpl Name des Templates
+   * @exception ServletModuleException
+   */
+  public void deliver_compressed(HttpServletRequest req, HttpServletResponse res,
+                                 TemplateModelRoot rtm, String templateFilename)
+      throws ServletModuleFailure {
+    if (rtm == null) rtm = new SimpleHash();
+    try {
+      PrintWriter out = new LineFilterWriter(res.getWriter());
+      //PrintWriter out =  res.getWriter();
+      HTMLTemplateProcessor.process(res, templateFilename, rtm, null, out, getLocale(req), getFallbackLocale(req));
+      out.close();
     }
+    catch (Throwable e) {
+      throw new ServletModuleFailure(e);
+    }
+  }
 
+  /**
+   * deliver liefert das Template mit dem Filenamen templateFilename
+   * an den HttpServletResponse res aus, nachdem es mit den Daten aus
+   * TemplateModelRoot rtm gemischt wurde
+   *
+   * @param out ist der OutputStream, in den die gergten Daten geschickt werden sollen.
+   * @param rtm beinahalten das freemarker.template.TempalteModelRoot mit den
+   *   Daten, die ins Template gemerged werden sollen.
+   * @param tmpl Name des Templates
+   * @exception ServletModuleException
+   */
+  private void deliver(HttpServletResponse res, HttpServletRequest req, PrintWriter out,
+                       TemplateModelRoot rtm, String templateFilename)
+      throws ServletModuleFailure {
+    try {
+      HTMLTemplateProcessor.process(res, templateFilename, rtm, null, out, getLocale(req), getFallbackLocale(req));
+    }
+    catch (Throwable e) {
+      throw new ServletModuleFailure(e);
+    }
+  }
+
+  /**
+   *  Wenn die abgeleitete Klasse diese Methode ueberschreibt und einen String mit einem
+   *  Methodennamen zurueckliefert, dann wird diese Methode bei fehlender Angabe des
+   *  doParameters ausgefuehrt.
+   *
+   * @return Name der Default-Action
+   */
+  public String defaultAction() {
+    return defaultAction;
+  }
+
+  /**
+   * Gets the fields from a httprequest and matches them with the metadata from
+   * the storage object. Returns the keys that match, with their values.
+   *
+   * @return Map with the values
+   */
+  public Map getIntersectingValues(HttpServletRequest req, StorageObject theStorage)
+      throws ServletModuleExc, ServletModuleFailure {
+
+    try {
+      HTTPRequestParser parser;
+      List theFieldList;
+
+      parser = new HTTPRequestParser(req);
+
+      theFieldList = theStorage.getFields();
+
+      Map withValues = new HashMap();
+      String aField, aValue;
+
+      for (int i = 0; i < theFieldList.size(); i++) {
+        aField = (String) theFieldList.get(i);
+
+        aValue = parser.getParameter(aField);
+        if (aValue != null)
+          withValues.put(aField, aValue);
+      }
+      return withValues;
+    }
+    catch (Throwable e) {
+      e.printStackTrace(logger.asPrintWriter(LoggerWrapper.DEBUG_MESSAGE));
+
+      throw new ServletModuleFailure( "ServletModule.getIntersectingValues: " + e.getMessage(), e);
+    }
+  }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001, 2002  The Mir-coders group
+ * Copyright (C) 2001, 2002 The Mir-coders group
  *
  * This file is part of Mir.
  *
@@ -18,23 +18,20 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with the com.oreilly.servlet library, any library
- * licensed under the Apache Software License, The Sun (tm) Java Advanced
- * Imaging library (JAI), The Sun JIMI library (or with modified versions of
- * the above that use the same license as the above), and distribute linked
- * combinations including the two.  You must obey the GNU General Public
- * License in all respects for all of the code used other than the above
- * mentioned libraries.  If you modify this file, you may extend this exception
- * to your version of the file, but you are not obligated to do so.  If you do
- * not wish to do so, delete this exception statement from your version.
+ * the code of this program with  any library licensed under the Apache Software License, 
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
+ * (or with modified versions of the above that use the same license as the above), 
+ * and distribute linked combinations including the two.  You must obey the 
+ * GNU General Public License in all respects for all of the code used other than 
+ * the above mentioned libraries.  If you modify this file, you may extend this 
+ * exception to your version of the file, but you are not obligated to do so.  
+ * If you do not wish to do so, delete this exception statement from your version.
  */
-
 package mircoders.servlet;
 
-import mir.misc.Logfile;
-import mir.misc.MirConfig;
+import mir.config.MirPropertiesConfiguration;
+import mir.log.LoggerWrapper;
 import mir.servlet.ServletModule;
-import mir.storage.StorageObjectException;
 import mircoders.module.ModuleUploadedMedia;
 import mircoders.storage.DatabaseAudio;
 
@@ -55,18 +52,18 @@ public class ServletModuleAudio extends ServletModuleUploadedMedia {
     return instance;
   }
 
-
   private ServletModuleAudio() {
-    theLog = Logfile.getInstance(MirConfig.getProp("Home") + MirConfig.getProp("ServletModule.Audio.Logfile"));
-    templateListString = MirConfig.getProp("ServletModule.Audio.ListTemplate");
-    templateObjektString = MirConfig.getProp("ServletModule.Audio.ObjektTemplate");
-    templateConfirmString = MirConfig.getProp("ServletModule.Audio.ConfirmTemplate");
+    logger = new LoggerWrapper("ServletModule.Audio");
     try {
+      configuration = MirPropertiesConfiguration.instance();
+      templateListString = configuration.getString("ServletModule.Audio.ListTemplate");
+      templateObjektString = configuration.getString("ServletModule.Audio.ObjektTemplate");
+      templateConfirmString = configuration.getString("ServletModule.Audio.ConfirmTemplate");
       mainModule = new ModuleUploadedMedia(DatabaseAudio.getInstance());
       //dbRights = DatabaseRights.getInstance();
     }
-    catch (StorageObjectException e) {
-      theLog.printDebugInfo("servletmodule audio could not be initialized");
+    catch (Exception e) {
+      logger.error("servletmodule audio could not be initialized: " + e.getMessage());
     }
   }
 }

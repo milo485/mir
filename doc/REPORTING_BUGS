@@ -1,4 +1,4 @@
-last changed: $Date: 2002/12/12 05:49:41 $. 2002 mir-coders
+last changed: $Date: 2002/12/23 02:56:17 $. 2002 mir-coders
 --------------------------------------------------------------------------
 
 BUG REPORTS
@@ -19,7 +19,7 @@ If the bug is re-producible, please tell us how to reproduce it.
 
 Please specify the relevant versions of the software that you are running Mir
 under. i.e JVM name and version (IBM, Sun,..), what compiler was used
-(javac or jikes), tomcat version. 
+(javac or jikes), tomcat version, browser version...
 
 Of course, you should always specify what version of Mir you are running. If you
 are running a version check'out of CVS, please specify when you checked it out
