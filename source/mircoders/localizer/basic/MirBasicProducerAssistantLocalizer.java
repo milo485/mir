@@ -72,6 +72,7 @@ public class MirBasicProducerAssistantLocalizer implements MirProducerAssistantL
 
     utilityMap.put("compressWhitespace", new freemarker.template.utility.CompressWhitespace() );
     utilityMap.put("encodeHTML", new GeneratorHTMLFunctions.encodeHTMLGeneratorFunction());
+    utilityMap.put("encodeXML", new GeneratorHTMLFunctions.encodeXMLGeneratorFunction());
     utilityMap.put("encodeURI", new GeneratorHTMLFunctions.encodeURIGeneratorFunction());
     utilityMap.put("subString", new GeneratorStringFunctions.subStringFunction());
     utilityMap.put("subList", new GeneratorListFunctions.subListFunction());

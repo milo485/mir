@@ -315,6 +315,9 @@ ServletModule.OpenIndy.PostingTemplate=etc/open/posting.template
 ServletModule.OpenIndy.PostingDoneTemplate=etc/open/posting_done.template
 ServletModule.OpenIndy.PostingDupeTemplate=etc/open/posting_dupe.template
 ServletModule.OpenIndy.SearchResultsTemplate=etc/open/search_results.template
+ServletModule.OpenIndy.PrepareMailTemplate=etc/open/prepare_mail.template
+ServletModule.OpenIndy.SentMailTemplate=etc/open/sent_mail.template
+ServletModule.OpenIndy.EmailIsFrom=mailer@somewhere.org
 
 #
 # config for ServletModuleComment - browsing/editing/deleting comments

@@ -1,0 +1,22 @@
+<HTML>
+<HEAD>EMAIL....</HEAD>
+<BODY>
+Use the follwoing form to send an article as an email.  The first three fields are required.<BR>
+<FORM method="post" action="/Mir/servlet/OpenMir">
+<input type="hidden" name="do" value="mail">
+<input type="hidden" name="mail_aid" value="${data.mail_aid}">
+Forward article to this email address:  <input type="text" size="20" name="mail_to" value="${data.mail_to}"> <BR> 
+Your email address: <input type="text" size="20" name="mail_from" value="${data.mail_from}"> <BR> 
+Your name: <input type="text" size="20" name="mail_from_name" value="${data.mail_from_name}"> <BR> 
+A comment to attach to the article: <textarea name="mail_comment" rows="5" cols="40">${data.mail_comment}</textarea><BR>
+The language you want the explanatory text of the forwarded article to appear in:
+<select name="mail_language">
+	<option value="en" <if data.mail_language=="en">selected</if>>english</option>
+	<option value="de" <if data.mail_language=="de">selected</if>>deutsch</option>	
+
+</select>
+
+<input type="submit" value="SEND"> 
+</FORM>
+</BODY>
+</HTML>

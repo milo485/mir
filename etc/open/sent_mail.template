@@ -1,0 +1,9 @@
+<HTML>
+<BODY>
+the article was sent to the specified address.
+
+<a href="javascript:history.go(-2)"><font color="White"><b>&gt;&gt; ${lang("postingdone.back")}</b></font></a>
+</BODY>
+</HTML>
+
+

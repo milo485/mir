@@ -224,7 +224,7 @@
       ${lang("content.images")}:
   </td>
   <td colspan="4" align="left" valign="top">
-    <a href="${config.actionRoot}?module=Images&do=edit&id=${m["id"]}"><img src="${config.actionRoot}?module=Images&do=showicon&id=${m["id"]}" alt="edit" border="0"></a>
+    <a href="${config.actionRoot}?module=Images&do=edit&id=${m["id"]}"><img src="${config.actionRoot}?module=Images&do=getIcon&id=${m["id"]}" alt="edit" border="0"></a>
       <a href="${config.actionRoot}?module=Content&do=dettach&cid=${data.id}&mid=${m["id"]}">${lang("delete")}</a>
   </td>
 </tr>

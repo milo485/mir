@@ -50,13 +50,42 @@
           <Generate 
               generator="/article.template" 
               destination="${config.storageRoot}/${pathprefix}/${article.date.formatted.yyyy}/${article.date.formatted.MM}/${article.id}.shtml"/>
+          <Generate 
+              generator="/emailThisArticle.template" 
+              destination="${config.storageRoot}/${pathprefix}/${article.date.formatted.yyyy}/${article.date.formatted.MM}/${article.id}.txt"/>
+
         </Language>
 
         <MarkContent key="article"/>            
-
+<!--	<IndexContent key="article" pathToIndex="/tmp/index"/>-->
       </Enumerate>
     </body>
   </producer>  
+
+<!--  <producer name="search-articles">
+    <verbs>
+      <verb name="changed" default="1">
+        <Define key="verbcondition" value=" and (not is_produced)"/>
+        <Set key="limit" value="10"/>
+      </verb>
+      <verb name="all">
+        <Define key="verbcondition" value=""/>
+        <Set key="limit" value="-1"/>
+      </verb>
+
+      <verb name="sample">
+        <Define key="verbcondition" value=""/>
+        <Set key="limit" value="10"/>
+      </verb>
+    </verbs>
+    <body>
+      <Enumerate key="article" table="content" selection="is_published='t' ${verbcondition}"
+                  limit="limit" order="webdb_create desc, date desc">
+	<IndexContent key="article" pathToIndex="/tmp/index"/>
+      </Enumerate>
+    </body>
+  </producer>  -->
+
 
   <producer name="navigation">
     <verbs>

@@ -44,6 +44,8 @@ import freemarker.template.*;
 import com.oreilly.servlet.multipart.*;
 import com.oreilly.servlet.*;
 
+import org.apache.commons.net.smtp.*;
+
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
 
@@ -67,6 +69,7 @@ import mir.entity.*;
 import mir.storage.*;
 import mir.media.*;
 import mir.log.*;
+import mir.util.StringRoutines;
 
 import mircoders.entity.*;
 import mircoders.storage.*;
@@ -84,7 +87,7 @@ import mircoders.search.*;
  *    open-postings to the newswire
  *
  * @author mir-coders group
- * @version $Id: ServletModuleOpenIndy.java,v 1.52 2002/12/23 03:43:46 mh Exp $
+ * @version $Id: ServletModuleOpenIndy.java,v 1.53 2003/01/12 22:25:18 john Exp $
  *
  */
 
@@ -96,6 +99,7 @@ public class ServletModuleOpenIndy extends ServletModule
   private String        postingFormTemplate, postingFormDoneTemplate,
     postingFormDupeTemplate;
   private String        searchResultsTemplate;
+  private String        prepareMailTemplate,sentMailTemplate;
   private ModuleContent contentModule;
   private ModuleComment commentModule;
   private ModuleImages  imageModule;
@@ -117,6 +121,8 @@ public class ServletModuleOpenIndy extends ServletModule
       postingFormDoneTemplate = MirConfig.getProp("ServletModule.OpenIndy.PostingDoneTemplate");
       postingFormDupeTemplate = MirConfig.getProp("ServletModule.OpenIndy.PostingDupeTemplate");
       searchResultsTemplate = MirConfig.getProp("ServletModule.OpenIndy.SearchResultsTemplate");
+      prepareMailTemplate = MirConfig.getProp("ServletModule.OpenIndy.PrepareMailTemplate");
+      sentMailTemplate = MirConfig.getProp("ServletModule.OpenIndy.SentMailTemplate");
       directOp = MirConfig.getProp("DirectOpenposting").toLowerCase();
       passwdProtection = MirConfig.getProp("PasswdProtection").toLowerCase();
       mainModule = new ModuleComment(DatabaseComment.getInstance());
@@ -434,6 +440,134 @@ public class ServletModuleOpenIndy extends ServletModule
 
     deliver(req, res, mergeData, postingFormDoneTemplate);
   }
+
+    /*
+   * Method for preparing and sending a content as an email message
+   */
+  
+  public void mail(HttpServletRequest req, HttpServletResponse res)
+    throws ServletModuleException, ServletModuleUserException {
+    String aid = req.getParameter("mail_aid");
+    if (aid == null){
+      throw new ServletModuleUserException("An article id must be specified in requests to email an article.  Something therefore went badly wrong....");
+    }
+    
+    String to = req.getParameter("mail_to");
+    String from = req.getParameter("mail_from");
+    String from_name = req.getParameter("mail_from_name");
+    String comment = req.getParameter("mail_comment");
+    String mail_language = req.getParameter("mail_language");
+    
+    SimpleHash mergeData = new SimpleHash();
+    
+    if (to == null || from == null || from_name == null|| to.equals("") || from.equals("") || from_name.equals("") || mail_language == null || mail_language.equals("")){
+
+      for (Enumeration theParams = req.getParameterNames(); theParams.hasMoreElements() ;) {
+	String pName=(String)theParams.nextElement();
+	if (pName.startsWith("mail_")){
+	  mergeData.put(pName,new SimpleScalar(req.getParameter(pName)));
+	}
+      }
+      deliver(req,res,mergeData,prepareMailTemplate); 
+    }
+    else {
+      //run checks on to and from and mail_language to make sure no monkey business occurring
+      if (mail_language.indexOf('.') != -1 || mail_language.indexOf('/') != -1 ){
+	throw new ServletModuleUserException("Sorry, you've entered an illegal character into the language field.  Go back and try again, asshole.");
+      }
+      if (to.indexOf('\n') != -1 
+	  || to.indexOf('\r') != -1 
+	  || to.indexOf(',') != -1 
+	  || from.indexOf('\n') != -1 
+	  || from.indexOf('\r') != -1 
+	  || from.indexOf(',') != -1 ){
+	throw new ServletModuleUserException("Sorry, you've entered an illegal character into the from or to field.  Go back and try again.");
+      }
+      EntityContent contentEnt;
+      try{
+	contentEnt = (EntityContent)contentModule.getById(aid);
+      }
+      catch (ModuleException e){ 
+	throw new ServletModuleUserException("Couldn't get content for article "+aid);
+      }
+      String producerStorageRoot=MirConfig.getProp("Producer.StorageRoot");
+      String producerDocRoot=MirConfig.getProp("Producer.DocRoot");
+      String publishPath = contentEnt.getValue("publish_path");
+      String txtFilePath = producerStorageRoot + producerDocRoot + "/" + mail_language + 
+	 publishPath + "/" + aid + ".txt";
+      
+
+      File inputFile = new File(txtFilePath);
+      String content;
+      
+      try{
+	FileReader in = new FileReader(inputFile);
+	StringWriter out = new StringWriter();
+	int c;
+	while ((c = in.read()) != -1)
+	  out.write(c);
+	in.close();
+	content= out.toString();
+      }
+      catch (FileNotFoundException e){
+	throw new ServletModuleUserException("No text file found in " + txtFilePath);
+      }
+      catch (IOException e){
+	throw new ServletModuleUserException("Problem reading file in " + txtFilePath);
+      }
+      // add some headers
+      content = "To: " + to + "\nReply-To: "+ from + "\n" + content;
+      // put in the comment where it should go
+      if (comment != null) { 
+	String commentTextToInsert = "\n\nAttached comment from " + from_name + ":\n" + comment;
+	try {
+	  content=StringRoutines.performRegularExpressionReplacement(content,"!COMMENT!",commentTextToInsert);
+	}
+	catch (Exception e){
+	  throw new ServletModuleUserException("Problem doing regular expression replacement " + e.toString());
+	}
+      }
+      else{
+	try {
+	  content=StringRoutines.performRegularExpressionReplacement(content,"!COMMENT!","");
+	}
+	catch (Exception e){
+	  throw new ServletModuleUserException("Problem doing regular expression replacement " + e.toString());
+	}
+      }
+      
+      SMTPClient client=new SMTPClient();
+      try {
+	int reply;
+	client.connect("localhost");
+	System.out.print(client.getReplyString());
+	
+	reply = client.getReplyCode();
+	
+	if(!SMTPReply.isPositiveCompletion(reply)) {
+	  client.disconnect();
+	  throw new ServletModuleUserException("SMTP server refused connection.");
+	}
+	
+	client.sendSimpleMessage(MirConfig.getProp("ServletModule.OpenIndy.EmailIsFrom"),to,content);
+	
+	client.disconnect();
+	//mission accomplished
+	deliver(req,res,mergeData,sentMailTemplate); 
+
+      } catch(IOException e) {
+	if(client.isConnected()) {
+	  try {
+	    client.disconnect();
+	  } catch(IOException f) {
+	    // do nothing
+	  }
+	}
+	throw new ServletModuleUserException(e.toString());
+      }
+    }
+  }
+
 
   /*
    * Method for querying a lucene index
