@@ -47,6 +47,9 @@ package mir.storage.store;
 import java.util.HashMap;
 import java.util.Map;
 
+import mir.config.MirPropertiesConfiguration;
+import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
+import mir.log.LoggerWrapper;
 import mir.misc.StringUtil;
 
 public class StoreContainerType {
@@ -60,6 +63,8 @@ public class StoreContainerType {
   private static ObjectStore o_store = ObjectStore.getInstance();
   private Class stocClass = null;
   private int stocType = STOC_TYPE_UNKNOWN;
+  private MirPropertiesConfiguration configuration;
+  private LoggerWrapper logger;
 
   static {
     uniqueTypes[STOC_TYPE_ENTITY] = new HashMap();
@@ -71,6 +76,12 @@ public class StoreContainerType {
   private StoreContainerType(Class stocClass, int stocType) {
     this.stocClass = stocClass;
     this.stocType = stocType;
+    logger = new LoggerWrapper("Database");
+    try {
+			configuration = MirPropertiesConfiguration.instance();
+		} catch (PropertiesConfigExc e) {
+			e.printStackTrace(logger.asPrintWriter(LoggerWrapper.ERROR_MESSAGE));
+		}
   }
 
   public static StoreContainerType valueOf(Class stoc_class, int stoc_type) {
@@ -104,7 +115,7 @@ public class StoreContainerType {
     String confProperty = "StoreContainer." + stringForStoreType(stocType) +
         ".DefaultSize";
     return
-        StringUtil.parseInt(o_store.getConfProperty(confProperty), 10);
+        StringUtil.parseInt(configuration.getString(confProperty), 10);
   }
 
   public String toString() {

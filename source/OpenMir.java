@@ -40,14 +40,13 @@ import mir.servlet.AbstractServlet;
 import mir.servlet.ServletModuleDispatch;
 import mir.servlet.ServletModuleUserExc;
 import mir.util.ExceptionFunctions;
-import mircoders.global.MirGlobal;
 import mircoders.servlet.ServletModuleOpenIndy;
 
 /**
  *  OpenMir.java - main servlet for open posting and comment feature to articles
  *
  *  @author RK 1999-2001, the mir-coders group
- *  @version $Id: OpenMir.java,v 1.35 2003/05/01 01:42:11 zapata Exp $
+ *  @version $Id: OpenMir.java,v 1.36 2003/06/15 22:59:44 idfx Exp $
  *
  */
 

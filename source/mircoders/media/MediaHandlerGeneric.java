@@ -37,7 +37,7 @@ import javax.servlet.ServletContext;
 import freemarker.template.SimpleList;
 
 import mir.config.MirPropertiesConfiguration;
-import mir.config.MirPropertiesConfiguration$PropertiesConfigExc;
+import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
 import mir.entity.Entity;
 import mir.log.LoggerWrapper;
 import mir.media.MediaExc;
@@ -64,7 +64,7 @@ import mir.misc.StringUtil;
  *
  * @see mir.media.MirMedia
  * @author mh <mh@nadir.org>
- * @version $Id: MediaHandlerGeneric.java,v 1.20 2003/04/29 02:36:50 zapata Exp $
+ * @version $Id: MediaHandlerGeneric.java,v 1.21 2003/06/15 22:59:21 idfx Exp $
  */
 
 public class MediaHandlerGeneric implements MirMedia

@@ -32,7 +32,6 @@ package mir.producer;
 import java.util.*;
 
 import mir.log.LoggerWrapper;
-import mir.rss.RSSData;
 import mir.rss.*;
 import mir.util.ExceptionFunctions;
 import mir.util.ParameterExpander;

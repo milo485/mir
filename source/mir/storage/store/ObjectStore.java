@@ -59,17 +59,12 @@ package mir.storage.store;
  * @version 1.0
  */
 
-import java.io.BufferedInputStream;
-import java.io.FileInputStream;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.MissingResourceException;
-import java.util.Properties;
 
 import javax.servlet.http.HttpServletRequest;
 
-import mir.config.MirPropertiesConfiguration;
 import mir.log.LoggerWrapper;
 
 public class ObjectStore {
@@ -77,28 +72,10 @@ public class ObjectStore {
   private final static ObjectStore INSTANCE = new ObjectStore();
   private final static Map containerMap = new HashMap(); // StoreContainerType/StoreContainer
   private static long storeHit = 0, storeMiss = 0;
-  private Properties ostoreConf;
   private LoggerWrapper logger;
 
   private ObjectStore() {
-    String confName = null;
-
-    logger = new LoggerWrapper("Database.ObjectStore");
-    Properties conf = new Properties();
-
-    try {
-      confName =
-          MirPropertiesConfiguration.instance().getString("Home") +
-          "etc/objectstore.properties";
-      conf.load(new BufferedInputStream(new FileInputStream(confName)));
-    }
-    catch (java.io.FileNotFoundException fnfe) {
-      logger.error("could not read config file. not found: " + confName);
-    }
-    catch (Throwable t) {
-      logger.error("could not get config: " + t.getMessage());
-    }
-    ostoreConf = conf;
+  	logger = new LoggerWrapper("Database");
   }
 
   public static ObjectStore getInstance() {
@@ -211,19 +188,6 @@ public class ObjectStore {
   private boolean has(StoreIdentifier sid) {
     StoreContainer stoc = getStoreContainerForSid(sid);
     return (stoc != null && stoc.has(sid)) ? true : false;
-  }
-
-  public String getConfProperty(String name) {
-    if (name != null) {
-      String returnValue = "";
-      try {
-        return ostoreConf.getProperty(name);
-      }
-      catch (MissingResourceException e) {
-        logger.error("getConfProperty: " + e.toString());
-      }
-    }
-    return null;
   }
 
   /**

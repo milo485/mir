@@ -31,7 +31,6 @@
 package  mircoders.media;
 
 import mir.media.*;
-import mir.entity.*;
 
 /**
  * Handles audio media, like mp3 and maybe it could also handle some other.
@@ -40,7 +39,7 @@ import mir.entity.*;
  * @see mir.media.MediaHandlerGeneric
  * @see mir.media.MirMedia
  * @author mh <mh@nadir.org>
- * @version $Id: MediaHandlerAudio.java,v 1.9 2003/04/29 02:36:50 zapata Exp $
+ * @version $Id: MediaHandlerAudio.java,v 1.10 2003/06/15 22:59:21 idfx Exp $
  */
 
 public class MediaHandlerAudio extends MediaHandlerGeneric implements MirMedia

@@ -78,7 +78,7 @@ public class RSSReader {
     registerModule(new RSSBasicModule(RSS_1_0_NAMESPACE_URI, "RSS 1.0 module"), "rss");
 
     RSSBasicModule dcModule = new RSSBasicModule(DUBLINCORE_NAMESPACE_URI, "Dublin Core RSS module 1.1");
-    dcModule.addProperty("date", dcModule.W3CDTF_PROPERTY_TYPE);
+    dcModule.addProperty("date", RSSBasicModule.W3CDTF_PROPERTY_TYPE);
     registerModule(dcModule, "dc");
 
     registerModule(new RSSBasicModule(EVENT_NAMESPACE_URI, "Event RSS module"), "ev");

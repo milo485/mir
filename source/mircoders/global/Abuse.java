@@ -223,7 +223,7 @@ public class Abuse {
       logger.info("checkComment: " + (System.currentTimeMillis()-time) + "ms");
     }
     catch (Throwable t) {
-      t.printStackTrace(logger.asPrintWriter(logger.DEBUG_MESSAGE));
+      t.printStackTrace(logger.asPrintWriter(LoggerWrapper.DEBUG_MESSAGE));
       logger.error("Abuse.checkComment: " + t.toString());
     }
   }
@@ -243,7 +243,7 @@ public class Abuse {
       logger.info("checkArticle: " + (System.currentTimeMillis()-time) + "ms");
     }
     catch (Throwable t) {
-      t.printStackTrace(logger.asPrintWriter(logger.DEBUG_MESSAGE));
+      t.printStackTrace(logger.asPrintWriter(LoggerWrapper.DEBUG_MESSAGE));
       logger.error("Abuse.checkArticle: " + t.toString());
     }
   }
