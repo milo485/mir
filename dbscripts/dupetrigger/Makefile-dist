@@ -4,7 +4,8 @@
 PGINC=/usr/include/postgresql/server
 
 #PGVERSION=-DPG70
-PGVERSION=-DPG71
+#PGVERSION=-DPG71
+PGVERSION=-DPG72
 
 # If changed, also change postgresql.script
 INSTALLDIR=/var/lib/postgres/data

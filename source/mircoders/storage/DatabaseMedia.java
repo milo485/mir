@@ -31,9 +31,9 @@
 
 package mircoders.storage;
 
-import mir.log.LoggerWrapper;
 import mir.entity.Entity;
 import mir.entity.EntityRelation;
+import mir.log.LoggerWrapper;
 import mir.storage.Database;
 import mir.storage.StorageObject;
 import mir.storage.StorageObjectExc;

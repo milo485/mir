@@ -29,26 +29,17 @@
  * not wish to do so, delete this exception statement from your version.
  */
 
-package mir.misc;
+package mir.servlet;
 
+import multex.Failure;
 
-/*
- * 
- * @version $Id: FileHandlerException.java,v 1.4 2003/01/25 17:45:17 idfx Exp $
- * @author mh, mir-coders
- *
- */
+public class ServletModuleFailure extends Failure {
 
-public final class FileHandlerException extends Exception {
-  String msg;
-
-  public FileHandlerException(String msg) {
-    super(msg);
-    this.msg = msg;
+  public ServletModuleFailure(String aMessage,Throwable aCause) {
+    super(aMessage, aCause);
   }
 
-  public String getMsg() {
-    return msg;
+  public ServletModuleFailure(Throwable aCause) {
+    this (aCause.getMessage(), aCause);
   }
 }
-

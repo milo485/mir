@@ -34,9 +34,9 @@ package mircoders.storage;
 import java.sql.Connection;
 import java.sql.Statement;
 
-import mir.log.LoggerWrapper;
 import mir.entity.EntityList;
 import mir.entity.EntityRelation;
+import mir.log.LoggerWrapper;
 import mir.storage.Database;
 import mir.storage.StorageObject;
 import mir.storage.StorageObjectFailure;
@@ -52,7 +52,6 @@ public class DatabaseContent extends Database implements StorageObject {
 
   private static DatabaseContent      instance;
   private static EntityRelation       relationComments;
-  private static EntityRelation       relationFeature;
 
   // Contructors / Singleton
 
@@ -78,8 +77,6 @@ public class DatabaseContent extends Database implements StorageObject {
 
     relationComments =
         new EntityRelation("id", "to_media", DatabaseComment.getInstance(), EntityRelation.TO_MANY);
-    relationFeature =
-        new EntityRelation("id", "to_feature", DatabaseFeature.getInstance(), EntityRelation.TO_ONE);
     theEntityClass = mircoders.entity.EntityContent.class;
   }
 
@@ -101,7 +98,9 @@ public class DatabaseContent extends Database implements StorageObject {
       executeUpdate(stmt,sql);
       logger.debug("set unproduced: "+where);
     }
-    catch (Exception e) {_throwStorageObjectException(e, "-- set unproduced failed");}
+    catch (Exception e) {
+      _throwStorageObjectException(e, "-- set unproduced failed");
+    }
     finally { freeConnection(con,stmt);}
   }
 
@@ -114,11 +113,11 @@ public class DatabaseContent extends Database implements StorageObject {
   }
 
   /**
-   * returns the features that belong to the article (via entityrelation)
+   *
+   * @param id
+   * @return
+   * @throws StorageObjectFailure
    */
-  public EntityList getFeature(EntityContent entC) throws StorageObjectFailure {
-    return relationFeature.getMany(entC);
-  }
 
   public boolean delete(String id) throws StorageObjectFailure
   {

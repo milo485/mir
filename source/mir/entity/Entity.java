@@ -36,16 +36,9 @@
 
 package  mir.entity;
 
-import java.util.List;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Set;
-
-import freemarker.template.SimpleScalar;
-import freemarker.template.TemplateHashModel;
-import freemarker.template.TemplateModel;
-import freemarker.template.TemplateModelException;
-import freemarker.template.TemplateModelRoot;
+import java.util.List;
+import java.util.Map;
 
 import mir.config.MirPropertiesConfiguration;
 import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
@@ -54,12 +47,17 @@ import mir.misc.StringUtil;
 import mir.storage.StorageObject;
 import mir.storage.StorageObjectExc;
 import mir.storage.StorageObjectFailure;
+import freemarker.template.SimpleScalar;
+import freemarker.template.TemplateHashModel;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateModelRoot;
 
 /**
  * Base Class of Entities
  * Interfacing TemplateHashModel and TemplateModelRoot to be freemarker compliant
  *
- * @version $Id: Entity.java,v 1.16 2003/02/28 18:27:07 idfx Exp $
+ * @version $Id: Entity.java,v 1.18 2003/03/05 19:23:14 idfx Exp $
  * @author rk
  *
  */
@@ -69,7 +67,7 @@ public class Entity implements TemplateHashModel, TemplateModelRoot
   protected static MirPropertiesConfiguration configuration;
 
   private boolean changed;
-  protected HashMap theValuesHash; // tablekey / value
+  protected Map theValuesHash; // tablekey / value
   protected StorageObject theStorageObject;
   protected List streamedInput = null;
   protected LoggerWrapper logger;
@@ -107,24 +105,17 @@ public class Entity implements TemplateHashModel, TemplateModelRoot
 
   /**
    * Sets the values of the Entity.
-   * @param theStringValues HashMap containing the new values of the Entity
+   * @param theStringValues Map containing the new values of the Entity
    */
 
-  public void setValues(HashMap theStringValues) {
+  public void setValues(Map theStringValues) {
     /** @todo should be synchronized */
     if (theStringValues != null) {
       theValuesHash = new HashMap();
-      String aKey;
-      Set set = theStringValues.keySet();
-      Iterator it = set.iterator();
-      int size = set.size();
-      for (int i = 0; i < size; i++) {
-        aKey = (String) it.next();
-        theValuesHash.put(aKey, (String) theStringValues.get(aKey));
-      }
+      theValuesHash.putAll(theStringValues);
     }
     else
-      logger.warn("Entity.setValues called with null HashMap");
+      logger.warn("Entity.setValues called with null Map");
   }
 
   /**
@@ -248,14 +239,14 @@ public class Entity implements TemplateHashModel, TemplateModelRoot
   }
 
   /**
-   * Returns a Hashmap with all values of the Entity.
-   * @return HashMap with field name as key and the corresponding values
+   * Returns a Map with all values of the Entity.
+   * @return Map with field name as key and the corresponding values
    *
        * @deprecated This method is deprecated and will be deleted in the next release.
    *  Entity interfaces freemarker.template.TemplateHashModel now and can
    *  be used in the same way as SimpleHash.
    */
-  public HashMap getValues() {
+  public Map getValues() {
     logger.warn("using deprecated Entity.getValues() - a waste of resources");
     return theValuesHash;
   }

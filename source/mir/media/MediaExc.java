@@ -31,18 +31,10 @@
 
 package mir.media;
 
+import multex.Exc;
 
-/*
- *  MirMediaException -
- *
- * @version $Id: MirMediaException.java,v 1.8 2003/01/25 17:45:17 idfx Exp $
- * @author mh
- *
- */
-
-public final class MirMediaException extends Exception {
-  public MirMediaException(String msg) {
-    super(msg);
+public class MediaExc extends Exc {
+  public MediaExc(String aMessage) {
+    super(aMessage);
   }
 }
-

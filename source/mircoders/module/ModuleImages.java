@@ -33,11 +33,7 @@ package mircoders.module;
 
 import mir.log.LoggerWrapper;
 import mir.module.AbstractModule;
-import mir.module.ModuleException;
 import mir.storage.StorageObject;
-import mir.storage.StorageObjectFailure;
-import mircoders.storage.DatabaseImages;
-import freemarker.template.SimpleList;
 
 public class ModuleImages extends AbstractModule {
   static LoggerWrapper logger = new LoggerWrapper("Module.Images");
@@ -50,16 +46,14 @@ public class ModuleImages extends AbstractModule {
   }
 
 // Methoden
-
-  public SimpleList getBilderAsSimpleList()
-      throws ModuleException {
-
-//  String sql = "select id, name from Bilder order by name";
+/*
+  public SimpleList getBilderAsSimpleList() throws ModuleExc, ModuleFailure {
     try {
       return ((DatabaseImages)theStorage).getPopupData();
-    } catch  (StorageObjectFailure e) {
+    }
+    catch  (StorageObjectFailure e) {
       throw new ModuleException(e.toString());
     }
   }
-
+*/
 }

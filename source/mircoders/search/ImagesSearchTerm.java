@@ -32,6 +32,9 @@
 package mircoders.search;
 
 import java.util.StringTokenizer;
+import java.util.Map;
+import java.util.Vector;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -44,17 +47,13 @@ import mircoders.storage.DatabaseContentToMedia;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 
-import freemarker.template.SimpleHash;
-import freemarker.template.SimpleList;
-import freemarker.template.SimpleScalar;
-
 
 public class ImagesSearchTerm extends SearchTerm{
-  
-  
-  public static String matchField       = "hasImages"; 
-  public static String paramName        = "search_hasImages"; 
-  public static String dataField        = "images"; 
+
+
+  public static String matchField       = "hasImages";
+  public static String paramName        = "search_hasImages";
+  public static String dataField        = "images";
   public static String templateVariable = "images";
 
   public void index(Document doc, Entity entity) throws StorageObjectFailure{
@@ -63,10 +62,10 @@ public class ImagesSearchTerm extends SearchTerm{
       doc.add(Field.Keyword(matchField,"y"));
       String imageURLString = "";
       for(int k=0;k<images.size();k++){
-	if (k != 0){
-	  imageURLString = imageURLString + ":";
-	}
-	imageURLString = imageURLString + (images.elementAt(k)).getValue("icon_path");
+        if (k != 0){
+          imageURLString = imageURLString + ":";
+        }
+        imageURLString = imageURLString + (images.elementAt(k)).getValue("icon_path");
       }
       doc.add(Field.UnIndexed("images",imageURLString));
     }
@@ -83,20 +82,20 @@ public class ImagesSearchTerm extends SearchTerm{
       return null;
     }
   }
- 
-  public void returnMeta(SimpleHash result,Document doc){
+
+  public void returnMeta(Map result,Document doc){
     String imageURLString=doc.get(dataField);
     if (imageURLString != null){
-      SimpleList theImages = new SimpleList();
+      List theImages = new Vector();
       StringTokenizer st = new StringTokenizer(imageURLString,":");
       while (st.hasMoreTokens()) {
-	String imageURL=st.nextToken();
-	theImages.add(new SimpleScalar(imageURL));
+        String imageURL=st.nextToken();
+        theImages.add(imageURL);
       }
       result.put(templateVariable,theImages);
     }
   }
-  
+
 
 }
 

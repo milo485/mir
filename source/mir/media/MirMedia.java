@@ -41,8 +41,8 @@ import freemarker.template.SimpleList;
  * must implement this interface. Each specific media type,
  * be it Gif, Jpeg, Mp3 audio, Real Audio or quicktime video
  * has special needs when it comes to representation on the various
- * pages (article, list, summary), must be stored differently and has a 
- * different URL, etc... This interface allows Mir to support 
+ * pages (article, list, summary), must be stored differently and has a
+ * different URL, etc... This interface allows Mir to support
  * an infinite (I hope) number of media types. Once this is done,
  * no code at any other level in Mir needs to be changed other than
  * adding the content-type <-> media handler name mapping in the
@@ -61,7 +61,7 @@ import freemarker.template.SimpleList;
  * <p>
  * The "name" field is used for various display/filenaming purposes. it should
  * match a valid file extension name for a media_type (we could have used the
- * content-type map for this....). 
+ * content-type map for this....).
  * <p>
  * The "mime_type" field is the most important as it does maps the type to Java
  * classes (the storage and media_handler name). We call those classes using
@@ -79,9 +79,9 @@ import freemarker.template.SimpleList;
  * <p>
  * Most media handlers should just extend MediaHandlerGeneric (i.e inherit from
  * ) and just override the things that need to be specific. see MediaHandlerAudio
- * 
+ *
  * @author <mh@nadir.org>, the Mir-coders group
- * @version $Id: MirMedia.java,v 1.15 2003/01/25 17:45:17 idfx Exp $
+ * @version $Id: MirMedia.java,v 1.16 2003/03/09 03:53:10 zapata Exp $
  */
 
 public interface  MirMedia{
@@ -98,11 +98,9 @@ public interface  MirMedia{
    * @return boolean, success/fail
    * @see mir.entity.Entity
    */
-  public abstract void set (InputStream in, Entity ent,
-                                Entity mediaTypeEnt ) throws MirMediaException;
+  public abstract void set (InputStream in, Entity ent, Entity mediaTypeEnt ) throws MediaExc, MediaFailure;
 
-	public abstract void produce (Entity ent, Entity mediaTypeEnt ) 
-    throws MirMediaException;
+  public abstract void produce (Entity ent, Entity mediaTypeEnt ) throws MediaExc, MediaFailure;
 
   /**
    * Get's the media data from storage and returns it as an InputStream
@@ -114,8 +112,7 @@ public interface  MirMedia{
    * @return java.io.InputStream
    * @see mir.entity.Entity
    */
-  public abstract InputStream getMedia (Entity ent, Entity mediaTypeEnt)
-          throws MirMediaException;
+  public abstract InputStream getMedia (Entity ent, Entity mediaTypeEnt) throws MediaExc, MediaFailure;
 
   /**
    * Pretty much like get() above. But get's the specific Icon
@@ -124,11 +121,11 @@ public interface  MirMedia{
    * @return java.io.InputStream
    * @see mir.entity.Entity
    */
-  public abstract InputStream getIcon (Entity ent) throws MirMediaException;
+  public abstract InputStream getIcon (Entity ent) throws MediaExc, MediaFailure;
 
-	/**
+        /**
    * gets the final content representation for the media
-   * in the form of a URL (String) that allows someone to 
+   * in the form of a URL (String) that allows someone to
    * download, look at or listen to the media. (HREF, img src
    * streaming link, etc..)
    * It should use the helper functions in the StringUtil class to
@@ -139,10 +136,9 @@ public interface  MirMedia{
    * @see mir.entity.Entity
    * @see mir.misc.StringUtil
    */
-  public abstract SimpleList getURL (Entity ent, Entity mediaTypeEnt)
-    throws MirMediaException;
+  public abstract SimpleList getURL (Entity ent, Entity mediaTypeEnt) throws MediaExc, MediaFailure;
 
-	/**
+        /**
    * Returns the absolute filesystem path to where the media
    * content should be stored. This path is usually defined
    * in the configuration wich is accessible through the MirConfig
@@ -150,9 +146,9 @@ public interface  MirMedia{
    * @return String, the path.
    * @see mir.misc.MirConfig
    */
-  public abstract String getStoragePath () throws MirMediaException;
+  public abstract String getStoragePath () throws MediaExc, MediaFailure;
 
-	/**
+        /**
    * Returns the *relative* filesystem path to where the media
    * icon content should be stored. It is relative to the path
    * returned by getStoragePath()
@@ -162,9 +158,9 @@ public interface  MirMedia{
    * @return String, the path.
    * @see mir.misc.MirConfig
    */
-  public abstract String getIconStoragePath () throws MirMediaException;
+  public abstract String getIconStoragePath () throws MediaExc, MediaFailure;
 
-	/**
+        /**
    * Returns the base URL to that the media is accessible from
    * to the end user. This could be a URL to another host.
    * This is used in the Metadata stored in the DB and later on
@@ -175,9 +171,9 @@ public interface  MirMedia{
    * @return String, the base URL to the host.
    * @see mir.misc.MirConfig
    */
-  public abstract String getPublishHost () throws MirMediaException;
+  public abstract String getPublishHost () throws MediaExc, MediaFailure;
 
-	/**
+        /**
    * Returns the file name of the Icon representing the media type.
    * It is used in the summary view.
    * It is usually defined
@@ -187,9 +183,9 @@ public interface  MirMedia{
    * @see mir.misc.MirConfig
    */
   public abstract String getBigIconName ();
-  
-	/**
-   * Returns the file name of the small Icon representing 
+
+        /**
+   * Returns the file name of the small Icon representing
    * the media type.
    * It is used in the right hand newswire list of the startpage.
    * It is usually defined
@@ -200,26 +196,26 @@ public interface  MirMedia{
    */
   public abstract String getTinyIconName ();
 
-	/**
+        /**
    * Returns the IMG SRC "ALT" text to be used
    * for the Icon representations
    * @return String, the ALT text.
    */
   public abstract String getIconAltName ();
 
-	/**
+        /**
    * your can all figure it out.
    * @return boolean.
    */
   public abstract boolean isVideo ();
 
-	/**
+        /**
    * you can all figure it out.
    * @return boolean.
    */
   public abstract boolean isAudio ();
 
-	/**
+        /**
    * you can all figure it out.
    * @return boolean.
    */

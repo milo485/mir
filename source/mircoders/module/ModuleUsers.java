@@ -31,15 +31,18 @@
 
 package mircoders.module;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import mir.entity.EntityList;
 import mir.log.LoggerWrapper;
 import mir.module.AbstractModule;
-import mir.module.ModuleException;
+import mir.module.ModuleExc;
+import mir.module.ModuleFailure;
 import mir.storage.StorageObject;
-import mir.storage.StorageObjectFailure;
+import mir.util.JDBCStringRoutines;
 import mircoders.entity.EntityUsers;
-import mircoders.storage.DatabaseUsers;
-import freemarker.template.SimpleList;
+import mircoders.global.MirGlobal;
 
 
 /*
@@ -56,41 +59,82 @@ public class ModuleUsers extends AbstractModule
   public ModuleUsers(StorageObject theStorage)
   {
     if (theStorage == null)
-      logger.warn("StorageObject was null!");
+      logger.warn("ModuleUsers(): StorageObject was null!");
 
     this.theStorage = theStorage;
   }
 
   /**
-   * login method
+   * Authenticate and lookup a user
+   *
+   * @param user              The user to lookup
+   * @param password          The password
+   * @return                  The authenticated user, or <code>null</code> if the user
+   *                          doesn't exist, or the supplied password is invalid.
+   * @throws ModuleException
    */
 
-  public EntityUsers getUserForLogin(String user, String password) throws ModuleException
-  {
-    String whereString = "login='" +user + "' and password='"+ password + "' and is_admin='1'";
-    EntityList userList = getByWhereClause(whereString, -1);
-    if (userList != null && userList.getCount()==1)
-      return (EntityUsers)userList.elementAt(0);
-    else
-      return null;
+  public EntityUsers getUserForLogin(String user, String password) throws ModuleExc, ModuleFailure {
+    try {
+      String whereString =
+          "login='" + JDBCStringRoutines.escapeStringLiteral(user) + "' " +
+          "and password='" + JDBCStringRoutines.escapeStringLiteral(
+          MirGlobal.localizer().adminInterface().makePasswordDigest(password)) +
+          "' " +
+          "and is_admin='1'";
+
+      EntityList userList = getByWhereClause(whereString, -1);
+
+      if (userList != null && userList.getCount() == 1)
+        return (EntityUsers) userList.elementAt(0);
+      else
+        return null;
+    }
+    catch (Throwable t) {
+      throw new ModuleFailure(t);
+    }
   }
 
-  public EntityList getUsers(String whereClause, int offset, int limit) throws ModuleException
-  {
+  private Map digestPassword(Map aValues) throws ModuleExc, ModuleFailure {
+    Map result = aValues;
+
     try {
-      return theStorage.selectByWhereClause(whereClause, null, offset, limit);
+      if (aValues.containsKey("password")) {
+        result = new HashMap();
+        result.putAll(aValues);
+        result.put("password",
+            MirGlobal.localizer().adminInterface().
+            makePasswordDigest( (String) aValues.get("password")));
+      }
     }
-    catch (StorageObjectFailure e){
-      throw new ModuleException(e.toString());
+    catch (Throwable t) {
+      throw new ModuleFailure("ModuleUsers.add: " + t.getMessage(), t);
+    }
+
+    return result;
+  }
+
+  public String add (Map theValues) throws ModuleExc, ModuleFailure {
+    try {
+      return super.add(digestPassword(theValues));
+    }
+    catch (Throwable t) {
+      throw new ModuleFailure(t);
     }
   }
 
-  public SimpleList getUsersAsSimpleList() throws ModuleException {
+  /**
+   * Standardfunktion, um einen Datensatz via StorageObject zu aktualisieren
+   * @param theValues Hash mit Spalte/Wert-Paaren
+   * @return Id des eingef?gten Objekts
+   * @exception ModuleException
+   */
+  public String set (Map theValues) throws ModuleExc, ModuleFailure {
     try {
-      return ((DatabaseUsers)theStorage).getPopupData();
+      return super.set(digestPassword(theValues));
     }
-    catch(StorageObjectFailure e) {
-      throw new ModuleException(e.toString());
+    catch (Throwable t) {
+      throw new ModuleFailure(t);
     }
   }
 }

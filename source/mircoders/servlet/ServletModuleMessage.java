@@ -31,7 +31,6 @@
 
 package mircoders.servlet;
 
-import java.io.IOException;
 import java.net.URLEncoder;
 
 import javax.servlet.http.HttpServletRequest;
@@ -40,9 +39,9 @@ import javax.servlet.http.HttpServletResponse;
 import mir.entity.EntityList;
 import mir.log.LoggerWrapper;
 import mir.misc.HTMLTemplateProcessor;
-import mir.module.ModuleException;
 import mir.servlet.ServletModule;
-import mir.servlet.ServletModuleException;
+import mir.servlet.ServletModuleExc;
+import mir.servlet.ServletModuleFailure;
 import mir.storage.StorageObjectFailure;
 import mircoders.module.ModuleMessage;
 import mircoders.storage.DatabaseMessages;
@@ -79,11 +78,12 @@ public class ServletModuleMessage extends ServletModule
     }
     catch (StorageObjectFailure e) {
       logger.error("initialization of ServletModuleMessage failed!: " + e.getMessage());
+
+      throw new ServletModuleFailure(e);
     }
   }
 
-  public void list(HttpServletRequest req, HttpServletResponse res)
-      throws ServletModuleException
+  public void list(HttpServletRequest req, HttpServletResponse res) throws ServletModuleExc
   {
 // fetch and deliver
     try {
@@ -108,9 +108,9 @@ public class ServletModuleMessage extends ServletModule
       HTMLTemplateProcessor.process(res, templateListString, mergeData, res.getWriter(), getLocale(req));
 
     }
-    catch (ModuleException e) {throw new ServletModuleException(e.toString());}
-    catch (IOException e) {throw new ServletModuleException(e.toString());}
-    catch (Exception e) {throw new ServletModuleException(e.toString());}
+    catch (Throwable e) {
+      throw new ServletModuleFailure(e);
+    }
   }
 
 

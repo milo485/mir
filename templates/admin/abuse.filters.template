@@ -1,0 +1,67 @@
+<function showFilterEntry(aType, anExpression, anId)>
+      <form method="post" action="${config.actionRoot}">
+        <input type="hidden" name="module" value="Abuse">
+        <input type="hidden" name="do" value="editfilter">
+        <if anId>
+          <input type="hidden" name="id" value="${anId}">
+        </if>
+        <if grey=="1"><assign grey="0"><tr class="list1"><else><tr class="list2"><assign grey="1"> </if>
+          <td>
+            <select name="type">
+              <list filtertypes as t>
+                <option value="${t.id}" <if t.id==aType>selected</if>>${lang(t.resource)}</option>
+              </list>
+            </select>
+          </td>
+          <td><input type="text" name="expression" size="30" value="${utility.encodeHTML(anExpression)}"></td>
+          <if anId>
+            <td>
+              <input class="majorbutton" type="submit" name="save" value="${lang("save")}">
+            </td>
+            <td>
+                <a href="${config.actionRoot}?module=Abuse&do=deletefilter&id=${anId}">${lang("delete")}</a>
+                &nbsp;
+            </td>
+          <else>
+            <td>
+              <input class="majorbutton" type="submit" name="save" value="${lang("add")}">
+            </td>
+          </if>
+        </tr>
+      </form>
+</function>
+<html>
+  <head>
+    <title>${config["Mir.Name"]} | ${lang("userlist.htmltitle")}</title>
+    <link rel="stylesheet" type="text/css" href="${config.docRoot}/style/admin.css">
+  </head>
+
+  <body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
+    <include "head.template">
+    <p>
+      <a class="majorcommand" href="${config.actionRoot}?module=Abuse">${lang("back")}</a>
+    </p>
+    <table border="0" cellpadding="2" cellspacing="1">
+      <tr class="darkgrey">
+        <td><span class="witesmall"><b>${lang("abuse.filter.type")}</b></span></td>
+        <td><span class="witesmall"><b>${lang("abuse.filter.expression")}</b></span></td>
+        <td><span class="witesmall"><b>&nbsp;</b></span></td>
+      </tr>
+      
+      <assign grey="0">      
+      <list filters as i>
+        <call showFilterEntry(i.type, i.expression, i.id)>
+      </list>
+      
+      <call showFilterEntry("", "", "")>
+    </table>
+
+    <p>
+      <a class="majorcommand" href="${config.actionRoot}?module=Abuse">${lang("back")}</a>
+    </p>
+
+    <include "foot.template">
+  </body>
+</html>
+
+

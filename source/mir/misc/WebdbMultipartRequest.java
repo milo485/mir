@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Map;
 import java.util.Vector;
 
 import javax.servlet.http.HttpServletRequest;
@@ -64,14 +65,14 @@ public class WebdbMultipartRequest
   FileHandler           _fHandler;
 
   public WebdbMultipartRequest(HttpServletRequest theReq, FileHandler handler)
-    throws FileHandlerException, FileHandlerUserException, IOException, PropertiesConfigExc
+    throws FileHandler.FileHandlerExc, FileHandler.FileHandlerFailure, IOException, PropertiesConfigExc
   {
     req=theReq;
     int maxSize;
     try {
-      maxSize =
-        MirPropertiesConfiguration.instance().getInt("MaxMediaUploadSize");
-    } catch (PropertiesConfigExc e) {
+      maxSize = MirPropertiesConfiguration.instance().getInt("MaxMediaUploadSize");
+    }
+    catch (PropertiesConfigExc e) {
       maxSize = 1024;
       throw e;
     }
@@ -82,33 +83,37 @@ public class WebdbMultipartRequest
 
 
   /**
-   * The following comment and some code was adapted from the Oreilley cos.jar 
+   * The following comment and some code was adapted from the Oreilley cos.jar
    * package. -mh 2001.09.20
    *
-   * Returns all the parameters as a HashMap of Strings, any parameter 
-   * that sent without a value will be null.  A value 
-   * is guaranteed to be in its normal, decoded form.  If A parameter 
-   * has multiple values, only the last one is returned (for backward 
+   * Returns all the parameters as a Map of Strings, any parameter
+   * that sent without a value will be null.  A value
+   * is guaranteed to be in its normal, decoded form.  If A parameter
+   * has multiple values, only the last one is returned (for backward
    * compatibility).  For parameters with multiple values, it's possible
    * the last "value" may be null.
    *
-   * @return A HashMap of String representations of the  parameter values.
+   * @return A Map of String representations of the  parameter values.
    */
-  public HashMap getParameters(){
-    HashMap pHash = new HashMap();
+  public Map getParameters(){
+    Map pHash = new HashMap();
     String value = new String();
 
     Enumeration Keys = parameters.keys();
     while(Keys.hasMoreElements()) {
       String KeyNm = (String)Keys.nextElement();
       Vector values = (Vector)parameters.get(KeyNm);
+
       if (values == null || values.size() == 0) {
         value = null;
-      } else {
+      }
+      else {
         value = (String)values.elementAt(values.size() - 1);
-      } //endif
+      }
+
       pHash.put(KeyNm, value);
-    } // end while
+    }
+
     return pHash;
   }
 
@@ -116,10 +121,10 @@ public class WebdbMultipartRequest
    * The following code and comment stolen from oreilley cos.jar.
    * -mh. 2001.09.20
    *
-   * Returns the values of the named parameter as a String array, or null if 
-   * the parameter was not sent.  The array has one entry for each parameter 
-   * field sent.  If any field was sent without a value that entry is stored 
-   * in the array as a null.  The values are guaranteed to be in their 
+   * Returns the values of the named parameter as a String array, or null if
+   * the parameter was not sent.  The array has one entry for each parameter
+   * field sent.  If any field was sent without a value that entry is stored
+   * in the array as a null.  The values are guaranteed to be in their
    * normal, decoded form.  A single value is returned as a one-element array.
    *
    * @param name the parameter name.
@@ -140,8 +145,8 @@ public class WebdbMultipartRequest
     }
   }
 
-  private void _evaluateRequest() throws FileHandlerException,
-    FileHandlerUserException, IOException {
+  private void _evaluateRequest() throws FileHandler.FileHandlerExc,
+      FileHandler.FileHandlerFailure, IOException {
 
     Part part;
     int i = 1;

@@ -29,22 +29,17 @@
  * not wish to do so, delete this exception statement from your version.
  */
 
-package mir.module;
+package mir.media;
 
+import multex.Failure;
 
-/*
- *  ServletModuleException -
- *  wird vom ServletModule geschmissen</b>
- *
- * 
- * @version 5.7.199
- * @author RK
- */
+public class MediaFailure extends Failure {
 
-public final class ModuleException extends Exception
-{
-	public ModuleException(String msg) {
-		super(msg);
-	}
+  public MediaFailure(String msg,Throwable cause) {
+    super(msg,cause);
+  }
+
+  public MediaFailure(Throwable aCause) {
+    this (aCause.getMessage(), aCause);
+  }
 }
-

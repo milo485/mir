@@ -29,7 +29,7 @@
         </if>
       </td>
       <td colspan="2" align="right" valign="top">
-        ${lang("content.published")} <a href="${config.docRoot}/help/content.html"><img src="${config.docRoot}/img/help.gif" border="0" align="absmiddle"></a>:
+        ${lang("content.published")} 
         <input type="checkbox" name="is_published" value="1"<if article.is_published!="0" && article.is_published!=""> checked</if>>
         <if new=="1">
           <input type="submit" name="save" value="${lang("insert")}">
@@ -71,39 +71,56 @@
   
     <tr>
       <td align="right" valign="top" class="editfieldname">
-        ${lang("content.topic")}&nbsp;
-        <a href="${config.docRoot}/help/content.html"><img src=" ${config.docRoot}/img/help.gif" border="0" align="absmiddle"></a>
-        <a href="${config.docRoot}/help/content.html">
-          <img src="${config.docRoot}/img/help.gif" border="0" align="middle"></a>
+          ${lang("content.articletype")} /  
+          ${lang("content.language")}:
       </td>
       <td colspan="4">
-        <table border=0 cellpadding="0" cellspacing="0">
-          <tr>
-            <td>
               <select name="to_article_type">
                 <list articletypes as a>
                   <option value="${a.id}" <if (a.id == article.to_article_type)>selected</if>>${lang("articletypes."+a.name)}</option>
                 </list>
               </select>
-            </td>
-            <td rowspan="2">
-              <select name="to_topic" size="5" multiple>
-                <list topics as t>
-                  <option value="${t.id}" <list article.to_topics as to><if (t.id == to["id"])>selected</if></list>>${t.title}</option>
-                </list>
-              </select>
-            </td>
-          </tr>
-          <tr>
-            <td>
               <select name="to_language">
                 <list languages as l>
                   <option value="${l.id}" <if (l.id == article.to_language)>selected</if>>${l.name}</option>
                 </list>
               </select>
-            <td>
-          </tr>
-        </table>
+      </td>
+    </tr>
+    <tr>
+      <td align="right" valign="top" class="editfieldname">
+        ${lang("content.topic")}:
+      </td>
+      <td colspan="4">
+        <if config["Mir.Localizer.Admin.TopicListFlavor"]!="0">      
+          <table border=0 cellpadding="0" cellspacing="0">
+            <tr> 
+                <assign col=config["Mir.Localizer.Admin.TopicListColumns"]>
+                <list topics as t>
+                  <if col=="0">
+                    </tr><tr>
+                    <assign col=config["Mir.Localizer.Admin.TopicListColumns"]>
+                  </if>
+                  <td>
+                    <input type="checkbox" name="to_topic" value="${t.id}" <list article.to_topics as to><if (t.id == to["id"])>checked</if></list>>${t.title}
+                  </td>
+                  <assign col=utility.increment(col, "-1")>
+                </list>
+                
+                <if col!="0">
+                  <td colspan="${col}">
+                    &nbsp;
+                  </td>
+                </if>
+            </tr>
+          </table>
+        <else>
+          <select name="to_topic" size="5" multiple>
+            <list topics as t>
+              <option value="${t.id}" <list article.to_topics as to><if (t.id == to["id"])>selected</if></list>>${t.title}</option>
+            </list>
+          </select>
+        </if>        
       </td>
     </tr>
 
@@ -117,8 +134,6 @@
     <tr>
       <td align="right" valign="top" class="editfieldname">
           ${lang("content.subtitle")}:&nbsp;<br> 
-          <a href="${config.docRoot}/help/content.html#title">
-          <img src="${config.docRoot}/img/help.gif" border="0" align="absmiddle"></a>
       </td>
       <td colspan="4">
         <input type="text" size="20" name="subtitle" value="${utility.encodeHTML(article.subtitle)}">
@@ -128,7 +143,6 @@
     <tr>
       <td align="right" valign="top" class="editfieldname">
         ${lang("content.location")}:
-        <a href="${config.docRoot}/help/content.html"><img src="${config.docRoot}/img/help.gif" border="0" align="middle"></a>
       </td>
       <td colspan="4" >
         <input type="text" size="40" name="source" value="${utility.encodeHTML(article.source)}">
@@ -137,8 +151,6 @@
     <tr>
       <td align="right" valign="top" class="editfieldname">
           ${lang("content.creator")}:
-          <a href="${config.docRoot}/help/content.html">
-          <img src="${config.docRoot}/img/help.gif" border="0" align="middle"></a>
       </td>
       <td colspan="4">
         <input type="text" size="40" name="creator" value="${utility.encodeHTML(article.creator)}"><br>
@@ -148,8 +160,6 @@
     <tr>
       <td align="right" valign="top" class="editfieldname">
           ${lang("content.creator.email")}/${lang("content.creator.url")}:
-          <a href="${config.docRoot}/help/content.html">
-          <img src="${config.docRoot}/img/help.gif" border="0" align="absmiddle"></a>
       </td>
       <td colspan="4" >
         <input type="text" size="20" name="creator_email" value="${utility.encodeHTML(article.creator_email)}">
@@ -159,8 +169,6 @@
     <tr>
       <td align="right" valign="top" class="editfieldname">
           ${lang("content.creator.address")}/${lang("content.creator.telephone")}:
-          <a href="${config.docRoot}/help/content.html">
-          <img src="${config.docRoot}/img/help.gif" border="0" align="absmiddle"></a>
       </td>
       <td colspan="4" >
         <input type="text" size="20" name="creator_address" value="${utility.encodeHTML(article.creator_address)}">
@@ -170,8 +178,6 @@
     <tr>
       <td align="right" valign="top" class="editfieldname">
           ${lang("content.abstract")}:
-          <a href="${config.docRoot}/help/content.html">
-          <img src="${config.docRoot}/img/help.gif" border="0" align="absmiddle"></a>
       </td>
       <td colspan="4">
         <textarea cols="70" rows="15" name="description" wrap=virtual>${utility.encodeHTML(article.description)}</textarea>
@@ -181,13 +187,9 @@
     <tr>
       <td align="right" valign="top" class="editfieldname">
         ${lang("content.content")}: 
-        <a href="${config.docRoot}/help/content.html"> <img src="${config.docRoot}/img/help.gif" border="0" align="absmiddle"></a>
         <br>
         ${lang("content.html")}
         <input type="checkbox" name="is_html" value="1"<if article.is_html=="1"> checked</if>>&nbsp;
-        <a href="${config.docRoot}/help/content.html">
-          <img src="${config.docRoot}/img/help.gif" border="0" align="absmiddle">
-        </a>
       </td>
       <td colspan="4">
         <textarea cols="70" rows="20" name="content_data" wrap=virtual>${article.content_data}</textarea>
@@ -264,7 +266,8 @@
                 ${lang("content.images")}:
             </td>
             <td colspan="4" align="left" valign="top">
-                <a href="${config.actionRoot}?module=Images&do=list&cid=${article.id}">${lang("content.addimage")}</a>
+                <a href="${config.actionRoot}?module=Images&do=list&cid=${article.id}">${lang("content.addimage")}</a> |
+                <a href="${config.actionRoot}?module=Images&do=add&articleid=${article.id}">${lang("content.uploadimage")}</a>
             </td>
           </tr>
 
@@ -284,7 +287,8 @@
               ${lang("content.audio")}:
             </td>
             <td colspan="4" align="left" valign="top">
-                <a href="${config.actionRoot}?module=Audio&do=list&cid=${article.id}">${lang("content.addaudio")}</a>
+                <a href="${config.actionRoot}?module=Audio&do=list&cid=${article.id}">${lang("content.addaudio")}</a> |
+                <a href="${config.actionRoot}?module=Audio&do=add&articleid=${article.id}">${lang("content.uploadaudio")}</a>
             </td>
           </tr>
 
@@ -304,7 +308,8 @@
                 ${lang("content.video")}:
             </td>
             <td colspan="4" align="left" valign="top">
-                <a href="${config.actionRoot}?module=Video&do=list&cid=${article.id}">${lang("content.addvideo")}</a>
+                <a href="${config.actionRoot}?module=Video&do=list&cid=${article.id}">${lang("content.addvideo")}</a> |
+                <a href="${config.actionRoot}?module=Video&do=add&articleid=${article.id}">${lang("content.uploadvideo")}</a>
             </td>
           </tr>
           <list article.to_media_other as m>
@@ -323,7 +328,8 @@
                 ${lang("content.other")}:
             </td>
             <td colspan="4" align="left" valign="top">
-              <a href="${config.actionRoot}?module=OtherMedia&do=list&cid=${article.id}">${lang("content.addother")}</a>
+              <a href="${config.actionRoot}?module=OtherMedia&do=list&cid=${article.id}">${lang("content.addother")}</a> |
+              <a href="${config.actionRoot}?module=OtherMedia&do=add&articleid=${article.id}">${lang("content.uploadother")}</a>
             </td>
           </tr>
           

@@ -32,7 +32,7 @@
 package mircoders.entity;
 
 import java.sql.SQLException;
-import java.util.HashMap;
+import java.util.Map;
 
 import mir.storage.StorageObject;
 import mir.storage.StorageObjectFailure;
@@ -47,32 +47,21 @@ import mir.storage.StorageObjectFailure;
 
 public class EntityOther extends EntityUploadedMedia
 {
-	public EntityOther()
-	{
-		super();
-	}
+  public EntityOther() {
+    super();
+  }
 
-	public EntityOther(StorageObject theStorage) {
-		this();
-		setStorage(theStorage);
-	}
+  public EntityOther(StorageObject theStorage) {
+    this();
+    setStorage(theStorage);
+  }
 
-	public void update() throws StorageObjectFailure {
-		super.update();
-		try {
-			theStorageObject.executeUpdate("update content set is_produced='0' where to_media="+getId());
-		} catch (SQLException e) {
-			throwStorageObjectFailure(e, "EntityOther :: update :: failed!! ");
-		}
-	}
-
-	public void setValues(HashMap theStringValues)
-	{
-		if (theStringValues != null) {
-			if (!theStringValues.containsKey("is_published"))
-			 theStringValues.put("is_published","0");
-		}
-		super.setValues(theStringValues);
-	}
+  public void setValues(Map theStringValues) {
+    if (theStringValues != null) {
+      if (!theStringValues.containsKey("is_published"))
+        theStringValues.put("is_published", "0");
+    }
+    super.setValues(theStringValues);
+  }
 
 }

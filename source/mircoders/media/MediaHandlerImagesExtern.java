@@ -36,12 +36,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 
-import mir.log.LoggerWrapper;
 import mir.config.MirPropertiesConfiguration;
 import mir.entity.Entity;
-import mir.media.MirMediaException;
+import mir.log.LoggerWrapper;
+import mir.media.MediaExc;
+import mir.media.MediaFailure;
 import mir.misc.StringUtil;
-
 import mircoders.storage.DatabaseUploadedMedia;
 
 
@@ -58,8 +58,7 @@ public class MediaHandlerImagesExtern extends MediaHandlerGeneric
     logger = new LoggerWrapper("Media.Images.Extern");
   }
 
-  public void produce(Entity anImageEntity, Entity mediaTypeEnt) throws MirMediaException
-  {
+  public void produce(Entity anImageEntity, Entity mediaTypeEnt) throws MediaExc, MediaFailure {
     try {
       String date = anImageEntity.getValue("date");
       String datePath = StringUtil.webdbDate2path(date);
@@ -73,7 +72,7 @@ public class MediaHandlerImagesExtern extends MediaHandlerGeneric
       File iconFile = new File(iconFilePath);
 
       if (!imageFile.exists()) {
-        throw new MirMediaException("error in MediaHandlerImagesExtern.produce(): " + filePath + " does not exist!");
+        throw new MediaExc("error in MediaHandlerImagesExtern.produce(): " + filePath + " does not exist!");
       }
       else {
         ImageProcessor processor = new ImageProcessor(imageFile, "JPEG");
@@ -102,13 +101,12 @@ public class MediaHandlerImagesExtern extends MediaHandlerGeneric
     catch(Throwable t) {
       logger.error("MediaHandlerImagesExtern.produce: " + t.getMessage());
       t.printStackTrace(logger.asPrintWriter(LoggerWrapper.DEBUG_MESSAGE));
-      throw new MirMediaException(t.getMessage());
+      throw new MediaFailure(t.getMessage(), t);
     }
   }
 
 
-  public InputStream getIcon(Entity anImageEntity) throws MirMediaException
-  {
+  public InputStream getIcon(Entity anImageEntity) throws MediaExc, MediaFailure {
     try {
       Entity mediaType = DatabaseUploadedMedia.getInstance().getMediaType(
           anImageEntity);
@@ -122,7 +120,7 @@ public class MediaHandlerImagesExtern extends MediaHandlerGeneric
       return new FileInputStream(new File(filePath));
     }
     catch (Throwable t) {
-      throw new MirMediaException(t.getMessage());
+      throw new MediaFailure(t);
     }
   }
 

@@ -37,8 +37,6 @@ import java.util.Iterator;
 import java.util.Map;
 
 import mir.config.MirPropertiesConfiguration;
-import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
-import mir.entity.EntityList;
 import mir.entity.adapter.EntityAdapter;
 import mir.entity.adapter.EntityIteratorAdapter;
 import mir.log.LoggerWrapper;
@@ -50,123 +48,93 @@ import mir.util.GeneratorListFunctions;
 import mir.util.GeneratorStringFunctions;
 import mircoders.global.MirGlobal;
 import mircoders.localizer.MirProducerAssistantLocalizer;
-import mircoders.module.ModuleLanguage;
-import mircoders.module.ModuleTopics;
-import mircoders.storage.DatabaseLanguage;
-import mircoders.storage.DatabaseTopics;
 
 public class MirBasicProducerAssistantLocalizer implements MirProducerAssistantLocalizer {
   protected LoggerWrapper logger;
 
   public void initializeGenerationValueSet(Map aValueSet) {
-    Iterator i;
+    try {
+      Iterator i;
 
-    Map configMap = new HashMap();
-    Map utilityMap = new HashMap();
+      Map configMap = new HashMap();
+      Map utilityMap = new HashMap();
 
-    logger = new LoggerWrapper("Localizer.ProducerAssistant");
+      logger = new LoggerWrapper("Localizer.ProducerAssistant");
 
 // obsolete:
-    configMap.put("producerDocRoot", MirGlobal.getConfigProperty("Producer.DocRoot"));
-    configMap.put("storageRoot", MirGlobal.getConfigProperty("Producer.StorageRoot"));
-    configMap.put("productionHost", MirGlobal.getConfigProperty("Producer.ProductionHost"));
-    configMap.put("openAction", MirGlobal.getConfigProperty("Producer.OpenAction"));
-    configMap.put("docRoot", MirGlobal.getConfigProperty("RootUri"));
-    configMap.put("actionRoot", MirGlobal.getConfigProperty("RootUri")+"/servlet/Mir");
-    configMap.put("now", new DateToMapAdapter((new GregorianCalendar()).getTime()));
-    configMap.put("videoHost", MirGlobal.getConfigProperty("Producer.Video.Host"));
-    configMap.put("audioHost", MirGlobal.getConfigProperty("Producer.Audio.Host"));
-    configMap.put("imageHost", MirGlobal.getConfigProperty("Producer.Image.Host"));
-    configMap.put("imagePath", MirGlobal.getConfigProperty("Producer.Image.Path"));
-    configMap.put("mirVersion", MirGlobal.getConfigProperty("Mir.Version"));
-    configMap.put("defEncoding", MirGlobal.getConfigProperty("Mir.DefaultEncoding"));
+      configMap.put("producerDocRoot", MirGlobal.config().getString("Producer.DocRoot"));
+      configMap.put("storageRoot", MirGlobal.config().getString("Producer.StorageRoot"));
+      configMap.put("productionHost", MirGlobal.config().getString("Producer.ProductionHost"));
+      configMap.put("openAction", MirGlobal.config().getString("Producer.OpenAction"));
+      configMap.put("docRoot", MirGlobal.config().getString("RootUri"));
+      configMap.put("actionRoot", MirGlobal.config().getString("RootUri") + "/servlet/Mir");
+      configMap.put("now", new DateToMapAdapter( (new GregorianCalendar()).getTime()));
+      configMap.put("videoHost", MirGlobal.config().getString("Producer.Video.Host"));
+      configMap.put("audioHost", MirGlobal.config().getString("Producer.Audio.Host"));
+      configMap.put("imageHost", MirGlobal.config().getString("Producer.Image.Host"));
+      configMap.put("imagePath", MirGlobal.config().getString("Producer.Image.Path"));
+      configMap.put("mirVersion", MirGlobal.config().getString("Mir.Version"));
+      configMap.put("defEncoding", MirGlobal.config().getString("Mir.DefaultEncoding"));
 
 // "new":
-    try {
-      configMap.putAll( MirPropertiesConfiguration.instance().allSettings() );
-    }
-    catch (PropertiesConfigExc e) {
-      throw new RuntimeException("Can't get configuration: " + e.getMessage());
-    }
+      configMap.putAll(MirPropertiesConfiguration.instance().allSettings());
 
-    utilityMap.put("compressWhitespace", new freemarker.template.utility.CompressWhitespace() );
-    utilityMap.put("encodeHTML", new GeneratorHTMLFunctions.encodeHTMLGeneratorFunction());
-    utilityMap.put("encodeXML", new GeneratorHTMLFunctions.encodeXMLGeneratorFunction());
-    utilityMap.put("encodeURI", new GeneratorHTMLFunctions.encodeURIGeneratorFunction());
-    utilityMap.put("subString", new GeneratorStringFunctions.subStringFunction());
-    utilityMap.put("subList", new GeneratorListFunctions.subListFunction());
-    utilityMap.put("isOdd", new GeneratorIntegerFunctions.isOddFunction());
-    utilityMap.put("increment", new GeneratorIntegerFunctions.incrementFunction());
+      utilityMap.put("compressWhitespace", new freemarker.template.utility.CompressWhitespace());
+      utilityMap.put("encodeHTML", new GeneratorHTMLFunctions.encodeHTMLGeneratorFunction());
+      utilityMap.put("encodeXML", new GeneratorHTMLFunctions.encodeXMLGeneratorFunction());
+      utilityMap.put("encodeURI", new GeneratorHTMLFunctions.encodeURIGeneratorFunction());
+      utilityMap.put("subString", new GeneratorStringFunctions.subStringFunction());
+      utilityMap.put("subList", new GeneratorListFunctions.subListFunction());
+      utilityMap.put("isOdd", new GeneratorIntegerFunctions.isOddFunction());
+      utilityMap.put("increment", new GeneratorIntegerFunctions.incrementFunction());
 
+      aValueSet.put("config", configMap);
+      aValueSet.put("utility", utilityMap);
 
-    aValueSet.put("config", configMap);
-    aValueSet.put("utility", utilityMap);
+      aValueSet.put("languages",
+        new EntityIteratorAdapter("", "", 20, MirGlobal.localizer().dataModel().adapterModel(), "language"));
 
+      aValueSet.put("topics",
+        new EntityIteratorAdapter("", "", 20, MirGlobal.localizer().dataModel().adapterModel(), "topic"));
 
-    EntityList topicList=null;
-    EntityList entityList=null;
-    EntityList languageList=null;
+      Map articleTypeMap = new HashMap();
+      articleTypeMap.put("openposting", "0");
+      articleTypeMap.put("newswire", "1");
+      articleTypeMap.put("feature", "2");
+      articleTypeMap.put("topicspecial", "3");
+      articleTypeMap.put("startspecial", "4");
 
-    try {
-      ModuleTopics topicsModule = new ModuleTopics(DatabaseTopics.getInstance());
-      ModuleLanguage languageModule = new ModuleLanguage(DatabaseLanguage.getInstance());
-
-      topicList = topicsModule.getTopicsList();
-      languageList = languageModule.getByWhereClause("", "id", -1);
-
-    }
-    catch (Throwable t) {
-      logger.error("initializeGenerationValueSet: Exception "+t.getMessage());
-    }
-
-    aValueSet.put("topics", topicList);
-    aValueSet.put("imclist", entityList);
-
-    Map articleTypeMap = new HashMap();
-    articleTypeMap.put("openposting", "0");
-    articleTypeMap.put("newswire", "1");
-    articleTypeMap.put("feature", "2");
-    articleTypeMap.put("topicspecial", "3");
-    articleTypeMap.put("startspecial", "4");
-
-    try {
-      i = new EntityIteratorAdapter( "", "", 20, MirGlobal.localizer().dataModel().adapterModel(), "articleType"  );
-
+      i = new EntityIteratorAdapter("", "", 20, MirGlobal.localizer().dataModel().adapterModel(), "articleType");
       while (i.hasNext()) {
         EntityAdapter articleType = (EntityAdapter) i.next();
 
         articleTypeMap.put(articleType.get("name"), articleType.get("id"));
       }
-    }
-    catch (Throwable t) {
-      logger.error("initializeGenerationValueSet: Exception while collecting article types "+t.getMessage());
-    }
-    aValueSet.put("articletype", articleTypeMap);
+      aValueSet.put("articletype", articleTypeMap);
 
-    Map commentStatusMap = new HashMap();
-    try {
-      i = new EntityIteratorAdapter( "", "", 20, MirGlobal.localizer().dataModel().adapterModel(), "commentStatus"  );
-
+      Map commentStatusMap = new HashMap();
+      i = new EntityIteratorAdapter("", "", 20, MirGlobal.localizer().dataModel().adapterModel(), "commentStatus");
       while (i.hasNext()) {
         EntityAdapter commentStatus = (EntityAdapter) i.next();
 
         commentStatusMap.put(commentStatus.get("name"), commentStatus.get("id"));
       }
+      aValueSet.put("commentstatus", commentStatusMap);
     }
     catch (Throwable t) {
-      logger.error("initializeGenerationValueSet: Exception while collecting comment statuses"+t.getMessage());
+      logger.error("initializeGenerationValueSet: Exception while collecting comment statuses" + t.getMessage());
+      throw new RuntimeException(t.getMessage());
     }
-    aValueSet.put("commentstatus", commentStatusMap);
 
   };
 
   public String filterText(String aText) {
     return StringUtil.createHTML(
         StringUtil.deleteForbiddenTags(aText),
-        MirGlobal.getConfigProperty("Producer.ImageRoot"),
-        MirGlobal.getConfigProperty("Producer.MailLinkName"),
-        MirGlobal.getConfigProperty("Producer.ExtLinkName"),
-        MirGlobal.getConfigProperty("Producer.IntLinkName")
+        MirGlobal.config().getString("Producer.ImageRoot"),
+        MirGlobal.config().getString("Producer.MailLinkName"),
+        MirGlobal.config().getString("Producer.ExtLinkName"),
+        MirGlobal.config().getString("Producer.IntLinkName")
     );
   }
 }

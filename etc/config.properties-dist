@@ -15,12 +15,15 @@
 # c) dynamic admin site
 # d) database config
 #
-# edit this to suit your needs (here with sampleuser idfx)
+# edit this to suit your needs
 # After you edited this file, build.sh has to be invoked.
 # To be sure, also restart Tomcat.
 #
 # Note that for Mir to work, Tomcat has to be set up to handle all
 # URLs that begin with /servlet. All other URLs are handled by Apache.
+#
+# There are more configuration values located in the default.properties file
+# located in source/. If necessary these values can be overridden in this file.
 #
 # The setup uses the following assumptions:
 # The URL to reach the site is http://indy.code-fu.de
@@ -50,6 +53,7 @@ DirectOpenposting=yes
 #where to put the lucene index
 IndexPath=/tmp/index
 
+# temp-dir used for media-uploads
 TempDir=/tmp
 
 Log.LogClass = mir.log.log4j.LoggerImpl
@@ -79,6 +83,16 @@ Mir.Localizer.OpenPosting.GeneratorLibrary= default=freemarker(etc/open/)
 # 0 = links, 1 = checkboxes, 2 = a listbox
 Mir.Localizer.Admin.ListOperationsFlavor=1
 
+# How should the topics be presented on the article edit page?
+# 0 = in a multiselect list box, 1 = checkboxes
+Mir.Localizer.Admin.TopicListFlavor=1
+
+# For the checkboxes flavour, how many columns should there be?
+Mir.Localizer.Admin.TopicListColumns=3
+
+# In which order should the topic appear?
+Mir.Localizer.Admin.TopicListOrder=title
+
 # Which producers need to be called after an article (resp. a comment) is posted
 Mir.Localizer.OpenPosting.ContentProducers= media.new;articles.changed;startpage.generate;synchronization.run
 Mir.Localizer.OpenPosting.CommentProducers= articles.changed;synchronization.run
@@ -92,9 +106,6 @@ Mir.Localizer.Producer.AllNewProducers= media.new;articles.changed;startpage.run
 #but these summarize what is said in there for the benefit of OpenMir 
 GenerateFO=yes
 GeneratePDF=yes
-
-#on-time-password-protection
-PasswdProtection=no
 
 #use rsync to mirror the website to a remote-host
 Rsync=no
@@ -126,7 +137,8 @@ Producer.StorageRoot=/pub/Dokumente/Indymedia/de-tech/Mir/produced
 #
 # where do we find the files? absolute path
 ServletModule.FileEdit.FileDirectory=/pub/Dokumente/Indymedia/de-tech/Mir/produced
-ServletModule.FileEdit.ExtFilter=inc
+ServletModule.FileEdit.ExtFilter=.*\.inc$
+ServletModule.FileEdit.Recursive=1
 
 #
 #
@@ -193,6 +205,11 @@ Producer.Icon.BigAudio=audio_big.gif
 Producer.Icon.BigVideo=video_big.gif
 Producer.Icon.BigText=text_big.gif
 
+#Icons used for links
+Producer.ExtLinkName=extlink.gif
+Producer.IntLinkName=intlink.gif
+Producer.MailLinkName=maillink.gif
+
 #the style sheet used to turn html into xsl:fo
 Producer.HTML2FOStyleSheet=/some/dir/mir/etc/producer/html2fo.xsl 
 
@@ -232,17 +249,8 @@ Database.Logfile=log/dbentity.log
 Adaptor.PostgreSQL.URL=jdbc:postgresql://localhost:5432/Mir
 Adaptor.PostgreSQL.Driver=org.postgresql.Driver
 
-#
-# should be explained .)
-#
-
 # how many articles should be shown on a list-page
 Lists.Max.Items=10
-
-HTMLTemplateProcessor.Logfile=log/htmlprocess.log
-HTMLTemplateProcessor.Dir=
-
-Entity.Logfile=log/dbentity.log
 
 #
 # Servlet / Module configurations
@@ -253,127 +261,3 @@ Entity.Logfile=log/dbentity.log
 # as the dynamic output html.
 # also used for the HTML charset meta tag.
 Mir.DefaultEncoding=UTF8
-
-Mir.Logfile=log/mir.log
-Mir.ErrorTemplate=templates/error.template
-Mir.UserErrorTemplate=templates/usererror.template
-Mir.LoginTemplate=templates/admin/login.template
-OpenMir.Logfile=log/OpenMir.log
-
-ServletModule.Schwerpunkt.ConfirmTemplate=templates/admin/confirm.template
-ServletModule.Schwerpunkt.ObjektTemplate=templates/admin/feature.template
-ServletModule.Schwerpunkt.ListTemplate=templates/admin/featurelist.template
-
-ServletModule.Feature.ConfirmTemplate=templates/admin/confirm.template
-ServletModule.Feature.ObjektTemplate=templates/admin/schwerpunkt.template
-ServletModule.Feature.ListTemplate=templates/admin/schwerpunktlist.template
-
-ServletModule.Themen.ConfirmTemplate=templates/admin/confirm.template
-ServletModule.Themen.ObjektTemplate=templates/admin/topic.template
-ServletModule.Themen.ListTemplate=templates/admin/topiclist.template
-
-ServletModule.LinksImcs.ConfirmTemplate=templates/admin/confirm.template
-ServletModule.LinksImcs.ObjektTemplate=templates/admin/linksimcs.template
-ServletModule.LinksImcs.ListTemplate=templates/admin/linksimcslist.template
-
-ServletModule.Users.ConfirmTemplate=templates/admin/confirm.template
-ServletModule.Users.ObjektTemplate=templates/admin/user.template
-ServletModule.Users.ListTemplate=templates/admin/userlist.template
-
-ServletModule.Images.ConfirmTemplate=templates/admin/confirm.template
-ServletModule.Images.ObjektTemplate=templates/admin/image.template
-ServletModule.Images.ListTemplate=templates/admin/imagelist.template
-
-Module.UploadedMedia.Logfile=log/mir.log
-
-ServletModule.Audio.ConfirmTemplate=templates/admin/confirm.template
-ServletModule.Audio.ObjektTemplate=templates/admin/audio.template
-ServletModule.Audio.ListTemplate=templates/admin/audiolist.template
-
-ServletModule.Video.ConfirmTemplate=templates/admin/confirm.template
-ServletModule.Video.ObjektTemplate=templates/admin/video.template
-ServletModule.Video.ListTemplate=templates/admin/videolist.template
-
-ServletModule.OtherMedia.ConfirmTemplate=templates/admin/confirm.template
-ServletModule.OtherMedia.ObjektTemplate=templates/admin/media.template
-ServletModule.OtherMedia.ListTemplate=templates/admin/medialist.template
-
-ServletModule.Content.ConfirmTemplate=templates/admin/confirm.template
-ServletModule.Content.ObjektTemplate=templates/admin/content.template
-ServletModule.Content.ListTemplate=templates/admin/contentlist.template
-
-ServletModule.Mediafolder.ConfirmTemplate=templates/admin/confirm.template
-ServletModule.Mediafolder.ObjektTemplate=templates/admin/mediafolder.template
-ServletModule.Mediafolder.ListTemplate=templates/admin/mediafolderlist.template
-
-#
-# config used for OpenIndy
-ServletModule.OpenIndy.CommentTemplate=etc/open/comment.template
-ServletModule.OpenIndy.CommentDoneTemplate=etc/open/comment_done.template
-ServletModule.OpenIndy.CommentDupeTemplate=etc/open/comment_dupe.template
-ServletModule.OpenIndy.PostingTemplate=etc/open/posting.template
-ServletModule.OpenIndy.PostingDoneTemplate=etc/open/posting_done.template
-ServletModule.OpenIndy.PostingDupeTemplate=etc/open/posting_dupe.template
-ServletModule.OpenIndy.SearchResultsTemplate=etc/open/search_results.template
-ServletModule.OpenIndy.PrepareMailTemplate=etc/open/prepare_mail.template
-ServletModule.OpenIndy.SentMailTemplate=etc/open/sent_mail.template
-ServletModule.OpenIndy.EmailIsFrom=mailer@somewhere.org
-ServletModule.OpenIndy.SMTPServer=localhost
-
-#
-# config for ServletModuleComment - browsing/editing/deleting comments
-ServletModule.Comment.ConfirmTemplate=templates/admin/confirm.template
-ServletModule.Comment.ObjektTemplate=templates/admin/comment.template
-ServletModule.Comment.ListTemplate=templates/admin/commentlist.template
-
-#
-# config for ServletModuleHidden - lists all hidden articles of one month
-ServletModule.Hidden.ListTemplate=templates/admin/hiddenlist.template
-
-#
-# config for Breaking - browsing/editing/deleting breaking news
-ServletModule.Breaking.ConfirmTemplate=templates/admin/confirm.template
-ServletModule.Breaking.ObjektTemplate=templates/admin/breaking.template
-ServletModule.Breaking.ListTemplate=templates/admin/breakinglist.template
-
-#
-# config for Breaking - editing text files
-ServletModule.FileEdit.ConfirmTemplate=templates/admin/confirm.template
-ServletModule.FileEdit.ObjektTemplate=templates/admin/fileedit.template
-ServletModule.FileEdit.ListTemplate=templates/admin/fileeditlist.template
-
-#
-# config for messages - browsing/editing/deleting internal messages
-ServletModule.Messages.ConfirmTemplate=templates/admin/confirm.template
-ServletModule.Messages.ObjektTemplate=templates/admin/message.template
-ServletModule.Messages.ListTemplate=templates/admin/messagelist.template
-
-#
-# config for languages - browsing/editing/deleting languages
-ServletModule.Language.ConfirmTemplate=templates/admin/confirm.template
-ServletModule.Language.ObjektTemplate=templates/admin/language.template
-ServletModule.Language.ListTemplate=templates/admin/languagelist.template
-
-#
-# config for article type
-ServletModule.ArticleType.ConfirmTemplate=templates/admin/confirm.template
-ServletModule.ArticleType.EditTemplate=templates/admin/articletype.template
-ServletModule.ArticleType.ListTemplate=templates/admin/articletypelist.template
-
-#
-# config for comment status
-ServletModule.CommentStatus.ConfirmTemplate=templates/admin/confirm.template
-ServletModule.CommentStatus.EditTemplate=templates/admin/commentstatus.template
-ServletModule.CommentStatus.ListTemplate=templates/admin/commentstatuslist.template
-
-#
-# producer-related configs below
-#
-
-Producer.ExtLinkName=extlink.gif
-Producer.IntLinkName=intlink.gif
-Producer.MailLinkName=maillink.gif
-Producer.Logfile=log/producer.log
-
-Producer.Content.Template=etc/producer/content.template
-Producer.Content.Batchsize=10

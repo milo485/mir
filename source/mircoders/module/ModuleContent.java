@@ -31,25 +31,17 @@
 
 package mircoders.module;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.StringTokenizer;
-
 import mir.entity.EntityList;
 import mir.log.LoggerWrapper;
 import mir.module.AbstractModule;
-import mir.module.ModuleException;
+import mir.module.ModuleExc;
+import mir.module.ModuleFailure;
 import mir.storage.StorageObject;
-import mir.storage.StorageObjectFailure;
-import mir.util.JDBCStringRoutines;
-import mircoders.entity.EntityUsers;
-import mircoders.storage.DatabaseContentToMedia;
 
 /*
  *  ContentObjekt -
  *
- * @version $Id: ModuleContent.java,v 1.14 2003/01/25 17:50:35 idfx Exp $
+ * @version $Id: ModuleContent.java,v 1.18 2003/03/09 19:14:21 idfx Exp $
  *
  * @author RK, mir-coders
  *
@@ -70,32 +62,29 @@ public class ModuleContent extends AbstractModule
 //
 // various methods to retrieve content entities
 
-  public EntityList getFeatures(int offset, int limit) throws ModuleException
-  {
-    return getContent("is_published=true AND to_article_type=2", "webdb_create desc",
-                      offset, limit);
-  }
+//  public EntityList getFeatures(int offset, int limit) throws ModuleExc, ModuleFailure {
+//    return getContent("is_published=true AND to_article_type=2", "webdb_create desc",
+//                      offset, limit);
+//  }
 
-  public EntityList getNewsWire(int offset, int limit) throws ModuleException
-  {
-    return getContent("is_published=true AND to_article_type = 1",
-                      "webdb_create desc",offset,limit);
-  }
+//  public EntityList getNewsWire(int offset, int limit) throws ModuleExc, ModuleFailure {
+//    return getContent("is_published=true AND to_article_type = 1",
+//                      "webdb_create desc",offset,limit);
+//  }
 
-  public EntityList getStartArticle() throws ModuleException
-  {
-    EntityList returnList = getContent("is_published=true AND to_article_type=4",
-                                       "webdb_create desc",0,1);
+//  public EntityList getStartArticle() throws ModuleExc, ModuleFailure {
+//    EntityList returnList = getContent("is_published=true AND to_article_type=4",
+//                                       "webdb_create desc",0,1);
 //if no startspecial exists
-    if (returnList==null || returnList.size()==0)
-      returnList = getContent("is_published=true AND to_article_type=3",
-                              "webdb_create desc",0,1);
+//    if (returnList==null || returnList.size()==0)
+//      returnList = getContent("is_published=true AND to_article_type=3",
+//                              "webdb_create desc",0,1);
 
-    return returnList;
-  }
+//    return returnList;
+//  }
 
-  public EntityList getContent(HashMap searchValues, boolean concat, int offset, EntityUsers user)
-      throws ModuleException {
+/*
+      public EntityList getContent(Map searchValues, boolean concat, int offset, EntityUsers user) throws ModuleException {
 
     try {
 
@@ -150,13 +139,15 @@ public class ModuleContent extends AbstractModule
     }
 
   }
-
+*/
+/*
   public EntityList getContentByField(String aField, String aValue, String orderBy, int offset,
                                       EntityUsers user) throws ModuleException
   {
     String whereClause = "lower("+aField + ") like lower('%" + JDBCStringRoutines.escapeStringLiteral(aValue) + "%')";
     return getContent(whereClause, orderBy, offset, user);
   }
+
 
   public EntityList getContent(String whereClause, String orderBy, int offset,
                                int limit, EntityUsers user) throws ModuleException {
@@ -170,16 +161,17 @@ public class ModuleContent extends AbstractModule
     }
     catch (StorageObjectFailure e){	throw new ModuleException(e.toString()); }
   }
+*/
 
-  public EntityList getContent(String whereClause, String orderBy,int offset, int limit)
-      throws ModuleException {
+  public EntityList getContent(String whereClause, String orderBy,int offset, int limit) throws ModuleExc, ModuleFailure {
     try {
       return theStorage.selectByWhereClause(whereClause, orderBy, offset, limit);
-    } catch (StorageObjectFailure e){
-      throw new ModuleException(e.toString());
+    }
+    catch (Throwable e){
+      throw new ModuleFailure(e);
     }
   }
-
+/*
   public EntityList getContent(String whereClause, String orderBy, int offset, EntityUsers user)
       throws ModuleException
   {
@@ -227,6 +219,7 @@ public class ModuleContent extends AbstractModule
       throw new ModuleException(e.toString());
     }
   }
+*/
 }
 
 

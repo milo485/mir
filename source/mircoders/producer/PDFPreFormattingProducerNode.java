@@ -115,14 +115,14 @@ public class PDFPreFormattingProducerNode implements ProducerNode {
       theContent = StringUtil.convertNewline2Break(theContent);
 
       if (images == null){
-          HashMap row = new HashMap();
+          Map row = new HashMap();
           row.put("text",theContent);
           row.put("hasImage","0");
           brokenUpContent.add(row);
       }
       if (images != null){
           //need to add checks for out of content!
-          HashMap row0 = new HashMap();
+          Map row0 = new HashMap();
           if (numCharsInAnImagelessRow>(theContent).length()){
               row0.put("text",theContent);
               outOfText = true;
@@ -137,8 +137,8 @@ public class PDFPreFormattingProducerNode implements ProducerNode {
           brokenUpContent.add(row0);
           aLogger.debug("CP1 is "+ currentPosition);
           while(images.hasNext()){
-              HashMap row1 = new HashMap();
-              HashMap row2 = new HashMap();
+              Map row1 = new HashMap();
+              Map row2 = new HashMap();
               EntityImages currentImage=(EntityImages) images.next();
               float img_width=(new Float(currentImage.getValue("img_width"))).floatValue();
               float img_height=(new Float(currentImage.getValue("img_height"))).floatValue();
@@ -198,7 +198,7 @@ public class PDFPreFormattingProducerNode implements ProducerNode {
 
               aLogger.debug("CP3 is "+ currentPosition);
           }
-          HashMap row3 = new HashMap();
+          Map row3 = new HashMap();
           if (! outOfText){
               row3.put("text",theContent.substring(currentPosition));
               row3.put("hasImage","0");

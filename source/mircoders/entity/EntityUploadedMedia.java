@@ -31,7 +31,8 @@
 
 package mircoders.entity;
 
-import java.util.HashMap;
+import java.util.Map;
+import java.sql.SQLException;
 
 import freemarker.template.SimpleList;
 import freemarker.template.SimpleScalar;
@@ -40,20 +41,19 @@ import freemarker.template.TemplateModelException;
 
 import mir.entity.Entity;
 import mir.entity.EntityList;
+import mir.log.LoggerWrapper;
 import mir.media.MediaHelper;
 import mir.media.MirMedia;
 import mir.misc.NumberUtils;
 import mir.storage.StorageObject;
 import mir.storage.StorageObjectFailure;
-import mir.log.LoggerWrapper;
-
 import mircoders.storage.DatabaseContentToMedia;
 import mircoders.storage.DatabaseUploadedMedia;
 
 /**
  *
  * @author mh, mir-coders group
- * @version $Id: EntityUploadedMedia.java,v 1.20 2003/02/28 18:27:08 idfx Exp $
+ * @version $Id: EntityUploadedMedia.java,v 1.24 2003/03/16 19:54:45 zapata Exp $
  */
 
 
@@ -73,16 +73,15 @@ public class EntityUploadedMedia extends Entity {
 
   public void update() throws StorageObjectFailure {
     super.update();
-    EntityList contentList = DatabaseContentToMedia.getInstance().getContent(this);
-    if (contentList!=null && contentList.size()>0) {
-      for(int i=0;i<contentList.size();i++) {
-        EntityContent contentEnt = (EntityContent)contentList.elementAt(i);
-        contentEnt.setProduced(false);
-      }
+    try {
+      theStorageObject.executeUpdate("update content set is_produced='0' where exists(select * from content_x_media where to_content=content.id and to_media=" + getId()+")");
+    }
+    catch (SQLException e) {
+      throwStorageObjectFailure(e, "EntityAudio :: update :: failed!! ");
     }
   }
 
-  public void setValues(HashMap theStringValues) {
+  public void setValues(Map theStringValues) {
     if (theStringValues != null) {
       if (!theStringValues.containsKey("is_published"))
         theStringValues.put("is_published", "0");
@@ -185,8 +184,8 @@ public class EntityUploadedMedia extends Entity {
       mediaHandler = MediaHelper.getHandler(mediaType);
       return mediaHandler.getURL(this, mediaType);
     }
-    catch (Exception ex) {
-      logger.warn("EntityUploadedMedia.getUrl: could not fetch data: " + ex.toString());
+    catch (Throwable t) {
+      logger.warn("EntityUploadedMedia.getUrl: could not fetch data: " + t.toString());
     }
     return null;
   }

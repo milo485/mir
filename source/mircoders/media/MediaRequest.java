@@ -32,29 +32,24 @@
 package mircoders.media;
 
 import java.util.GregorianCalendar;
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import javax.servlet.ServletContext;
 
-import com.oreilly.servlet.multipart.FilePart;
-
-import mir.log.LoggerWrapper;
 import mir.config.MirPropertiesConfiguration;
 import mir.entity.Entity;
 import mir.entity.EntityList;
+import mir.log.LoggerWrapper;
 import mir.media.MediaHelper;
 import mir.media.MirMedia;
-import mir.media.MirMediaException;
 import mir.misc.FileHandler;
-import mir.misc.FileHandlerException;
-import mir.misc.FileHandlerUserException;
 import mir.misc.StringUtil;
 import mir.storage.Database;
-import mir.storage.StorageObjectExc;
 import mir.storage.StorageObjectFailure;
-
 import mircoders.storage.DatabaseMediaType;
+
+import com.oreilly.servlet.multipart.FilePart;
 
 
 /*
@@ -64,7 +59,7 @@ import mircoders.storage.DatabaseMediaType;
  *    appropriate media objects are set.
  *
  * @author mh
- * @version $Id: MediaRequest.java,v 1.14 2003/02/28 18:27:08 idfx Exp $
+ * @version $Id: MediaRequest.java,v 1.18 2003/03/09 19:14:21 idfx Exp $
  *
  */
 
@@ -92,8 +87,7 @@ public class MediaRequest implements FileHandler
    * is_published parameter (from the upload form) is supplied. (for backwards
    * compatibility.)
    */
-  public void setFile(FilePart filePart, int fileNum, HashMap mediaValues)
-    throws FileHandlerException, FileHandlerUserException {
+  public void setFile(FilePart filePart, int fileNum, Map mediaValues) throws FileHandlerExc, FileHandlerFailure {
 
     String mediaId=null;
     MirMedia mediaHandler;
@@ -170,7 +164,7 @@ public class MediaRequest implements FileHandler
         //  uncomment the next line and comment out the exception throw
         //  if you'd rather just assign missing media titles automatically
         //  mediaTitle="media item "+fileNum;
-        throw new FileHandlerUserException("Missing field: media title "+mediaTitle+fileNum);
+//        throw new FileHandlerUserException("Missing field: media title "+mediaTitle+fileNum);
       }
 
       // TODO: need to add all the extra fields that can be present in the
@@ -233,22 +227,22 @@ public class MediaRequest implements FileHandler
       // along with media_type
       try {
         mediaHandler = MediaHelper.getHandler(mediaType);
-        mediaStorage = MediaHelper.getStorage(mediaType,
-                                            "mircoders.storage.Database");
+        mediaStorage = MediaHelper.getStorage(mediaType, "mircoders.storage.Database");
       }
-      catch (MirMediaException e) {
-        throw new FileHandlerException (e.getMessage());
+      catch (Throwable e) {
+        throw new FileHandlerFailure(e);
       }
       mediaValues.put("to_media_type",mediaTypeId);
 
       //load the classes via reflection
       String MediaId;
       Entity mediaEnt = null;
+
       try {
         mediaEnt = (Entity)mediaStorage.getEntityClass().newInstance();
       }
-      catch (Exception e) {
-        throw new FileHandlerException("Error in MediaRequest: "+e.toString());
+      catch (Throwable e) {
+        throw new FileHandlerFailure("MediaRequest.setFile: "+e.toString(), e);
       }
 
       mediaEnt.setStorage(mediaStorage);
@@ -259,8 +253,8 @@ public class MediaRequest implements FileHandler
       try {
         mediaHandler.set(filePart.getInputStream(), mediaEnt, mediaType);
       }
-      catch (MirMediaException e) {
-        throw new FileHandlerException(e.getMessage());
+      catch (Throwable e) {
+        throw new FileHandlerFailure("MediaRequest.setFile: "+e.toString(), e);
       }
 
       _returnList.add(mediaEnt);
@@ -272,23 +266,24 @@ public class MediaRequest implements FileHandler
       }
       catch (Exception e2) {
       }
-      throw new FileHandlerException("error in MediaRequest: "+e.toString());
+      throw new FileHandlerFailure("MediaRequest.setFile: "+e.toString(), e);
     }
-    catch (StorageObjectExc e) {
-      throw new FileHandlerException("error in MediaRequest: "+e.toString());
+    catch (Throwable e) {
+      throw new FileHandlerFailure("MediaRequest.setFile: "+e.toString(), e);
     } //end try/catch block
 
   } // method setFile()
 
-  private void _throwBadContentType (String fileName, String contentType)
-    throws FileHandlerUserException {
-
-    //theLog.printDebugInfo("Wrong file type uploaded!: " + fileName+" "
-      //                    +contentType);
-    throw new FileHandlerUserException("The file you uploaded is of the "
-        +"following mime-type: "+contentType
-        +", we do not support this mime-type. "
-        +"Error One or more files of unrecognized type. Sorry");
+  private void _throwBadContentType (String fileName, String contentType) throws FileHandlerExc, FileHandlerFailure {
+    try {
+      throw new UnsupportedMediaFormatExc(
+          "The file you uploaded is of the following mime-type: " + contentType +
+          ", we do not support this mime-type. "
+          + "Error One or more files of unrecognized type. Sorry");
+    }
+    catch (Throwable t) {
+      throw new FileHandlerFailure(t);
+    }
   }
 
 }

@@ -40,8 +40,8 @@ import java.util.Vector;
 
 import mir.entity.Entity;
 import mir.entity.adapter.EntityAdapter;
-import mir.storage.StorageObjectFailure;
 import mir.misc.StringUtil;
+import mir.storage.StorageObjectFailure;
 import mir.util.StringRoutines;
 import mircoders.entity.EntityComment;
 import mircoders.entity.EntityContent;
@@ -70,6 +70,10 @@ public class MirBasicAdminInterfaceLocalizer implements MirAdminInterfaceLocaliz
 
     addSimpleCommentOperation(new ModifyCommentFieldOperation("unhide", "is_published", "1"));
     addSimpleCommentOperation(new ModifyCommentFieldOperation("hide", "is_published", "0"));
+  }
+
+  public String makePasswordDigest(String aPassword) {
+    return aPassword;
   }
 
   public void initializeArticle(Map anArticle) {

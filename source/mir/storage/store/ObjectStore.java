@@ -65,6 +65,7 @@ import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.Properties;
 
@@ -76,7 +77,7 @@ import mir.log.LoggerWrapper;
 public class ObjectStore {
 
   private final static ObjectStore INSTANCE = new ObjectStore();
-  private final static HashMap containerMap = new HashMap(); // StoreContainerType/StoreContainer
+  private final static Map containerMap = new HashMap(); // StoreContainerType/StoreContainer
   private static long storeHit = 0, storeMiss = 0;
   private Properties ostoreConf;
   private LoggerWrapper logger;

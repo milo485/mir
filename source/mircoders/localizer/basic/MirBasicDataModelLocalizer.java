@@ -41,10 +41,10 @@ import mir.entity.Entity;
 import mir.entity.adapter.EntityAdapter;
 import mir.entity.adapter.EntityAdapterDefinition;
 import mir.entity.adapter.EntityAdapterModel;
+import mir.log.LoggerWrapper;
 import mir.media.MediaHelper;
 import mir.media.MirMedia;
 import mir.util.RewindableIterator;
-import mir.log.LoggerWrapper;
 import mircoders.entity.EntityUploadedMedia;
 import mircoders.global.MirGlobal;
 import mircoders.localizer.MirAdminInterfaceLocalizer;
@@ -56,7 +56,6 @@ import mircoders.storage.DatabaseBreaking;
 import mircoders.storage.DatabaseComment;
 import mircoders.storage.DatabaseCommentStatus;
 import mircoders.storage.DatabaseContent;
-import mircoders.storage.DatabaseFeature;
 import mircoders.storage.DatabaseImageType;
 import mircoders.storage.DatabaseImages;
 import mircoders.storage.DatabaseLanguage;
@@ -157,7 +156,6 @@ public class MirBasicDataModelLocalizer implements MirDataModelLocalizer {
       definition.addDBDateField("creationdate", "webdb_create");
       result.addMapping( "breakingNews", DatabaseBreaking.getInstance(), definition);
 
-      result.addMapping( "feature", DatabaseFeature.getInstance(), new EntityAdapterDefinition());
       result.addMapping( "imageType", DatabaseImageType.getInstance(), new EntityAdapterDefinition());
       result.addMapping( "language", DatabaseLanguage.getInstance(), new EntityAdapterDefinition());
       result.addMapping( "mediaFolder", DatabaseMediafolder.getInstance(), new EntityAdapterDefinition());
@@ -353,7 +351,7 @@ public class MirBasicDataModelLocalizer implements MirDataModelLocalizer {
     public Object getValue(EntityAdapter anEntityAdapter) {
       try {
         return anEntityAdapter.getRelation(
-          "exists (select * from content_x_media where content_id="+anEntityAdapter.get("id")+" and media_id=id)",
+          "is_published='t' and exists (select * from content_x_media where content_id="+anEntityAdapter.get("id")+" and media_id=id)",
           "id",
           definition);
       }
@@ -377,7 +375,7 @@ public class MirBasicDataModelLocalizer implements MirDataModelLocalizer {
         iterator = (RewindableIterator) (anEntityAdapter.get("to_uploaded_media"));
         iterator.rewind();
 
-        tinyIcon = MirGlobal.getConfigProperty("Producer.Icon.TinyText");
+        tinyIcon = MirGlobal.config().getString("Producer.Icon.TinyText");
         iconAlt = "Text";
 
         if (iterator.hasNext()) {
@@ -387,15 +385,15 @@ public class MirBasicDataModelLocalizer implements MirDataModelLocalizer {
           mediaHandler = MediaHelper.getHandler( mediaType );
 
           if (mediaHandler.isVideo()) {
-            tinyIcon = MirGlobal.getConfigProperty("Producer.Icon.TinyVideo");
+            tinyIcon = MirGlobal.config().getString("Producer.Icon.TinyVideo");
             iconAlt = "Video";
           }
           else if (mediaHandler.isAudio()) {
-            tinyIcon = MirGlobal.getConfigProperty("Producer.Icon.TinyAudio");
+            tinyIcon = MirGlobal.config().getString("Producer.Icon.TinyAudio");
             iconAlt = "Audio";
           }
           else if (mediaHandler.isImage()) {
-            tinyIcon = MirGlobal.getConfigProperty("Producer.Icon.TinyImage");
+            tinyIcon = MirGlobal.config().getString("Producer.Icon.TinyImage");
             iconAlt = "Image";
           }
           else {
@@ -411,7 +409,7 @@ public class MirBasicDataModelLocalizer implements MirDataModelLocalizer {
       }
 
       result = new HashMap();
-      result.put("tiny_icon", MirGlobal.getConfigProperty("Producer.ImageRoot") + "/" + tinyIcon);
+      result.put("tiny_icon", MirGlobal.config().getString("Producer.ImageRoot") + "/" + tinyIcon);
       result.put("icon_alt", iconAlt);
 
       return result;

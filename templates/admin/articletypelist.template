@@ -5,7 +5,7 @@
   </head>
   <body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
 
-    <include "templates/admin/head.template">
+    <include "head.template">
 
     <p>
       <a class="majorcommand" href="${config.actionRoot}?module=ArticleType&do=add">${lang("add")}</a> |
@@ -82,7 +82,7 @@
       <a class="majorcommand" href="${config.actionRoot}?module=Admin&do=superusermenu">${lang("back")}</a>
     </p>
 
-    <include "templates/admin/foot.template">
+    <include "foot.template">
   </body>
 </html>
 

@@ -32,6 +32,7 @@
 package mircoders.search;
 
 import java.util.StringTokenizer;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -39,8 +40,6 @@ import mir.entity.Entity;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
-
-import freemarker.template.SimpleHash;
 
 
 public class ContentSearchTerm extends SearchTerm{
@@ -57,9 +56,9 @@ public class ContentSearchTerm extends SearchTerm{
     matchField = aMatchField;
     dataField = aDataField;
     templateVariable = aTemplateVariable;
-    
+
   }
-  
+
   public void index(Document doc, Entity entity){
     doc.add(Field.UnStored(matchField,entity.getValue(partOfEntity)));
   }
@@ -72,41 +71,41 @@ public class ContentSearchTerm extends SearchTerm{
   public String makeTerm(HttpServletRequest req){
       String wanted = req.getParameter(paramName);
       if (wanted != null && !(wanted.equals(""))){
-	String searchBoolean = req.getParameter("search_boolean");
-	if (searchBoolean != null && searchBoolean.equals("phrase")){
-	  return matchField + ":" + "\"" + wanted + "\"";
-	}
-	else {
-	  if (searchBoolean != null && searchBoolean.equals("and")){
-	    StringTokenizer st = new StringTokenizer(wanted); 
-	    String composite = "(";
-	    while (st.hasMoreTokens()) { 
-	      composite = composite + " +" + matchField + ":" + st.nextToken(); 
-	    }
-	    composite = composite + ")";
-	    return composite;
-	  }
-	  else {
-	    //default to or
-	    StringTokenizer st = new StringTokenizer(wanted); 
-	    String composite = "(";
-	    while (st.hasMoreTokens()) { 
-	      composite = composite + " " + matchField + ":" + st.nextToken(); 
-	    }
-	    composite = composite + ")";
-	    return composite;
-	  }
-	}
+        String searchBoolean = req.getParameter("search_boolean");
+        if (searchBoolean != null && searchBoolean.equals("phrase")){
+          return matchField + ":" + "\"" + wanted + "\"";
+        }
+        else {
+          if (searchBoolean != null && searchBoolean.equals("and")){
+            StringTokenizer st = new StringTokenizer(wanted);
+            String composite = "(";
+            while (st.hasMoreTokens()) {
+              composite = composite + " +" + matchField + ":" + st.nextToken();
+            }
+            composite = composite + ")";
+            return composite;
+          }
+          else {
+            //default to or
+            StringTokenizer st = new StringTokenizer(wanted);
+            String composite = "(";
+            while (st.hasMoreTokens()) {
+              composite = composite + " " + matchField + ":" + st.nextToken();
+            }
+            composite = composite + ")";
+            return composite;
+          }
+        }
       }
       else {
-	return null;
+        return null;
       }
   }
 
-  public void returnMeta(SimpleHash result,Document doc){
+  public void returnMeta(Map result,Document doc){
     return;
   }
-  
+
 
 }
 

@@ -33,15 +33,15 @@ package  mircoders.media;
 
 import java.io.StringReader;
 
-import freemarker.template.SimpleHash;
-import freemarker.template.SimpleList;
-
-import mir.log.LoggerWrapper;
 import mir.entity.Entity;
+import mir.log.LoggerWrapper;
+import mir.media.MediaExc;
+import mir.media.MediaFailure;
 import mir.media.MirMedia;
-import mir.media.MirMediaException;
 import mir.misc.FileUtil;
 import mir.misc.StringUtil;
+import freemarker.template.SimpleHash;
+import freemarker.template.SimpleList;
 
 
 
@@ -53,7 +53,7 @@ import mir.misc.StringUtil;
  * @see mir.media.MediaHandlerGeneric
  * @see mir.media.MirMedia
  * @author john <john@manifestor.org>, mh <heckmann@hbe.ca>
- * @version $Id: MediaHandlerRealAudio.java,v 1.15 2003/02/23 05:00:14 zapata Exp $
+ * @version $Id: MediaHandlerRealAudio.java,v 1.18 2003/03/09 19:14:21 idfx Exp $
  */
 
 
@@ -63,8 +63,7 @@ public class MediaHandlerRealAudio extends MediaHandlerAudio implements MirMedia
     logger = new LoggerWrapper("Media.Audio.Real");
   }
 
-  public void produce (Entity ent, Entity mediaTypeEnt )
-    throws MirMediaException {
+  public void produce (Entity ent, Entity mediaTypeEnt ) throws MediaExc, MediaFailure {
 
     // first see if the file exists
     super.produce(ent, mediaTypeEnt);
@@ -84,7 +83,7 @@ public class MediaHandlerRealAudio extends MediaHandlerAudio implements MirMedia
     }
     catch (Throwable e) {
       logger.error("MediaHandlerRealAudio.produce: " + e.toString());
-      throw new MirMediaException(e.toString());
+      throw new MediaFailure(e);
     }
   }
 

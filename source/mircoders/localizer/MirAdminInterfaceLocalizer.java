@@ -54,8 +54,30 @@ public interface MirAdminInterfaceLocalizer {
    */
   public void initializeArticle(Map anArticle);
 
+  /**
+   * Allows passwords to be stored encrypted in the database. Just implement this
+   * function and return a digest of the supplied password. This function should always
+   * return the same digest for the same password.
+   *
+   * @param aPassword The password to be digested
+   * @return The digested password
+   */
+  public String makePasswordDigest(String aPassword);
+
+
+  /**
+   *
+   * @return
+   */
   public List simpleCommentOperations();
+
+  /**
+   *
+   * @param aName
+   * @return
+   */
   public MirSimpleEntityOperation simpleCommentOperationForName(String aName);
+
 
   public List simpleArticleOperations();
   public MirSimpleEntityOperation simpleArticleOperationForName(String aName);

@@ -35,7 +35,7 @@ import java.io.File;
 import java.util.Map;
 
 import mir.log.LoggerWrapper;
-import mir.util.FileCopier;
+import mir.util.FileFunctions;
 import mir.util.ParameterExpander;
 
 public class DirCopyingProducerNode implements ProducerNode  {
@@ -60,7 +60,7 @@ public class DirCopyingProducerNode implements ProducerNode  {
     try {
       source = ParameterExpander.expandExpression( aValueMap, sourceExpression );
       destination = ParameterExpander.expandExpression( aValueMap, destinationExpression );
-      FileCopier.copy(
+      FileFunctions.copy(
         new File(sourceBasePath, source),
         new File(destinationBasePath, destination));
       aLogger.info(source + " copied into " + destination);

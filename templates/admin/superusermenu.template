@@ -22,6 +22,9 @@
 			<a class="menucommand" href="${config.actionRoot}?module=Language&do=list">${lang("superusermenu.languages")}</a>
 
       <p>
+			<a class="menucommand" href="${config.actionRoot}?module=Abuse">${lang("superusermenu.abuse")}</a>
+
+      <p>
 			<a class="menucommand" href="${config.actionRoot}?module=LinksImcs&do=list">${lang("superusermenu.imcs")}</a>
 
 

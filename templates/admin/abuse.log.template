@@ -1,0 +1,46 @@
+<html>
+  <head>
+    <title>${config["Mir.Name"]} | ${lang("abuse.log.htmltitle")}</title>
+    <link rel="stylesheet" type="text/css" href="${config.docRoot}/style/admin.css">
+  </head>
+
+  <body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
+    <include "head.template">
+    <p>
+      <a class="majorcommand" href="${config.actionRoot}?module=Abuse">${lang("back")}</a>
+    </p>
+
+    <table border="0" cellpadding="2" cellspacing="1">
+      <tr class="darkgrey">
+        <td><span class="witesmall"><b>${lang("abuse.log.time")}</b></span></td>
+        <td><span class="witesmall"><b>${lang("abuse.log.address")}</b></span></td>
+        <td><span class="witesmall"><b>${lang("abuse.log.object")}</b></span></td>
+        <td><span class="witesmall"><b>${lang("abuse.log.browser")}</b></span></td>
+      </tr>
+      
+      <assign grey="0">      
+      <list log as l>
+        <if grey=="1"><assign grey="0"><tr class="list1"><else><tr class="list2"><assign grey="1"> </if>
+          <td>${l.timestamp["yyyy-MM-dd  HH:mm"]}</td>
+          <td>${l.ip}</td>
+          <td>
+            <if l.type=="content">
+              <a href="${config.actionRoot}?module=Content&do=edit&id=${l.id}&returnurl=${utility.encodeURI(thisurl)}">Article</a>
+            <else>
+              <a href="${config.actionRoot}?module=Comment&do=edit&id=${l.id}&returnurl=${utility.encodeURI(thisurl)}">Comment</a>
+            </if>
+          </td>
+          <td>${l.browser}</td>
+        </tr>
+      </list>
+    </table>
+
+    <p>
+      <a class="majorcommand" href="${config.actionRoot}?module=Abuse">${lang("back")}</a>
+    </p>
+
+    <include "foot.template">
+  </body>
+</html>
+
+

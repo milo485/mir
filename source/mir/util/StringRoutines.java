@@ -59,12 +59,14 @@ public class StringRoutines {
   }
 
   static String replaceStringCharacters(String aText, char[] aCharactersToReplace, String[] aStringsToSubstitute) {
+    if (aText==null)
+      return null;
+
     int position, nextPosition;
     int i;
     StringBuffer result = new StringBuffer();
 
     position=0;
-
     do {
       nextPosition = StringRoutines.indexOfCharacters(aText, aCharactersToReplace, position);
 
@@ -116,6 +118,14 @@ public class StringRoutines {
     throw new Exception("Integer expected, "+aValue+" found");
   }
 
+  /**
+   *
+   * @param aSource
+   * @param aSearchExpression
+   * @param aReplacement
+   * @return
+   * @throws Exception
+   */
   public static String performRegularExpressionReplacement(String aSource,
       String aSearchExpression, String aReplacement) throws Exception {
 
@@ -126,6 +136,13 @@ public class StringRoutines {
     return regularExpression.substituteAll(aSource, aReplacement);
   }
 
+  /**
+   *
+   * @param aSource
+   * @param aSearchExpression
+   * @return
+   * @throws REException
+   */
   public static boolean performRegularExpressionSearch(String aSource,
       String aSearchExpression) throws REException {
     RE regularExpression;
@@ -135,6 +152,16 @@ public class StringRoutines {
     return regularExpression.isMatch(aSource);
   }
 
+  /**
+   * Separates a string based on a separator:
+   *     <code>seperateString("a:b:c", ":");</code> will lead to
+   *     a List with 3 Strings: <code>"a"</code>, <code>"b"</code> and <code>"c"</code>
+   *
+   * @param aString     The string to split
+   * @param aSeparator
+   * @return
+   */
+
   public static List splitString(String aString, String aSeparator) {
     List result= new Vector();
     int previousPosition = 0;
@@ -142,6 +169,38 @@ public class StringRoutines {
     int endOfNamePosition;
 
     while ((position = aString.indexOf(aSeparator, previousPosition))>=0) {
+      result.add(aString.substring(previousPosition, position));
+      previousPosition = position + aSeparator.length();
+    }
+
+    result.add(aString.substring(previousPosition, aString.length()));
+
+    return result;
+  }
+
+  /**
+   * Separates a String into at most 2 parts based on a separator:
+   * <ul>
+   *   <li>
+   *     <code>seperateString("a:b:c", ":");</code> will lead to
+   *     a List with 2 Strings: <code>"a"</code> and <code>"b:c"</code>
+   *   <li>
+   *     <code>seperateString("abc", ":");</code> will lead to
+   *     a List with a single String: <code>"abc"</code>
+   * </ul>
+   *
+   *
+   * @param aString
+   * @param aSeparator
+   * @return
+   */
+  public static List separateString(String aString, String aSeparator) {
+    List result= new Vector();
+    int previousPosition = 0;
+    int position;
+    int endOfNamePosition;
+
+    if((position = aString.indexOf(aSeparator, previousPosition))>=0) {
       result.add(aString.substring(previousPosition, position));
       previousPosition = position + aSeparator.length();
     }

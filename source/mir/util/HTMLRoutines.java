@@ -39,6 +39,24 @@ public class HTMLRoutines {
     return URLEncoder.encode(aString);
   }
 
+  /**
+   *
+   *
+   * @param aString
+   * @param anEncoding the encoding to use (Note: JDK 1.3 does not seem to support custom
+   *             encodings, so this parameter is ignored for now)
+   * @return
+   */
+
+  public static String encodeURL(String aString, String anEncoding) {
+    try {
+      return URLEncoder.encode(aString);
+    }
+    catch (Throwable t) {
+      throw new RuntimeException(t.getMessage());
+    }
+  }
+
   public static String encodeHTML(String aText) {
     final char[] CHARACTERS_TO_ESCAPE = { '&', '<', '>', '"' };
     final String[] ESCAPE_CODES = { "&amp;", "&lt;", "&gt;", "&quot;" };

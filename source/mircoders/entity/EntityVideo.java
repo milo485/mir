@@ -32,11 +32,11 @@
 package mircoders.entity;
 
 import java.sql.SQLException;
-import java.util.HashMap;
+import java.util.Map;
 
+import mir.log.LoggerWrapper;
 import mir.storage.StorageObject;
 import mir.storage.StorageObjectFailure;
-import mir.log.LoggerWrapper;
 
 /**
  * Diese Klasse enth?lt die Daten eines MetaObjekts
@@ -59,21 +59,7 @@ public class EntityVideo extends EntityUploadedMedia
     setStorage(theStorage);
   }
 
-  //
-  // methods
-
-  public void update() throws StorageObjectFailure {
-    super.update();
-
-    try {
-      theStorageObject.executeUpdate("update content set is_produced='0' where to_media=" + getId());
-    }
-    catch (SQLException e) {
-      logger.error("EntityVideo.update: " + e.toString());
-    }
-  }
-
-  public void setValues(HashMap theStringValues) {
+  public void setValues(Map theStringValues) {
     if (theStringValues != null) {
       if (!theStringValues.containsKey("is_published"))
         theStringValues.put("is_published", "0");

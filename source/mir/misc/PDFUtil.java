@@ -48,63 +48,56 @@ import org.apache.log.Priority;
 import org.xml.sax.XMLReader;
 
 public class PDFUtil {
-    
+
   public static void makePDF(String foFilePath,Object pdfDestination,String stylesheetPath) throws Exception
   {
     try{
       Driver driver = new Driver();
-      
+
       //stupid logging that fop wants to use, needs to be changed
       Hierarchy hierarchy = Hierarchy.getDefaultHierarchy();
       Logger fopLog=null;
       fopLog = hierarchy.getLoggerFor("fop");
       fopLog.setPriority(Priority.WARN);
       driver.setLogger(fopLog);
-      
+
       driver.setRenderer(Driver.RENDER_PDF);
-  
+
       File foFile=new File(foFilePath);
-      
+
       String html2foStyleSheetPath;
-      if (stylesheetPath == "FROMCONFIG"){
-	html2foStyleSheetPath=MirGlobal.getConfigProperty("Home") 
-	  + MirGlobal.getConfigProperty("HTMLTemplateProcessor.Dir")
-          + "/" 
-          + MirGlobal.getConfigProperty("Producer.PrintableContent.html2foStyleSheetName"); 
-      }
-      else {
-	  html2foStyleSheetPath=stylesheetPath;
-      }
+      html2foStyleSheetPath=stylesheetPath;
+
       File html2foStyleSheet=new File(html2foStyleSheetPath);
       InputHandler inputHandler =
-	new XSLTInputHandler(foFile, html2foStyleSheet);
+        new XSLTInputHandler(foFile, html2foStyleSheet);
       XMLReader parser = inputHandler.getParser();
-      
+
       if (pdfDestination instanceof String) {
-	String filePath = (String) pdfDestination;
-	driver.setOutputStream(new FileOutputStream(filePath));
-	driver.render(parser, inputHandler.getInputSource());
+        String filePath = (String) pdfDestination;
+        driver.setOutputStream(new FileOutputStream(filePath));
+        driver.render(parser, inputHandler.getInputSource());
       }
       else if (pdfDestination instanceof HttpServletResponse){
-	HttpServletResponse res = (HttpServletResponse) pdfDestination; 
-	ByteArrayOutputStream out = new ByteArrayOutputStream();
-	driver.setOutputStream(out);
-	res.setContentType("application/pdf");
-	
-	driver.render(parser, inputHandler.getInputSource());
-	
-	byte[] content = out.toByteArray();
-	res.setContentLength(content.length);
-	res.getOutputStream().write(content);
-	res.getOutputStream().flush();
+        HttpServletResponse res = (HttpServletResponse) pdfDestination;
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        driver.setOutputStream(out);
+        res.setContentType("application/pdf");
+
+        driver.render(parser, inputHandler.getInputSource());
+
+        byte[] content = out.toByteArray();
+        res.setContentLength(content.length);
+        res.getOutputStream().write(content);
+        res.getOutputStream().flush();
       }
       else {
-	throw new Exception("I'm sorry but I don't know how to output a pdf to an object of type" + pdfDestination.getClass().getName());
+        throw new Exception("I'm sorry but I don't know how to output a pdf to an object of type" + pdfDestination.getClass().getName());
       }
     }
-  
+
     catch (Exception ex){
-	throw(ex);
+        throw(ex);
     }
   }
 }

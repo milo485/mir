@@ -30,40 +30,38 @@
  */
 package mir.config;
 
-import multex.Exc;
-import multex.Failure;
-
-import org.apache.commons.configuration.PropertiesConfiguration;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-
 import javax.servlet.ServletContext;
+
+import multex.Exc;
+import multex.Failure;
+
+import org.apache.commons.collections.ExtendedProperties;
 
 
 /**
  * @author idefix
  */
-public class MirPropertiesConfiguration extends PropertiesConfiguration {
+public class MirPropertiesConfiguration extends ExtendedProperties {
   private static MirPropertiesConfiguration instance;
   private static ServletContext context;
   private static String contextPath;
 
-  //if one of these properties is not present a new 
+  //if one of these properties is not present a new
   //property is added with its default value;
-  private  static NeededProperty[] neededWithValue =
+  private static NeededProperty[] neededWithValue =
   {
-  	new NeededProperty("Producer.DocRoot",""),
-		new NeededProperty("Producer.ImageRoot",""),
-		new NeededProperty("Producer.Image.Path",""),
-		new NeededProperty("Producer.Media.Path",""),
-		new NeededProperty("Producer.RealMedia.Path",""),
-		new NeededProperty("Producer.Image.IconPath","")
+    new NeededProperty("Producer.DocRoot", ""),
+    new NeededProperty("Producer.ImageRoot", ""),
+    new NeededProperty("Producer.Image.Path", ""),
+    new NeededProperty("Producer.Media.Path", ""),
+    new NeededProperty("Producer.RealMedia.Path", ""),
+    new NeededProperty("Producer.Image.IconPath", "")
   };
 
   /**
@@ -71,8 +69,13 @@ public class MirPropertiesConfiguration extends PropertiesConfiguration {
    */
   private MirPropertiesConfiguration(ServletContext ctx, String ctxPath)
     throws IOException {
-    super(ctx.getRealPath("/WEB-INF/etc/") + "/config.properties",
-      ctx.getRealPath("/WEB-INF/") + "/default.properties");
+    //loading the defaults-config
+    super(ctx.getRealPath("/WEB-INF/") + "/default.properties");
+    //loading the user-config
+    ExtendedProperties userConfig = 
+    	new ExtendedProperties(ctx.getRealPath("/WEB-INF/etc/") + "/config.properties");
+    //merging them to one config while overriding the defaults
+    this.combine(userConfig);
     addProperty("Home", ctx.getRealPath("/WEB-INF/") + "/");
     checkMissing();
   }
@@ -111,17 +114,16 @@ public class MirPropertiesConfiguration extends PropertiesConfiguration {
     return context;
   }
 
-	/**
-	 * Returns all properties in a Map
-	 * @return Map
-	 */
+  /**
+   * Returns all properties in a Map
+   * @return Map
+   */
   public Map allSettings() {
     Iterator iterator = this.getKeys();
     Map returnMap = new HashMap();
-
     while (iterator.hasNext()) {
       String key = (String) iterator.next();
-      Object o = this.getString(key);
+      Object o = this.getProperty(key);
 
       if (o == null) {
         o = new Object();
@@ -132,7 +134,6 @@ public class MirPropertiesConfiguration extends PropertiesConfiguration {
 
     return returnMap;
   }
-
 
   /**
    * Returns a String-property concatenated with the home-dir of the
@@ -154,11 +155,11 @@ public class MirPropertiesConfiguration extends PropertiesConfiguration {
    * Checks if one property is missing and adds a default value
    */
   private void checkMissing() {
-		for (int i = 0; i < neededWithValue.length; i++) {
-			if (super.getProperty(neededWithValue[i].getKey()) == null) {
-				addProperty(neededWithValue[i].getKey(), neededWithValue[i].getValue());
-			}
-		}
+    for (int i = 0; i < neededWithValue.length; i++) {
+      if (super.getProperty(neededWithValue[i].getKey()) == null) {
+        addProperty(neededWithValue[i].getKey(), neededWithValue[i].getValue());
+      }
+    }
   }
 
   public File getFile(String key) throws FileNotFoundException {
@@ -173,17 +174,39 @@ public class MirPropertiesConfiguration extends PropertiesConfiguration {
   }
 
   /**
+   * @return the vlaue of this property as String
+   * @param key the key of this property
    * @see org.apache.commons.configuration.Configuration#getString(java.lang.String)
    */
   public String getString(String key) {
-    if (super.getString(key) == null) {
-      return new String();
-    }
-
-    return super.getString(key);
+  	return getString(key, "");
+  }
+  
+  
+  /** 
+   * @return the value of this property as String
+   * @param key the key of the property
+   * @param defaultValue the default value of this property if it is null
+   * @see org.apache.commons.collections.ExtendedProperties#getString(java.lang.String, java.lang.String)
+   */
+  public String getString(String key, String defaultValue) {
+		Object object = getProperty(key);  	
+		if(object == null){
+			if (defaultValue == null) {
+				return new String();
+			}
+		  return defaultValue;
+		} 			
+		if (object instanceof String) {
+			return (String)object;
+		}
+		return object.toString();
   }
 
   /**
+   * Returns a property according to the given key
+   * @param key the key of the property
+   * @return the value of the property as Object, if no property available it returns a empty String
    * @see org.apache.commons.configuration.Configuration#getString(java.lang.String)
    */
   public Object getProperty(String key) {
@@ -193,7 +216,7 @@ public class MirPropertiesConfiguration extends PropertiesConfiguration {
 
     return super.getProperty(key);
   }
-
+  
   /**
    * @author idefix
    */
@@ -218,28 +241,27 @@ public class MirPropertiesConfiguration extends PropertiesConfiguration {
     public PropertiesConfigFailure(String msg, Throwable cause) {
       super(msg, cause);
     }
-    
   }
-  
-	/**
-	 * A Class for properties to be checked
-	 * @author idefix
-	 */
-	private static class NeededProperty {
-		private String _key;
-		private String _value;
-    	
-		public NeededProperty(String key, String value) {
-			_key = key;
-			_value = value;
-		}
-		
-		public String getKey() {
-			return _key;
-		}
-		
-		public String getValue() {
-			return _value;
-		}
-	}
+
+  /**
+   * A Class for properties to be checked
+   * @author idefix
+   */
+  private static class NeededProperty {
+    private String _key;
+    private String _value;
+
+    public NeededProperty(String key, String value) {
+      _key = key;
+      _value = value;
+    }
+
+    public String getKey() {
+      return _key;
+    }
+
+    public String getValue() {
+      return _value;
+    }
+  }
 }

@@ -31,14 +31,14 @@
 
 package mircoders.search;
 
+import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 
 import mir.entity.Entity;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
-
-import freemarker.template.SimpleHash;
 
 
 public class UnStoredSearchTerm extends SearchTerm{
@@ -49,7 +49,7 @@ public class UnStoredSearchTerm extends SearchTerm{
   public String paramName;
   public String partOfEntity;
 
-  
+
   public UnStoredSearchTerm(String anEntityPart,String aParamName,String aMatchField,String aDataField, String aTemplateVariable){
       partOfEntity = anEntityPart;
       paramName = aParamName;
@@ -57,8 +57,8 @@ public class UnStoredSearchTerm extends SearchTerm{
       dataField = aDataField;
       templateVariable = aTemplateVariable;
   }
-  
-  
+
+
   public void index(Document doc, Entity entity){
     doc.add(Field.UnStored(matchField,entity.getValue(partOfEntity)));
   }
@@ -66,20 +66,20 @@ public class UnStoredSearchTerm extends SearchTerm{
   public void indexValue(Document doc, String value){
     doc.add(Field.UnStored(matchField, value));
   }
-    
+
   public String makeTerm(HttpServletRequest req){
       String wanted = req.getParameter(paramName);
       if (wanted != null && !(wanted.equals(""))){
-	return matchField + ":" + "\"" + wanted + "\"";
+        return matchField + ":" + "\"" + wanted + "\"";
       }
       else {
-	return null;
+        return null;
       }
   }
-  public void returnMeta(SimpleHash result,Document doc){
+  public void returnMeta(Map result,Document doc){
     return;
   }
-  
+
 
 }
 

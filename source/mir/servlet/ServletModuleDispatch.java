@@ -44,7 +44,7 @@ import mir.log.LoggerWrapper;
  * Dispatcher, calls the method passed to ServletModule Class, through the "do"
  * Parameter (via POST or GET)
  *
- * @version $Id: ServletModuleDispatch.java,v 1.12 2003/01/25 17:45:19 idfx Exp $
+ * @version $Id: ServletModuleDispatch.java,v 1.13 2003/03/06 05:40:39 zapata Exp $
  *
  * @Author rk
  *
@@ -76,7 +76,7 @@ public final class ServletModuleDispatch {
          */
 
   public static void dispatch(ServletModule sMod, HttpServletRequest req,
-                              HttpServletResponse res) throws ServletModuleException, ServletModuleUserException
+          HttpServletResponse res) throws ServletModuleExc, ServletModuleUserExc, ServletModuleFailure
   {
     //sMod.predeliver(req,res);
 
@@ -86,7 +86,7 @@ public final class ServletModuleDispatch {
       if (sMod.defaultAction() != null)
         doParam = sMod.defaultAction();
       else
-        throw new ServletModuleException("no parameter do supplied!");
+        throw new ServletModuleExc("no parameter do supplied!");
     }
 
     try {
@@ -98,26 +98,21 @@ public final class ServletModuleDispatch {
       else logger.debug("method lookup unsuccesful");
     }
     catch ( NoSuchMethodException e) {
-      throw new ServletModuleException("no such method '"+doParam+"' (" + e.getMessage() + ")");
+      throw new ServletModuleFailure("no such method '"+doParam+"' (" + e.getMessage() + ")", e);
     }
     catch ( SecurityException e) {
-      throw new ServletModuleException("method not allowed!" + e.getMessage());
+      throw new ServletModuleFailure("method not allowed!" + e.getMessage(), e);
     }
     catch ( InvocationTargetException e) {
       logger.debug( "invocation target exception: " + e.getMessage());
-      if (e.getTargetException() instanceof ServletModuleUserException) {
-        throw new ServletModuleUserException(e.getTargetException().getMessage());
-      }
-      else {
-        e.printStackTrace();
-        throw new ServletModuleException(e.getTargetException().getMessage());
-      }
+
+      throw new ServletModuleFailure(e.getTargetException().getMessage(), e.getTargetException());
     }
     catch ( IllegalAccessException e) {
-      throw new ServletModuleException("illegal method not allowed!" + e.getMessage());
+      throw new ServletModuleFailure("illegal method not allowed!" + e.getMessage(), e);
     }
-
-//hopefully we don't get here ...
-    throw new ServletModuleException("delivery failed! -- ");
+    catch (Throwable t) {
+      throw new ServletModuleFailure(t);
+    }
   }
 }

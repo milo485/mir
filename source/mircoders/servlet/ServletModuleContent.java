@@ -31,7 +31,6 @@
 
 package mircoders.servlet;
 
-import java.io.IOException;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -46,9 +45,9 @@ import mir.entity.adapter.EntityAdapterModel;
 import mir.entity.adapter.EntityIteratorAdapter;
 import mir.log.LoggerWrapper;
 import mir.misc.StringUtil;
-import mir.module.ModuleException;
 import mir.servlet.ServletModule;
-import mir.servlet.ServletModuleException;
+import mir.servlet.ServletModuleExc;
+import mir.servlet.ServletModuleFailure;
 import mir.storage.StorageObjectFailure;
 import mir.util.CachingRewindableIterator;
 import mir.util.HTTPRequestParser;
@@ -72,7 +71,7 @@ import freemarker.template.SimpleHash;
  *  ServletModuleContent -
  *  deliver html for the article admin form.
  *
- * @version $Id: ServletModuleContent.java,v 1.36 2003/03/02 04:36:31 zapata Exp $
+ * @version $Id: ServletModuleContent.java,v 1.45 2003/03/16 00:11:09 zapata Exp $
  * @author rk, mir-coders
  *
  */
@@ -96,12 +95,12 @@ public class ServletModuleContent extends ServletModule
 
       mainModule = new ModuleContent(DatabaseContent.getInstance());
     }
-    catch (StorageObjectFailure e) {
-      logger.error("servletmodulecontent konnte nicht initialisiert werden");
+    catch (Throwable e) {
+      logger.fatal("ServletModuleContent could not be initialized: " + e.toString());
     }
   }
 
-  public void list(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleException
+  public void list(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc
   {
     HTTPRequestParser requestParser = new HTTPRequestParser(aRequest);
 
@@ -113,7 +112,7 @@ public class ServletModuleContent extends ServletModule
     returnArticleList(aRequest, aResponse, where, order, offset, selectArticleUrl);
   }
 
-  public void search(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleException {
+  public void search(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc, ServletModuleFailure {
     try {
       HTTPRequestParser requestParser = new HTTPRequestParser(aRequest);
       SQLQueryBuilder queryBuilder = new SQLQueryBuilder();
@@ -160,21 +159,21 @@ public class ServletModuleContent extends ServletModule
       returnArticleList(aRequest, aResponse, queryBuilder.getWhereClause(), queryBuilder.getOrderByClause(), 0, selectArticleUrl);
     }
     catch (Throwable e) {
-      throw new ServletModuleException(e.toString());
+      throw new ServletModuleFailure(e);
     }
   }
 
-  public void add(HttpServletRequest req, HttpServletResponse res) throws ServletModuleException {
+  public void add(HttpServletRequest req, HttpServletResponse res) throws ServletModuleExc {
     _showObject(null, req, res);
   }
 
 
-  public void insert(HttpServletRequest req, HttpServletResponse res) throws ServletModuleException
+  public void insert(HttpServletRequest req, HttpServletResponse res) throws ServletModuleExc
   {
 //theLog.printDebugInfo(":: content :: trying to insert");
     try {
       EntityUsers   user = _getUser(req);
-      HashMap withValues = getIntersectingValues(req, DatabaseContent.getInstance());
+      Map withValues = getIntersectingValues(req, DatabaseContent.getInstance());
 
       String now = StringUtil.date2webdbDate(new GregorianCalendar());
       withValues.put("date", now);
@@ -191,20 +190,17 @@ public class ServletModuleContent extends ServletModule
 
       _showObject(id, req, res);
     }
-    catch (StorageObjectFailure e) {
-      throw new ServletModuleException(e.toString());
-    }
-    catch (ModuleException e) {
-      throw new ServletModuleException(e.toString());
+    catch (Throwable e) {
+      throw new ServletModuleFailure(e);
     }
   }
 
-  public void delete(HttpServletRequest req, HttpServletResponse res) throws ServletModuleException
+  public void delete(HttpServletRequest req, HttpServletResponse res) throws ServletModuleExc
   {
     EntityUsers   user = _getUser(req);
 
     String idParam = req.getParameter("id");
-    if (idParam == null) throw new ServletModuleException("Invalid call: id missing");
+    if (idParam == null) throw new ServletModuleExc("Invalid call: id missing");
 
     String confirmParam = req.getParameter("confirm");
     String cancelParam = req.getParameter("cancel");
@@ -241,14 +237,8 @@ public class ServletModuleContent extends ServletModule
           }
 
         }
-        catch (ModuleException e) {
-          throw new ServletModuleException(e.toString());
-        }
-        catch (StorageObjectFailure e) {
-          throw new ServletModuleException(e.toString());
-        }
-        catch (IOException e) {
-          throw new ServletModuleException(e.toString());
+        catch (Throwable e) {
+          throw new ServletModuleFailure(e);
         }
         list(req,res);
       }
@@ -259,58 +249,53 @@ public class ServletModuleContent extends ServletModule
     }
   }
 
-  public void edit(HttpServletRequest req, HttpServletResponse res) throws ServletModuleException
+  public void edit(HttpServletRequest req, HttpServletResponse res) throws ServletModuleExc
   {
     String idParam = req.getParameter("id");
     if (idParam == null)
-      throw new ServletModuleException("Invalid call: id not supplied ");
+      throw new ServletModuleExc("Invalid call: id not supplied ");
     _showObject(idParam, req, res);
   }
 
 // methods for attaching media file
-  public void attach(HttpServletRequest req, HttpServletResponse res) throws ServletModuleException
+  public void attach(HttpServletRequest req, HttpServletResponse res) throws ServletModuleExc
   {
     String  mediaIdParam = req.getParameter("mid");
     String  idParam = req.getParameter("cid");
-    if (idParam == null||mediaIdParam==null) throw new ServletModuleException("smod content :: attach :: cid/mid missing");
+    if (idParam == null||mediaIdParam==null) throw new ServletModuleExc("smod content :: attach :: cid/mid missing");
 
     try {
       EntityContent entContent = (EntityContent)mainModule.getById(idParam);
       entContent.attach(mediaIdParam);
     }
-    catch(ModuleException e) {
-      logger.error("smod content :: attach :: could not get entityContent");
-    }
-    catch(StorageObjectFailure e) {
+    catch(Throwable e) {
       logger.error("smod content :: attach :: could not get entityContent");
     }
 
     _showObject(idParam, req, res);
   }
 
-  public void dettach(HttpServletRequest req, HttpServletResponse res) throws ServletModuleException
+  public void dettach(HttpServletRequest req, HttpServletResponse res) throws ServletModuleExc
   {
     String  cidParam = req.getParameter("cid");
     String  midParam = req.getParameter("mid");
-    if (cidParam == null) throw new ServletModuleException("smod content :: dettach :: cid missing");
-    if (midParam == null) throw new ServletModuleException("smod content :: dettach :: mid missing");
+    if (cidParam == null)
+      throw new ServletModuleExc("smod content :: dettach :: cid missing");
+    if (midParam == null)
+      throw new ServletModuleExc("smod content :: dettach :: mid missing");
 
     try {
       EntityContent entContent = (EntityContent)mainModule.getById(cidParam);
       entContent.dettach(cidParam,midParam);
     }
-    catch(ModuleException e) {
-      logger.error("smod content :: dettach :: could not get entityContent");
-    }
-    catch(StorageObjectFailure e) {
+    catch(Throwable e) {
       logger.error("smod content :: dettach :: could not get entityContent");
     }
 
     _showObject(cidParam, req, res);
   }
 
-  public void update(HttpServletRequest aRequest, HttpServletResponse aResponse)
-      throws ServletModuleException
+  public void update(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc
   {
     try {
       HTTPRequestParser requestParser = new HTTPRequestParser(aRequest);
@@ -318,9 +303,10 @@ public class ServletModuleContent extends ServletModule
       String returnUrl = requestParser.getParameter("returnurl");
 
       String idParam = aRequest.getParameter("id");
-      if (idParam == null) throw new ServletModuleException("Wrong call: (id) is missing");
+      if (idParam == null)
+        throw new ServletModuleExc("Wrong call: (id) is missing");
 
-      HashMap withValues = getIntersectingValues(aRequest, DatabaseContent.getInstance());
+      Map withValues = getIntersectingValues(aRequest, DatabaseContent.getInstance());
       String[] topic_id = aRequest.getParameterValues("to_topic");
       String content_id = aRequest.getParameter("id");
 
@@ -343,7 +329,7 @@ public class ServletModuleContent extends ServletModule
         _showObject(idParam, aRequest, aResponse);
     }
     catch (Throwable e) {
-      throw new ServletModuleException(e.toString());
+      throw new ServletModuleFailure(e);
     }
   }
 
@@ -353,9 +339,8 @@ public class ServletModuleContent extends ServletModule
   * if the "id" parameter is null, it means show an empty form to add a new
   * article.
 */
-  private void _showObject(String id, HttpServletRequest aRequest, HttpServletResponse aResponse)
-      throws ServletModuleException {
-
+  public void _showObject(String id, HttpServletRequest aRequest, HttpServletResponse aResponse)
+      throws ServletModuleExc {
     try {
       HTTPRequestParser requestParser = new HTTPRequestParser(aRequest);
       Map responseData = ServletHelper.makeGenerationData(getLocale(aRequest));
@@ -387,13 +372,19 @@ public class ServletModuleContent extends ServletModule
       }
       responseData.put("article", article);
 
+      responseData.put("topics",
+          new EntityIteratorAdapter("", configuration.getString("Mir.Localizer.Admin.TopicListOrder"),
+          20, MirGlobal.localizer().dataModel().adapterModel(), "topic"));
+
+
+
       responseData.put("returnurl", requestParser.getParameter("returnurl"));
       responseData.put("thisurl", urlBuilder.getQuery());
 
       ServletHelper.generateResponse(aResponse.getWriter(), responseData, editTemplate);
     }
-    catch (Exception e) {
-      throw new ServletModuleException(e.toString());
+    catch (Throwable e) {
+      throw new ServletModuleFailure(e);
     }
   }
 
@@ -403,7 +394,7 @@ public class ServletModuleContent extends ServletModule
        String aWhereClause,
        String anOrderByClause,
        int anOffset,
-       String aSelectArticleUrl) throws ServletModuleException {
+       String aSelectArticleUrl) throws ServletModuleExc {
 
     HTTPRequestParser requestParser = new HTTPRequestParser(aRequest);
     URLBuilder urlBuilder = new URLBuilder();
@@ -472,11 +463,11 @@ public class ServletModuleContent extends ServletModule
       ServletHelper.generateResponse(aResponse.getWriter(), responseData, listTemplate);
     }
     catch (Throwable e) {
-      throw new ServletModuleException(e.toString());
+      throw new ServletModuleFailure(e);
     }
   }
 
-  public void selectparent(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleException
+  public void selectparent(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc
   {
     try {
       HTTPRequestParser requestParser = new HTTPRequestParser(aRequest);
@@ -490,27 +481,27 @@ public class ServletModuleContent extends ServletModule
       returnArticleList(aRequest, aResponse, "", "", 0, urlBuilder.getQuery());
     }
     catch (Throwable e) {
-      throw new ServletModuleException(e.getMessage());
+      throw new ServletModuleFailure(e);
     }
   }
 
-  public void listchildren(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleException
+  public void listchildren(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc
   {
     try {
       HTTPRequestParser requestParser = new HTTPRequestParser(aRequest);
       String articleId = requestParser.getParameter("article_id");
 
       if (articleId == null)
-        throw new ServletModuleException("ServletModuleContent.listchildren: article_id not set!");
+        throw new ServletModuleExc("ServletModuleContent.listchildren: article_id not set!");
 
       returnArticleList(aRequest, aResponse, "to_content = " + articleId, "", 0, null);
     }
     catch (Throwable e) {
-      throw new ServletModuleException(e.getMessage());
+      throw new ServletModuleFailure(e);
     }
   }
 
-  public void setparent(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleException
+  public void setparent(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc
   {
     HTTPRequestParser requestParser = new HTTPRequestParser(aRequest);
     String articleId = aRequest.getParameter("childid");
@@ -525,13 +516,13 @@ public class ServletModuleContent extends ServletModule
     }
     catch(Throwable e) {
       logger.error("ServletModuleContent.setparent: " + e.getMessage());
-      throw new ServletModuleException("ServletModuleContent.setparent: " + e.getMessage());
+      throw new ServletModuleFailure(e);
     }
 
     redirect(aResponse, returnUrl);
   }
 
-  public void clearparent(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleException
+  public void clearparent(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc
   {
     HTTPRequestParser requestParser = new HTTPRequestParser(aRequest);
     String articleId = requestParser.getParameter("id");
@@ -547,7 +538,7 @@ public class ServletModuleContent extends ServletModule
       e.printStackTrace(logger.asPrintWriter(LoggerWrapper.DEBUG_MESSAGE));
       logger.error("ServletModuleContent.clearparent: " + e.getMessage());
 
-      throw new ServletModuleException("ServletModuleContent.clearparent: " + e.getMessage());
+      throw new ServletModuleFailure("ServletModuleContent.clearparent: " + e.getMessage(), e);
     }
 
     redirect(aResponse, returnUrl);

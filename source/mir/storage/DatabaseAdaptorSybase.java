@@ -33,11 +33,10 @@
  */
 package mir.storage;
 
-import mir.config.MirPropertiesConfiguration;
-
-import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
-
 import java.util.Properties;
+
+import mir.config.MirPropertiesConfiguration;
+import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
 
 
 /**

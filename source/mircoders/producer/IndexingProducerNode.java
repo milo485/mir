@@ -29,22 +29,16 @@
  */
 package mircoders.producer;
 
+import java.util.Map;
+
 import mir.entity.Entity;
-
 import mir.entity.adapter.EntityAdapter;
-
-import mir.log.LoggerToWriterAdapter;
 import mir.log.LoggerWrapper;
-
 import mir.misc.StringUtil;
-
 import mir.producer.ProducerFailure;
 import mir.producer.ProducerNode;
-
 import mir.util.ParameterExpander;
-
 import mircoders.entity.EntityContent;
-
 import mircoders.search.AudioSearchTerm;
 import mircoders.search.ContentSearchTerm;
 import mircoders.search.ImagesSearchTerm;
@@ -56,17 +50,10 @@ import mircoders.search.UnIndexedSearchTerm;
 import mircoders.search.VideoSearchTerm;
 
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
-
 import org.apache.lucene.document.Document;
-
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
-
 import org.apache.lucene.store.FSDirectory;
-
-import java.io.PrintWriter;
-
-import java.util.Map;
 
 
 public class IndexingProducerNode implements ProducerNode {
@@ -176,11 +163,12 @@ public class IndexingProducerNode implements ProducerNode {
       //}
       //theDoc.add(Field.UnStored("comments",commentsAggregate));
       indexWriter.addDocument(theDoc);
-    } catch (Throwable t) {
+    }
+    catch (Throwable t) {
       aLogger.error("Error while indexing content: " + t.getMessage());
-      t.printStackTrace(new PrintWriter(
-          new LoggerToWriterAdapter(aLogger, LoggerWrapper.DEBUG_MESSAGE)));
-    } finally {
+      t.printStackTrace(aLogger.asPrintWriter(LoggerWrapper.DEBUG_MESSAGE));
+    }
+    finally {
       if (indexWriter != null) {
         try {
           indexWriter.close();

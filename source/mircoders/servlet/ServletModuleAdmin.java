@@ -31,16 +31,14 @@
 
 package mircoders.servlet;
 
-import java.io.PrintWriter;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import mir.log.LoggerToWriterAdapter;
 import mir.log.LoggerWrapper;
 import mir.servlet.ServletModule;
-import mir.servlet.ServletModuleException;
+import mir.servlet.ServletModuleFailure;
 import mir.util.URLBuilder;
 
 public class ServletModuleAdmin extends ServletModule
@@ -53,10 +51,7 @@ public class ServletModuleAdmin extends ServletModule
     defaultAction = "showSuperUserMenu";
   }
 
-  public void superusermenu(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleException {
-    // ML: experiment in using the producer's generation system instead of the
-    //     old one...
-
+  public void superusermenu(HttpServletRequest aRequest, HttpServletResponse aResponse) {
     URLBuilder urlBuilder = new URLBuilder();
     int count;
 
@@ -70,9 +65,7 @@ public class ServletModuleAdmin extends ServletModule
       ServletHelper.generateResponse(aResponse.getWriter(), responseData, "superusermenu.template");
     }
     catch (Throwable e) {
-      e.printStackTrace(new PrintWriter(new LoggerToWriterAdapter(logger, LoggerWrapper.ERROR_MESSAGE)));
-
-      throw new ServletModuleException(e.getMessage());
+      throw new ServletModuleFailure(e);
     }
   }
 }

@@ -29,29 +29,21 @@
  * not wish to do so, delete this exception statement from your version.
  */
 
-package mir.media;
+package mir.servlet;
 
-
-/*
- *  MirMediaException -
- *  differentiates itself from a bug in that it
- *  represents a probable user error
- * 
- * @version $Id: MirMediaUserException.java,v 1.5 2003/01/25 17:45:17 idfx Exp $
- * @author mh
+import multex.Exc;
+/**
  *
+ * <p>Title: ServletModuleUserExc</p>
+ * <p>Description: </p>
+ * <p>Copyright: Copyright (c) 2003</p>
+ * <p>Company: </p>
+ * @author Zapata
+ * @version 1.0
  */
 
-public final class MirMediaUserException extends Exception {
-  String msg;
-
-	public MirMediaUserException(String msg) {
-    super(msg);
-    this.msg = msg;
-  }
-
-  public String getMsg() {
-    return msg;
+public class ServletModuleUserExc extends Exc {
+  public ServletModuleUserExc(String aMessageName, String[] aParameterArray) {
+    super(aMessageName, aParameterArray);
   }
 }
-

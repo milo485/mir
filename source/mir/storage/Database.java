@@ -32,7 +32,6 @@ package mir.storage;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -40,41 +39,34 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
-
-import com.codestudio.util.SQLManager;
-
-import freemarker.template.SimpleHash;
-import freemarker.template.SimpleList;
+import java.util.List;
+import java.util.Map;
 
 import mir.config.MirPropertiesConfiguration;
-
 import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
-
 import mir.entity.Entity;
 import mir.entity.EntityList;
 import mir.entity.StorableObjectEntity;
-
 import mir.log.LoggerWrapper;
-
 import mir.misc.HTMLTemplateProcessor;
 import mir.misc.StringUtil;
-
 import mir.storage.store.ObjectStore;
 import mir.storage.store.StorableObject;
 import mir.storage.store.StoreContainerType;
 import mir.storage.store.StoreIdentifier;
 import mir.storage.store.StoreUtil;
-
 import mir.util.JDBCStringRoutines;
+
+import com.codestudio.util.SQLManager;
+
+import freemarker.template.SimpleHash;
+import freemarker.template.SimpleList;
 
 
 /**
@@ -85,7 +77,7 @@ import mir.util.JDBCStringRoutines;
  * Treiber, Host, User und Passwort, ueber den der Zugriff auf die
  * Datenbank erfolgt.
  *
- * @version $Id: Database.java,v 1.34 2003/02/23 05:00:12 zapata Exp $
+ * @version $Id: Database.java,v 1.36 2003/03/05 19:23:15 idfx Exp $
  * @author rk
  *
  */
@@ -695,7 +687,7 @@ public class Database implements StorageObject {
   private Entity makeEntityFromResultSet(ResultSet rs)
     throws StorageObjectFailure {
     /** @todo OS: get Pkey from ResultSet and consult ObjectStore */
-    HashMap theResultHash = new HashMap();
+    Map theResultHash = new HashMap();
     String theResult = null;
     int theType;
     Entity returnEntity = null;

@@ -31,7 +31,6 @@
 
 package mircoders.servlet;
 
-import java.io.IOException;
 import java.net.URLEncoder;
 
 import javax.servlet.http.HttpServletRequest;
@@ -41,9 +40,8 @@ import mir.config.MirPropertiesConfiguration;
 import mir.entity.EntityList;
 import mir.log.LoggerWrapper;
 import mir.misc.HTMLTemplateProcessor;
-import mir.module.ModuleException;
 import mir.servlet.ServletModule;
-import mir.servlet.ServletModuleException;
+import mir.servlet.ServletModuleFailure;
 import mircoders.module.ModuleBreaking;
 import mircoders.storage.DatabaseBreaking;
 import freemarker.template.SimpleHash;
@@ -66,7 +64,7 @@ public class ServletModuleBreaking extends ServletModule
   private ServletModuleBreaking() {
     logger = new LoggerWrapper("ServletModule.Breaking");
     try {
-			configuration = MirPropertiesConfiguration.instance();
+                        configuration = MirPropertiesConfiguration.instance();
 
       templateListString = configuration.getString("ServletModule.Breaking.ListTemplate");
       templateObjektString = configuration.getString("ServletModule.Breaking.ObjektTemplate");
@@ -81,7 +79,6 @@ public class ServletModuleBreaking extends ServletModule
   }
 
   public void list(HttpServletRequest req, HttpServletResponse res)
-      throws ServletModuleException
   {
     logger.debug("-- breaking: list");
 // fetch and deliver
@@ -107,8 +104,8 @@ public class ServletModuleBreaking extends ServletModule
 // raus damit
       HTMLTemplateProcessor.process(res, templateListString, mergeData, res.getWriter(), getLocale(req));
     }
-    catch (ModuleException e) {throw new ServletModuleException(e.toString());}
-    catch (IOException e) {throw new ServletModuleException(e.toString());}
-    catch (Exception e) {throw new ServletModuleException(e.toString());}
+    catch (Exception e) {
+      throw new ServletModuleFailure(e);
+    }
   }
 }

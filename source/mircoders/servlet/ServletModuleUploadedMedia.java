@@ -31,10 +31,9 @@
 
 package mircoders.servlet;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLEncoder;
-import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletOutputStream;
@@ -43,24 +42,24 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import mir.config.MirPropertiesConfiguration;
-import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
 import mir.entity.Entity;
 import mir.entity.EntityList;
 import mir.log.LoggerWrapper;
 import mir.media.MediaHelper;
 import mir.media.MirMedia;
 import mir.misc.FileHandler;
-import mir.misc.FileHandlerException;
-import mir.misc.FileHandlerUserException;
 import mir.misc.WebdbMultipartRequest;
-import mir.module.ModuleException;
 import mir.servlet.ServletModule;
-import mir.servlet.ServletModuleException;
-import mir.servlet.ServletModuleUserException;
-import mir.storage.StorageObjectFailure;
+import mir.servlet.ServletModuleExc;
+import mir.servlet.ServletModuleFailure;
+import mir.servlet.ServletModuleUserExc;
+import mir.util.ExceptionFunctions;
+import mircoders.entity.EntityContent;
 import mircoders.entity.EntityUploadedMedia;
 import mircoders.entity.EntityUsers;
 import mircoders.media.MediaRequest;
+import mircoders.media.UnsupportedMediaFormatExc;
+import mircoders.storage.DatabaseContent;
 import mircoders.storage.DatabaseMediafolder;
 import freemarker.template.SimpleHash;
 import freemarker.template.SimpleList;
@@ -69,7 +68,7 @@ import freemarker.template.SimpleList;
  *  ServletModuleBilder -
  *  liefert HTML fuer Bilder
  *
- * @version $Id: ServletModuleUploadedMedia.java,v 1.16 2003/02/23 05:00:15 zapata Exp $
+ * @version $Id: ServletModuleUploadedMedia.java,v 1.23 2003/03/09 19:14:21 idfx Exp $
  * @author RK, the mir-coders group
  */
 
@@ -88,12 +87,28 @@ public abstract class ServletModuleUploadedMedia
   }
 
   public void insert(HttpServletRequest req, HttpServletResponse res)
-          throws ServletModuleException, ServletModuleUserException {
+          throws ServletModuleExc, ServletModuleUserExc {
     try {
       EntityUsers user = _getUser(req);
       MediaRequest mediaReq =  new MediaRequest(user.getId(), false);
       WebdbMultipartRequest mp = new WebdbMultipartRequest(req, (FileHandler)mediaReq);
       EntityList mediaList = mediaReq.getEntityList();
+      String articleid = (String) mp.getParameters().get("articleid");
+
+      if (articleid!=null) {
+        EntityContent entContent = (EntityContent) DatabaseContent.getInstance().selectById(articleid);
+
+        mediaList.rewind();
+
+        while (mediaList.hasNext()) {
+          entContent.attach( ( (EntityUploadedMedia) mediaList.next()).getId());
+        }
+        mediaList.rewind();
+
+        ((ServletModuleContent) ServletModuleContent.getInstance())._showObject(articleid, req, res);
+
+        return;
+      }
 
       SimpleHash mergeData = new SimpleHash();
       SimpleHash popups = new SimpleHash();
@@ -108,33 +123,28 @@ public abstract class ServletModuleUploadedMedia
       if (mediaList.hasNextBatch())
         mergeData.put("next", (new Integer(mediaList.getNextBatch())).toString());
       if (mediaList.hasPrevBatch())
-          mergeData.put("prev", (new Integer(mediaList.getPrevBatch())).toString());
+        mergeData.put("prev", (new Integer(mediaList.getPrevBatch())).toString());
       //fetch the popups
       popups.put("mediafolderPopupData", DatabaseMediafolder.getInstance().getPopupData());
       // raus damit
       deliver(req, res, mergeData, popups, templateListString);
-    } catch (FileHandlerUserException e) {
-      logger.error("ServletModuleUploadedMedia.insert: " + e.getMessage());
-      throw new ServletModuleUserException(e.getMessage());
-    } catch (FileHandlerException e) {
-      throw new ServletModuleException(
-              "upload -- media handling exception " + e.toString());
-    } catch (StorageObjectFailure e) {
-      throw new ServletModuleException("upload -- storageobjectexception "
-                                      + e.toString());
-    } catch (IOException e) {
-      throw new ServletModuleException("upload -- ioexception " + e.toString());
-    } catch (PropertiesConfigExc e) {
-      throw new ServletModuleException("upload -- configexception " + e.toString());
+    }
+    catch (Throwable t) {
+      Throwable cause = ExceptionFunctions.traceCauseException(t);
+
+      if (cause instanceof UnsupportedMediaFormatExc) {
+        throw new ServletModuleUserExc("media.error.unsupportedformat", new String[] {});
+      }
+      throw new ServletModuleFailure("ServletModuleUploadedMedia.insert: " + t.toString(), t);
     }
   }
 
-  public void update(HttpServletRequest req, HttpServletResponse res) throws ServletModuleException {
+  public void update(HttpServletRequest req, HttpServletResponse res) throws ServletModuleExc {
 
     try {
       EntityUsers user = _getUser(req);
       WebdbMultipartRequest mp = new WebdbMultipartRequest(req, null);
-      HashMap parameters = mp.getParameters();
+      Map parameters = mp.getParameters();
 
       parameters.put("to_publisher", user.getId());
       parameters.put("is_produced", "0");
@@ -145,21 +155,14 @@ public abstract class ServletModuleUploadedMedia
       logger.debug("update: media ID = " + id);
       _edit(id, req, res);
     }
-    catch (IOException e) {
-      throw new ServletModuleException("upload -- ioexception " + e.toString());
-    }
-    catch (ModuleException e) {
-      throw new ServletModuleException("upload -- moduleexception " + e.toString());
-    }
-    catch (Exception e) {
-      throw new ServletModuleException("upload -- exception " + e.toString());
+    catch (Throwable e) {
+      throw new ServletModuleFailure("upload -- exception " + e.toString(), e);
     }
 
   }
 
 
-  public void list(HttpServletRequest req, HttpServletResponse res)
-          throws ServletModuleException {
+  public void list(HttpServletRequest req, HttpServletResponse res) throws ServletModuleExc {
     // Parameter auswerten
     SimpleHash mergeData = new SimpleHash();
     SimpleHash popups = new SimpleHash();
@@ -226,27 +229,28 @@ public abstract class ServletModuleUploadedMedia
 
       deliver(req, res, mergeData, popups, templateListString);
     }
-    catch (ModuleException e) {
-      throw new ServletModuleException(e.toString());
-    }
-    catch (Exception e) {
-      throw new ServletModuleException(e.toString());
+    catch (Throwable e) {
+      throw new ServletModuleFailure(e);
     }
   }
 
 
-  public void add(HttpServletRequest req, HttpServletResponse res)
-          throws ServletModuleException {
+  public void add(HttpServletRequest req, HttpServletResponse res) throws ServletModuleExc {
     try {
       SimpleHash mergeData = new SimpleHash();
-      mergeData.put("new", "1");
       SimpleHash popups = new SimpleHash();
-      popups.put("mediafolderPopupData", DatabaseMediafolder.getInstance().getPopupData());
       String maxMedia = MirPropertiesConfiguration.instance().getString("ServletModule.OpenIndy.MaxMediaUploadItems");
       String numOfMedia = req.getParameter("medianum");
-      if(numOfMedia==null||numOfMedia.equals("")){
+
+      mergeData.put("new", "1");
+      mergeData.put("articleid", req.getParameter("articleid"));
+
+      popups.put("mediafolderPopupData", DatabaseMediafolder.getInstance().getPopupData());
+
+      if (numOfMedia==null || numOfMedia.equals("")) {
         numOfMedia="1";
-      } else if(Integer.parseInt(numOfMedia) > Integer.parseInt(maxMedia)) {
+      }
+      else if(Integer.parseInt(numOfMedia) > Integer.parseInt(maxMedia)) {
         numOfMedia = maxMedia;
       }
 
@@ -259,19 +263,18 @@ public abstract class ServletModuleUploadedMedia
       mergeData.put("medianum",numOfMedia);
       mergeData.put("mediafields",mediaFields);
       deliver(req, res, mergeData, popups, templateObjektString);
-    } catch (Exception e) {
-      throw new ServletModuleException(e.toString());
+    }
+    catch (Exception e) {
+      throw new ServletModuleFailure(e);
     }
   }
 
-  public void edit(HttpServletRequest req, HttpServletResponse res)
-          throws ServletModuleException {
+  public void edit(HttpServletRequest req, HttpServletResponse res) throws ServletModuleExc {
     String idParam = req.getParameter("id");
     _edit(idParam, req, res);
   }
 
-  private void _edit(String idParam, HttpServletRequest req, HttpServletResponse res)
-          throws ServletModuleException {
+  private void _edit(String idParam, HttpServletRequest req, HttpServletResponse res) throws ServletModuleExc {
     if (idParam != null && !idParam.equals("")) {
       try {
         SimpleHash popups = new SimpleHash();
@@ -279,15 +282,12 @@ public abstract class ServletModuleUploadedMedia
         deliver(req, res, mainModule.getById(idParam), popups,
                 templateObjektString);
       }
-      catch (ModuleException e) {
-        throw new ServletModuleException(e.toString());
-      }
-      catch (StorageObjectFailure e) {
-        throw new ServletModuleException(e.toString());
+      catch (Throwable e) {
+        throw new ServletModuleFailure(e);
       }
     }
     else {
-      throw new ServletModuleException("ServletmoduleUploadedMedia :: _edit without id");
+      throw new ServletModuleExc("ServletmoduleUploadedMedia :: _edit without id");
     }
   }
 
@@ -298,9 +298,7 @@ public abstract class ServletModuleUploadedMedia
     return (EntityUsers) session.getAttribute("login.uid");
   }
 
-  public void getMedia(HttpServletRequest req, HttpServletResponse res)
-    throws ServletModuleException
-  {
+  public void getMedia(HttpServletRequest req, HttpServletResponse res) throws ServletModuleExc {
     String idParam = req.getParameter("id");
     if (idParam!=null && !idParam.equals("")) {
       try {
@@ -326,23 +324,15 @@ public abstract class ServletModuleUploadedMedia
         in.close();
         out.close();
       }
-
-      catch (IOException e) {
-        throw new ServletModuleException(e.toString());
-      }
-      catch (ModuleException e) {
-        throw new ServletModuleException(e.toString());
-      }
-      catch (Exception e) {
-        throw new ServletModuleException(e.toString());
+      catch (Throwable e) {
+        throw new ServletModuleFailure(e);
       }
     }
     else logger.error("id not specified.");
     // no exception allowed
   }
 
-  public void getIcon(HttpServletRequest req, HttpServletResponse res)
-    throws ServletModuleException
+  public void getIcon(HttpServletRequest req, HttpServletResponse res) throws ServletModuleExc
   {
     String idParam = req.getParameter("id");
     if (idParam!=null && !idParam.equals("")) {
@@ -370,14 +360,8 @@ public abstract class ServletModuleUploadedMedia
         out.close();
       }
 
-      catch (IOException e) {
-        throw new ServletModuleException(e.toString());
-      }
-      catch (ModuleException e) {
-        throw new ServletModuleException(e.toString());
-      }
-      catch (Exception e) {
-        throw new ServletModuleException(e.toString());
+      catch (Throwable e) {
+        throw new ServletModuleFailure(e);
       }
     }
     else logger.error("getIcon: id not specified.");

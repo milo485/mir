@@ -33,13 +33,15 @@ package mircoders.global;
 
 import mir.config.MirPropertiesConfiguration;
 import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
-import mir.misc.*;
-import mircoders.localizer.*;
+import mir.misc.ConfigException;
+import mircoders.localizer.MirCachingLocalizerDecorator;
+import mircoders.localizer.MirLocalizer;
 
 public class MirGlobal {
   static private MirPropertiesConfiguration configuration;
   static private MirLocalizer localizer;
   static private ProducerEngine producerEngine;
+  static private Abuse abuse;
 
   public static MirLocalizer localizer() {
     String localizerClassName;
@@ -48,7 +50,7 @@ public class MirGlobal {
     if (localizer == null ) {
       synchronized(MirGlobal.class) {
         if (localizer == null ) {
-          localizerClassName = getConfigPropertyWithDefault("Mir.Localizer", "mirlocal.localizer.basic.MirBasicLocalizer");
+          localizerClassName = config().getString("Mir.Localizer", "mirlocal.localizer.basic.MirBasicLocalizer");
 
           try {
             localizerClass = Class.forName(localizerClassName);
@@ -73,6 +75,17 @@ public class MirGlobal {
     return localizer;
   }
 
+  public static Abuse abuse() {
+    if (abuse==null) {
+      synchronized(MirGlobal.class) {
+        if (abuse==null)
+          abuse = new Abuse();
+      }
+    }
+
+    return abuse;
+  }
+
   public static MirPropertiesConfiguration config() {
     try {
       return MirPropertiesConfiguration.instance();
@@ -88,43 +101,5 @@ public class MirGlobal {
     }
 
     return producerEngine;
-  }
-
-  public static String getConfigPropertyWithDefault(String aPropertyName, String aDefault) {
-    String result;
-
-    //this try-catch is sort of a hack, if we make everything use MirGlobal
-    //instead of MirConfig, we can get rid of the Runtime exception we through
-    //in getProp, and deal with it here.. needs more thinking.. -mh
-    try {
-      result = config().getString(aPropertyName);
-    } catch (Throwable t) {
-      result = aDefault;
-    }
-
-
-    if (result==null)
-      result = aDefault;
-
-    return result;
-  }
-
-  public static String getConfigProperty(String aPropertyName) {
-    String result;
-
-    result = config().getString(aPropertyName);
-
-    if (result==null)
-      throw new ConfigException("Property '" + aPropertyName + "' not present");
-
-    return result;
-  }
-
-  public static int getConfigIntegerProperty(String aPropertyName) {
-    return config().getInt(aPropertyName);
-  }
-
-  public static boolean getConfigBooleanProperty(String aPropertyName) {
-    return config().getBoolean(aPropertyName);
   }
 }

@@ -31,6 +31,8 @@
 
 package mircoders.search;
 
+import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 
 import mir.entity.Entity;
@@ -42,15 +44,11 @@ import mircoders.storage.DatabaseContentToMedia;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 
-import freemarker.template.SimpleHash;
-import freemarker.template.SimpleScalar;
-
-
 public class AudioSearchTerm extends SearchTerm{
-  
-  
-  public static String matchField       = "hasAudio"; 
-  public static String paramName        = "search_hasAudio"; 
+
+
+  public static String matchField       = "hasAudio";
+  public static String paramName        = "search_hasAudio";
   public static String templateVariable = "hasAudio";
 
   public void index(Document doc, Entity entity) throws StorageObjectFailure{
@@ -69,11 +67,11 @@ public class AudioSearchTerm extends SearchTerm{
       return null;
     }
   }
- 
-  public void returnMeta(SimpleHash result,Document doc){
-    result.put(templateVariable,new SimpleScalar(doc.get(matchField)));
+
+  public void returnMeta(Map result,Document doc){
+    result.put(templateVariable,doc.get(matchField));
   }
-  
+
 
 }
 

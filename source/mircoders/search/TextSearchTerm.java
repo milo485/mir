@@ -31,15 +31,14 @@
 
 package mircoders.search;
 
+import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 
 import mir.entity.Entity;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
-
-import freemarker.template.SimpleHash;
-import freemarker.template.SimpleScalar;
 
 
 public class TextSearchTerm extends SearchTerm{
@@ -56,9 +55,9 @@ public class TextSearchTerm extends SearchTerm{
     matchField = aMatchField;
     dataField = aDataField;
     templateVariable = aTemplateVariable;
-    
+
   }
-  
+
   public void index(Document doc, Entity entity){
     doc.add(Field.Text(matchField,entity.getValue(partOfEntity)));
   }
@@ -71,16 +70,16 @@ public class TextSearchTerm extends SearchTerm{
   public String makeTerm(HttpServletRequest req){
       String wanted = req.getParameter(paramName);
       if (wanted != null && !(wanted.equals(""))){
-	return matchField + ":" + "\"" + wanted + "\"";
+        return matchField + ":" + "\"" + wanted + "\"";
       }
       else {
-	return null;
+        return null;
       }
   }
-  public void returnMeta(SimpleHash result,Document doc){
-    result.put(templateVariable,new SimpleScalar(doc.get(dataField))); 
+  public void returnMeta(Map result,Document doc){
+    result.put(templateVariable, doc.get(dataField));
   }
-  
+
 
 }
 

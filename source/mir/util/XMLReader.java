@@ -31,12 +31,21 @@
 
 package mir.util;
 
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Stack;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
+
+import multex.Exc;
+import multex.Failure;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
@@ -44,9 +53,6 @@ import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
-
-import multex.Failure;
-import multex.Exc;
 
 public class XMLReader {
   private Locator locator;

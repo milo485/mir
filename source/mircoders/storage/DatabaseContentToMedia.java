@@ -35,13 +35,12 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
-import mir.log.LoggerWrapper;
 import mir.entity.EntityList;
+import mir.log.LoggerWrapper;
 import mir.storage.Database;
 import mir.storage.StorageObject;
 import mir.storage.StorageObjectExc;
 import mir.storage.StorageObjectFailure;
-
 import mircoders.entity.EntityContent;
 import mircoders.entity.EntityUploadedMedia;
 
@@ -49,7 +48,7 @@ import mircoders.entity.EntityUploadedMedia;
  * <b>implements abstract DB connection to the content_x_media SQL table
  *
  * @author RK, mir-coders group
- * @version $Id: DatabaseContentToMedia.java,v 1.13 2003/02/20 16:05:35 zapata Exp $
+ * @version $Id: DatabaseContentToMedia.java,v 1.16 2003/03/09 03:53:12 zapata Exp $
  *
  */
 
@@ -57,25 +56,25 @@ public class DatabaseContentToMedia extends Database implements StorageObject{
 
   private static DatabaseContentToMedia instance;
 
-  // the following *has* to be sychronized cause this static method
-  // could get preemted and we could end up with 2 instances of DatabaseFoo.
-  // see the "Singletons with needles and thread" article at JavaWorld -mh
-  public synchronized static DatabaseContentToMedia getInstance() throws
-      StorageObjectFailure {
+  public static DatabaseContentToMedia getInstance() {
     if (instance == null) {
-      instance = new DatabaseContentToMedia();
-      instance.myselfDatabase = instance;
+      synchronized (DatabaseContentToMedia.class) {
+        if (instance == null) {
+          instance = new DatabaseContentToMedia();
+          instance.myselfDatabase = instance;
+        }
+      }
     }
     return instance;
   }
 
-  private DatabaseContentToMedia() throws StorageObjectFailure {
+  private DatabaseContentToMedia() {
     super();
+
     logger = new LoggerWrapper("Database.ContentToMedia");
 
     hasTimestamp = false;
     theTable = "content_x_media";
-
     theEntityClass = mir.entity.GenericEntity.class;
   }
 
@@ -240,10 +239,8 @@ public class DatabaseContentToMedia extends Database implements StorageObject{
             "id");
       }
       catch (Exception e) {
-        e.printStackTrace();
         logger.error("DatabaseContentToMedia.getOther: " + e.toString());
-        throw new StorageObjectFailure("DatabaseContentToMedia.getOther: " +
-                                       e.toString(), e);
+        throw new StorageObjectFailure("DatabaseContentToMedia.getOther: " + e.toString(), e);
       }
     }
     return returnList;
@@ -271,7 +268,6 @@ public class DatabaseContentToMedia extends Database implements StorageObject{
             "id");
       }
       catch (Exception e) {
-        e.printStackTrace();
         logger.error("DatabaseContentToMedia.getUploadedMedia: " + e.toString());
         throw new StorageObjectFailure(
             "DatabaseContentToMedia.getUploadedMedia: " + e.toString(), e);

@@ -38,8 +38,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
-import mir.log.LoggerWrapper;
 import mir.entity.EntityList;
+import mir.log.LoggerWrapper;
 import mir.storage.Database;
 import mir.storage.StorageObject;
 import mir.storage.StorageObjectFailure;
@@ -56,28 +56,26 @@ public class DatabaseContentToTopics extends Database implements StorageObject{
 
   private static DatabaseContentToTopics instance;
 
-  // the following *has* to be sychronized cause this static method
-  // could get preemted and we could end up with 2 instances of DatabaseFoo.
-  // see the "Singletons with needles and thread" article at JavaWorld -mh
-  public synchronized static DatabaseContentToTopics getInstance()
-    throws StorageObjectFailure {
+  public static DatabaseContentToTopics getInstance() {
     if (instance == null) {
-      instance = new DatabaseContentToTopics();
-      instance.myselfDatabase = instance;
+      synchronized (DatabaseContentToTopics.class) {
+        if (instance == null) {
+          instance = new DatabaseContentToTopics();
+          instance.myselfDatabase = instance;
+        }
+      }
     }
     return instance;
   }
 
-  private DatabaseContentToTopics() throws StorageObjectFailure {
+  private DatabaseContentToTopics() {
     super();
 
     logger = new LoggerWrapper("Database.ContentToTopics");
 
     hasTimestamp = false;
     theTable="content_x_topic";
-    try { this.theEntityClass = Class.forName("mir.entity.GenericEntity"); }
-    catch (Exception e) { throw new StorageObjectFailure(e); }
-
+    theEntityClass = mir.entity.GenericEntity.class;
   }
 
   /**

@@ -38,6 +38,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import mir.misc.MessageMethodModel;
+import mir.util.RewindableIterator;
+
 import org.apache.struts.util.MessageResources;
 
 import freemarker.template.FileTemplateCache;
@@ -50,9 +53,6 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateModelRoot;
 import freemarker.template.TemplateScalarModel;
-
-import mir.misc.MessageMethodModel;
-import mir.util.RewindableIterator;
 
 public class FreemarkerGenerator implements Generator {
   private Template template;

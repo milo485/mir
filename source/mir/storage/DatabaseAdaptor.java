@@ -30,9 +30,9 @@
  */
 package mir.storage;
 
-import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
-
 import java.util.Properties;
+
+import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
 
 
 /**
@@ -42,7 +42,7 @@ import java.util.Properties;
  *
  * @author <RK>
  *
- * @version $Id: DatabaseAdaptor.java,v 1.5 2003/01/28 21:48:30 idfx Exp $
+ * @version $Id: DatabaseAdaptor.java,v 1.6 2003/03/05 19:23:15 idfx Exp $
  */
 public interface DatabaseAdaptor {
   /* Liefert den Namen der Adaptorklasse

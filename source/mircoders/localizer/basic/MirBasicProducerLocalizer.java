@@ -70,7 +70,7 @@ public class MirBasicProducerLocalizer implements MirProducerLocalizer {
     try {
       logger = new LoggerWrapper("Localizer.Basic.Producer");
 
-      String allNewProducers = MirGlobal.getConfigProperty("Mir.Localizer.Producer.AllNewProducers");
+      String allNewProducers = MirGlobal.config().getString("Mir.Localizer.Producer.AllNewProducers");
       allNewProducerTasks = ProducerEngine.ProducerTask.parseProducerTaskList(allNewProducers);
 
       producerFactories = new Vector();
@@ -115,7 +115,7 @@ public class MirBasicProducerLocalizer implements MirProducerLocalizer {
     try {
       DefaultProducerNodeBuilders.registerBuilders(
           aLibrary, model, generatorLibrary, writerEngine,
-          MirGlobal.getConfigProperty("Home"), MirGlobal.getConfigProperty("Producer.StorageRoot"));
+          MirGlobal.config().getString("Home"), MirGlobal.config().getString("Producer.StorageRoot"));
       SupplementalProducerNodeBuilders.registerBuilders(aLibrary, model);
     }
     catch (Throwable t) {
@@ -132,7 +132,7 @@ public class MirBasicProducerLocalizer implements MirProducerLocalizer {
 
     aFileMonitor.clear();
     reader = new ProducerConfigReader();
-    reader.parseFile(MirGlobal.getConfigProperty("Home") + File.separatorChar + MirGlobal.getConfigProperty("Mir.Localizer.ProducerConfigFile"), library, aFactories, usedFiles);
+    reader.parseFile(MirGlobal.config().getString("Home") + File.separatorChar + MirGlobal.config().getString("Mir.Localizer.ProducerConfigFile"), library, aFactories, usedFiles);
 
     i = usedFiles.iterator();
     while (i.hasNext())

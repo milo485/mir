@@ -31,39 +31,39 @@
 
 package mircoders.search;
 
+import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 
 import mir.entity.Entity;
 
 import org.apache.lucene.document.Document;
 
-import freemarker.template.SimpleHash;
-
 
 abstract public class SearchTerm {
-  
-  public static String  partOfEntity; 
-  public static String  paramName;    
-  public static String  matchField;   
-  public static String  dataField;    
-  public static String  templateVariable;    
+
+  public static String  partOfEntity;
+  public static String  paramName;
+  public static String  matchField;
+  public static String  dataField;
+  public static String  templateVariable;
 
   public SearchTerm(String anEntityPart,String aParamName,String aMatchField,String aDataField, String aTemplateVariable){
     //for more reusable SearchTerm types
-    partOfEntity     = anEntityPart;       
-    paramName        = aParamName;    
-    matchField       = aMatchField;   
-    dataField        = aDataField;    
+    partOfEntity     = anEntityPart;
+    paramName        = aParamName;
+    matchField       = aMatchField;
+    dataField        = aDataField;
     templateVariable = aTemplateVariable;
   }
 
   public SearchTerm(){
-    //do nothing, we'll get the values from the extending class definition instead 
+    //do nothing, we'll get the values from the extending class definition instead
   }
 
   abstract public void index(Document doc, Entity entity) throws Exception;
   abstract public String makeTerm(HttpServletRequest req);
-  abstract public void returnMeta(SimpleHash result,Document doc);
-  
+  abstract public void returnMeta(Map result,Document doc);
+
 
 }

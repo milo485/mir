@@ -43,10 +43,15 @@ public class GeneratorHTMLFunctions {
   public static class encodeURIGeneratorFunction implements Generator.GeneratorFunction {
     public Object perform(List aParameters) throws GeneratorExc, GeneratorFailure {
       try {
-        if (aParameters.size()!=1)
-          throw new GeneratorExc("encodeURIGeneratorFunction: only 1 parameter expected");
+        if (aParameters.size()<1 || aParameters.size()>2)
+          throw new GeneratorExc("encodeURIGeneratorFunction <text> [<encoding>]: only 1 or 2 parameters expected");
 
-        return HTMLRoutines.encodeURL(StringRoutines.interpretAsString(aParameters.get(0)));
+        if (aParameters.size()>=2)
+          return HTMLRoutines.encodeURL(StringRoutines.interpretAsString(aParameters.get(0)), (StringRoutines.interpretAsString(aParameters.get(1))));
+        else
+          return HTMLRoutines.encodeURL(StringRoutines.interpretAsString(aParameters.get(0)));
+
+
       }
       catch (GeneratorExc e) {
         throw e;

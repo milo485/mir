@@ -1,13 +1,13 @@
 package mir.log.log4j;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import mir.config.MirPropertiesConfiguration;
 import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
 
-import org.apache.log4j.PropertyConfigurator;
 import org.apache.log4j.Logger;
-
-import java.util.Map;
-import java.util.HashMap;
+import org.apache.log4j.PropertyConfigurator;
 
 
 public class LoggerImpl implements mir.log.Logger {

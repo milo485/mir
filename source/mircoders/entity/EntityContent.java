@@ -35,26 +35,26 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
+import java.util.Map;
 
-import freemarker.template.SimpleScalar;
-import freemarker.template.TemplateModel;
-import freemarker.template.TemplateModelException;
-
-import mir.log.LoggerWrapper;
 import mir.entity.Entity;
 import mir.entity.EntityList;
+import mir.log.LoggerWrapper;
 import mir.storage.StorageObject;
 import mir.storage.StorageObjectExc;
 import mir.storage.StorageObjectFailure;
 import mircoders.storage.DatabaseContent;
 import mircoders.storage.DatabaseContentToMedia;
 import mircoders.storage.DatabaseContentToTopics;
+import freemarker.template.SimpleScalar;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
 
 /**
  * this class implements mapping of one line of the database table content
  * to a java object
  *
- * @version $Id: EntityContent.java,v 1.15 2003/02/23 05:00:13 zapata Exp $
+ * @version $Id: EntityContent.java,v 1.17 2003/03/05 19:23:15 idfx Exp $
  * @author mir-coders group
  *
  */
@@ -71,7 +71,7 @@ public class EntityContent extends Entity
   //this should always be transient i.e it can never be stored in the db
   //or ObjectStore. (so the ObjectStore should only be caching what comes
   //directly out of the DB. @todo confirm this with rk. -mh
-  HashMap _entCache = new HashMap();
+  Map _entCache = new HashMap();
   Boolean _hasMedia = null;
 
   // constructors
@@ -260,7 +260,7 @@ public class EntityContent extends Entity
   /**
    * overridden method setValues to patch creator_main_url
    */
-  public void setValues(HashMap theStringValues) {
+  public void setValues(Map theStringValues) {
     if (theStringValues != null) {
       if (theStringValues.containsKey("creator_main_url")){
         if (((String)theStringValues.get("creator_main_url")).equalsIgnoreCase("http://")){

@@ -31,24 +31,17 @@
 
 package mircoders.module;
 
-import java.util.HashMap;
-
-import freemarker.template.SimpleList;
+import java.util.Map;
 
 import mir.entity.Entity;
 import mir.entity.EntityList;
+import mir.log.LoggerWrapper;
 import mir.module.AbstractModule;
-import mir.module.ModuleException;
+import mir.module.ModuleExc;
+import mir.module.ModuleFailure;
 import mir.storage.StorageObject;
-import mir.storage.StorageObjectExc;
-import mir.storage.StorageObjectFailure;
-import mir.log.*;
-
-import mircoders.entity.EntityContent;
-import mircoders.entity.EntityTopics;
-import mircoders.storage.DatabaseContent;
-import mircoders.storage.DatabaseContentToTopics;
 import mircoders.storage.DatabaseTopics;
+import freemarker.template.SimpleList;
 
 /*
  *  ThemenModule -
@@ -65,12 +58,12 @@ public class ModuleTopics extends AbstractModule {
     this.theStorage = theStorage;
   }
 
-  public SimpleList getTopicsAsSimpleList() throws ModuleException {
+  public SimpleList getTopicsAsSimpleList() throws ModuleExc, ModuleFailure {
     try {
       return ((DatabaseTopics) theStorage).getPopupData();
     }
-    catch (StorageObjectFailure e) {
-      throw new ModuleException(e.toString());
+    catch (Throwable e) {
+      throw new ModuleFailure(e);
     }
   }
 
@@ -80,15 +73,15 @@ public class ModuleTopics extends AbstractModule {
    *  @return SimpleList of all Topics sorted by title
    *
    */
-  public EntityList getTopicsList() {
-    EntityList returnList = null;
+  public EntityList getTopicsList() throws ModuleExc, ModuleFailure {
     try {
-      returnList = getByWhereClause("", "title", -1);
+      return getByWhereClause("", "title", -1);
     }
-    catch (Exception e) {
-      logger.warn("--getTopicsList: topics could not be fetched: " + e.getMessage());
+    catch (Throwable e) {
+      logger.error("ModuleTopics.getTopicsList: topics could not be fetched: " + e.getMessage());
+
+      throw new ModuleFailure("ModuleTopics.getTopicsList: topics could not be fetched: " + e.getMessage(), e);
     }
-    return returnList;
   }
 
   /**
@@ -98,29 +91,19 @@ public class ModuleTopics extends AbstractModule {
    * @return Id des eingef?gten Objekts
    * @exception ModuleException
    */
-  public String set(HashMap theValues) throws ModuleException {
+  public String set(Map theValues) throws ModuleExc, ModuleFailure {
     try {
       Entity theEntity = theStorage.selectById((String) theValues.get("id"));
       if (theEntity == null) {
-        throw new ModuleException("Kein Objekt mit id in Datenbank id: " + theValues.get("id"));
+        throw new ModuleExc("No topic with id  " + theValues.get("id") + " found");
       }
       theEntity.setValues(theValues);
-      DatabaseContentToTopics db = DatabaseContentToTopics.getInstance();
-      DatabaseContent dbc = DatabaseContent.getInstance();
-      EntityList contentList = db.getContent((EntityTopics) theEntity);
-      if (contentList!=null) {
-        for (int i = 0; i < contentList.size(); i++) {
-          dbc.setUnproduced("id=" + ((EntityContent) contentList.elementAt(i)).getId());
-        }
-      }
       theEntity.update();
+
       return theEntity.getId();
     }
-    catch (StorageObjectFailure e) {
-      throw new ModuleException(e.toString());
-    }
-    catch (StorageObjectExc e) {
-      throw new ModuleException(e.toString());
+    catch (Throwable e) {
+      throw new ModuleFailure(e);
     }
   }
 

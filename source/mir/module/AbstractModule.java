@@ -31,16 +31,12 @@
 
 package  mir.module;
 
-import java.sql.SQLException;
-import java.util.HashMap;
-
-import freemarker.template.SimpleHash;
+import java.util.Map;
 
 import mir.entity.Entity;
 import mir.entity.EntityList;
 import mir.storage.StorageObject;
-import mir.storage.StorageObjectExc;
-import mir.storage.StorageObjectFailure;
+import freemarker.template.SimpleHash;
 
 
 /**
@@ -75,17 +71,19 @@ public class AbstractModule {
    *   @param String der Entity
    *   @return Entity
    */
-  public Entity getById (String id) throws ModuleException {
+  public Entity getById (String id) throws ModuleExc, ModuleFailure {
     try {
       if (theStorage == null)
-        throw  new ModuleException("No StorageObject set!");
+        throw  new ModuleExc("AbstractModule.getById: No StorageObject set!");
       Entity entity = (Entity)theStorage.selectById(id);
+
       if (entity == null)
-        throw new ModuleException("No object for id = " + id);
-      else return entity;
+        throw new ModuleExc("AbstractModule.getById: No object for id = " + id);
+      else
+        return entity;
     }
-    catch (StorageObjectExc e){
-      throw new ModuleException(e.toString());
+    catch (Throwable e) {
+      throw new ModuleFailure(e);
     }
   }
 
@@ -95,14 +93,15 @@ public class AbstractModule {
    *   @param offset - ab welchem Datensatz die gematchten Entities zurueckgeliefert werden
    *   @return EntityList Liste der gematchten Datens?tze
    */
-  public EntityList getByWhereClause (String whereClause, int offset) throws ModuleException {
+  public EntityList getByWhereClause (String whereClause, int offset) throws ModuleExc, ModuleFailure {
     try {
       if (theStorage == null)
-        throw  new ModuleException("Kein StorageObject gesetzt");
+        throw  new ModuleExc("AbstractModule.getByWhereClause: No StorageObject set!");
+
       return theStorage.selectByWhereClause(whereClause, offset);
     }
-    catch (StorageObjectFailure e){
-      throw new ModuleException(e.toString());
+    catch (Throwable e) {
+      throw new ModuleFailure(e);
     }
   }
 
@@ -113,13 +112,15 @@ public class AbstractModule {
    *   @param offset - ab welchem Datensatz die gematchten Entities zurueckgeliefert werden
    *   @return EntityList Liste der gematchten Datens?tze
    */
-  public EntityList getByWhereClause (String where, String order, int offset) throws ModuleException {
+  public EntityList getByWhereClause (String where, String order, int offset) throws ModuleExc, ModuleFailure {
     try {
-      if (theStorage==null) throw new ModuleException("Kein StorageObject gesetzt");
+      if (theStorage==null)
+        throw new ModuleExc("AbstractModule.getByWhereClause: No StorageObject set!");
+
       return theStorage.selectByWhereClause(where, order, offset);
     }
-    catch (StorageObjectFailure e){
-      throw new ModuleException(e.toString());
+    catch (Throwable e) {
+      throw new ModuleFailure(e);
     }
   }
   /**
@@ -133,14 +134,15 @@ public class AbstractModule {
    *   @return EntityList
    */
 
-  public EntityList getByWhereClause(String where, String order, int offset, int limit) throws ModuleException
-  {
+  public EntityList getByWhereClause(String where, String order, int offset, int limit) throws ModuleExc, ModuleFailure   {
     try {
-      if (theStorage==null) throw new ModuleException("StorageObject not set!");
+      if (theStorage==null)
+        throw new ModuleExc("AbstractModule.getByWhereClause: StorageObject not set!");
+
       return theStorage.selectByWhereClause(where, order, offset, limit);
     }
-    catch (StorageObjectFailure e){
-      throw new ModuleException(e.toString());
+    catch (Throwable e) {
+      throw new ModuleFailure(e);
     }
   }
 
@@ -151,26 +153,28 @@ public class AbstractModule {
    *   @param offset - ab welchem Datensatz die gematchten Entities zurueckgeliefert werden
    *   @return EntityList Liste der gematchten Datens?tze
    */
-  public EntityList getByFieldValue (String aField, String aValue, int offset) throws ModuleException {
+  public EntityList getByFieldValue (String aField, String aValue, int offset) throws ModuleExc, ModuleFailure {
     String whereClause;
     whereClause = aField + " like '%" + aValue + "%'";
     return getByWhereClause(whereClause, offset);
   }
 
   /**
-   * Standardfunktion, um einen Datensatz via StorageObject einzuf?gen
+   *    * Standardfunktion, um einen Datensatz via StorageObject einzuf?gen
    * @param theValues Hash mit Spalte/Wert-Paaren
    * @return Id des eingef?gten Objekts
-   * @exception ModuleException
+   * @exception ModuleExc
+   * @exception ModuleFailure
    */
-  public String add (HashMap theValues) throws ModuleException {
+  public String add (Map theValues) throws ModuleExc, ModuleFailure {
     try {
       Entity theEntity = (Entity)theStorage.getEntityClass().newInstance();
       theEntity.setStorage(theStorage);
       theEntity.setValues(theValues);
       return theEntity.insert();
-    } catch (Exception e) {
-      throw new ModuleException(e.toString());
+    }
+    catch (Throwable e) {
+      throw new ModuleFailure(e);
     }
   }
 
@@ -178,32 +182,35 @@ public class AbstractModule {
    * Standardfunktion, um einen Datensatz via StorageObject zu aktualisieren
    * @param theValues Hash mit Spalte/Wert-Paaren
    * @return Id des eingef?gten Objekts
-   * @exception ModuleException
+   * @exception ModuleExc
+   * @exception ModuleFailure
    */
-  public String set (HashMap theValues) throws ModuleException {
+  public String set (Map theValues) throws ModuleExc, ModuleFailure {
     try {
       Entity theEntity = theStorage.selectById((String)theValues.get("id"));
       if (theEntity == null)
-        throw new ModuleException("Kein Objekt mit id in Datenbank id: " + theValues.get("id"));
+        throw new ModuleExc("No object found with id " + theValues.get("id"));
       theEntity.setValues(theValues);
       theEntity.update();
       return theEntity.getId();
     }
-    catch (StorageObjectExc e){
-      throw new ModuleException(e.toString());
+    catch (Throwable e) {
+      throw new ModuleFailure(e);
     }
   }
 
   /**
    * Deletes a record using an id
    * @param idParam
-   * @exception ModuleException
+   * @exception ModuleExc
+   * @exception ModuleFailure
    */
-  public void deleteById (String idParam) throws ModuleException {
+  public void deleteById (String idParam) throws ModuleExc, ModuleFailure {
     try {
       theStorage.delete(idParam);
-    } catch (StorageObjectFailure e){
-      throw new ModuleException(e.toString());
+    }
+    catch (Throwable e) {
+      throw new ModuleFailure(e);
     }
   }
 
@@ -218,9 +225,13 @@ public class AbstractModule {
   /**
    * returns the number of rows
    */
-  public int getSize(String where)
-      throws SQLException,StorageObjectFailure {
-    return theStorage.getSize(where);
+  public int getSize(String where) throws ModuleExc, ModuleFailure {
+    try {
+      return theStorage.getSize(where);
+    }
+    catch (Throwable e) {
+      throw new ModuleFailure(e);
+    }
   }
 
 }

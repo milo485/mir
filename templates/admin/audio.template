@@ -11,10 +11,13 @@ function openWin(url) {
 
 <body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
 
-<include "templates/admin/head.template">
+<include "head.template">
 
 <if data.new>
 <form action="${config.actionRoot}?module=Audio&do=add" method="post">
+        <if data.articleid>
+          <input type="hidden" name="articleid" value="${data.articleid}">
+        </if>
 	<table border="0">
 	<tr>
 	<td align="right" class="darkgrey">
@@ -30,6 +33,9 @@ function openWin(url) {
 </form>
 </if>
 <form enctype="multipart/form-data" method="post" action="${config.actionRoot}?module=Audio&do=<if data.new>insert<else>update</if>&id=${data.id}">
+        <if data.articleid>
+          <input type="hidden" name="articleid" value="${data.articleid}">
+        </if>
 	<input type="hidden" name="where" value="${data.where}">
 	<input type="hidden" name="offset" value="${data.offset}">
 	<input type="hidden" name="order" value="${data.order}">
@@ -154,6 +160,6 @@ function openWin(url) {
     </if> </span></form></span>
     </td>
 </table>
-<include "templates/admin/foot.template">
+<include "foot.template">
 </body>
 </html>

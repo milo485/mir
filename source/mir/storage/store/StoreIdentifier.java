@@ -47,6 +47,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import mir.entity.EntityList;
+import mir.log.LoggerWrapper;
 
 public class StoreIdentifier {
 
@@ -60,6 +61,8 @@ public class StoreIdentifier {
   private String uniqueIdentifier = null; // id for Entity & sql for EntityList
   private long timesUsed;
   private boolean invalidating = false;
+
+  protected LoggerWrapper logger = new LoggerWrapper("Database.ObjectStore");
 
   /** @todo initialize logfile  */
 
@@ -97,14 +100,13 @@ public class StoreIdentifier {
    *  @return
    */
   public void invalidate() {
-    System.out.println("Invalidating: " + toString());
+    logger.info("Invalidating: " + toString());
     // avoid deadlock due to propagation.
     if (!invalidating) {
       invalidating = true;
       if (stocType != null &&
           stocType.getStocType() == StoreContainerType.STOC_TYPE_ENTITY) {
-        System.out.println("Propagating invalidation to EntityList for " +
-                           toString());
+        logger.info("Propagating invalidation to EntityList for " + toString());
         // we should invalidate related ENTITY_LIST
         StoreContainerType entityListStocType =
             StoreContainerType.valueOf(stocType.getStocClass(),
@@ -118,14 +120,12 @@ public class StoreIdentifier {
         for (Iterator it = set.iterator(); it.hasNext(); ) {
           Object o = it.next();
           if (o instanceof StoreIdentifier) {
-            System.out.println("Propagating invalidation to StoreIdentifier: " +
-                               o.toString());
+            logger.info("Propagating invalidation to StoreIdentifier: " + o.toString());
             // propagate invalidation to a specific StoreIdentifier in cache
             o_store.invalidate( (StoreIdentifier) o);
           }
           else if (o instanceof StoreContainerType) {
-            System.out.println("Propagating invalidation to StoreContainer: " +
-                               o.toString());
+            logger.info("Propagating invalidation to StoreContainer: " + o.toString());
             // propagate invalidation to a whole StoreContainer
             o_store.invalidate( (StoreContainerType) o);
           }

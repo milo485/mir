@@ -45,25 +45,23 @@ import mir.storage.Database;
  */
 
 public final class MediaHelper {
- 
+
   static String _classPrefix = "mircoders.media.MediaHandler";
 
-  public static MirMedia getHandler( Entity mediaType )
-    throws MirMediaException {
+  public static MirMedia getHandler( Entity mediaType ) throws MediaExc, MediaFailure {
 
     MirMedia mediaHandler;
     String handlerName = mediaType.getValue("classname");
     try {
       Class handlerClass = Class.forName(_classPrefix+handlerName);
       return mediaHandler = (MirMedia)handlerClass.newInstance();
-    } catch (Exception e) {
-      throw new MirMediaException ("getHandler -- error in reflection "
-                                    +e.toString());
     }
-  } 
+    catch (Throwable e) {
+      throw new MediaFailure("getHandler -- error in reflection " + e.toString(), e);
+    }
+  }
 
-  public static Database getStorage(Entity mediaType, String classPrefix)
-    throws MirMediaException {
+  public static Database getStorage(Entity mediaType, String classPrefix) throws MediaExc, MediaFailure {
 
     Database mediaStorage;
     String storageName =  mediaType.getValue("tablename");
@@ -71,13 +69,13 @@ public final class MediaHelper {
       Class storageClass = Class.forName(classPrefix+storageName);
       Method m = storageClass.getMethod("getInstance", null);
       return mediaStorage = (Database)m.invoke(null, null);
-    } catch (Exception e) {
-      throw new MirMediaException ("getStorage -- error in reflection "
-                                    +e.toString());
+    }
+    catch (Throwable e) {
+      throw new MediaFailure("getStorage -- error in reflection " + e.toString(), e);
     }
   }
 
 }
 
-    
+
 

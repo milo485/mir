@@ -71,7 +71,7 @@ public class PDFGeneratingProducerNode implements ProducerNode {
 
     }
     catch (Throwable t) {
-      t.printStackTrace();
+      t.printStackTrace(aLogger.asPrintWriter(LoggerWrapper.DEBUG_MESSAGE));
       aLogger.error("  error while generating: " + t.getMessage() + t.toString());
     }
     endTime = System.currentTimeMillis();

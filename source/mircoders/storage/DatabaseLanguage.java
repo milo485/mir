@@ -40,12 +40,11 @@ package mircoders.storage;
  * @version 1.0
  */
 
-import freemarker.template.SimpleList;
-
 import mir.log.LoggerWrapper;
 import mir.storage.Database;
 import mir.storage.StorageObject;
 import mir.storage.StorageObjectFailure;
+import freemarker.template.SimpleList;
 
 
 public class DatabaseLanguage extends Database implements StorageObject{

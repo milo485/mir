@@ -29,9 +29,12 @@ public class HTTPRequestParser {
   public String getParameter(String aName) {
     try {
       String result = request.getParameter(aName);
+      String requestEncoding = request.getCharacterEncoding();
+      if (requestEncoding==null)
+        requestEncoding = "ISO-8859-1";
 
-      if (result != null && encoding!=null && !encoding.equals(request.getCharacterEncoding())) {
-        result = new String(result.getBytes(request.getCharacterEncoding()), encoding);
+      if (result != null && encoding!=null && !encoding.equals(requestEncoding)) {
+        result = new String(result.getBytes(requestEncoding), encoding);
       }
 
       return result;

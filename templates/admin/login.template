@@ -11,7 +11,7 @@
     </script>
   </head>
   <body onLoad="placeFocus()" marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
-    <include "templates/admin/head_nonavi.template">
+    <include "head_nonavi.template">
     <center>
       <p>
         <span class="small">
@@ -73,7 +73,7 @@
         </table>
       </form>
     </center>
-	  <include "templates/admin/foot.template">
+	  <include "foot.template">
   </body>
 </html>
 

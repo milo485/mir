@@ -42,7 +42,8 @@ package mircoders.module;
 
 import mir.log.LoggerWrapper;
 import mir.module.AbstractModule;
-import mir.module.ModuleException;
+import mir.module.ModuleExc;
+import mir.module.ModuleFailure;
 import mir.storage.StorageObject;
 import mircoders.storage.DatabaseMediafolder;
 import freemarker.template.SimpleList;
@@ -54,19 +55,22 @@ public class ModuleMediafolder extends AbstractModule
 
 // Kontruktor
 
-  public ModuleMediafolder(StorageObject theStorage)
+  public ModuleMediafolder(StorageObject aStorage)
   {
-    if (theStorage == null) logger.warn("ModuleMediafolder: StorageObject was null!");
-    this.theStorage = theStorage;
+    if (aStorage == null)
+      logger.warn("ModuleMediafolder: StorageObject was null!");
+
+    theStorage = aStorage;
   }
 
 // Methoden
 
-  public SimpleList getPopupData() throws ModuleException {
+  public SimpleList getPopupData() throws ModuleExc, ModuleFailure {
     try {
       return ((DatabaseMediafolder)theStorage).getPopupData();
-    } catch (Exception e) {
-      throw new ModuleException(e.toString());
+    }
+    catch (Throwable e) {
+      throw new ModuleFailure(e);
     }
   }
 

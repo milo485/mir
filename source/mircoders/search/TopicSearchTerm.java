@@ -31,6 +31,8 @@
 
 package mircoders.search;
 
+import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 
 import mir.entity.Entity;
@@ -42,20 +44,18 @@ import mircoders.storage.DatabaseContentToTopics;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 
-import freemarker.template.SimpleHash;
-
 
 public class TopicSearchTerm extends SearchTerm{
-  
-  
-  public static String matchField       = "topic"; 
-  public static String paramName        = "search_topic"; 
+
+
+  public static String matchField       = "topic";
+  public static String paramName        = "search_topic";
 
   public void index(Document doc, Entity entity) throws StorageObjectFailure{
     EntityList topics = DatabaseContentToTopics.getInstance().getTopics((EntityContent) entity);
     if (topics != null && topics.size()>0){
       for(int k=0;k<topics.size();k++){
-	doc.add(Field.UnStored(matchField,(topics.elementAt(k)).getValue("title")));
+        doc.add(Field.UnStored(matchField,(topics.elementAt(k)).getValue("title")));
       }
     }
   }
@@ -68,11 +68,11 @@ public class TopicSearchTerm extends SearchTerm{
       return null;
     }
   }
- 
-  public void returnMeta(SimpleHash result,Document doc){
+
+  public void returnMeta(Map result,Document doc){
     return;
   }
-  
+
 
 }
 

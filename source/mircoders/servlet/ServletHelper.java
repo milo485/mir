@@ -5,26 +5,37 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import org.apache.struts.util.MessageResources;
+
+import mir.entity.adapter.EntityIteratorAdapter;
 import mir.generator.Generator;
-import mir.servlet.ServletModuleException;
+import mir.servlet.ServletModuleExc;
+import mir.servlet.ServletModuleFailure;
+import mir.util.CachingRewindableIterator;
 import mir.util.NullWriter;
 import mir.util.ResourceBundleGeneratorFunction;
-import mir.entity.adapter.*;
-import mir.util.*;
-import mircoders.global.MirGlobal;
 
-import org.apache.struts.util.MessageResources;
+import mircoders.global.MirGlobal;
 
 
 
 public class ServletHelper {
-// ML: add logging!
+  static Map makeGenerationData(Locale aLocale) throws ServletModuleExc {
+    return makeGenerationData(aLocale, "bundles.adminlocal", "bundles.admin");
+  }
 
-  static Map makeGenerationData(Locale aLocale) throws ServletModuleException {
+  static Map makeGenerationData(Locale aLocale, String aBundle) throws ServletModuleExc {
+    return makeGenerationData(aLocale, aBundle, aBundle);
+  }
+
+  static Map makeGenerationData(Locale aLocale, String aBundle, String aDefaultBundle) throws ServletModuleExc {
+
     try {
       Map result = new HashMap();
 
       MirGlobal.localizer().producerAssistant().initializeGenerationValueSet(result);
+
+      result.put("returnurl", null);
 
       Object languages =
           new CachingRewindableIterator(
@@ -52,18 +63,17 @@ public class ServletHelper {
 
       result.put( "lang",
           new ResourceBundleGeneratorFunction( aLocale,
-                  MessageResources.getMessageResources("bundles.adminlocal"),
-                  MessageResources.getMessageResources("bundles.admin")));
+                  MessageResources.getMessageResources(aBundle),
+                  MessageResources.getMessageResources(aDefaultBundle)));
 
       return result;
     }
     catch (Throwable t) {
-      throw new ServletModuleException(t.getMessage());
+      throw new ServletModuleFailure(t);
     }
   }
 
-  static void generateResponse(PrintWriter aWriter, Map aGenerationData, String aGenerator) throws ServletModuleException {
-
+  static void generateResponse(PrintWriter aWriter, Map aGenerationData, String aGenerator) throws ServletModuleExc {
     Generator generator;
 
     try {
@@ -72,7 +82,20 @@ public class ServletHelper {
       generator.generate(aWriter, aGenerationData, new PrintWriter(new NullWriter()));
     }
     catch (Throwable t) {
-      throw new ServletModuleException(t.getMessage());
+      throw new ServletModuleFailure(t);
+    }
+  }
+
+  static void generateOpenPostingResponse(PrintWriter aWriter, Map aGenerationData, String aGenerator) throws ServletModuleExc {
+    Generator generator;
+
+    try {
+      generator = MirGlobal.localizer().generators().makeAdminGeneratorLibrary().makeGenerator(aGenerator);
+
+      generator.generate(aWriter, aGenerationData, new PrintWriter(new NullWriter()));
+    }
+    catch (Throwable t) {
+      throw new ServletModuleFailure(t);
     }
   }
 }

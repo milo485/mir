@@ -56,8 +56,8 @@
 
 -->
 
-  <property name="app.name"       value="Mir"/>
-  <property name="deploy.home"    value="../${app.name}"/>
+  <property name="app.name"       value="mir"/>
+  <property name="deploy.home"    value="./bin/${app.name}"/>
 
   <!-- don't use unless your Jikes is >= v1.18 -->
   <!-- <property name="build.compiler"   value="jikes"/>-->

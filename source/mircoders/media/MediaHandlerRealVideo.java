@@ -31,18 +31,18 @@
 
 package  mircoders.media;
 
-import java.io.StringReader;
 import java.io.File;
+import java.io.StringReader;
 
-import freemarker.template.SimpleHash;
-import freemarker.template.SimpleList;
-
-import mir.log.LoggerWrapper;
 import mir.entity.Entity;
+import mir.log.LoggerWrapper;
+import mir.media.MediaExc;
+import mir.media.MediaFailure;
 import mir.media.MirMedia;
-import mir.media.MirMediaException;
 import mir.misc.FileUtil;
 import mir.misc.StringUtil;
+import freemarker.template.SimpleHash;
+import freemarker.template.SimpleList;
 
 
 
@@ -54,7 +54,7 @@ import mir.misc.StringUtil;
  * @see mir.media.MediaHandlerGeneric
  * @see mir.media.MirMedia
  * @author john <john@manifestor.org>, mh <mh@nadir.org>
- * @version $Id: MediaHandlerRealVideo.java,v 1.15 2003/02/23 05:00:14 zapata Exp $
+ * @version $Id: MediaHandlerRealVideo.java,v 1.18 2003/03/09 19:14:21 idfx Exp $
  */
 
 
@@ -66,9 +66,7 @@ public class MediaHandlerRealVideo extends MediaHandlerVideo implements MirMedia
     logger = new LoggerWrapper("Media.Video.Real");
   }
 
-  public void produce (Entity ent, Entity mediaTypeEnt )
-    throws MirMediaException {
-
+  public void produce (Entity ent, Entity mediaTypeEnt) throws MediaExc, MediaFailure {
     // first see if the file exists
     super.produce(ent, mediaTypeEnt);
 
@@ -85,15 +83,14 @@ public class MediaHandlerRealVideo extends MediaHandlerVideo implements MirMedia
       FileUtil.write(super.getStoragePath()+File.separator+RealMediaFile,
                       new StringReader(RealMediaPointer), "US-ASCII");
     }
-    catch (Exception e) {
+    catch (Throwable e) {
       logger.error("MediaHandlerRealVideo.produce: " + e.toString());
 
-      throw new MirMediaException(e.toString());
+      throw new MediaFailure(e);
     }
   }
 
-  public SimpleList getURL(Entity ent, Entity mediaTypeEnt)
-  {
+  public SimpleList getURL(Entity ent, Entity mediaTypeEnt) {
     SimpleList theList = new SimpleList();
 
     //String stringSize = ent.getValue("size");
@@ -115,18 +112,15 @@ public class MediaHandlerRealVideo extends MediaHandlerVideo implements MirMedia
 
   }
 
-  public String getStoragePath()
-  {
+  public String getStoragePath() {
     return configuration.getString("Producer.RealMedia.Path");
   }
 
-  public String getDescr(Entity mediaType)
-  {
+  public String getDescr(Entity mediaType) {
     return "RealMedia";
   }
 
-  public String getPublishHost()
-  {
+  public String getPublishHost() {
     return StringUtil.removeSlash(configuration.getString("Producer.RealMedia.Host"));
   }
 

@@ -40,7 +40,8 @@ import javax.servlet.http.HttpSession;
 import mir.entity.adapter.EntityAdapter;
 import mir.log.LoggerWrapper;
 import mir.servlet.ServletModule;
-import mir.servlet.ServletModuleException;
+import mir.servlet.ServletModuleExc;
+import mir.servlet.ServletModuleFailure;
 import mir.util.StringRoutines;
 import mircoders.entity.EntityComment;
 import mircoders.entity.EntityContent;
@@ -71,14 +72,14 @@ public class ServletModuleLocalizer extends ServletModule {
     }
   }
 
-  private EntityAdapter getActiveUser(HttpServletRequest aRequest) throws ServletModuleException {
+  private EntityAdapter getActiveUser(HttpServletRequest aRequest) throws ServletModuleExc {
     try {
       HttpSession session = aRequest.getSession(false);
       return MirGlobal.localizer().dataModel().adapterModel().makeEntityAdapter
           ("user", (EntityUsers) session.getAttribute("login.uid"));
     }
-    catch (Exception e) {
-      throw new ServletModuleException("ServletModuleLocalizer.getActiveUser: " + e.getMessage());
+    catch (Throwable e) {
+      throw new ServletModuleFailure("ServletModuleLocalizer.getActiveUser: " + e.getMessage(), e);
     }
   }
 
@@ -103,7 +104,7 @@ public class ServletModuleLocalizer extends ServletModule {
     }
   }
 
-  public void commentoperation(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleException {
+  public void commentoperation(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc {
     String commentIdString = aRequest.getParameter("id");
     String operationString = aRequest.getParameter("operation");
     String returnUrlString = aRequest.getParameter("returnurl");
@@ -113,7 +114,7 @@ public class ServletModuleLocalizer extends ServletModule {
     redirect(aResponse, returnUrlString);
   }
 
-  public void commentoperationbatch(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleException {
+  public void commentoperationbatch(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc {
     String returnUrlString = aRequest.getParameter("returnurl");
 
     String[] operations = aRequest.getParameterValues("operation");
@@ -161,7 +162,7 @@ public class ServletModuleLocalizer extends ServletModule {
     }
   }
 
-  public void articleoperation(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleException {
+  public void articleoperation(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc {
     String articleIdString = aRequest.getParameter("articleid");
     String operationString = aRequest.getParameter("operation");
     String returnUrlString = aRequest.getParameter("returnurl");
@@ -170,7 +171,7 @@ public class ServletModuleLocalizer extends ServletModule {
     redirect(aResponse, returnUrlString);
   }
 
-  public void articleoperationbatch(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleException {
+  public void articleoperationbatch(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc {
     String returnUrlString = aRequest.getParameter("returnurl");
 
     String[] operations = aRequest.getParameterValues("operation");
@@ -180,8 +181,7 @@ public class ServletModuleLocalizer extends ServletModule {
         List parts = StringRoutines.splitString(operations[i], ";");
 
         if (parts.size() != 2) {
-          logger.error("articleoperationbatch: operation string invalid: " +
-                       operations[i]);
+          logger.error("articleoperationbatch: operation string invalid: " + operations[i]);
         }
         else {
           String articleIdString = (String) parts.get(0);

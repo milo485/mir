@@ -6,21 +6,22 @@
 
 <body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
 
-<include "templates/admin/head.template">
+<include "head.template">
 
 <br>
-<b>${lang("fileedit.filename")} :</b> ${data.filename}
+<b>${lang("fileedit.filename")} :</b> ${filename}
 
 <br>
 
 <form action="${config.actionRoot}" method="post">
 
 	<input type="hidden" name="module" value="FileEdit">
-	<input type="hidden" name="filename" value="${data.filename}">
+	<input type="hidden" name="filename" value="${filename}">
+	<input type="hidden" name="subdirectory" value="${subdirectory}">
         <input type="hidden" name="do" value="update">
 
 
-	 <textarea cols="120" rows="40" name="text" wrap=virtual>${data.text}</textarea>
+	 <textarea cols="120" rows="40" name="text" wrap=virtual>${utility.encodeHTML(text)}</textarea>
 
 <br>
 
@@ -38,12 +39,12 @@ ${lang("preview")}
 
 <hr size="2" width="90%" noshade>
 
-${data.text}
+${text}
 
 <hr size="2" width="90%" noshade>
 <br>
 
-<include "templates/admin/foot.template">
+<include "foot.template">
 
 </body>
 </html>

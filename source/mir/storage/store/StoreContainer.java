@@ -51,6 +51,7 @@ import java.util.ListIterator;
 
 import javax.servlet.http.HttpServletRequest;
 
+import mir.log.LoggerWrapper;
 import mir.misc.StringUtil;
 
 public class StoreContainer {
@@ -64,8 +65,11 @@ public class StoreContainer {
   private int hitCount = 0, missCount = 0;
   private static ObjectStore o_store = ObjectStore.getInstance();
 
+  protected LoggerWrapper logger = new LoggerWrapper("Database.ObjectStore");
+
   // avoid construction without parameters
   private StoreContainer() {};
+
 
   public StoreContainer(StoreContainerType stoc_type) {
     this.uniqueId = ++uniqueCounter;
@@ -105,8 +109,7 @@ public class StoreContainer {
     if (sid != null && sid.hasReference()) {
       if (has(sid)) {
         moveToHead(sid);
-        System.err.println("OBJECTStore: tried to add sid " + sid.toString() +
-                           " that was already in store.");
+        logger.error("OBJECTStore: tried to add sid " + sid.toString() + " that was already in store.");
       }
       else {
         container.addFirst(sid);

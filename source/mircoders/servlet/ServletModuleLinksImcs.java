@@ -31,7 +31,6 @@
 
 package mircoders.servlet;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URLEncoder;
 
@@ -40,11 +39,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import mir.entity.EntityList;
 import mir.log.LoggerWrapper;
-import mir.misc.HTMLParseException;
 import mir.misc.HTMLTemplateProcessor;
-import mir.module.ModuleException;
 import mir.servlet.ServletModule;
-import mir.servlet.ServletModuleException;
+import mir.servlet.ServletModuleExc;
+import mir.servlet.ServletModuleFailure;
 import mir.storage.StorageObjectFailure;
 import mircoders.module.ModuleLanguage;
 import mircoders.module.ModuleLinksImcs;
@@ -87,8 +85,7 @@ public class ServletModuleLinksImcs extends ServletModule {
     }
   }
 
-  public void add(HttpServletRequest req, HttpServletResponse res)
-          throws ServletModuleException {
+  public void add(HttpServletRequest req, HttpServletResponse res) throws ServletModuleExc {
     try {
       SimpleHash modelRoot = new SimpleHash();
       EntityList theParentList;
@@ -110,19 +107,12 @@ public class ServletModuleLinksImcs extends ServletModule {
       }
 
     }
-    catch (ModuleException e) {
-      throw new ServletModuleException(e.toString());
-    }
-    catch (HTMLParseException e) {
-      throw new ServletModuleException(e.toString());
-    }
-    catch (IOException e) {
-      throw new ServletModuleException(e.toString());
+    catch (Throwable e) {
+      throw new ServletModuleFailure(e);
     }
   }
 
-  public void list(HttpServletRequest req, HttpServletResponse res)
-          throws ServletModuleException {
+  public void list(HttpServletRequest req, HttpServletResponse res) throws ServletModuleExc {
     try {
 
       SimpleHash modelRoot = new SimpleHash();
@@ -197,13 +187,13 @@ public class ServletModuleLinksImcs extends ServletModule {
       HTMLTemplateProcessor.process(res, templateListString, modelRoot, res.getWriter(), getLocale(req));
 
     }
-    catch (Exception e) {
-      throw new ServletModuleException(e.toString());
+    catch (Throwable e) {
+      throw new ServletModuleFailure(e);
     }
   }
 
   public void edit(HttpServletRequest req, HttpServletResponse res)
-          throws ServletModuleException {
+          throws ServletModuleExc {
     try {
 
       SimpleHash modelRoot = new SimpleHash();
@@ -223,8 +213,8 @@ public class ServletModuleLinksImcs extends ServletModule {
       deliver(req, res, modelRoot, templateObjektString);
 
     }
-    catch (ModuleException e) {
-      throw new ServletModuleException(e.toString());
+    catch (Throwable e) {
+      throw new ServletModuleFailure(e);
     }
   }
 

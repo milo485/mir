@@ -31,21 +31,10 @@
 
 package mir.servlet;
 
+import multex.Exc;
 
-/*
- *  ServletModuleUserException -
- *  Return an Exception with a simple String Message Method
- *  Differentiates user errors from System bugs/errors.
- *
- *
- * @version 02.2002
- * @author mh
- */
-
-public final class ServletModuleUserException extends Exception
-{
-  public ServletModuleUserException(String msg) {
-    super(msg);
+public class ServletModuleExc extends Exc {
+  public ServletModuleExc(String aMessage) {
+    super(aMessage);
   }
 }
-

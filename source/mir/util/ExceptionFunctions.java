@@ -29,22 +29,53 @@
  * not wish to do so, delete this exception statement from your version.
  */
 
-package mir.module;
+package mir.util;
 
+import java.lang.reflect.InvocationTargetException;
 
-/*
- *  ServletModuleException -
- *  wird vom ServletModule geschmissen</b>
+import multex.Failure;
+
+import org.xml.sax.SAXException;
+
+/**
  *
- * 
- * @version 5.7.199
- * @author RK
+ * <p>Title: ExceptionFunctions </p>
+ * <p>Description: Functions to assist handling and throwing exceptions</p>
+ * <p>Copyright: Copyright (c) 2003</p>
+ * <p>Company: Mir coders</p>
+ * @author Zapata
+ * @version 1.0
  */
 
-public final class ModuleUserException extends Exception
-{
-	public ModuleUserException(String msg) {
-		super(msg);
-	}
-}
+public class ExceptionFunctions {
+  private ExceptionFunctions() {
+  }
 
+  /**
+   * Traces an exception to it's root cause, using all known exception types that support
+   *   cause exceptions.
+   *
+   * @param anException
+   * @return the cause (if found)
+   */
+
+  public static Throwable traceCauseException(Throwable anException) {
+    Throwable result = anException;
+
+    while (true) {
+      if ((result instanceof Failure) && (((Failure) result).getCause()!=null)) {
+        result = ((Failure) result).getCause();
+      }
+      else if ((result instanceof SAXException) && (((SAXException) result).getException()!=null)) {
+        result = ((SAXException) result).getException();
+      }
+      else if ((result instanceof InvocationTargetException) && (((InvocationTargetException) result).getTargetException()!=null)) {
+        result = ((InvocationTargetException) result).getTargetException();
+      }
+      else
+        break;
+    }
+
+    return result;
+  }
+}

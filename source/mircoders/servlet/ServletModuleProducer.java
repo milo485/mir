@@ -46,7 +46,7 @@ import mir.generator.Generator;
 import mir.log.LoggerWrapper;
 import mir.producer.ProducerFactory;
 import mir.servlet.ServletModule;
-import mir.servlet.ServletModuleException;
+import mir.servlet.ServletModuleFailure;
 import mir.util.NullWriter;
 import mir.util.ResourceBundleGeneratorFunction;
 import mircoders.global.MirGlobal;
@@ -64,7 +64,7 @@ public class ServletModuleProducer extends ServletModule
   int totalNrComments;
   List producersData;
 
-  void generateResponse(String aGeneratorIdentifier, PrintWriter aWriter, Map aResponseData, Locale aLocale) throws ServletModuleException {
+  void generateResponse(String aGeneratorIdentifier, PrintWriter aWriter, Map aResponseData, Locale aLocale) {
     try {
       generator = MirGlobal.localizer().generators().makeAdminGeneratorLibrary().makeGenerator(aGeneratorIdentifier);
       MirGlobal.localizer().producerAssistant().initializeGenerationValueSet(aResponseData);
@@ -72,7 +72,7 @@ public class ServletModuleProducer extends ServletModule
       generator.generate(aWriter, aResponseData, new PrintWriter(new NullWriter()));
     }
     catch (Throwable t) {
-      throw new ServletModuleException(t.getMessage());
+      throw new ServletModuleFailure(t);
     }
   }
 
@@ -82,7 +82,7 @@ public class ServletModuleProducer extends ServletModule
     defaultAction="showProducerQueueStatus";
   }
 
-  public void showMessage(PrintWriter aWriter, Locale aLocale, String aMessage, String anArgument1, String anArgument2) throws ServletModuleException {
+  public void showMessage(PrintWriter aWriter, Locale aLocale, String aMessage, String anArgument1, String anArgument2) {
     Map responseData;
     try {
       responseData = new HashMap();
@@ -92,12 +92,12 @@ public class ServletModuleProducer extends ServletModule
       generateResponse("infomessage.template", aWriter, responseData, aLocale);
     }
     catch (Throwable t) {
-      throw new ServletModuleException(t.getMessage());
+      throw new ServletModuleFailure(t);
     }
   }
 
 
-  public void showProducerQueueStatus(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleException {
+  public void showProducerQueueStatus(HttpServletRequest aRequest, HttpServletResponse aResponse) {
     Object comments;
     Map generationData;
     Generator generator;
@@ -138,12 +138,11 @@ public class ServletModuleProducer extends ServletModule
       generator.generate(aResponse.getWriter(), generationData, new PrintWriter(new NullWriter()));
     }
     catch (Throwable t) {
-      t.printStackTrace(logger.asPrintWriter(LoggerWrapper.DEBUG_MESSAGE));
-      throw new ServletModuleException(t.getMessage());
+      throw new ServletModuleFailure(t);
     }
   }
 
-  public void produce(HttpServletRequest req, HttpServletResponse res) throws ServletModuleException {
+  public void produce(HttpServletRequest req, HttpServletResponse res) {
     /*
      * This method will only be called by external scripts (e.g. from cron jobs).
      * The output therefore is very simple.
@@ -161,22 +160,22 @@ public class ServletModuleProducer extends ServletModule
         out.println("job added");
       }
     }
-    catch (Exception e) {
-      throw new ServletModuleException(e.getMessage());
+    catch (Throwable t) {
+      throw new ServletModuleFailure(t);
     }
   }
 
-  public void produceAllNew(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleException {
+  public void produceAllNew(HttpServletRequest aRequest, HttpServletResponse aResponse) {
     try {
       MirGlobal.localizer().producers().produceAllNew();
       showMessage(aResponse.getWriter(), getLocale(aRequest), "produceAllNewAddedToQueue", "", "");
     }
-    catch (Exception e) {
-      throw new ServletModuleException(e.getMessage());
+    catch (Throwable t) {
+      throw new ServletModuleFailure(t);
     }
   }
 
-  public void enqueue(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleException {
+  public void enqueue(HttpServletRequest aRequest, HttpServletResponse aResponse) {
     try {
       if (aRequest.getParameter("producer")!=null) {
         String producerParam = aRequest.getParameter("producer");
@@ -187,12 +186,12 @@ public class ServletModuleProducer extends ServletModule
         showProducerQueueStatus(aRequest, aResponse);
       }
     }
-    catch (Exception e) {
-      throw new ServletModuleException(e.getMessage());
+    catch (Throwable t) {
+      throw new ServletModuleFailure(t);
     }
   }
 
-  public void cancelAbortJob(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleException {
+  public void cancelAbortJob(HttpServletRequest aRequest, HttpServletResponse aResponse)  {
     // ML: to be coded
   }
 }

@@ -32,7 +32,10 @@
 		<td colspan="3" bgcolor="white">
 
 <include "open/disclaimer.inc.de">
+<if data.passwd>					
+
 <br>${data.passwd}
+</if>
 <br><br>
 <a name="form"></a>
 		</td>
@@ -41,7 +44,7 @@
 	<tr>
 		<td><b>${lang("posting.nr_of_media")}</b> <br>
   		${lang("posting.nr_of_media.info")}</td>
-		<td colspan="2"><input type="text" name="medianum" value="${medianum}">&nbsp;<input type="submit" value="${lang("posting.nr_of_media.submit")}">
+		<td colspan="2"><input type="text" name="medianum" value="${data.medianum}">&nbsp;<input type="submit" value="${lang("posting.nr_of_media.submit")}">
 	</tr>
 </form>
 
@@ -52,12 +55,12 @@
 			<center><font size="+2" face="Helvetica, Arial,sans-serif" color="white"><b>${lang("posting.form.title")}</b></font></center>
 		</td>
 	</tr>
-	<if config["PasswdProtection"]=="yes" || config["PasswdProtection"]=="1">
+<if data.passwd>					
     <tr>
   		<td>${lang("posting.password")}</td>
   		<td><input type="text" name="passwd" size="10"></td>
   	</tr>
-	</if>
+</if>
 	<tr>
  		<td valign="top">
 			${lang("posting.title")}:<br>
@@ -75,7 +78,7 @@
        <td colspan="2">
        <select name="to_topic" size="3" multiple>
        <list extra.themenPopupData as t>
-       <option value="${t.key}" <list to_topic as to><if (t.key == to)>selected</if></list>>${t.value}</option>
+       <option value="${t.key}" <list data.to_topic as to><if (t.key == to)>selected</if></list>>${t.value}</option>
        </list>
        </select>
        &nbsp;&nbsp;<font size="-1">(<i>${lang("optional")}</i>)</font>

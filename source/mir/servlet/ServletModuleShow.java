@@ -49,54 +49,55 @@ import freemarker.template.TemplateModelRoot;
  * @author RK
  */
 public class ServletModuleShow extends ServletModule {
-	private static ServletModuleShow instance = new ServletModuleShow();
+  private static ServletModuleShow instance = new ServletModuleShow();
 
-	/**
-	 * Ein ServletModuleShow-Objekt wird ?ber getInstance geliefert. Es gibt zur
-	 * Laufzeit nur ein Objekt (Singleton)
-	 * @return ServletModuleShow
-	 */
-	public static ServletModule getInstance () {
-		return  instance;
-	}
-
-	/**
-	 * Initialisierung leer.
-	 */
-	private ServletModuleShow () {
-	}
-
-	/**
-	 * defaultAction (s.a ServletModule)
-	 * @return "show"
-	 */
-	public String defaultAction () {
-		return  "show";
-	}
-
-	/**
-	 * Standardmethode, die die Funktionalitaet des ServletModules implementiert.
-	 *
-	 * @param req Http-Request, das vom Dispatcher durchgereicht wird
-	 * @param res Http-Response, die vom Dispatcher durchgereicht wird
-	 * @return String fuer Logfile
-	 * @exception ServletModuleException
-	 */
-  public void show(HttpServletRequest req, HttpServletResponse res) throws ServletModuleException {
-    try {
-      String idParam = req.getParameter("tmpl");
-      if (!(idParam==null || idParam.equals(""))) {
-  	    deliver(req, res, (TemplateModelRoot)null, "html/"+idParam+".template");
-      }
-      else {
-        throw new ServletModuleException("Falsches template: " + idParam);
-      }
-    }
-    catch (Exception e) {
-      throw new ServletModuleException(e.toString());
-    }
+  /**
+   * Ein ServletModuleShow-Objekt wird ?ber getInstance geliefert. Es gibt zur
+   * Laufzeit nur ein Objekt (Singleton)
+   * @return ServletModuleShow
+   */
+  public static ServletModule getInstance() {
+    return instance;
   }
 
+  /**
+   * Initialisierung leer.
+   */
+  private ServletModuleShow() {
+  }
+
+  /**
+   * defaultAction (s.a ServletModule)
+   * @return "show"
+   */
+  public String defaultAction() {
+    return "show";
+  }
+
+  /**
+   * Standardmethode, die die Funktionalitaet des ServletModules implementiert.
+   *
+   * @param req Http-Request, das vom Dispatcher durchgereicht wird
+   * @param res Http-Response, die vom Dispatcher durchgereicht wird
+   * @return String fuer Logfile
+   * @exception ServletModuleException
+   */
+  public void show(HttpServletRequest req, HttpServletResponse res) throws
+      ServletModuleExc {
+    try {
+      String idParam = req.getParameter("tmpl");
+      if (! (idParam == null || idParam.equals(""))) {
+        deliver(req, res, (TemplateModelRoot)null,
+                "html/" + idParam + ".template");
+      }
+      else {
+        throw new ServletModuleExc("Invalid template: " + idParam);
+      }
+    }
+    catch (Throwable e) {
+      throw new ServletModuleFailure(e);
+    }
+  }
 }
 
 

@@ -31,30 +31,26 @@
 
 package mir.servlet;
 
-import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.List;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
-
+import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import freemarker.template.SimpleHash;
 import freemarker.template.TemplateModelRoot;
-
 import mir.config.MirPropertiesConfiguration;
 import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
 import mir.entity.EntityList;
 import mir.log.LoggerWrapper;
-import mir.misc.HTMLParseException;
 import mir.misc.HTMLTemplateProcessor;
 import mir.misc.LineFilterWriter;
 import mir.module.AbstractModule;
-import mir.module.ModuleException;
 import mir.storage.StorageObject;
-import mir.util.*;
+import mir.util.HTTPRequestParser;
 
 
 
@@ -76,7 +72,7 @@ public abstract class ServletModule {
 
   public String defaultAction;
   protected LoggerWrapper logger;
-        protected MirPropertiesConfiguration configuration;
+  protected MirPropertiesConfiguration configuration;
   protected AbstractModule mainModule;
   protected String templateListString;
   protected String templateObjektString;
@@ -113,7 +109,7 @@ public abstract class ServletModule {
    */
   public String getLanguage(HttpServletRequest req) {
     HttpSession session = req.getSession(false);
-    String language = (String) session.getAttribute("Language");
+    String language = (String) session.getAttribute("language");
     if (language == null) {
       language = configuration.getString("StandardLanguage");
     }
@@ -129,7 +125,7 @@ public abstract class ServletModule {
     HttpSession session = req.getSession(false);
     if (session != null) {
       // session can be null in case of logout
-      loc = (Locale) session.getAttribute("Locale");
+      loc = (Locale) session.getAttribute("locale");
     }
     // if there is nothing in the session get it fron the accept-language
     if (loc == null) {
@@ -138,12 +134,12 @@ public abstract class ServletModule {
     return loc;
   }
 
-  public void redirect(HttpServletResponse aResponse, String aQuery) throws ServletModuleException {
+  public void redirect(HttpServletResponse aResponse, String aQuery) throws ServletModuleExc, ServletModuleFailure {
     try {
       aResponse.sendRedirect(MirPropertiesConfiguration.instance().getString("RootUri") + "/Mir?"+aQuery);
     }
     catch (Throwable t) {
-      throw new ServletModuleException(t.getMessage());
+      throw new ServletModuleFailure("ServletModule.redirect: " +t.getMessage(), t);
     }
   }
 
@@ -156,7 +152,7 @@ public abstract class ServletModule {
    * @param res Http-Response, die vom Dispatcher durchgereicht wird
    */
   public void list(HttpServletRequest req, HttpServletResponse res)
-      throws ServletModuleException {
+      throws ServletModuleExc, ServletModuleUserExc, ServletModuleFailure {
     try {
       EntityList theList;
       String offsetParam = req.getParameter("offset");
@@ -179,8 +175,8 @@ public abstract class ServletModule {
 
       HTMLTemplateProcessor.process(res, templateListString, theList, out, getLocale(req));
     }
-    catch (Exception e) {
-      throw new ServletModuleException(e.getMessage());
+    catch (Throwable e) {
+      throw new ServletModuleFailure(e);
     }
   }
 
@@ -192,15 +188,15 @@ public abstract class ServletModule {
    * @param res Http-Response, die vom Dispatcher durchgereicht wird
    */
   public void add(HttpServletRequest req, HttpServletResponse res)
-      throws ServletModuleException {
+      throws ServletModuleExc, ServletModuleUserExc, ServletModuleFailure  {
 
     try {
       SimpleHash mergeData = new SimpleHash();
       mergeData.put("new", "1");
       deliver(req, res, mergeData, templateObjektString);
     }
-    catch (Exception e) {
-      throw new ServletModuleException(e.getMessage());
+    catch (Throwable e) {
+      throw new ServletModuleFailure(e);
     }
   }
 
@@ -214,16 +210,16 @@ public abstract class ServletModule {
    * @param res Http-Response, die vom Dispatcher durchgereicht wird
    */
   public void insert(HttpServletRequest req, HttpServletResponse res)
-      throws ServletModuleException, ServletModuleUserException {
+      throws ServletModuleExc, ServletModuleUserExc, ServletModuleFailure  {
     try {
-      HashMap withValues = getIntersectingValues(req, mainModule.getStorageObject());
+      Map withValues = getIntersectingValues(req, mainModule.getStorageObject());
       logger.debug("--trying to add...");
       String id = mainModule.add(withValues);
       logger.debug("--trying to deliver..." + id);
       list(req, res);
     }
-    catch (Exception e) {
-      throw new ServletModuleException(e.getMessage());
+    catch (Throwable e) {
+      throw new ServletModuleFailure(e);
     }
   }
 
@@ -232,12 +228,13 @@ public abstract class ServletModule {
    *
    */
 
-  public void delete(HttpServletRequest req, HttpServletResponse res) throws ServletModuleException {
+  public void delete(HttpServletRequest req, HttpServletResponse res)
+      throws ServletModuleExc, ServletModuleUserExc, ServletModuleFailure  {
     try {
       String idParam = req.getParameter("id");
 
       if (idParam == null)
-        throw new ServletModuleException("Invalid call to delete: no id supplied");
+        throw new ServletModuleExc("Invalid call to delete: no id supplied");
 
       String confirmParam = req.getParameter("confirm");
       String cancelParam = req.getParameter("cancel");
@@ -273,8 +270,8 @@ public abstract class ServletModule {
         }
       }
     }
-    catch (Exception e) {
-      throw new ServletModuleException(e.getMessage());
+    catch (Throwable e) {
+      throw new ServletModuleFailure(e);
     }
   }
 
@@ -287,13 +284,25 @@ public abstract class ServletModule {
    * @param res Http-Response, die vom Dispatcher durchgereicht wird
    */
   public void edit(HttpServletRequest req, HttpServletResponse res)
-      throws ServletModuleException {
+      throws ServletModuleExc, ServletModuleUserExc, ServletModuleFailure  {
+    edit(req, res, req.getParameter("id"));
+  }
+
+  /**
+   *  edit(req,res) - generische Editmethode. Wennn die Funktionalitaet
+   *  nicht reicht, muss sie in der abgeleiteten ServletModule-Klasse
+   *  ueberschreiben werden.
+   *
+   * @param req Http-Request, das vom Dispatcher durchgereicht wird
+   * @param res Http-Response, die vom Dispatcher durchgereicht wird
+   */
+  public void edit(HttpServletRequest aRequest, HttpServletResponse aResponse, String anIdentifier)
+      throws ServletModuleExc, ServletModuleUserExc, ServletModuleFailure  {
     try {
-      String idParam = req.getParameter("id");
-      deliver(req, res, mainModule.getById(idParam), templateObjektString);
+      deliver(aRequest, aResponse, mainModule.getById(anIdentifier), templateObjektString);
     }
-    catch (ModuleException e) {
-      throw new ServletModuleException(e.getMessage());
+    catch (Throwable e) {
+      throw new ServletModuleFailure(e);
     }
   }
 
@@ -307,10 +316,10 @@ public abstract class ServletModule {
    */
 
   public void update(HttpServletRequest req, HttpServletResponse res)
-      throws ServletModuleException {
+      throws ServletModuleExc, ServletModuleUserExc, ServletModuleFailure  {
     try {
       String idParam = req.getParameter("id");
-      HashMap withValues = getIntersectingValues(req, mainModule.getStorageObject());
+      Map withValues = getIntersectingValues(req, mainModule.getStorageObject());
 
       String id = mainModule.set(withValues);
       String whereParam = req.getParameter("where");
@@ -323,8 +332,8 @@ public abstract class ServletModule {
         edit(req, res);
       }
     }
-    catch (Exception e) {
-      throw new ServletModuleException(e.getMessage());
+    catch (Throwable e) {
+      throw new ServletModuleFailure(e);
     }
   }
 
@@ -339,11 +348,11 @@ public abstract class ServletModule {
    * @param tmpl Name des Templates
    * @exception ServletModuleException
    */
-  public void deliver(HttpServletRequest req, HttpServletResponse res,
-                      TemplateModelRoot rtm, TemplateModelRoot popups,
-                      String templateFilename)
-      throws ServletModuleException {
-    if (rtm == null) rtm = new SimpleHash();
+  public void deliver(HttpServletRequest req, HttpServletResponse res, TemplateModelRoot rtm,
+         TemplateModelRoot popups, String templateFilename) throws ServletModuleFailure  {
+    if (rtm == null)
+      rtm = new SimpleHash();
+
     try {
       PrintWriter out = res.getWriter();
       HTMLTemplateProcessor.process(res, templateFilename, rtm, popups, out, getLocale(req));
@@ -354,10 +363,8 @@ public abstract class ServletModule {
       // (br1)
       out.close();
     }
-    catch (HTMLParseException e) {
-      throw new ServletModuleException(e.getMessage());
-    } catch (IOException e) {
-      throw new ServletModuleException(e.getMessage());
+    catch (Throwable e) {
+      throw new ServletModuleFailure(e);
     }
   }
 
@@ -374,8 +381,7 @@ public abstract class ServletModule {
    * @exception ServletModuleException
    */
   public void deliver(HttpServletRequest req, HttpServletResponse res,
-                      TemplateModelRoot rtm, String templateFilename)
-      throws ServletModuleException {
+        TemplateModelRoot rtm, String templateFilename) throws ServletModuleFailure {
     deliver(req, res, rtm, null, templateFilename);
   }
 
@@ -392,7 +398,7 @@ public abstract class ServletModule {
    */
   public void deliver_compressed(HttpServletRequest req, HttpServletResponse res,
                                  TemplateModelRoot rtm, String templateFilename)
-      throws ServletModuleException {
+      throws ServletModuleFailure {
     if (rtm == null) rtm = new SimpleHash();
     try {
       PrintWriter out = new LineFilterWriter(res.getWriter());
@@ -400,11 +406,8 @@ public abstract class ServletModule {
       HTMLTemplateProcessor.process(res, templateFilename, rtm, out, getLocale(req));
       out.close();
     }
-    catch (HTMLParseException e) {
-      throw new ServletModuleException(e.getMessage());
-    }
-    catch (IOException e) {
-      throw new ServletModuleException(e.getMessage());
+    catch (Throwable e) {
+      throw new ServletModuleFailure(e);
     }
   }
 
@@ -421,8 +424,14 @@ public abstract class ServletModule {
    */
   private void deliver(HttpServletResponse res, HttpServletRequest req, PrintWriter out,
                        TemplateModelRoot rtm, String templateFilename)
-      throws HTMLParseException {
-    HTMLTemplateProcessor.process(res, templateFilename, rtm, out, getLocale(req));
+      throws ServletModuleFailure {
+    try {
+      HTMLTemplateProcessor.process(res, templateFilename, rtm, out,
+                                    getLocale(req));
+    }
+    catch (Throwable e) {
+      throw new ServletModuleFailure(e);
+    }
   }
 
   /**
@@ -437,22 +446,13 @@ public abstract class ServletModule {
   }
 
   /**
-   *  Hier kann vor der Datenaufbereitung schon mal ein response geschickt
-   *  werden (um das subjektive Antwortverhalten bei langsamen Verbindungen
-   *  zu verbessern).
-   */
-  public void predeliver(HttpServletRequest req, HttpServletResponse res) {
-    ;
-  }
-
-  /**
-   * Holt die Felder aus der Metadatenfelderliste des StorageObjects, die
-   * im HttpRequest vorkommen und liefert sie als HashMap zurueck
+   * Gets the fields from a httprequest and matches them with the metadata from
+   * the storage object. Returns the keys that match, with their values.
    *
-   * @return HashMap mit den Werten
+   * @return Map with the values
    */
-  public HashMap getIntersectingValues(HttpServletRequest req, StorageObject theStorage)
-      throws ServletModuleException {
+  public Map getIntersectingValues(HttpServletRequest req, StorageObject theStorage)
+      throws ServletModuleExc, ServletModuleFailure {
 
     try {
       HTTPRequestParser parser;
@@ -471,7 +471,7 @@ public abstract class ServletModule {
 
       theFieldList = theStorage.getFields();
 
-      HashMap withValues = new HashMap();
+      Map withValues = new HashMap();
       String aField, aValue;
 
       for (int i = 0; i < theFieldList.size(); i++) {
@@ -487,8 +487,8 @@ public abstract class ServletModule {
     }
     catch (Throwable e) {
       e.printStackTrace(logger.asPrintWriter(LoggerWrapper.DEBUG_MESSAGE));
-      throw new ServletModuleException(
-          "ServletModule.getIntersectingValues: " + e.getMessage());
+
+      throw new ServletModuleFailure( "ServletModule.getIntersectingValues: " + e.getMessage(), e);
     }
   }
 

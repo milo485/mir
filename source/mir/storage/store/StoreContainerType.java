@@ -47,6 +47,7 @@ package mir.storage.store;
  */
 
 import java.util.HashMap;
+import java.util.Map;
 
 import mir.misc.StringUtil;
 
@@ -57,7 +58,7 @@ public class StoreContainerType {
   public final static int STOC_TYPE_ENTITYLIST = 1;
   public final static int STOC_TYPE_MAX = STOC_TYPE_ENTITYLIST;
 
-  private static HashMap[] uniqueTypes = new HashMap[STOC_TYPE_MAX + 1];
+  private static Map[] uniqueTypes = new HashMap[STOC_TYPE_MAX + 1];
   private static ObjectStore o_store = ObjectStore.getInstance();
   private Class stocClass = null;
   private int stocType = STOC_TYPE_UNKNOWN;
@@ -77,7 +78,7 @@ public class StoreContainerType {
   public static StoreContainerType valueOf(Class stoc_class, int stoc_type) {
     StoreContainerType returnStocType = null;
     if (stoc_type >= 0 && stoc_type <= STOC_TYPE_MAX) {
-      HashMap current = uniqueTypes[stoc_type];
+      Map current = uniqueTypes[stoc_type];
       if (current.containsKey(stoc_class))
         returnStocType = (StoreContainerType) current.get(stoc_class);
       else {

@@ -29,39 +29,12 @@
  * not wish to do so, delete this exception statement from your version.
  */
 
-package mircoders.servlet;
+package mir.module;
 
-import mir.log.LoggerWrapper;
-import mir.servlet.ServletModule;
-import mir.storage.StorageObjectFailure;
-import mircoders.module.ModuleSchwerpunkt;
-import mircoders.storage.DatabaseFeature;
+import multex.Exc;
 
-/*
- *  ServletModuleSchwerpunkt - code for the handling of "features"
- *
- *
- *
- * @author RK
- */
-
-public class ServletModuleSchwerpunkt extends ServletModule
-{
-// Singelton / Kontruktor
-  private static ServletModuleSchwerpunkt instance = new ServletModuleSchwerpunkt();
-  public static ServletModule getInstance() { return instance; }
-
-  private ServletModuleSchwerpunkt() {
-    super();
-    logger = new LoggerWrapper("ServletModule.Feature");
-    templateListString = configuration.getString("ServletModule.Schwerpunkt.ListTemplate");
-    templateObjektString = configuration.getString("ServletModule.Schwerpunkt.ObjektTemplate");
-    templateConfirmString = configuration.getString("ServletModule.Schwerpunkt.ConfirmTemplate");
-    try {
-      mainModule = new ModuleSchwerpunkt(DatabaseFeature.getInstance());
-    }
-    catch (StorageObjectFailure e) {
-      logger.error("Intialization of ServletModuleSchwerpunkt (Features) failed!: " + e.getMessage());
-    }
+public class ModuleExc extends Exc {
+  public ModuleExc(String aMessage) {
+    super(aMessage);
   }
 }

@@ -35,19 +35,17 @@ package mircoders.media;
 import java.io.File;
 import java.io.InputStream;
 
-import freemarker.template.SimpleList;
-
 import mir.config.MirPropertiesConfiguration;
 import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
 import mir.entity.Entity;
+import mir.log.LoggerWrapper;
+import mir.media.MediaExc;
+import mir.media.MediaFailure;
 import mir.media.MirMedia;
-import mir.media.MirMediaException;
 import mir.misc.FileUtil;
 import mir.misc.StringUtil;
-import mir.storage.StorageObjectFailure;
-import mir.log.LoggerWrapper;
-
 import mircoders.entity.EntityImages;
+import freemarker.template.SimpleList;
 
 /**
  * This class handles saving, fetching creating representations
@@ -63,7 +61,7 @@ import mircoders.entity.EntityImages;
  *
  * @see mir.media.MirMedia
  * @author mh
- * @version $Id: MediaHandlerImages.java,v 1.18 2003/02/28 18:27:08 idfx Exp $
+ * @version $Id: MediaHandlerImages.java,v 1.21 2003/03/09 19:14:21 idfx Exp $
  */
 
 
@@ -90,36 +88,35 @@ public abstract class MediaHandlerImages implements MirMedia
     logger = new LoggerWrapper("Media.Images");
   }
 
-  public InputStream getMedia(Entity ent, Entity mediaTypeEnt)
-    throws MirMediaException
-        {
-    InputStream in;
+  public InputStream getMedia(Entity ent, Entity mediaTypeEnt) throws MediaExc, MediaFailure {
+    InputStream inputStream;
+
     try {
-      in = ((EntityImages)ent).getImage();
+      inputStream = ((EntityImages)ent).getImage();
     }
-    catch ( StorageObjectFailure e) {
-      logger.error("MediaHandlerImages.getImage: "+e.toString());
-      throw new MirMediaException(e.toString());
+    catch (Throwable e) {
+      logger.error("MediaHandlerImages.getImage: " + e.toString());
+
+      throw new MediaFailure(e);
     }
 
-    return in;
+    return inputStream;
   }
 
-  public void set(InputStream in, Entity ent, Entity mediaTypeEnt)
-    throws MirMediaException {
+  public void set(InputStream in, Entity ent, Entity mediaTypeEnt) throws MediaExc, MediaFailure {
 
     try {
       ((EntityImages)ent).setImage(in, getType());
     }
-    catch ( StorageObjectFailure e) {
+    catch (Throwable e) {
       logger.error("MediaHandlerImages.set: "+e.getMessage());
       e.printStackTrace(logger.asPrintWriter(LoggerWrapper.DEBUG_MESSAGE));
-      throw new MirMediaException(e.getMessage());
+
+      throw new MediaFailure(e);
     }
   }
 
-  public void produce(Entity ent, Entity mediaTypeEnt) throws MirMediaException
-  {
+  public void produce(Entity ent, Entity mediaTypeEnt) throws MediaExc, MediaFailure {
     String date = ent.getValue("date");
     String datePath = StringUtil.webdbDate2path(date);
     String ext = "."+mediaTypeEnt.getValue("name");
@@ -143,84 +140,73 @@ public abstract class MediaHandlerImages implements MirMedia
       }
       catch (Throwable e) {
         logger.error("MediaHandlerImages.produce: " + e.toString());
-        throw new MirMediaException("MediaHandlerImages.produce: " + e.toString());
+        throw new MediaFailure("MediaHandlerImages.produce: " + e.toString(), e);
       }
     }
     else {
       logger.error("MediaHandlerImages.produce: missing image or icon OID for: " + ent.getId());
-      throw new MirMediaException("MediaHandlerImages.produce: missing image or icon OID for: " + ent.getId());
+
+      throw new MediaExc("MediaHandlerImages.produce: missing image or icon OID for: " + ent.getId());
     }
   }
 
 
-  public InputStream getIcon(Entity ent) throws MirMediaException
-  {
+  public InputStream getIcon(Entity ent) throws MediaExc, MediaFailure {
     InputStream in;
     try {
       in = ((EntityImages)ent).getIcon();
     }
     catch (Throwable e) {
       logger.error("MediaHandlerImages.getIcon: " + e.toString());
-      throw new MirMediaException(e.toString());
+      throw new MediaFailure(e);
     }
 
     return in;
   }
 
-  public SimpleList getURL(Entity ent, Entity mediaTypeEnt)
-  {
+  public SimpleList getURL(Entity ent, Entity mediaTypeEnt) {
     SimpleList theList = new SimpleList();
     theList.add(ent);
     return theList;
   }
 
-  public String getStoragePath()
-  {
+  public String getStoragePath() {
     return configuration.getString("Producer.Image.Path");
   }
 
-  public String getIconStoragePath()
-  {
+  public String getIconStoragePath() {
     return configuration.getString("Producer.Image.IconPath");
   }
 
-  public String getPublishHost()
-  {
+  public String getPublishHost() {
     return StringUtil.removeSlash(configuration.getString("Producer.Image.Host"));
   }
 
-  public String getTinyIconName()
-  {
+  public String getTinyIconName() {
     return configuration.getString("Producer.Icon.TinyImage");
   }
 
-  public String getBigIconName()
-  {
+  public String getBigIconName() {
     return configuration.getString("Producer.Icon.BigImage");
   }
 
-  public String getIconAltName()
-  {
+  public String getIconAltName() {
     return "Image";
   }
 
-  public boolean isVideo()
-  {
+  public boolean isVideo() {
     return false;
   }
 
-  public boolean isAudio()
-  {
+  public boolean isAudio() {
     return false;
   }
 
-  public boolean isImage ()
-  {
+  public boolean isImage () {
     return true;
   }
 
-  public String getDescr(Entity mediaType)
-  {
+  public String getDescr(Entity mediaType) {
     return "image/jpeg";
   }
 

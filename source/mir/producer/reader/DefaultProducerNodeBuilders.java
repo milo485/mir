@@ -57,7 +57,8 @@ import mir.producer.LoopProducerNode;
 import mir.producer.ProducerNode;
 import mir.producer.ResourceBundleProducerNode;
 import mir.producer.ScriptCallingProducerNode;
-import mir.util.*;
+import mir.util.XMLReader;
+import mir.util.XMLReaderTool;
 
 public class DefaultProducerNodeBuilders {
 

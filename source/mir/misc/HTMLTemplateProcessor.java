@@ -33,22 +33,32 @@ package mir.misc;
 
 import java.io.PrintWriter;
 import java.net.URLEncoder;
-import java.util.*;
+import java.util.GregorianCalendar;
+import java.util.Iterator;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.struts.util.MessageResources;
-
-import freemarker.template.*;
-
-import mir.log.LoggerWrapper;
-import mir.util.*;
-import mir.generator.*;
 import mir.config.MirPropertiesConfiguration;
 import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
 import mir.entity.Entity;
 import mir.entity.EntityList;
+import mir.generator.FreemarkerGenerator;
+import mir.log.LoggerWrapper;
 import mir.storage.StorageObjectFailure;
+import mir.util.GeneratorHTMLFunctions;
+import mir.util.GeneratorIntegerFunctions;
+
+import org.apache.struts.util.MessageResources;
+
+import freemarker.template.FileTemplateCache;
+import freemarker.template.SimpleHash;
+import freemarker.template.SimpleList;
+import freemarker.template.SimpleScalar;
+import freemarker.template.Template;
+import freemarker.template.TemplateModelRoot;
 
 /**
  * Hilfsklasse zum Mergen von Template und Daten
@@ -76,7 +86,7 @@ public final class HTMLTemplateProcessor {
     logger = new LoggerWrapper("TemplateEngine");
 
     templateDir =
-        configuration.getStringWithHome("HTMLTemplateProcessor.Dir");
+        configuration.getStringWithHome("Mir.TemplateDir");
     templateCache = new FileTemplateCache(templateDir);
     templateCache.setLoadingPolicy(FileTemplateCache.LOAD_ON_DEMAND);
     // gone in freemarker 1.7.1: templateCache.startAutoUpdate();
@@ -102,7 +112,7 @@ public final class HTMLTemplateProcessor {
   // with freemarker templates
 
   /**
-       * Wandelt <code>anEntity</code> in freemarker-Struktur um, mischt die Daten mit
+   * Wandelt <code>anEntity</code> in freemarker-Struktur um, mischt die Daten mit
    * Template <code>templateFilename</code> und gibt das Ergebnis an den PrintWriter
    * <code>out</code>
    *
@@ -352,11 +362,11 @@ public final class HTMLTemplateProcessor {
   /**
    *  Konvertiert ein Hashtable mit den keys und values als String
    *  in ein freemarker.template.SimpleHash-Modell
-   *  @param mergeData der HashMap mit den String / String Daten
+   *  @param mergeData der Map mit den String / String Daten
    *  @return SimpleHash mit den entsprechenden freemarker Daten
    *
    */
-  public static SimpleHash makeSimpleHash(HashMap mergeData) {
+  public static SimpleHash makeSimpleHash(Map mergeData) {
     SimpleHash modelRoot = new SimpleHash();
     String aField;
     if (mergeData != null) {

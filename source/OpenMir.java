@@ -31,124 +31,105 @@
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.GregorianCalendar;
-import java.util.Locale;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import freemarker.template.SimpleHash;
-import freemarker.template.SimpleScalar;
-
-import mir.config.MirPropertiesConfiguration;
-import mir.misc.HTMLTemplateProcessor;
-import mir.misc.StringUtil;
 import mir.servlet.AbstractServlet;
 import mir.servlet.ServletModuleDispatch;
-import mir.servlet.ServletModuleException;
-import mir.servlet.ServletModuleUserException;
+import mir.servlet.ServletModuleUserExc;
+import mir.util.ExceptionFunctions;
+import mircoders.global.MirGlobal;
 import mircoders.servlet.ServletModuleOpenIndy;
 
 /**
  *  OpenMir.java - main servlet for open posting and comment feature to articles
  *
  *  @author RK 1999-2001, the mir-coders group
- *  @version $Id: OpenMir.java,v 1.20 2003/02/23 05:00:10 zapata Exp $
+ *  @version $Id: OpenMir.java,v 1.30 2003/03/17 20:47:03 zapata Exp $
  *
  */
 
 
 public class OpenMir extends AbstractServlet {
-
-  //private static boolean                confed=false;
-  private static String lang;
-  public HttpSession session;
-
-  public void doGet(HttpServletRequest req, HttpServletResponse res)
-    throws ServletException, IOException {
-    doPost(req,res);
-  }
-
-  public void doPost(HttpServletRequest req, HttpServletResponse res)
-    throws ServletException, IOException {
+  public void process(HttpServletRequest aRequest, HttpServletResponse aResponse)
+        throws ServletException, IOException {
+                if ((configuration.getString("RootUri") == null) ||
+                        configuration.getString("RootUri").equals("")) {
+                  configuration.setProperty("RootUri", aRequest.getContextPath());
+                }
 
     long startTime = System.currentTimeMillis();
     long sessionConnectTime=0;
 
-    session = req.getSession();
+    HttpSession session = aRequest.getSession();
 
-    if(session.getAttribute("Language")==null){
-      if (req.getParameter("language")!=null) {
-        setLanguage(session, req.getParameter("language"));
-      }
-      else {
-        setLanguage(session, getAcceptLanguage(req));
-      }
-    }
-
-    if (req.getParameter("language")!=null)
-      setLocale(session, new Locale(req.getParameter("language"), "") );
+    checkLanguage(session, aRequest);
 
     //make sure client browsers don't cache anything
-    setNoCaching(res);
+    setNoCaching(aResponse);
 
-    res.setContentType("text/html");
-    //res.setContentType("text/html; charset="+MirPropertiesConfiguration.instance().getString("Mir.DefaultHTMLCharset"));
+    aResponse.setContentType("text/html");
+    //aResponse.setContentType("text/html; charset="+MirPropertiesConfiguration.instance().getString("Mir.DefaultHTMLCharset"));
+
     try {
-      ServletModuleDispatch.dispatch(ServletModuleOpenIndy.getInstance(),req,res);
+      ServletModuleDispatch.dispatch(ServletModuleOpenIndy.getInstance(), aRequest, aResponse);
     }
-    catch (ServletModuleUserException e) {
-      handleUserError(req,res,res.getWriter(), e.getMessage());
+    catch (Throwable e) {
+      Throwable cause = ExceptionFunctions.traceCauseException(e);
+
+      if (cause instanceof ServletModuleUserExc)
+        handleUserError(aRequest, aResponse, aResponse.getWriter(), (ServletModuleUserExc) cause);
+      else
+        handleError(aRequest, aResponse, aResponse.getWriter(), cause);
     }
-    catch (ServletModuleException e){
-      e.printStackTrace();
-      handleError(req,res,res.getWriter(), "OpenIndy :: ServletException in Module ServletModule -- " + e.getMessage());
-    }
-    // timing...
+
     sessionConnectTime = System.currentTimeMillis() - startTime;
     logger.debug("EXECTIME (ServletModuleOpenIndy): " + sessionConnectTime + " ms");
   }
 
-  private void handleUserError(HttpServletRequest req, HttpServletResponse res,
-                               PrintWriter out, String errorString) {
-    try {
-      logger.error(errorString);
-      SimpleHash modelRoot = new SimpleHash();
-      modelRoot.put("errorstring", new SimpleScalar(errorString));
-      modelRoot.put("date", new SimpleScalar(StringUtil.date2readableDateTime(new GregorianCalendar())));
-      HTMLTemplateProcessor.process(res,MirPropertiesConfiguration.instance().getString("Mir.UserErrorTemplate"),
-                                    modelRoot, out, req.getLocale() );
-      out.close();
-    }
-    catch (Exception e) {
-      logger.error("Error in UserErrorTemplate");
-    }
-
+  private void handleUserError(HttpServletRequest aRequest, HttpServletResponse aResponse,
+                               PrintWriter out, ServletModuleUserExc anException) {
+    ((ServletModuleOpenIndy) ServletModuleOpenIndy.getInstance()).handleUserError(aRequest, aResponse, out, anException);
   }
 
-  private void handleError(HttpServletRequest req, HttpServletResponse res,PrintWriter out, String errorString) {
-
-    try {
-      logger.error(errorString);
-      SimpleHash modelRoot = new SimpleHash();
-      modelRoot.put("errorstring", new SimpleScalar(errorString));
-      modelRoot.put("date", new SimpleScalar(StringUtil.date2readableDateTime(
-                                               new GregorianCalendar())));
-      HTMLTemplateProcessor.process(res,MirPropertiesConfiguration.instance().getString("Mir.ErrorTemplate"),
-                                    modelRoot,out, req.getLocale());
-      out.close();
-    }
-    catch (Exception e) {
-      logger.error("Error in ErrorTemplate");
-    }
-
+  private void handleError(HttpServletRequest aRequest, HttpServletResponse aResponse,PrintWriter out, Throwable anException) {
+    ((ServletModuleOpenIndy) ServletModuleOpenIndy.getInstance()).handleError(aRequest, aResponse, out, anException);
   }
 
   public String getServletInfo(){
     return "OpenMir "+configuration.getString("Mir.Version");
   }
 
+
+  /**
+   * Selects the language for the response.
+   *
+   * @param session
+   * @param aRequest
+   */
+  private void checkLanguage(HttpSession aSession, HttpServletRequest aRequest) {
+    String requestLanguage = aRequest.getParameter("language");
+    String sessionLanguage = (String) aSession.getAttribute("language");
+    String acceptLanguage = aRequest.getLocale().getLanguage();
+    String defaultLanguage = MirGlobal.config().getString("Mir.Login.DefaultLanguage", "en");
+
+    logger.debug(" requestlanguage = " + requestLanguage + ", sessionLanugage = " + sessionLanguage +
+                 ", acceptLanguage = " + acceptLanguage + ", defaultLanguage = " + defaultLanguage);
+
+    String language = requestLanguage;
+
+    if (language==null)
+      language = sessionLanguage;
+
+    if (language==null)
+      language = acceptLanguage;
+
+    if (language==null)
+      language = defaultLanguage;
+
+    setLanguage(aSession, language);
+  }
 }
 

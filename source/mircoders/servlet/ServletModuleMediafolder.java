@@ -46,7 +46,6 @@ import javax.servlet.http.HttpServletResponse;
 import mir.log.LoggerWrapper;
 import mir.misc.StringUtil;
 import mir.servlet.ServletModule;
-import mir.servlet.ServletModuleException;
 import mir.storage.StorageObjectFailure;
 import mircoders.module.ModuleMediafolder;
 import mircoders.storage.DatabaseMediafolder;
@@ -75,7 +74,7 @@ public class ServletModuleMediafolder extends ServletModule
     }
   }
 
-  public void add(HttpServletRequest req, HttpServletResponse res) throws ServletModuleException
+  public void add(HttpServletRequest req, HttpServletResponse res)
   {
     SimpleHash mergeData = new SimpleHash();
     mergeData.put("new", "1");

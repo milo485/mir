@@ -29,39 +29,17 @@
  * not wish to do so, delete this exception statement from your version.
  */
 
-package mircoders.module;
+package mir.module;
 
-import mir.log.LoggerWrapper;
-import mir.module.AbstractModule;
-import mir.module.ModuleException;
-import mir.storage.StorageObject;
-import mir.storage.StorageObjectFailure;
-import mircoders.storage.DatabaseFeature;
-import freemarker.template.SimpleList;
+import multex.Failure;
 
-/*
- *  Feature -
- *
- *
- * @author RK
- */
+public class ModuleFailure extends Failure {
 
-public class ModuleSchwerpunkt extends AbstractModule
-{
-  static LoggerWrapper logger = new LoggerWrapper("Module.Feature");
-
-  public ModuleSchwerpunkt(StorageObject theStorage) {
-
-    this.theStorage = theStorage;
+  public ModuleFailure(String msg,Throwable cause) {
+    super(msg,cause);
   }
 
-  public SimpleList getSchwerpunktAsSimpleList() throws ModuleException {
-    try {
-      return ((DatabaseFeature)theStorage).getPopupData();
-    }
-    catch (StorageObjectFailure e) {
-      throw new ModuleException(e.toString());
-    }
+  public ModuleFailure(Throwable aCause) {
+    this (aCause.getMessage(), aCause);
   }
 }
-

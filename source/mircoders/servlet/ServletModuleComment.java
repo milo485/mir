@@ -31,7 +31,6 @@
 
 package mircoders.servlet;
 
-import java.io.PrintWriter;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -40,15 +39,15 @@ import javax.servlet.http.HttpServletResponse;
 import mir.config.MirPropertiesConfiguration;
 import mir.entity.adapter.EntityAdapterModel;
 import mir.entity.adapter.EntityIteratorAdapter;
-import mir.log.LoggerToWriterAdapter;
 import mir.log.LoggerWrapper;
 import mir.servlet.ServletModule;
-import mir.servlet.ServletModuleException;
+import mir.servlet.ServletModuleExc;
+import mir.servlet.ServletModuleFailure;
 import mir.util.CachingRewindableIterator;
 import mir.util.HTTPRequestParser;
 import mir.util.JDBCStringRoutines;
-import mir.util.URLBuilder;
 import mir.util.SQLQueryBuilder;
+import mir.util.URLBuilder;
 import mircoders.global.MirGlobal;
 import mircoders.module.ModuleComment;
 import mircoders.module.ModuleContent;
@@ -93,17 +92,17 @@ public class ServletModuleComment extends ServletModule
     }
   }
 
-  public void edit(HttpServletRequest req, HttpServletResponse res) throws ServletModuleException
+  public void edit(HttpServletRequest req, HttpServletResponse res) throws ServletModuleExc
   {
     String idParam = req.getParameter("id");
 
     if (idParam == null)
-      throw new ServletModuleException("Invalid call: id not supplied ");
+      throw new ServletModuleExc("Invalid call: id not supplied ");
 
     showComment(idParam, req, res);
   }
 
-  public void showComment(String anId, HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleException {
+  public void showComment(String anId, HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc {
     try {
       SimpleHash extraInfo = new SimpleHash();
       TemplateModelRoot data;
@@ -115,13 +114,13 @@ public class ServletModuleComment extends ServletModule
 
       deliver(aRequest, aResponse, data, extraInfo, templateObjektString);
     }
-    catch (Exception e) {
-      throw new ServletModuleException(e.toString());
+    catch (Throwable e) {
+      throw new ServletModuleFailure(e);
     }
   }
 
 
-  public void list(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleException
+  public void list(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc
   {
     HTTPRequestParser requestParser = new HTTPRequestParser(aRequest);
 
@@ -132,7 +131,7 @@ public class ServletModuleComment extends ServletModule
     returnCommentList(aRequest, aResponse, where, order, offset);
   }
 
-  public void search(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleException
+  public void search(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc
   {
     HTTPRequestParser requestParser = new HTTPRequestParser(aRequest);
     SQLQueryBuilder queryBuilder = new SQLQueryBuilder();
@@ -175,7 +174,7 @@ public class ServletModuleComment extends ServletModule
     returnCommentList(aRequest, aResponse, queryBuilder.getWhereClause(), queryBuilder.getOrderByClause(), 0);
   }
 
-  public void articlecomments(HttpServletRequest req, HttpServletResponse res) throws ServletModuleException
+  public void articlecomments(HttpServletRequest req, HttpServletResponse res) throws ServletModuleExc
   {
     String articleIdString = req.getParameter("articleid");
     int articleId;
@@ -185,16 +184,13 @@ public class ServletModuleComment extends ServletModule
 
       returnCommentList( req, res, "to_media="+articleId, "webdb_create desc", 0);
     }
-    catch (ServletModuleException e) {
-      throw e;
-    }
     catch (Throwable e) {
-      throw new ServletModuleException(e.getMessage());
+      throw new ServletModuleFailure(e);
     }
   }
 
   public void returnCommentList(HttpServletRequest aRequest, HttpServletResponse aResponse,
-     String aWhereClause, String anOrderByClause, int anOffset) throws ServletModuleException {
+     String aWhereClause, String anOrderByClause, int anOffset) throws ServletModuleExc {
     // ML: experiment in using the producer's generation system instead of the
     //     old one...
 
@@ -258,9 +254,7 @@ public class ServletModuleComment extends ServletModule
       ServletHelper.generateResponse(aResponse.getWriter(), responseData, "commentlist.template");
     }
     catch (Throwable e) {
-      e.printStackTrace(new PrintWriter(new LoggerToWriterAdapter(logger, LoggerWrapper.ERROR_MESSAGE)));
-
-      throw new ServletModuleException(e.getMessage());
+      throw new ServletModuleFailure(e);
     }
   }
 }

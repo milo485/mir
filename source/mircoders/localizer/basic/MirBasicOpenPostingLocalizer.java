@@ -54,8 +54,8 @@ public class MirBasicOpenPostingLocalizer implements MirOpenPostingLocalizer {
     logger = new LoggerWrapper("Localizer.Basic.OpenPosting");
 
     try {
-      String contentProducers = MirGlobal.getConfigProperty("Mir.Localizer.OpenPosting.ContentProducers");
-      String commentProducers = MirGlobal.getConfigProperty("Mir.Localizer.OpenPosting.CommentProducers");
+      String contentProducers = MirGlobal.config().getString("Mir.Localizer.OpenPosting.ContentProducers");
+      String commentProducers = MirGlobal.config().getString("Mir.Localizer.OpenPosting.CommentProducers");
 
       afterContentProducerTasks = ProducerEngine.ProducerTask.parseProducerTaskList(contentProducers);
       afterCommentProducerTasks = ProducerEngine.ProducerTask.parseProducerTaskList(commentProducers);

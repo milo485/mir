@@ -33,20 +33,18 @@ package  mircoders.media;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
-
-import freemarker.template.SimpleList;
-
-import mir.log.LoggerWrapper;
 
 import mir.config.MirPropertiesConfiguration;
 import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
 import mir.entity.Entity;
+import mir.log.LoggerWrapper;
+import mir.media.MediaExc;
+import mir.media.MediaFailure;
 import mir.media.MirMedia;
-import mir.media.MirMediaException;
 import mir.misc.FileUtil;
 import mir.misc.StringUtil;
+import freemarker.template.SimpleList;
 
 
 /**
@@ -66,7 +64,7 @@ import mir.misc.StringUtil;
  *
  * @see mir.media.MirMedia
  * @author mh <mh@nadir.org>
- * @version $Id: MediaHandlerGeneric.java,v 1.14 2003/02/23 05:00:14 zapata Exp $
+ * @version $Id: MediaHandlerGeneric.java,v 1.18 2003/03/09 19:14:21 idfx Exp $
  */
 
 public class MediaHandlerGeneric implements MirMedia
@@ -80,8 +78,8 @@ public class MediaHandlerGeneric implements MirMedia
     static {
       try {
         configuration = MirPropertiesConfiguration.instance();
-      } catch (PropertiesConfigExc e) {
-        e.printStackTrace();
+      }
+      catch (PropertiesConfigExc e) {
       }
       imageHost = configuration.getString("Producer.Image.Host");
       imageRoot = configuration.getString("Producer.ImageRoot");
@@ -91,7 +89,7 @@ public class MediaHandlerGeneric implements MirMedia
       logger = new LoggerWrapper("Media.Generic");
     }
 
-    public void set (InputStream in, Entity ent, Entity mediaTypeEnt ) throws MirMediaException {
+    public void set (InputStream in, Entity ent, Entity mediaTypeEnt ) throws MediaExc, MediaFailure {
       String ext = mediaTypeEnt.getValue("name");
       String mediaFname = ent.getId() + "." + ext;
       String date = ent.getValue("date");
@@ -105,42 +103,41 @@ public class MediaHandlerGeneric implements MirMedia
       }
       catch (Throwable e) {
         logger.error("MediaHandlerGeneric.set: " + e.toString());
-        throw new MirMediaException(e.toString());
+        throw new MediaFailure(e);
       }
     }
 
-    public void produce (Entity ent, Entity mediaTypeEnt )
-      throws MirMediaException {
-
+    public void produce (Entity ent, Entity mediaTypeEnt ) throws MediaExc, MediaFailure {
       //check first if the media file exist since produced
       //location is also the storage location
+
       String date = ent.getValue("date");
       String datePath = StringUtil.webdbDate2path(date);
       String relPath = datePath+ent.getId()+"."+mediaTypeEnt.getValue("name");
       String fname = getStoragePath()+relPath;
       if(! new File(fname).exists())
-        throw new MirMediaException("error in MirMedia.produce(): "+relPath+
-                                    " does not exist!");
+        throw new MediaExc("error in MirMedia.produce(): " + relPath + " does not exist!");
     }
 
-    public InputStream getMedia (Entity ent, Entity mediaTypeEnt)
-      throws MirMediaException {
+    public InputStream getMedia (Entity ent, Entity mediaTypeEnt) throws MediaExc, MediaFailure {
       String publishPath = ent.getValue("publish_path");
       String fname = getStoragePath()+publishPath;
       File f = new File(fname);
       if(! f.exists())
-        throw new MirMediaException("error in MirMedia.getMedia(): "+fname+
-                                    " does not exist!");
-      FileInputStream in;
+        throw new MediaExc("error in MirMedia.getMedia(): " + fname + " does not exist!");
+
+      FileInputStream inputStream;
       try {
-        in = new FileInputStream(f);
-      } catch (IOException e) {
-        throw new MirMediaException("getMedia(): "+e.toString());
+        inputStream = new FileInputStream(f);
       }
-      return in;
+      catch (Throwable e) {
+        throw new MediaFailure("MediaHandlerGeneric.getMedia(): " + e.toString(), e);
+      }
+
+      return inputStream;
     }
 
-    public InputStream getIcon (Entity ent) throws MirMediaException {
+    public InputStream getIcon (Entity ent) throws MediaExc, MediaFailure {
         return null;
     }
 

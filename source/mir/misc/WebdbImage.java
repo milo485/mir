@@ -36,7 +36,7 @@ package mir.misc;
  * Description:
  * Copyright:    Copyright (c) 2002 Mir-coders
  * @author $Author: idfx $
- * @version $Id: WebdbImage.java,v 1.11 2003/02/28 18:27:07 idfx Exp $
+ * @version $Id: WebdbImage.java,v 1.12 2003/03/05 19:23:14 idfx Exp $
  */
 
 import java.io.File;
@@ -49,9 +49,9 @@ import javax.media.jai.JAI;
 import javax.media.jai.ParameterBlockJAI;
 import javax.media.jai.PlanarImage;
 
-import com.sun.media.jai.codec.FileSeekableStream;
-
 import mir.config.MirPropertiesConfiguration;
+
+import com.sun.media.jai.codec.FileSeekableStream;
 
 public class WebdbImage
 {

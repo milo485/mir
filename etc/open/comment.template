@@ -16,7 +16,10 @@
 			<p>
 				<font color="white"">
 					${lang("comment.note")}
-                                        <br>${data.passwd}
+<if data.passwd>					
+          <br>
+          ${data.passwd}
+</if>          
 				</font>
 			</p>
 
@@ -27,12 +30,12 @@
 			<font face="Helvetica, Arial" color="white" size=+2><b>${lang("comment.formtitle")}</b></font>
 		</td>
 	</tr>
-	<if config["PasswdProtection"]=="yes" || config["PasswdProtection"]=="1">
+<if data.passwd>					
 	<tr>
 		<td><td>${lang("comment.password")}:</td>
 		<td><input type="text" name="passwd" size="10"></td>
 	</tr>
-	</if>
+</if>
 	<tr>
  		<td>
 			<b>${lang("comment.title")}:</b>

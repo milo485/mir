@@ -31,51 +31,40 @@
 
 package mircoders.storage;
 
-import mir.log.LoggerWrapper;
 import mir.entity.Entity;
 import mir.entity.EntityRelation;
+import mir.log.LoggerWrapper;
 import mir.storage.Database;
 import mir.storage.StorageObject;
 import mir.storage.StorageObjectFailure;
 
-/**
- * <b>this class implements the access to the content-table</b>
- *
- *
- */
-
 public class DatabaseUploadedMedia extends Database implements StorageObject {
-
   private static DatabaseUploadedMedia  instance;
   private static EntityRelation         relationMediaType;
 
-  // Contructors / Singleton
-
-  public static DatabaseUploadedMedia getInstance()
-    throws StorageObjectFailure {
-
+  public static DatabaseUploadedMedia getInstance() {
     if (instance == null ) {
-      instance = new DatabaseUploadedMedia();
-      instance.myselfDatabase = instance;
+      synchronized(DatabaseUploadedMedia.class) {
+        if (instance == null ) {
+          instance = new DatabaseUploadedMedia();
+          instance.myselfDatabase = instance;
+        }
+      }
     }
+
     return instance;
   }
 
-  private DatabaseUploadedMedia()
-    throws StorageObjectFailure {
-
+  private DatabaseUploadedMedia() {
     super();
 
     logger = new LoggerWrapper("Database.UploadedMedia");
 
-    this.theTable="uploaded_media";
-    this.theCoreTable="media";
+    theTable="uploaded_media";
+    theCoreTable="media";
     relationMediaType = new EntityRelation("to_media_type", "id", DatabaseMediaType.getInstance(), EntityRelation.TO_ONE);
-    try { this.theEntityClass = Class.forName("mircoders.entity.EntityUploadedMedia"); }
-    catch (Exception e) { throw new StorageObjectFailure(e); }
+    theEntityClass = mircoders.entity.EntityUploadedMedia.class;
   }
-
-  // methods
 
 
   /**

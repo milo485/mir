@@ -52,30 +52,25 @@ public class DatabaseComment extends Database implements StorageObject{
 
   private static DatabaseComment instance;
 
-  // the following *has* to be sychronized cause this static method
-  // could get preemted and we could end up with 2 instances of DatabaseFoo..
-  // see the "Singletons with needles and thread" article at JavaWorld -mh
-  public synchronized static DatabaseComment getInstance() throws
-      StorageObjectFailure {
+  public static DatabaseComment getInstance() {
     if (instance == null) {
-      instance = new DatabaseComment();
-      instance.myselfDatabase = instance;
+      synchronized (DatabaseComment.class) {
+        if (instance == null) {
+          instance = new DatabaseComment();
+          instance.myselfDatabase = instance;
+        }
+      }
     }
     return instance;
   }
 
-  private DatabaseComment() throws StorageObjectFailure {
+  private DatabaseComment() {
     super();
     hasTimestamp = false;
     theTable = "comment";
     logger = new LoggerWrapper("Database.Comment");
 
-    try {
-      this.theEntityClass = Class.forName("mircoders.entity.EntityComment");
-    }
-    catch (Exception e) {
-      throw new StorageObjectFailure(e);
-    }
+    this.theEntityClass = mircoders.entity.EntityComment.class;
   }
 
   public SimpleList getPopupData() throws StorageObjectFailure {

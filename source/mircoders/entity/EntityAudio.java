@@ -32,7 +32,7 @@
 package mircoders.entity;
 
 import java.sql.SQLException;
-import java.util.HashMap;
+import java.util.Map;
 
 import mir.storage.StorageObject;
 import mir.storage.StorageObjectFailure;
@@ -41,7 +41,7 @@ import mir.storage.StorageObjectFailure;
  * This class handles storage of audio data and meta data
  *
  * @author mh
- * @version $Id: EntityAudio.java,v 1.6 2003/02/23 05:00:13 zapata Exp $
+ * @version $Id: EntityAudio.java,v 1.9 2003/03/16 19:54:45 zapata Exp $
  */
 
 
@@ -56,17 +56,7 @@ public class EntityAudio extends EntityUploadedMedia
     setStorage(theStorage);
   }
 
-  public void update() throws StorageObjectFailure {
-    super.update();
-    try {
-      theStorageObject.executeUpdate("update content set is_produced='0' where existto_media=" + getId());
-    }
-    catch (SQLException e) {
-      throwStorageObjectFailure(e, "EntityAudio :: update :: failed!! ");
-    }
-  }
-
-  public void setValues(HashMap theStringValues) {
+  public void setValues(Map theStringValues) {
     if (theStringValues != null) {
       if (!theStringValues.containsKey("is_published"))
         theStringValues.put("is_published", "0");

@@ -6,7 +6,7 @@
 
 <body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
 
-<include "templates/admin/head.template">
+<include "head.template">
 
 <table border="0" cellpadding="2" cellspacing="1">
   <tr>
@@ -110,6 +110,6 @@
   <tr><td align="center">${lang("no_matches_found")}</td></tr>
 </if>
 </table>
-<include "templates/admin/foot.template">
+<include "foot.template">
 </body>
 </html>

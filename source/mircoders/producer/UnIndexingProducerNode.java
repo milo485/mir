@@ -31,12 +31,10 @@
 
 package mircoders.producer;
 
-import java.io.PrintWriter;
 import java.util.Map;
 
 import mir.entity.Entity;
 import mir.entity.adapter.EntityAdapter;
-import mir.log.LoggerToWriterAdapter;
 import mir.log.LoggerWrapper;
 import mir.producer.ProducerFailure;
 import mir.producer.ProducerNode;
@@ -80,13 +78,13 @@ public class UnIndexingProducerNode implements ProducerNode {
       aLogger.info("UnIndexing " + (String) entity.getValue("id") + " out of " + index);
 
       IndexUtil.unindexEntity((EntityContent) entity,index);
-      
+
     }
     catch (Throwable t) {
       aLogger.error("Error while unindexing content: " + t.getMessage());
-      t.printStackTrace(new PrintWriter(new LoggerToWriterAdapter(aLogger, LoggerWrapper.DEBUG_MESSAGE)));
+      t.printStackTrace(aLogger.asPrintWriter(LoggerWrapper.DEBUG_MESSAGE));
     }
-    
+
     endTime = System.currentTimeMillis();
 
     aLogger.info("  UnIndexTime: " + (endTime-startTime) + " ms<br>");

@@ -7,7 +7,7 @@
 
 <body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
 
-<include "templates/admin/head.template">
+<include "head.template">
 <table width="98%" class="pink">
   <tr>
     <td>
@@ -100,7 +100,7 @@ ${i.content_data_parsed}
 </if>
 
 
-<include "templates/admin/foot.template">
+<include "foot.template">
 
 </body>
 </html>

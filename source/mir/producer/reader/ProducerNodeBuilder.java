@@ -35,7 +35,7 @@ import java.util.Map;
 import java.util.Set;
 
 import mir.producer.ProducerNode;
-import mir.util.*;
+import mir.util.XMLReader;
 
 public interface ProducerNodeBuilder  {
   public void setAttributes(Map anAttributes) throws ProducerConfigExc, XMLReader.XMLReaderExc;

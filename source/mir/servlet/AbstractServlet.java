@@ -31,8 +31,8 @@
 
 package mir.servlet;
 
+import java.io.IOException;
 import java.util.Locale;
-
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -40,14 +40,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.codestudio.util.JDBCPool;
+import com.codestudio.util.JDBCPoolMetaData;
+import com.codestudio.util.SQLManager;
 import mir.config.MirPropertiesConfiguration;
 import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
 import mir.log.LoggerWrapper;
 import mir.storage.DatabaseAdaptor;
-
-import com.codestudio.util.JDBCPool;
-import com.codestudio.util.JDBCPoolMetaData;
-import com.codestudio.util.SQLManager;
 
 /**
  * Title:        Mir
@@ -55,13 +54,13 @@ import com.codestudio.util.SQLManager;
  * Copyright:    Copyright (c) 2001, 2002
  * Company:      Mir-coders group
  * @author       idfx, the Mir-coders group
- * @version      $Id: AbstractServlet.java,v 1.22 2003/02/20 16:05:33 zapata Exp $
+ * @version      $Id: AbstractServlet.java,v 1.26 2003/03/19 15:34:52 rk Exp $
  */
 
 public abstract class AbstractServlet extends HttpServlet {
-    protected static String lang;
-    protected LoggerWrapper logger;
-    protected MirPropertiesConfiguration configuration;
+  protected static String lang;
+  protected LoggerWrapper logger;
+  protected MirPropertiesConfiguration configuration;
 
   /**
    * Constructor for AbstractServlet.
@@ -71,100 +70,107 @@ public abstract class AbstractServlet extends HttpServlet {
     logger = new LoggerWrapper("Servlet");
   }
 
-    protected void setNoCaching(HttpServletResponse res) {
-      //nothing in Mir can or should be cached as it's all dynamic...
-      //
-      //this needs to be done here and not per page (via meta tags) as some
-      //browsers have problems w/ it per-page -mh
-      res.setHeader("Pragma", "no-cache");
-      res.setDateHeader("Expires", 0);
-      res.setHeader("Cache-Control", "no-cache");
+  protected void setNoCaching(HttpServletResponse aResponse) {
+    //nothing in Mir can or should be cached as it's all dynamic...
+    //
+    //this needs to be done here and not per page (via meta tags) as some
+    //browsers have problems w/ it per-page -mh
+    aResponse.setHeader("Pragma", "no-cache");
+    aResponse.setDateHeader("Expires", 0);
+    aResponse.setHeader("Cache-Control", "no-cache");
+  }
+
+  /**
+   * Bind the language to the session
+   */
+  protected void setLanguage(HttpSession session, String language) {
+    logger.debug("setting language to " + language);
+
+    session.setAttribute("language", language);
+    session.setAttribute("locale", new Locale(language, ""));
+  }
+
+  /**
+   * Get the session-bound language
+   */
+  protected String getLanguage(HttpServletRequest aRequest, HttpSession session) {
+    String lang = (String) session.getAttribute("language");
+
+    if (lang == null || lang.length()==0) {
+      lang = getAcceptLanguage(aRequest);
     }
 
-    /**
-     * Bind the language to the session
-     */
-    protected void setLanguage(HttpSession session, String language) {
-        session.setAttribute("Language", language);
+    return lang;
+  }
+
+  /**
+   * get the locale either from the session or the accept-language header ot the request
+   * this supersedes getLanguage for the new i18n
+   */
+  public Locale getLocale(HttpServletRequest aRequest) {
+    Locale loc = null;
+    HttpSession session = aRequest.getSession(false);
+    if (session != null) {
+      // session can be null in case of logout
+      loc = (Locale) session.getAttribute("locale");
+    }
+    // if there is nothing in the session get it fron the accept-language
+    if (loc == null) {
+      loc = aRequest.getLocale();
     }
 
-    protected void setLocale(HttpSession session, Locale loc) {
-        session.setAttribute("Locale", loc);
-    }
+    logger.debug("getting locale: " + loc.getLanguage());
 
-    /**
-     * Get the session-bound language
-     */
-    protected String getLanguage(HttpServletRequest req, HttpSession session) {
-        String lang = (String) session.getAttribute("Language");
-        if (lang == null || lang.equals("")) {
-            return getAcceptLanguage(req);
-        }
-        else {
-            return lang;
-        }
-    }
+    return loc;
+  }
 
-    /**
-     * get the locale either from the session or the accept-language header ot the request
-     * this supersedes getLanguage for the new i18n
-     */
-    public Locale getLocale(HttpServletRequest req) {
-        Locale loc=null;
-        HttpSession session = req.getSession(false);
-        if (session!=null) {
-            // session can be null in case of logout
-            loc = (Locale) session.getAttribute("Locale");
-        }
-        // if there is nothing in the session get it fron the accept-language
-        if (loc == null) {
-            loc = req.getLocale();
-        }
-        return loc;
-    }
+  /**
+   * Checks the Accept-Language of the client browser.
+   * If this language is available it returns its country-code,
+   * else it returns the standard-language
+   */
+  protected String getAcceptLanguage(HttpServletRequest aRequest) {
+    Locale loc = aRequest.getLocale();
+    lang = loc.getLanguage();
+    return lang;
+  }
 
-    /**
-     * Checks the Accept-Language of the client browser.
-     * If this language is available it returns its country-code,
-     * else it returns the standard-language
-     */
-    protected String getAcceptLanguage(HttpServletRequest req) {
-        Locale loc = req.getLocale();
-        lang = loc.getLanguage();
-        return lang;
-    }
   /**
    * @see javax.servlet.Servlet#init(javax.servlet.ServletConfig)
    */
   public void init(ServletConfig config) throws ServletException {
     super.init(config);
+
     MirPropertiesConfiguration.setContext(config.getServletContext());
     try {
       configuration = MirPropertiesConfiguration.instance();
-    } catch (PropertiesConfigExc e) {
+    }
+    catch (PropertiesConfigExc e) {
       throw new ServletException(e);
     }
 
-    String dbUser=configuration.getString("Database.Username");
-    String dbPassword=configuration.getString("Database.Password");
-    String dbHost=configuration.getString("Database.Host");
-    String dbAdapName=configuration.getString("Database.Adaptor");
-    String dbName=configuration.getString("Database.Name");
+    String dbUser = configuration.getString("Database.Username");
+    String dbPassword = configuration.getString("Database.Password");
+    String dbHost = configuration.getString("Database.Host");
+    String dbAdapName = configuration.getString("Database.Adaptor");
+    String dbName = configuration.getString("Database.Name");
 
     DatabaseAdaptor adaptor;
     try {
-      adaptor = (DatabaseAdaptor)Class.forName(dbAdapName).newInstance();
-    } catch (Exception e) {
-      throw new ServletException("Could not load DB adapator: "+
-                                        e.toString());
+      adaptor = (DatabaseAdaptor) Class.forName(dbAdapName).newInstance();
+    }
+    catch (Exception e) {
+      throw new ServletException("Could not load DB adapator: " +
+                                 e.toString());
     }
 
     String dbDriver;
     String dbUrl;
-    try{
-      dbDriver=adaptor.getDriver();
-      dbUrl=adaptor.getURL(dbUser,dbPassword, dbHost);
-    } catch (Exception e) {
+    try {
+      dbDriver = adaptor.getDriver();
+      dbUrl = adaptor.getURL(dbUser, dbPassword, dbHost);
+    }
+    catch (Exception e) {
       throw new ServletException(e);
     }
 
@@ -185,9 +191,24 @@ public abstract class AbstractServlet extends HttpServlet {
 
     SQLManager manager = SQLManager.getInstance();
     JDBCPool pool = null;
-    if(manager != null){
+    if (manager != null) {
       pool = manager.createPool(meta);
     }
   }
+
+
+  protected final void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    doPost(request, response);
+  }
+
+  protected final void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    if ( (configuration.getString("RootUri") == null) ||
+        configuration.getString("RootUri").equals("")) {
+      configuration.setProperty("RootUri", request.getContextPath());
+    }
+    process(request, response);
+  }
+
+  abstract public void process(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException;
 
 }

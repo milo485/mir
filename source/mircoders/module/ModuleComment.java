@@ -31,17 +31,14 @@
 
 package mircoders.module;
 
-import java.io.PrintWriter;
-import java.util.HashMap;
+import java.util.Map;
 
 import mir.entity.Entity;
-import mir.log.LoggerToWriterAdapter;
 import mir.log.LoggerWrapper;
 import mir.module.AbstractModule;
-import mir.module.ModuleException;
+import mir.module.ModuleExc;
+import mir.module.ModuleFailure;
 import mir.storage.StorageObject;
-import mir.storage.StorageObjectExc;
-import mir.storage.StorageObjectFailure;
 import mircoders.storage.DatabaseComment;
 import mircoders.storage.DatabaseContent;
 import freemarker.template.SimpleList;
@@ -57,24 +54,22 @@ public class ModuleComment extends AbstractModule
 {
   static LoggerWrapper logger = new LoggerWrapper("Module.Comment");
 
-  // Contructor
   public ModuleComment(StorageObject theStorage)
   {
     if (theStorage == null) logger.warn("StorageObject was null!");
     this.theStorage = theStorage;
   }
 
-  // Methoden
-  public SimpleList getCommentAsSimpleList() throws ModuleException {
+  public SimpleList getCommentAsSimpleList() throws ModuleExc, ModuleFailure {
     try {
       return ((DatabaseComment)theStorage).getPopupData();
     }
-    catch (StorageObjectFailure e) {
-      throw new ModuleException(e.toString());
+    catch (Throwable e) {
+      throw new ModuleFailure(e);
     }
   }
 
-  public void deleteById (String anId) throws ModuleException {
+  public void deleteById (String anId) throws ModuleExc, ModuleFailure {
     try {
       Entity theEntity = theStorage.selectById((String)anId);
       if (theEntity != null)
@@ -82,33 +77,31 @@ public class ModuleComment extends AbstractModule
 
       super.deleteById(anId);
     }
-    catch (StorageObjectFailure e){
-      throw new ModuleException(e.toString());
-    } catch (StorageObjectExc e) {
-      throw new ModuleException(e.toString());
+    catch (Throwable e) {
+      throw new ModuleFailure(e);
     }
   }
 
   /**
-   * setValues in the Entity and updates them on the StorageObject
+   *
+   * @param theValues
+   * @return
+   * @throws ModuleExc
+   * @throws ModuleFailure
    */
-  public String set(HashMap theValues) throws ModuleException {
+
+  public String set(Map theValues) throws ModuleExc, ModuleFailure {
     try {
       Entity theEntity = theStorage.selectById((String)theValues.get("id"));
       if (theEntity == null)
-         throw new ModuleException("No Object in the database with id " + theValues.get("id"));
+         throw new ModuleExc("No Object in the database with id " + theValues.get("id"));
       DatabaseContent.getInstance().setUnproduced("id=" + theEntity.getValue("to_media"));
       theEntity.setValues(theValues);
       theEntity.update();
       return theEntity.getId();
     }
-    catch (StorageObjectFailure e){
-      logger.error("ModuleComment.set: " + e.getMessage());
-      e.printStackTrace(new PrintWriter(new LoggerToWriterAdapter(logger, LoggerWrapper.DEBUG_MESSAGE)));
-
-      throw new ModuleException(e.toString());
-    } catch (StorageObjectExc e) {
-      throw new ModuleException(e.toString());
+    catch (Throwable e) {
+      throw new ModuleFailure(e);
     }
   }
 }

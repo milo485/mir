@@ -1,6 +1,6 @@
 package mir.log;
 
-import java.io.*;
+import java.io.PrintWriter;
 
 public class LoggerWrapper {
   private Object object;

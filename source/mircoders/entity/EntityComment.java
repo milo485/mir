@@ -31,7 +31,7 @@
 
 package mircoders.entity;
 
-import java.util.HashMap;
+import java.util.Map;
 
 import mir.entity.Entity;
 import mir.storage.StorageObject;
@@ -39,8 +39,8 @@ import mir.storage.StorageObject;
 /**
  * This class maps one line of the comment-table to a java-object.
  *
- * @author $Author: idfx $
- * @version $Revision: 1.13 $ $Date: 2003/01/25 17:50:34 $
+ * @author $Author: zapata $
+ * @version $Revision: 1.14 $ $Date: 2003/03/04 22:00:52 $
  */
 
 
@@ -61,7 +61,7 @@ public class EntityComment extends Entity
   /**
    * overridden method setValues to patch creator_main_url
    */
-  public void setValues(HashMap theStringValues)
+  public void setValues(Map theStringValues)
   {
     if (theStringValues != null) {
       if (!theStringValues.containsKey("is_published")) {

@@ -31,16 +31,18 @@
 
 package mircoders.servlet;
 
-import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import mir.log.LoggerWrapper;
-import mir.module.ModuleException;
 import mir.servlet.ServletModule;
-import mir.servlet.ServletModuleException;
+import mir.servlet.ServletModuleExc;
+import mir.servlet.ServletModuleFailure;
+import mir.servlet.ServletModuleUserExc;
 import mir.storage.StorageObjectFailure;
+import mir.util.HTTPRequestParser;
 import mircoders.module.ModuleUsers;
 import mircoders.storage.DatabaseUsers;
 import freemarker.template.SimpleHash;
@@ -53,7 +55,7 @@ import freemarker.template.SimpleHash;
  * @author RK
  */
 
-public class ServletModuleUsers extends mir.servlet.ServletModule
+public class ServletModuleUsers extends ServletModule
 {
   private static ServletModuleUsers instance = new ServletModuleUsers();
   public static ServletModule getInstance() { return instance; }
@@ -74,40 +76,104 @@ public class ServletModuleUsers extends mir.servlet.ServletModule
     }
   }
 
-  public void edit(HttpServletRequest req, HttpServletResponse res) throws ServletModuleException
+  public void edit(HttpServletRequest req, HttpServletResponse res) throws ServletModuleExc
   {
     String idParam = req.getParameter("id");
 
     if (idParam == null)
-      throw new ServletModuleException("ServletModuleUser.edit: invalid call: (id) not specified");
+      throw new ServletModuleExc("ServletModuleUser.edit: invalid call: (id) not specified");
 
     try {
       deliver(req, res, mainModule.getById(idParam), templateObjektString);
     }
-    catch (ModuleException e) {
-      throw new ServletModuleException(e.toString());
+    catch (Throwable e) {
+      throw new ServletModuleFailure(e);
     }
   }
 
   public void add(HttpServletRequest req, HttpServletResponse res)
-      throws ServletModuleException
+      throws ServletModuleExc
   {
     try {
       SimpleHash mergeData = new SimpleHash();
       mergeData.put("new", "1");
       deliver(req, res, mergeData, templateObjektString);
     }
-    catch (Exception e) { throw new ServletModuleException(e.toString());}
+    catch (Throwable e) {
+      throw new ServletModuleFailure(e);
+    }
   }
 
-  public void insert(HttpServletRequest req, HttpServletResponse res)
-      throws ServletModuleException
+  public String checkPassword(HTTPRequestParser aRequestParser) throws ServletModuleExc, ServletModuleUserExc, ServletModuleFailure
+  {
+    if ( (aRequestParser.getParameter("newpassword") != null &&
+          aRequestParser.getParameter("newpassword").length() > 0) ||
+        (aRequestParser.getParameter("newpassword2") != null &&
+         aRequestParser.getParameter("newpassword2").length() > 0)
+        ) {
+      String newPassword = aRequestParser.getParameterWithDefault("newpassword", "");
+      String newPassword2 = aRequestParser.getParameterWithDefault("newpassword2", "");
+
+      if (newPassword.length() == 0 || newPassword2.length() == 0) {
+        throw new ServletModuleUserExc("user.error.missingpasswords", new String[] {});
+      }
+
+      if (!newPassword.equals(newPassword2)) {
+        throw new ServletModuleUserExc("user.error.passwordmismatch", new String[] {});
+      }
+
+      return newPassword;
+    }
+    else
+      return null;
+  }
+
+  public void insert(HttpServletRequest aRequest, HttpServletResponse aResponse)
+      throws ServletModuleExc, ServletModuleUserExc, ServletModuleFailure
   {
     try {
-      HashMap withValues = getIntersectingValues(req, mainModule.getStorageObject());
+      HTTPRequestParser requestParser = new HTTPRequestParser(aRequest);
+      Map withValues = getIntersectingValues(aRequest, mainModule.getStorageObject());
+
+      String newPassword=checkPassword(requestParser);
+      if (newPassword!=null)
+        withValues.put("password", newPassword);
+      else
+        throw new ServletModuleUserExc("user.error.missingpassword", new String[] {});
+
       String id = mainModule.add(withValues);
-      deliver(req, res, mainModule.getById(id), templateObjektString);
+      if (requestParser.hasParameter("returnurl"))
+        redirect(aResponse, requestParser.getParameter("returnurl"));
+      else
+        list(aRequest, aResponse);
     }
-    catch (Exception e) { throw new ServletModuleException(e.toString());}
+    catch (Throwable e) {
+      throw new ServletModuleFailure(e);
+    }
   }
+
+  public void update(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc, ServletModuleUserExc, ServletModuleFailure
+  {
+    try {
+      HTTPRequestParser requestParser = new HTTPRequestParser(aRequest);
+
+      Map withValues = getIntersectingValues(aRequest, mainModule.getStorageObject());
+
+      String newPassword=checkPassword(requestParser);
+      if (newPassword!=null)
+        withValues.put("password", newPassword);
+
+      mainModule.set(withValues);
+
+      if (requestParser.hasParameter("returnurl"))
+        redirect(aResponse, requestParser.getParameter("returnurl"));
+      else
+        list(aRequest, aResponse);
+    }
+    catch (Throwable e) {
+      throw new ServletModuleFailure(e);
+    }
+  }
+
+
 }

@@ -36,10 +36,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.HashMap;
+import java.util.Map;
 
-import mir.log.LoggerWrapper;
 import mir.entity.Entity;
+import mir.log.LoggerWrapper;
 import mir.storage.Database;
 import mir.storage.StorageObject;
 import mir.storage.StorageObjectFailure;
@@ -90,7 +90,7 @@ public class DatabaseLinksImcs extends Database implements StorageObject {
     //cache
     invalidatePopupCache();
     try {
-      HashMap theEntityValues = theEntity.getValues();
+      Map theEntityValues = theEntity.getValues();
       List streamedInput = theEntity.streamedInput();
       StringBuffer f = new StringBuffer();
       StringBuffer v = new StringBuffer();
@@ -177,7 +177,7 @@ public class DatabaseLinksImcs extends Database implements StorageObject {
     Connection con = null;
     PreparedStatement pstmt = null;
     List streamedInput = theEntity.streamedInput();
-    HashMap theEntityValues = theEntity.getValues();
+    Map theEntityValues = theEntity.getValues();
     String id = theEntity.getId();
     String aField;
     StringBuffer fv = new StringBuffer();
