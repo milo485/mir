@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001, 2002  The Mir-coders group
+ * Copyright (C) 2001, 2002 The Mir-coders group
  *
  * This file is part of Mir.
  *
@@ -18,15 +18,14 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with the com.oreilly.servlet library, any library
- * licensed under the Apache Software License, The Sun (tm) Java Advanced
- * Imaging library (JAI), The Sun JIMI library (or with modified versions of
- * the above that use the same license as the above), and distribute linked
- * combinations including the two.  You must obey the GNU General Public
- * License in all respects for all of the code used other than the above
- * mentioned libraries.  If you modify this file, you may extend this exception
- * to your version of the file, but you are not obligated to do so.  If you do
- * not wish to do so, delete this exception statement from your version.
+ * the code of this program with  any library licensed under the Apache Software License, 
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
+ * (or with modified versions of the above that use the same license as the above), 
+ * and distribute linked combinations including the two.  You must obey the 
+ * GNU General Public License in all respects for all of the code used other than 
+ * the above mentioned libraries.  If you modify this file, you may extend this 
+ * exception to your version of the file, but you are not obligated to do so.  
+ * If you do not wish to do so, delete this exception statement from your version.
  */
 
 package mircoders.servlet;
@@ -37,12 +36,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.lucene.index.IndexReader;
-import freemarker.template.SimpleHash;
 import mir.entity.adapter.EntityAdapterModel;
 import mir.entity.adapter.EntityIteratorAdapter;
 import mir.log.LoggerWrapper;
@@ -65,11 +63,15 @@ import mircoders.storage.DatabaseContent;
 import mircoders.storage.DatabaseContentToMedia;
 import mircoders.storage.DatabaseContentToTopics;
 
+import org.apache.lucene.index.IndexReader;
+
+import freemarker.template.SimpleHash;
+
 /*
  *  ServletModuleContent -
  *  deliver html for the article admin form.
  *
- * @version $Id: ServletModuleContent.java,v 1.48 2003/04/10 03:31:47 zapata Exp $
+ * @version $Id: ServletModuleContent.java,v 1.50 2003/04/21 12:42:51 idfx Exp $
  * @author rk, mir-coders
  *
  */
@@ -187,7 +189,9 @@ public class ServletModuleContent extends ServletModule
         withValues.put("is_html","0");
 
       String id = mainModule.add(withValues);
-      DatabaseContentToTopics.getInstance().setTopics(id,req.getParameterValues("to_topic"));
+      List topics;
+
+      DatabaseContentToTopics.getInstance().setTopics(id, req.getParameterValues("to_topic"));
 
       _showObject(id, req, res);
     }
@@ -310,7 +314,7 @@ public class ServletModuleContent extends ServletModule
         throw new ServletModuleExc("Wrong call: (id) is missing");
 
       Map withValues = getIntersectingValues(aRequest, DatabaseContent.getInstance());
-      String[] topic_id = aRequest.getParameterValues("to_topic");
+
       String content_id = aRequest.getParameter("id");
 
       withValues.put("is_produced", "0");
@@ -320,7 +324,7 @@ public class ServletModuleContent extends ServletModule
         withValues.put("is_html","0");
 
       String id = mainModule.set(withValues);
-      DatabaseContentToTopics.getInstance().setTopics(aRequest.getParameter("id"),topic_id);
+      DatabaseContentToTopics.getInstance().setTopics(aRequest.getParameter("id"), aRequest.getParameterValues("to_topic"));
 
       String whereParam = aRequest.getParameter("where");
       String orderParam = aRequest.getParameter("order");
@@ -336,12 +340,18 @@ public class ServletModuleContent extends ServletModule
     }
   }
 
-/*
-  * HelperMethod shows the basic article editing form.
-  *
-  * if the "id" parameter is null, it means show an empty form to add a new
-  * article.
-*/
+
+  /**
+   * HelperMethod shows the basic article editing form.
+   *
+   * if the "id" parameter is null, it means show an empty form to add a new
+   * article.
+   *
+   * @param id
+   * @param aRequest
+   * @param aResponse
+   * @throws ServletModuleExc
+   */
   public void _showObject(String id, HttpServletRequest aRequest, HttpServletResponse aResponse)
       throws ServletModuleExc {
     try {

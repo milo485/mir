@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001, 2002  The Mir-coders group
+ * Copyright (C) 2001, 2002 The Mir-coders group
  *
  * This file is part of Mir.
  *
@@ -18,17 +18,15 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with the com.oreilly.servlet library, any library
- * licensed under the Apache Software License, The Sun (tm) Java Advanced
- * Imaging library (JAI), The Sun JIMI library (or with modified versions of
- * the above that use the same license as the above), and distribute linked
- * combinations including the two.  You must obey the GNU General Public
- * License in all respects for all of the code used other than the above
- * mentioned libraries.  If you modify this file, you may extend this exception
- * to your version of the file, but you are not obligated to do so.  If you do
- * not wish to do so, delete this exception statement from your version.
+ * the code of this program with  any library licensed under the Apache Software License,
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library
+ * (or with modified versions of the above that use the same license as the above),
+ * and distribute linked combinations including the two.  You must obey the
+ * GNU General Public License in all respects for all of the code used other than
+ * the above mentioned libraries.  If you modify this file, you may extend this
+ * exception to your version of the file, but you are not obligated to do so.
+ * If you do not wish to do so, delete this exception statement from your version.
  */
-
 package mircoders.localizer.basic;
 
 import java.util.GregorianCalendar;
@@ -42,6 +40,7 @@ import mir.entity.adapter.EntityIteratorAdapter;
 import mir.log.LoggerWrapper;
 import mir.misc.StringUtil;
 import mir.util.DateToMapAdapter;
+import mir.util.GeneratorExpressionFunctions;
 import mir.util.GeneratorHTMLFunctions;
 import mir.util.GeneratorIntegerFunctions;
 import mir.util.GeneratorListFunctions;
@@ -87,6 +86,7 @@ public class MirBasicProducerAssistantLocalizer implements MirProducerAssistantL
       utilityMap.put("subList", new GeneratorListFunctions.subListFunction());
       utilityMap.put("isOdd", new GeneratorIntegerFunctions.isOddFunction());
       utilityMap.put("increment", new GeneratorIntegerFunctions.incrementFunction());
+      utilityMap.put("evaluate", new GeneratorExpressionFunctions.evaluateExpressionFunction());
 
       aValueSet.put("config", configMap);
       aValueSet.put("utility", utilityMap);
@@ -128,13 +128,17 @@ public class MirBasicProducerAssistantLocalizer implements MirProducerAssistantL
 
   };
 
-  public String filterText(String aText) {
+  public String filterNonHTMLText(String aText) {
     return StringUtil.createHTML(
-        StringUtil.deleteForbiddenTags(aText),
+        StringUtil.removeHTMLTags(aText),
         MirGlobal.config().getString("Producer.ImageRoot"),
         MirGlobal.config().getString("Producer.MailLinkName"),
         MirGlobal.config().getString("Producer.ExtLinkName"),
         MirGlobal.config().getString("Producer.IntLinkName")
     );
+  }
+
+  public String filterHTMLText(String aText) {
+    return StringUtil.deleteForbiddenTags(aText);
   }
 }

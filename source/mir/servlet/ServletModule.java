@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001, 2002  The Mir-coders group
+ * Copyright (C) 2001, 2002 The Mir-coders group
  *
  * This file is part of Mir.
  *
@@ -18,17 +18,15 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with the com.oreilly.servlet library, any library
- * licensed under the Apache Software License, The Sun (tm) Java Advanced
- * Imaging library (JAI), The Sun JIMI library (or with modified versions of
- * the above that use the same license as the above), and distribute linked
- * combinations including the two.  You must obey the GNU General Public
- * License in all respects for all of the code used other than the above
- * mentioned libraries.  If you modify this file, you may extend this exception
- * to your version of the file, but you are not obligated to do so.  If you do
- * not wish to do so, delete this exception statement from your version.
+ * the code of this program with  any library licensed under the Apache Software License, 
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
+ * (or with modified versions of the above that use the same license as the above), 
+ * and distribute linked combinations including the two.  You must obey the 
+ * GNU General Public License in all respects for all of the code used other than 
+ * the above mentioned libraries.  If you modify this file, you may extend this 
+ * exception to your version of the file, but you are not obligated to do so.  
+ * If you do not wish to do so, delete this exception statement from your version.
  */
-
 package mir.servlet;
 
 import java.io.PrintWriter;
@@ -36,12 +34,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import freemarker.template.SimpleHash;
-import freemarker.template.TemplateModelRoot;
 import mir.config.MirPropertiesConfiguration;
 import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
 import mir.entity.EntityList;
@@ -51,6 +48,8 @@ import mir.misc.LineFilterWriter;
 import mir.module.AbstractModule;
 import mir.storage.StorageObject;
 import mir.util.HTTPRequestParser;
+import freemarker.template.SimpleHash;
+import freemarker.template.TemplateModelRoot;
 
 
 
@@ -456,16 +455,7 @@ public abstract class ServletModule {
       HTTPRequestParser parser;
       List theFieldList;
 
-      logger.debug("using charset: " + req.getParameter("charset"));
-      logger.debug("using method: " + req.getParameter("do"));
-      if (req.getParameter("charset") != null) {
-        parser = new HTTPRequestParser(req, req.getParameter("charset"));
-        logger.debug("using charset: " + req.getParameter("charset"));
-        logger.debug("original charset: " + req.getCharacterEncoding());
-      }
-      else {
-        parser = new HTTPRequestParser(req);
-      }
+      parser = new HTTPRequestParser(req);
 
       theFieldList = theStorage.getFields();
 
@@ -487,5 +477,4 @@ public abstract class ServletModule {
       throw new ServletModuleFailure( "ServletModule.getIntersectingValues: " + e.getMessage(), e);
     }
   }
-
 }

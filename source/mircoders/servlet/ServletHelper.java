@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001, 2002  The Mir-coders group
+ * Copyright (C) 2001, 2002 The Mir-coders group
  *
  * This file is part of Mir.
  *
@@ -18,17 +18,15 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with the com.oreilly.servlet library, any library
- * licensed under the Apache Software License, The Sun (tm) Java Advanced
- * Imaging library (JAI), The Sun JIMI library (or with modified versions of
- * the above that use the same license as the above), and distribute linked
- * combinations including the two.  You must obey the GNU General Public
- * License in all respects for all of the code used other than the above
- * mentioned libraries.  If you modify this file, you may extend this exception
- * to your version of the file, but you are not obligated to do so.  If you do
- * not wish to do so, delete this exception statement from your version.
+ * the code of this program with  any library licensed under the Apache Software License, 
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
+ * (or with modified versions of the above that use the same license as the above), 
+ * and distribute linked combinations including the two.  You must obey the 
+ * GNU General Public License in all respects for all of the code used other than 
+ * the above mentioned libraries.  If you modify this file, you may extend this 
+ * exception to your version of the file, but you are not obligated to do so.  
+ * If you do not wish to do so, delete this exception statement from your version.
  */
-
 package mircoders.servlet;
 
 import java.io.PrintWriter;
@@ -36,19 +34,23 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import org.apache.struts.util.MessageResources;
 import mir.entity.adapter.EntityIteratorAdapter;
 import mir.generator.Generator;
+import mir.log.LoggerWrapper;
 import mir.servlet.ServletModuleExc;
 import mir.servlet.ServletModuleFailure;
 import mir.util.CachingRewindableIterator;
-import mir.util.NullWriter;
 import mir.util.ResourceBundleGeneratorFunction;
 import mircoders.global.MirGlobal;
+
+import org.apache.struts.util.MessageResources;
 
 
 
 public class ServletHelper {
+  static LoggerWrapper logger = new LoggerWrapper("ServletModule.Helper");
+
+
   public static Map makeGenerationData(Locale[] aLocales) throws ServletModuleExc {
     return makeGenerationData(aLocales, "bundles.adminlocal", "bundles.admin");
   }
@@ -108,7 +110,7 @@ public class ServletHelper {
     try {
       generator = MirGlobal.localizer().generators().makeAdminGeneratorLibrary().makeGenerator(aGenerator);
 
-      generator.generate(aWriter, aGenerationData, new PrintWriter(new NullWriter()));
+      generator.generate(aWriter, aGenerationData, logger);
     }
     catch (Throwable t) {
       throw new ServletModuleFailure(t);
@@ -121,7 +123,7 @@ public class ServletHelper {
     try {
       generator = MirGlobal.localizer().generators().makeOpenPostingGeneratorLibrary().makeGenerator(aGenerator);
 
-      generator.generate(aWriter, aGenerationData, new PrintWriter(new NullWriter()));
+      generator.generate(aWriter, aGenerationData, logger);
     }
     catch (Throwable t) {
       throw new ServletModuleFailure(t);

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001, 2002  The Mir-coders group
+ * Copyright (C) 2001, 2002 The Mir-coders group
  *
  * This file is part of Mir.
  *
@@ -18,43 +18,38 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with the com.oreilly.servlet library, any library
- * licensed under the Apache Software License, The Sun (tm) Java Advanced
- * Imaging library (JAI), The Sun JIMI library (or with modified versions of
- * the above that use the same license as the above), and distribute linked
- * combinations including the two.  You must obey the GNU General Public
- * License in all respects for all of the code used other than the above
- * mentioned libraries.  If you modify this file, you may extend this exception
- * to your version of the file, but you are not obligated to do so.  If you do
- * not wish to do so, delete this exception statement from your version.
+ * the code of this program with  any library licensed under the Apache Software License,
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library
+ * (or with modified versions of the above that use the same license as the above),
+ * and distribute linked combinations including the two.  You must obey the
+ * GNU General Public License in all respects for all of the code used other than
+ * the above mentioned libraries.  If you modify this file, you may extend this
+ * exception to your version of the file, but you are not obligated to do so.
+ * If you do not wish to do so, delete this exception statement from your version.
  */
-
 package mircoders.localizer.basic;
 
 import java.util.List;
-import java.util.Locale;
-import java.util.*;
-import javax.servlet.http.HttpServletRequest;
+import java.util.Random;
 
+import mir.config.MirPropertiesConfiguration;
 import mir.log.LoggerWrapper;
-import mir.servlet.*;
-import mir.config.*;
 import mir.session.Request;
-import mir.session.Response;
-import mir.session.*;
-
+import mir.session.Session;
+import mir.session.SessionHandler;
 import mircoders.entity.EntityComment;
 import mircoders.entity.EntityContent;
 import mircoders.global.MirGlobal;
 import mircoders.global.ProducerEngine;
-import mircoders.localizer.*;
+import mircoders.localizer.MirLocalizerExc;
+import mircoders.localizer.MirLocalizerFailure;
+import mircoders.localizer.MirOpenPostingLocalizer;
 
 public class MirBasicOpenPostingLocalizer implements MirOpenPostingLocalizer {
   private List afterContentProducerTasks;
   private List afterCommentProducerTasks;
   protected LoggerWrapper logger;
   protected MirPropertiesConfiguration configuration;
-
 
   public MirBasicOpenPostingLocalizer() throws MirLocalizerExc, MirLocalizerFailure {
     logger = new LoggerWrapper("Localizer.Basic.OpenPosting");
@@ -80,9 +75,18 @@ public class MirBasicOpenPostingLocalizer implements MirOpenPostingLocalizer {
     }
   }
 
+  public SessionHandler getOpenSessionHandler(String aSessionType) {
+    if (aSessionType!=null && aSessionType.equals("comment"))
+      return new MirBasicCommentPostingHandler();
+
+    return new MirBasicArticlePostingHandler();
+  }
+
   public SessionHandler getOpenSessionHandler(Request aRequest, Session aSession) throws MirLocalizerExc, MirLocalizerFailure {
     if (aSession.getAttribute("handler")==null)
-      aSession.setAttribute("handler", new MirBasicCommentPostingSessionHandler());
+    {
+      aSession.setAttribute("handler", getOpenSessionHandler(aRequest.getParameter("sessiontype")));
+    }
 
     return (SessionHandler) aSession.getAttribute("handler");
   }

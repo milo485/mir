@@ -18,15 +18,14 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with the com.oreilly.servlet library, any library
- * licensed under the Apache Software License, The Sun (tm) Java Advanced
- * Imaging library (JAI), The Sun JIMI library (or with modified versions of
- * the above that use the same license as the above), and distribute linked
- * combinations including the two.  You must obey the GNU General Public
- * License in all respects for all of the code used other than the above
- * mentioned libraries.  If you modify this file, you may extend this exception
- * to your version of the file, but you are not obligated to do so.  If you do
- * not wish to do so, delete this exception statement from your version.
+ * the code of this program with  any library licensed under the Apache Software License, 
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
+ * (or with modified versions of the above that use the same license as the above), 
+ * and distribute linked combinations including the two.  You must obey the 
+ * GNU General Public License in all respects for all of the code used other than 
+ * the above mentioned libraries.  If you modify this file, you may extend this 
+ * exception to your version of the file, but you are not obligated to do so.  
+ * If you do not wish to do so, delete this exception statement from your version.
  */
 
 import java.io.IOException;
@@ -39,18 +38,15 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Vector;
+
 import javax.servlet.ServletException;
 import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.struts.util.MessageResources;
-import freemarker.template.SimpleHash;
-import freemarker.template.SimpleList;
-import freemarker.template.SimpleScalar;
-import freemarker.template.TemplateModel;
 import mir.config.MirPropertiesConfiguration;
+import mir.entity.adapter.EntityIteratorAdapter;
 import mir.generator.FreemarkerGenerator;
 import mir.log.LoggerWrapper;
 import mir.misc.HTMLTemplateProcessor;
@@ -60,19 +56,22 @@ import mir.servlet.ServletModule;
 import mir.servlet.ServletModuleDispatch;
 import mir.servlet.ServletModuleExc;
 import mir.servlet.ServletModuleUserExc;
+import mir.util.CachingRewindableIterator;
 import mir.util.ExceptionFunctions;
 import mir.util.StringRoutines;
-import mir.util.*;
-import mir.entity.*;
-import mir.entity.adapter.*;
 import mircoders.entity.EntityUsers;
 import mircoders.global.MirGlobal;
 import mircoders.module.ModuleMessage;
 import mircoders.module.ModuleUsers;
-import mircoders.storage.DatabaseArticleType;
-import mircoders.storage.DatabaseMessages;
+import mircoders.servlet.ServletHelper;
 import mircoders.storage.DatabaseUsers;
-import mircoders.servlet.*;
+
+import org.apache.struts.util.MessageResources;
+
+import freemarker.template.SimpleHash;
+import freemarker.template.SimpleList;
+import freemarker.template.SimpleScalar;
+import freemarker.template.TemplateModel;
 
 
 
@@ -80,8 +79,8 @@ import mircoders.servlet.*;
 /**
  * Mir.java - main servlet, that dispatches to servletmodules
  *
- * @author $Author: zapata $
- * @version $Id: Mir.java,v 1.43 2003/04/12 15:29:43 zapata Exp $
+ * @author $Author: idfx $
+ * @version $Id: Mir.java,v 1.45 2003/04/21 12:42:46 idfx Exp $
  *
  */
 public class Mir extends AbstractServlet {

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001, 2002  The Mir-coders group
+ * Copyright (C) 2001, 2002 The Mir-coders group
  *
  * This file is part of Mir.
  *
@@ -18,40 +18,46 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with the com.oreilly.servlet library, any library
- * licensed under the Apache Software License, The Sun (tm) Java Advanced
- * Imaging library (JAI), The Sun JIMI library (or with modified versions of
- * the above that use the same license as the above), and distribute linked
- * combinations including the two.  You must obey the GNU General Public
- * License in all respects for all of the code used other than the above
- * mentioned libraries.  If you modify this file, you may extend this exception
- * to your version of the file, but you are not obligated to do so.  If you do
- * not wish to do so, delete this exception statement from your version.
+ * the code of this program with  any library licensed under the Apache Software License, 
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
+ * (or with modified versions of the above that use the same license as the above), 
+ * and distribute linked combinations including the two.  You must obey the 
+ * GNU General Public License in all respects for all of the code used other than 
+ * the above mentioned libraries.  If you modify this file, you may extend this 
+ * exception to your version of the file, but you are not obligated to do so.  
+ * If you do not wish to do so, delete this exception statement from your version.
  */
-
 package mircoders.pdf;
 
-import mir.log.LoggerWrapper;
+import gnu.regexp.RE;
+import gnu.regexp.REException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 
-
-import gnu.regexp.RE;
-import gnu.regexp.REException;
-
-import com.lowagie.text.*;
-import com.lowagie.text.pdf.*;
-
+import mir.config.MirPropertiesConfiguration;
+import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
 import mir.entity.EntityList;
-
+import mir.log.LoggerWrapper;
 import mircoders.entity.EntityContent;
 import mircoders.entity.EntityImages;
 import mircoders.storage.DatabaseContentToMedia;
 
-import mir.config.MirPropertiesConfiguration;
-import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
+import com.lowagie.text.BadElementException;
+import com.lowagie.text.Document;
+import com.lowagie.text.DocumentException;
+import com.lowagie.text.Element;
+import com.lowagie.text.Font;
+import com.lowagie.text.Image;
+import com.lowagie.text.PageSize;
+import com.lowagie.text.Paragraph;
+import com.lowagie.text.Phrase;
+import com.lowagie.text.pdf.BaseFont;
+import com.lowagie.text.pdf.ColumnText;
+import com.lowagie.text.pdf.PdfContentByte;
+import com.lowagie.text.pdf.PdfTemplate;
+import com.lowagie.text.pdf.PdfWriter;
 
 
 

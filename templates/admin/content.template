@@ -109,7 +109,8 @@
 	</tr>
 	
 	<call TextInputTableRow      (lang("content.title"), 40, 255, "title", article.title)>
-	<call TextInputTableRowLight (lang("content.subtitle"), 20, 20, "subtitle", article.subtitle)>
+	<call TextInputTableRowLight (lang("content.subtitle"), 40, 255, "subtitle", article.subtitle)>
+	<call TextInputTableRowLight (lang("content.edittitle"), 40, 255, "edittitle", article.edittitle)>
   <comment>
 		<call TextInputTableRowLight ("", 20, 20, "subtitle", article.edittitle)>
   </comment>

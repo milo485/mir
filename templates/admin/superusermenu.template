@@ -20,7 +20,6 @@
 		&gt; <a href="${config.actionRoot}?module=Users&do=list">${lang("superusermenu.users")}</a><br>
 		&gt; <a href="${config.actionRoot}?module=Language&do=list">${lang("superusermenu.languages")}</a><br>
 		&gt; <a href="${config.actionRoot}?module=Abuse">${lang("superusermenu.abuse")}</a><br>
-		&gt; <a href="${config.actionRoot}?module=LinksImcs&do=list">${lang("superusermenu.imcs")}</a><br>
 		</p>
 		</td>
       <td>&nbsp;  </td>

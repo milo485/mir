@@ -85,14 +85,14 @@ function openWin(url) {
 	    	</select>
 		</td>
 	</tr>
-
-	<call TextInputTableRow (lang("media.description"), 40, 255, "description", data.description)>
+	
+	<if !data.new>
+	  <call TextInputTableRow (lang("media.title"), 40, 80, "title", data.title)>
+	</if>
 	<call TextInputTableRow (lang("media.date"), 8, 8, "date", data.date)>
-	<call TextInputTableRowLight (lang("year"), 20, 40, "year", data.year)>
-	<call TextInputTableRow (lang("media.location"), 40, 80, "place", data.place)>
 	<call TextInputTableRow (lang("media.creator"), 40, 80, "creator", data.creator)>
-	<call TextAreaTableRow (lang("media.keywords"), "", 40, 2, "keywords", data.keywords)>
-	<call TextAreaTableRow (lang("media.comment"), "", 40, 2, "comment", data.comment)>
+	<call TextAreaTableRow  (lang("media.description"), "", 40, 2, "description", data.description)>
+	<call TextAreaTableRow  (lang("media.comment"), "", 40, 2, "comment", data.comment)>
 	<call TextInputTableRow (lang("media.source"), 40, 80, "source", data.source)>
 	
 	<tr><td colspan="2" class="x-small">&nbsp;</td></tr>
@@ -123,19 +123,10 @@ function openWin(url) {
 			&nbsp;
 		</td>
 		<td class="listrow2">
-			<INPUT TYPE="file" NAME="mpfile${m}"><br>
+			<input type="file" name="media${m}"><br>
 		</td>
 	</tr>
 	</list>
-	<else>
-	<tr>
-		<td align="right" class="table-left">
-			<B>${lang("media.title")}:<B>
-		</td>
-		<td class="listrow2">
-			<input type="text" name="title" size="40" maxlength="80" value="${data.title}">
-		</td>
-	</tr>
 	</if>
 
     <td colspan="2" align="right" class="table-foot">

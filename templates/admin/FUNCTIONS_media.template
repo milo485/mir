@@ -31,7 +31,6 @@
 				<option value="title"<if data.query_field=="title"> selected</if>>${lang("media.title")}</option>
 				<option value="creator"<if data.query_field=="creator"> selected</if>>${lang("media.creator")}</option>
 				<option value="place"<if data.query_field=="place"> selected</if>>${lang("media.location")}</option>
-				<option value="keywords"<if data.query_field=="keywords"> selected</if>>${lang("media.keywords")}</option>
 			</select>
 		</td>
 		

@@ -37,13 +37,11 @@ echo "grant all on img_type        to $3;"   >> ${SCRIPT_FILE}
 echo "grant all on img_color       to $3;"   >> ${SCRIPT_FILE}
 echo "grant all on language        to $3;"   >> ${SCRIPT_FILE}
 echo "grant all on rights          to $3;"   >> ${SCRIPT_FILE}
-echo "grant all on feature         to $3;"   >> ${SCRIPT_FILE}
 echo "grant all on article_type    to $3;"   >> ${SCRIPT_FILE}
 echo "grant all on media           to $3;"   >> ${SCRIPT_FILE}
 echo "grant all on breaking        to $3;"   >> ${SCRIPT_FILE}
 echo "grant all on messages        to $3;"   >> ${SCRIPT_FILE}
 echo "grant all on comment_status  to $3;"   >> ${SCRIPT_FILE}
-echo "grant all on links_imcs      to $3;"   >> ${SCRIPT_FILE}
 echo "grant all on other_media     to $3;"   >> ${SCRIPT_FILE}
 echo "grant all on webdb_users     to $3;"   >> ${SCRIPT_FILE}
 echo "grant all on content_x_topic to $3;"   >> ${SCRIPT_FILE}
@@ -61,14 +59,12 @@ echo "grant all on media_folder    to $3;"   >> ${SCRIPT_FILE}
 
 echo "grant all on media_id_seq    to $3;"   >> ${SCRIPT_FILE}
 echo "grant all on media_folder_id_seq to $3;"   >> ${SCRIPT_FILE}
-echo "grant all on feature_id_seq  to $3;"   >> ${SCRIPT_FILE}
 echo "grant all on topic_id_seq    to $3;"   >> ${SCRIPT_FILE}
 echo "grant all on webdb_users_id_seq to $3;"   >> ${SCRIPT_FILE}
 echo "grant all on comment_id_seq  to $3;"   >> ${SCRIPT_FILE}
 echo "grant all on breaking_id_seq to $3;"   >> ${SCRIPT_FILE}
 echo "grant all on messages_id_seq to $3;"   >> ${SCRIPT_FILE}
 echo "grant all on media_type_id_seq to $3;"   >> ${SCRIPT_FILE}
-echo "grant all on links_imcs_id_seq to $3;"   >> ${SCRIPT_FILE}
 echo "grant all on comment_status_id_seq to $3;"   >> ${SCRIPT_FILE}
 echo "grant all on article_type_id_seq to $3;"   >> ${SCRIPT_FILE}
 echo "grant all on language_id_seq to $3;"   >> ${SCRIPT_FILE}

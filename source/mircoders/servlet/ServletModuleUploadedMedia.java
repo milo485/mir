@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001, 2002  The Mir-coders group
+ * Copyright (C) 2001, 2002 The Mir-coders group
  *
  * This file is part of Mir.
  *
@@ -18,58 +18,65 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with the com.oreilly.servlet library, any library
- * licensed under the Apache Software License, The Sun (tm) Java Advanced
- * Imaging library (JAI), The Sun JIMI library (or with modified versions of
- * the above that use the same license as the above), and distribute linked
- * combinations including the two.  You must obey the GNU General Public
- * License in all respects for all of the code used other than the above
- * mentioned libraries.  If you modify this file, you may extend this exception
- * to your version of the file, but you are not obligated to do so.  If you do
- * not wish to do so, delete this exception statement from your version.
+ * the code of this program with  any library licensed under the Apache Software License,
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library
+ * (or with modified versions of the above that use the same license as the above),
+ * and distribute linked combinations including the two.  You must obey the
+ * GNU General Public License in all respects for all of the code used other than
+ * the above mentioned libraries.  If you modify this file, you may extend this
+ * exception to your version of the file, but you are not obligated to do so.
+ * If you do not wish to do so, delete this exception statement from your version.
  */
 
 package mircoders.servlet;
 
 import java.io.InputStream;
 import java.net.URLEncoder;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Vector;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import freemarker.template.SimpleHash;
-import freemarker.template.SimpleList;
 import mir.config.MirPropertiesConfiguration;
 import mir.entity.Entity;
 import mir.entity.EntityList;
 import mir.log.LoggerWrapper;
 import mir.media.MediaHelper;
 import mir.media.MirMedia;
-import mir.misc.FileHandler;
-import mir.misc.WebdbMultipartRequest;
 import mir.servlet.ServletModule;
 import mir.servlet.ServletModuleExc;
 import mir.servlet.ServletModuleFailure;
 import mir.servlet.ServletModuleUserExc;
+import mir.session.UploadedFile;
 import mir.util.ExceptionFunctions;
+import mir.util.HTTPParsedRequest;
 import mircoders.entity.EntityComment;
 import mircoders.entity.EntityContent;
 import mircoders.entity.EntityUploadedMedia;
 import mircoders.entity.EntityUsers;
-import mircoders.media.MediaRequest;
-import mircoders.media.UnsupportedMediaFormatExc;
+import mircoders.media.MediaUploadProcessor;
+import mircoders.module.*;
 import mircoders.storage.DatabaseComment;
 import mircoders.storage.DatabaseContent;
 import mircoders.storage.DatabaseMediafolder;
+
+import org.apache.commons.fileupload.FileItem;
+
+import freemarker.template.SimpleHash;
+import freemarker.template.SimpleList;
 
 /*
  *  ServletModuleBilder -
  *  liefert HTML fuer Bilder
  *
- * @version $Id: ServletModuleUploadedMedia.java,v 1.24 2003/04/10 03:31:47 zapata Exp $
+ * @version $Id: ServletModuleUploadedMedia.java,v 1.27 2003/04/26 00:42:22 zapata Exp $
  * @author RK, the mir-coders group
  */
 
@@ -90,22 +97,47 @@ public abstract class ServletModuleUploadedMedia
   public void insert(HttpServletRequest req, HttpServletResponse res)
           throws ServletModuleExc, ServletModuleUserExc {
     try {
+      HTTPParsedRequest parsedRequest = new HTTPParsedRequest(req,
+          configuration.getString("Mir.DefaultEncoding"),
+          configuration.getInt("MaxMediaUploadSize")*1024,
+          configuration.getString("TempDir"));
+
       EntityUsers user = _getUser(req);
-      MediaRequest mediaReq =  new MediaRequest(user.getId(), false);
-      WebdbMultipartRequest mp = new WebdbMultipartRequest(req, (FileHandler)mediaReq);
-      EntityList mediaList = mediaReq.getEntityList();
-      String articleid = (String) mp.getParameters().get("articleid");
-      String commentid = (String) mp.getParameters().get("commentid");
+      Map mediaValues = new HashMap();
+
+      mediaValues.put("to_publisher", _getUser(req).getId());
+
+      Iterator i = mainModule.getStorageObject().getFields().iterator();
+      while (i.hasNext()) {
+        String field = (String) i.next();
+        String value = parsedRequest.getParameter(field);
+        if (value!=null)
+          mediaValues.put(field, value);
+      }
+
+      List mediaList = new Vector();
+
+      i = parsedRequest.getFiles().iterator();
+      while (i.hasNext()) {
+        UploadedFile file = new mir.session.CommonsUploadedFileAdapter((FileItem) i.next());
+
+        String suffix = file.getFieldName().substring(5);
+        mediaValues.put("title", parsedRequest.getParameter("media_title" + suffix));
+
+        mediaList.add(MediaUploadProcessor.processMediaUpload(file, mediaValues));
+      }
+
+      String articleid = parsedRequest.getParameter("articleid");
+      String commentid = parsedRequest.getParameter("commentid");
 
       if (articleid!=null) {
         EntityContent entContent = (EntityContent) DatabaseContent.getInstance().selectById(articleid);
 
-        mediaList.rewind();
+        i=mediaList.iterator();
 
-        while (mediaList.hasNext()) {
-          entContent.attach( ( (EntityUploadedMedia) mediaList.next()).getId());
+        while (i.hasNext()) {
+          entContent.attach(((EntityUploadedMedia) i.next()).getId());
         }
-        mediaList.rewind();
 
         ((ServletModuleContent) ServletModuleContent.getInstance())._showObject(articleid, req, res);
 
@@ -115,12 +147,11 @@ public abstract class ServletModuleUploadedMedia
       if (commentid!=null) {
         EntityComment comment = (EntityComment) DatabaseComment.getInstance().selectById(commentid);
 
-        mediaList.rewind();
+        i=mediaList.iterator();
 
-        while (mediaList.hasNext()) {
-          comment.attach( ( (EntityUploadedMedia) mediaList.next()).getId());
+        while (i.hasNext()) {
+          comment.attach( ( (EntityUploadedMedia) i.next()).getId());
         }
-        mediaList.rewind();
 
         ((ServletModuleComment) ServletModuleComment.getInstance()).showComment(commentid, req, res);
 
@@ -129,18 +160,12 @@ public abstract class ServletModuleUploadedMedia
 
       SimpleHash mergeData = new SimpleHash();
       SimpleHash popups = new SimpleHash();
-      mergeData.put("contentlist", mediaList);
-      if (mediaList.getOrder() != null) {
-        mergeData.put("order", mediaList.getOrder());
-        mergeData.put("order_encoded", URLEncoder.encode(mediaList.getOrder()));
-      }
-      mergeData.put("count", (new Integer(mediaList.getCount())).toString());
-      mergeData.put("from", (new Integer(mediaList.getFrom())).toString());
-      mergeData.put("to", (new Integer(mediaList.getTo())).toString());
-      if (mediaList.hasNextBatch())
-        mergeData.put("next", (new Integer(mediaList.getNextBatch())).toString());
-      if (mediaList.hasPrevBatch())
-        mergeData.put("prev", (new Integer(mediaList.getPrevBatch())).toString());
+      mergeData.put("contentlist", mir.generator.FreemarkerGenerator.makeAdapter(mediaList));
+
+      mergeData.put("count", Integer.toString(mediaList.size()));
+      mergeData.put("from", "1");
+      mergeData.put("to", Integer.toString(mediaList.size()));
+
       //fetch the popups
       popups.put("mediafolderPopupData", DatabaseMediafolder.getInstance().getPopupData());
       // raus damit
@@ -149,7 +174,7 @@ public abstract class ServletModuleUploadedMedia
     catch (Throwable t) {
       Throwable cause = ExceptionFunctions.traceCauseException(t);
 
-      if (cause instanceof UnsupportedMediaFormatExc) {
+      if (cause instanceof ModuleMediaType.UnsupportedMimeTypeExc) {
         throw new ServletModuleUserExc("media.error.unsupportedformat", new String[] {});
       }
       throw new ServletModuleFailure("ServletModuleUploadedMedia.insert: " + t.toString(), t);
@@ -159,16 +184,27 @@ public abstract class ServletModuleUploadedMedia
   public void update(HttpServletRequest req, HttpServletResponse res) throws ServletModuleExc {
 
     try {
+      HTTPParsedRequest parsedRequest = new HTTPParsedRequest(req,
+          configuration.getString("Mir.DefaultEncoding"),
+          configuration.getInt("MaxMediaUploadSize")*1024,
+          configuration.getString("TempDir"));
       EntityUsers user = _getUser(req);
-      WebdbMultipartRequest mp = new WebdbMultipartRequest(req, null);
-      Map parameters = mp.getParameters();
+      Map mediaValues = new HashMap();
 
-      parameters.put("to_publisher", user.getId());
-      parameters.put("is_produced", "0");
-      if (!parameters.containsKey("is_published"))
-        parameters.put("is_published", "0");
+      Iterator i = mainModule.getStorageObject().getFields().iterator();
+      while (i.hasNext()) {
+        String field = (String) i.next();
+        String value = parsedRequest.getParameter(field);
+        if (value!=null)
+          mediaValues.put(field, value);
+      }
 
-      String id = mainModule.set(parameters);
+      mediaValues.put("to_publisher", user.getId());
+      mediaValues.put("is_produced", "0");
+      if (!mediaValues.containsKey("is_published"))
+        mediaValues.put("is_published", "0");
+
+      String id = mainModule.set(mediaValues);
       logger.debug("update: media ID = " + id);
       _edit(id, req, res);
     }

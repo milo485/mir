@@ -28,7 +28,7 @@
 	</tr>
 	<tr>
 		<td valign="top" align="center" bgcolor="#663399">
-			<a href="javascript:history.go(-2)"><font color="White"><b>&gt;&gt; ${lang("commentdone.back")}</b></font></a>
+			<a href="${referer}"><font color="White"><b>&gt;&gt; ${lang("commentdone.back")}</b></font></a>
 		</td>
 	</tr>
 </table>

@@ -5,7 +5,7 @@
   </head>
   
   <body marginwidth="0" marginheight="0" leftmargin="0" topmargin="0" bgcolor="#dddddd">
-    <form enctype="multipart/form-data" action="${actionURL}&do=opensession" method="post">
+    <form enctype="multipart/form-data" action="${actionURL}&do=opensession&sessiontype=comment" method="post">
       <input type="hidden" name="do" value="processcomment">
       <input type="hidden" name="to_media" value="${to_media}">
     
@@ -32,16 +32,16 @@
           <tr>
             <td align="right">&nbsp;</td>
             <td>
-              ${lang("comment.note")}
-                     <br>${data.passwd}<br>
-               <br>
+              ${lang("comment.note")}<br>
+              ${password}<br>
+              <br>
             </td>
             <td>&nbsp;</td>
           </tr>
           <tr>
             <td></td>
-            <td  valign="top">
-                  ${lang("comment.password")}: <input type="text" name="passwd" size="10">
+            <td valign="top">
+              ${lang("comment.password")}: <input type="text" name="password" size="10">
             </td>
             <td>&nbsp;</td>
           </tr>
@@ -144,7 +144,7 @@
             ${lang("comment.email")}:
           </td>
           <td>
-            <input type="text" name="email" maxlength="80" value="">
+            <input type="text" name="email" maxlength="80" value="${utility.encodeHTML(email)}">
           </td>
           <td>&nbsp;</td>
         </tr>
@@ -153,7 +153,7 @@
             ${lang("comment.url")}:
           </td>
           <td>
-            <input type="text" name="main_url" maxlength="160" value="http://">
+            <input type="text" name="main_url" maxlength="160" value="${utility.encodeHTML(main_url)}">
           </td>
           <td>&nbsp;</td>
         </tr>
@@ -162,7 +162,7 @@
             ${lang("comment.address")}:
           </td>
           <td>
-            <input type="text" name="address" maxlength="160" value="">
+            <input type="text" name="address" maxlength="160" value="${utility.encodeHTML(address)}">
           </td>
           <td>&nbsp;</td>
         </tr>
@@ -171,7 +171,7 @@
             ${lang("comment.phone")}<br><br>
           </td>
           <td>
-            <input type="text" name="phone" maxlength="20" value=""><br><br>
+            <input type="text" name="phone" maxlength="20" value="${utility.encodeHTML(phone)}"><br><br>
           </td>
           <td>&nbsp;</td>
         </tr>
@@ -181,7 +181,7 @@
 		${lang("posting.media.title")} 1:
 		</td>
 		<td colspan="2">
-			<input type="text" name="media_title1" size="40" maxlength="80" value=""><br>
+			<input type="text" name="media1_title" size="40" maxlength="80" value=""><br>
 		</td>
 	</tr>
 	<tr>
@@ -195,7 +195,7 @@
 		${lang("posting.media.title")} 2:
 		</td>
 		<td colspan="2">
-			<input type="text" name="media_title2" size="40" maxlength="80" value=""><br>
+			<input type="text" name="media2_title" size="40" maxlength="80" value=""><br>
 		</td>
 	</tr>
 	<tr>
@@ -209,7 +209,7 @@
 		${lang("posting.media.title")} 3:
 		</td>
 		<td colspan="2">
-			<input type="text" name="media_title3" size="40" maxlength="80" value=""><br>
+			<input type="text" name="media3_title" size="40" maxlength="80" value=""><br>
 		</td>
 	</tr>
 	<tr>

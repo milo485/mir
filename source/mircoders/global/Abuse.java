@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001, 2002  The Mir-coders group
+ * Copyright (C) 2001, 2002 The Mir-coders group
  *
  * This file is part of Mir.
  *
@@ -18,18 +18,19 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with the com.oreilly.servlet library, any library
- * licensed under the Apache Software License, The Sun (tm) Java Advanced
- * Imaging library (JAI), The Sun JIMI library (or with modified versions of
- * the above that use the same license as the above), and distribute linked
- * combinations including the two.  You must obey the GNU General Public
- * License in all respects for all of the code used other than the above
- * mentioned libraries.  If you modify this file, you may extend this exception
- * to your version of the file, but you are not obligated to do so.  If you do
- * not wish to do so, delete this exception statement from your version.
+ * the code of this program with  any library licensed under the Apache Software License,
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library
+ * (or with modified versions of the above that use the same license as the above),
+ * and distribute linked combinations including the two.  You must obey the
+ * GNU General Public License in all respects for all of the code used other than
+ * the above mentioned libraries.  If you modify this file, you may extend this
+ * exception to your version of the file, but you are not obligated to do so.
+ * If you do not wish to do so, delete this exception statement from your version.
  */
 
 package mircoders.global;
+
+import gnu.regexp.RE;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -42,23 +43,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Vector;
+
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.collections.ExtendedProperties;
-
-import gnu.regexp.RE;
-
 import mir.entity.Entity;
 import mir.log.LoggerWrapper;
+import mir.session.HTTPAdapters;
+import mir.session.Request;
 import mir.util.DateToMapAdapter;
 import mir.util.InternetFunctions;
 import mir.util.StringRoutines;
-import mir.session.*;
 import mircoders.entity.EntityComment;
 import mircoders.entity.EntityContent;
 import mircoders.localizer.MirAdminInterfaceLocalizer;
+
+import org.apache.commons.collections.ExtendedProperties;
 
 
 public class Abuse {
@@ -217,15 +218,32 @@ public class Abuse {
     }
   }
 
-  public void checkArticle(EntityContent anArticle, HttpServletRequest aRequest, HttpServletResponse aResponse) {
+  public void checkArticle(EntityContent anArticle, Request aRequest, HttpServletResponse aResponse) {
     try {
       long time = System.currentTimeMillis();
+      String address = "0.0.0.0";
+      String browser = "unknown";
+      Cookie[] cookies = {};
 
-      logArticle(aRequest.getRemoteAddr(), anArticle.getId(), new Date(), (String) aRequest.getHeader("User-Agent"));
+      HttpServletRequest request = null;
+
+      if (aRequest instanceof HTTPAdapters.HTTPParsedRequestAdapter) {
+        request = ((HTTPAdapters.HTTPParsedRequestAdapter) aRequest).getRequest();
+      }
+      else if (aRequest instanceof HTTPAdapters.HTTPRequestAdapter) {
+        request = ((HTTPAdapters.HTTPRequestAdapter) aRequest).getRequest();
+      }
+      if (request!=null) {
+        browser = (String) request.getHeader("User-Agent");
+        address = request.getRemoteAddr();
+        cookies = request.getCookies();
+      }
+
+      logArticle(address, anArticle.getId(), new Date(), browser);
 
       MirAdminInterfaceLocalizer.MirSimpleEntityOperation operation = MirGlobal.localizer().adminInterface().simpleCommentOperationForName(commentBlockAction);
 
-      if (checkCookie(Arrays.asList(aRequest.getCookies())) || checkIpFilter(aRequest.getRemoteAddr()) || checkRegExpFilter(anArticle)) {
+      if (checkCookie(Arrays.asList(cookies)) || checkIpFilter(address) || checkRegExpFilter(anArticle)) {
         operation.perform(null, MirGlobal.localizer().dataModel().adapterModel().makeEntityAdapter("content", anArticle));
         setCookie(aResponse);
       }

@@ -36,114 +36,106 @@ function openWin(url) {
 </if>
 
 
-<form enctype="multipart/form-data" method="post" action="${config.actionRoot}?module=Audio&do=<if data.new>insert<else>update</if>&id=${data.id}">
-	<if data.articleid>
-		<input type="hidden" name="articleid" value="${data.articleid}">
-	</if>
-	<if data.commentid>
-		<input type="hidden" name="commentid" value="${data.commentid}">
-	</if>
-	<input type="hidden" name="where" value="${data.where}">
-	<input type="hidden" name="offset" value="${data.offset}">
-	<input type="hidden" name="order" value="${data.order}">
-	<input type="hidden" name="id" value="${data.id}">
-
-	<table border="0">
-
-	<if !data.new>
-	<tr>
-    	<td align="right" valign="top">
-			<a href="${config.actionRoot}?module=Audio&do=getMedia&id=${data.id}">
-	  	  	<img src="${config.docRoot}/img/${data.big_icon}" border=0></a>&nbsp;&nbsp;
-		</td>
-		<td valign="bottom" class="small">
-			${lang("media.created")}: ${data.webdb_create}
-			<if data.webdb_lastchange>/ ${lang("media.changed")} ${data.webdb_lastchange}</if><br>
-			<if data.is_published=="1">${lang("media.published")}: ${data.publish_date} / ${data.publish_server}${data.publish_path}<br></if>
-			${lang("media.format")}: ${data.mimetype} / ${data.media_descr}<br>
-			${lang("media.size")}: ${data.human_readable_size}<br>
-			${lang("media.rights")}: <b>${data.rightsHashdata[to_rights]["name"]}</b><br>
-		</td>
-  	</tr>
-	</if>
-
-	<tr>
-		<td align="right" class="table-left">
-			<B>${lang("media.mediafolder")}:</B>
-		</td>
-		<td class="listrow2">
-			<select name="to_media_folder">
- 			<list extra.mediafolderPopupData as m>
-				<option value="${m.key}" <if m.key == data.to_media_folder>selected</if>>${m.value}</option>
-			</list>
-	    	</select>
-		</td>
-	</tr>
-	
-	<call TextInputTableRow (lang("media.description"), 40, 255, "description", data.description)>
-	<call TextInputTableRow (lang("media.date"), 8, 8, "date", data.date)>
-	<call TextInputTableRowLight (lang("year"), 20, 40, "year", data.year)>
-	<call TextInputTableRow (lang("media.location"), 40, 80, "place", data.place)>
-	<call TextInputTableRow (lang("media.creator"), 40, 80, "creator", data.creator)>
-	<call TextAreaTableRow (lang("media.keywords"), "", 40, 2, "keywords", data.keywords)>
-	<call TextAreaTableRow (lang("media.comment"), "", 40, 2, "comment", data.comment)>
-	<call TextInputTableRow (lang("media.source"), 40, 80, "source", data.source)>
-	
-	<tr><td colspan="2" class="x-small">&nbsp;</td></tr>
-	
-	
-	<if data.new>
-	<tr>
-		<td align="right" class="table-left">
-			${lang("media.is_published")} : 
-		</td>
-		<td class="listrow2" style='border: 1px solid #FF0000;'>
-			<input type="checkbox" name="is_published" value="1"<if data.is_published!="0" && data.is_published!=""> checked</if>> 
-		</td>
-	</tr>
-	<tr><td colspan="2" class="x-small">&nbsp;</td></tr>
-	
-	<list data.mediafields as m>
-	<tr>
-		<td align="right" class="table-left">
-			<B>${lang("media.title")}:<B>
-		 </td>
-		<td class="listrow2">
-			<input type="text" name="media_title${m}" size="40" maxlength="80" value="">
-		</td>
-	</tr>
-	<tr>
-		<td align="right">
-			&nbsp;
-		</td>
-		<td class="listrow2">
-			<INPUT TYPE="file" NAME="mpfile${m}"><br>
-		</td>
-	</tr>
-	</list>
-	<else>
-	<tr>
-		<td align="right" class="table-left">
-			<B>${lang("media.title")}:<B>
-		</td>
-		<td class="listrow2">
-			<input type="text" name="title" size="40" maxlength="80" value="${data.title}">
-		</td>
-	</tr>
-	</if>
-
-    <td colspan="2" align="right" class="table-foot">
-	<if data.new>
-      <input type="submit" name="save" value="${lang("insert")}">
-    <else>
-     ${lang("media.is_published")} <input type="checkbox" name="is_published" value="1"<if data.is_published!="0" && data.is_published!=""> checked</if>>
-    &nbsp;&nbsp;<input type="submit" name="save" value="${lang("save")}">
-    </if> </form>
-    </td>
-</table>
-
-<p><a class="link-box" href="${config.actionRoot}?module=Audio&do=list">[&lt;] ${lang("list")} </a> &nbsp;</p>
-
-<include "foot.template">
-</body>
+    <form enctype="multipart/form-data" method="post" action="${config.actionRoot}?module=Audio&do=<if data.new>insert<else>update</if>&id=${data.id}">
+    	<if data.articleid>
+    		<input type="hidden" name="articleid" value="${data.articleid}">
+    	</if>
+    	<if data.commentid>
+    		<input type="hidden" name="commentid" value="${data.commentid}">
+    	</if>
+    	<input type="hidden" name="where" value="${data.where}">
+    	<input type="hidden" name="offset" value="${data.offset}">
+    	<input type="hidden" name="order" value="${data.order}">
+    	<input type="hidden" name="id" value="${data.id}">
+    
+      <table border="0">
+    
+        <if !data.new>
+        <tr>
+          <td align="right" valign="top">
+            <a href="${config.actionRoot}?module=Audio&do=getMedia&id=${data.id}">
+            <img src="${config.docRoot}/img/${data.big_icon}" border=0></a>&nbsp;&nbsp;
+      		</td>
+      		<td valign="bottom" class="small">
+            ${lang("media.created")}: ${data.webdb_create}
+            <if data.webdb_lastchange>/ ${lang("media.changed")} ${data.webdb_lastchange}</if><br>
+            <if data.is_published=="1">${lang("media.published")}: ${data.publish_date} / ${data.publish_server}${data.publish_path}<br></if>
+            ${lang("media.format")}: ${data.mimetype} / ${data.media_descr}<br>
+            ${lang("media.size")}: ${data.human_readable_size}<br>
+            ${lang("media.rights")}: <b>${data.rightsHashdata[to_rights]["name"]}</b><br>
+          </td>
+          </tr>
+        </if>
+      
+      	<tr>
+      		<td align="right" class="table-left">
+      			<b>${lang("media.mediafolder")}:</b>
+      		</td>
+      		<td class="listrow2">
+      			<select name="to_media_folder">
+       			<list extra.mediafolderPopupData as m>
+      				<option value="${m.key}" <if m.key == data.to_media_folder>selected</if>>${m.value}</option>
+      			</list>
+      	    	</select>
+      		</td>
+      	</tr>
+      	
+          <if !data.new>
+            <call TextInputTableRow (lang("media.title"), 40, 80, "title", data.title)>
+          </if>
+          <call TextInputTableRow (lang("media.date"), 8, 8, "date", data.date)>
+          <call TextInputTableRow (lang("media.creator"), 40, 80, "creator", data.creator)>
+          <call TextAreaTableRow  (lang("media.description"), "", 40, 2, "description", data.description)>
+          <call TextAreaTableRow  (lang("media.comment"), "", 40, 2, "comment", data.comment)>
+          <call TextInputTableRow (lang("media.source"), 40, 80, "source", data.source)>
+      	
+          <tr><td colspan="2" class="x-small">&nbsp;</td></tr>
+      	
+      	
+        	<if data.new>
+          	<tr>
+          		<td align="right" class="table-left">
+          			${lang("media.is_published")} : 
+          		</td>
+          		<td class="listrow2" style='border: 1px solid #FF0000;'>
+          			<input type="checkbox" name="is_published" value="1"<if data.is_published!="0" && data.is_published!=""> checked</if>> 
+          		</td>
+          	</tr>
+          	<tr><td colspan="2" class="x-small">&nbsp;</td></tr>
+        	
+          	<list data.mediafields as m>
+            	<tr>
+            		<td align="right" class="table-left">
+            			<B>${lang("media.title")}:<B>
+            		 </td>
+            		<td class="listrow2">
+            			<input type="text" name="media_title${m}" size="40" maxlength="80" value="">
+            		</td>
+            	</tr>
+            	<tr>
+            		<td align="right">
+            			&nbsp;
+            		</td>
+            		<td class="listrow2">
+            			<input type="file" name="media${m}"><br>
+            		</td>
+            	</tr>
+          	</list>
+        	</if>
+      
+          <td colspan="2" align="right" class="table-foot">
+            <if data.new>
+              <input type="submit" name="save" value="${lang("insert")}">
+            <else>
+              ${lang("media.is_published")} <input type="checkbox" name="is_published" value="1"<if data.is_published!="0" && data.is_published!=""> checked</if>>
+              &nbsp;&nbsp;<input type="submit" name="save" value="${lang("save")}">
+            </if> 
+          </td>
+      </table>
+    </form>
+  
+    <p><a class="link-box" href="${config.actionRoot}?module=Audio&do=list">[&lt;] ${lang("list")} </a> &nbsp;</p>
+  
+    <include "foot.template">
+  </body>
 </html>

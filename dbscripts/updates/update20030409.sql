@@ -1,4 +1,4 @@
--- update script 2002-12-12 by Zapata
+-- update script 2003-04-09 by Zapata
 -- * creates table comment_x_media, to support media in comments
 -- * adds webdb_lastchange to comment
 -- This script will the second time this script is run,

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001, 2002  The Mir-coders group
+ * Copyright (C) 2001, 2002 The Mir-coders group
  *
  * This file is part of Mir.
  *
@@ -18,17 +18,15 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with the com.oreilly.servlet library, any library
- * licensed under the Apache Software License, The Sun (tm) Java Advanced
- * Imaging library (JAI), The Sun JIMI library (or with modified versions of
- * the above that use the same license as the above), and distribute linked
- * combinations including the two.  You must obey the GNU General Public
- * License in all respects for all of the code used other than the above
- * mentioned libraries.  If you modify this file, you may extend this exception
- * to your version of the file, but you are not obligated to do so.  If you do
- * not wish to do so, delete this exception statement from your version.
+ * the code of this program with  any library licensed under the Apache Software License, 
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
+ * (or with modified versions of the above that use the same license as the above), 
+ * and distribute linked combinations including the two.  You must obey the 
+ * GNU General Public License in all respects for all of the code used other than 
+ * the above mentioned libraries.  If you modify this file, you may extend this 
+ * exception to your version of the file, but you are not obligated to do so.  
+ * If you do not wish to do so, delete this exception statement from your version.
  */
-
 package mir.generator;
 
 import java.io.PrintWriter;
@@ -38,9 +36,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-import org.apache.struts.util.MessageResources;
-import org.apache.commons.beanutils.PropertyUtils;
+import mir.log.LoggerWrapper;
+import mir.util.RewindableIterator;
 
+import org.apache.commons.beanutils.PropertyUtils;
 
 import freemarker.template.FileTemplateCache;
 import freemarker.template.SimpleScalar;
@@ -53,9 +52,6 @@ import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateModelRoot;
 import freemarker.template.TemplateScalarModel;
 
-import mir.util.RewindableIterator;
-import mir.util.*;
-
 
 public class FreemarkerGenerator implements Generator {
   private Template template;
@@ -64,7 +60,7 @@ public class FreemarkerGenerator implements Generator {
     template = aTemplate;
   }
 
-  public void generate(Object anOutputWriter, Map aValues, PrintWriter aLogger) throws GeneratorExc, GeneratorFailure {
+  public void generate(Object anOutputWriter, Map aValues, LoggerWrapper aLogger) throws GeneratorExc, GeneratorFailure {
     if (!(anOutputWriter instanceof PrintWriter))
       throw new GeneratorExc("Writer for a FreemarkerGenerator must be a PrintWriter");
 
@@ -73,8 +69,8 @@ public class FreemarkerGenerator implements Generator {
     }
     catch (Throwable t) {
       t.printStackTrace();
-      aLogger.println("Exception occurred: "+t.getMessage());
-      t.printStackTrace(aLogger);
+      aLogger.error("Exception occurred: "+t.getMessage());
+      t.printStackTrace(aLogger.asPrintWriter(LoggerWrapper.DEBUG_MESSAGE));
       throw new GeneratorFailure( t );
     }
   }

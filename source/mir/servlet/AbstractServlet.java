@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001, 2002  The Mir-coders group
+ * Copyright (C) 2001, 2002 The Mir-coders group
  *
  * This file is part of Mir.
  *
@@ -18,23 +18,22 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with the com.oreilly.servlet library, any library
- * licensed under the Apache Software License, The Sun (tm) Java Advanced
- * Imaging library (JAI), The Sun JIMI library (or with modified versions of
- * the above that use the same license as the above), and distribute linked
- * combinations including the two.  You must obey the GNU General Public
- * License in all respects for all of the code used other than the above
- * mentioned libraries.  If you modify this file, you may extend this exception
- * to your version of the file, but you are not obligated to do so.  If you do
- * not wish to do so, delete this exception statement from your version.
+ * the code of this program with  any library licensed under the Apache Software License,
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library
+ * (or with modified versions of the above that use the same license as the above),
+ * and distribute linked combinations including the two.  You must obey the
+ * GNU General Public License in all respects for all of the code used other than
+ * the above mentioned libraries.  If you modify this file, you may extend this
+ * exception to your version of the file, but you are not obligated to do so.
+ * If you do not wish to do so, delete this exception statement from your version.
  */
-
 package mir.servlet;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Locale;
+
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -42,13 +41,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import com.codestudio.util.JDBCPool;
-import com.codestudio.util.JDBCPoolMetaData;
-import com.codestudio.util.SQLManager;
 import mir.config.MirPropertiesConfiguration;
 import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
 import mir.log.LoggerWrapper;
 import mir.storage.DatabaseAdaptor;
+
+import com.codestudio.util.JDBCPool;
+import com.codestudio.util.JDBCPoolMetaData;
+import com.codestudio.util.SQLManager;
 
 /**
  * Title:        Mir
@@ -56,7 +56,7 @@ import mir.storage.DatabaseAdaptor;
  * Copyright:    Copyright (c) 2001, 2002
  * Company:      Mir-coders group
  * @author       idfx, the Mir-coders group
- * @version      $Id: AbstractServlet.java,v 1.28 2003/04/20 14:42:09 idfx Exp $
+ * @version      $Id: AbstractServlet.java,v 1.30 2003/04/26 00:42:21 zapata Exp $
  */
 
 public abstract class AbstractServlet extends HttpServlet {
@@ -197,30 +197,29 @@ public abstract class AbstractServlet extends HttpServlet {
       pool = manager.createPool(meta);
     }
   }
-  
+
   private void setEncoding(HttpServletRequest request){
-  	try {
-			Class reqClass = request.getClass();
-			Method method = reqClass.getMethod("setCharacterEncoding", new Class[]{String.class});
-			String encoding = configuration.getString("Mir.DefaultHTMLCharset");
-			method.invoke(request, new Object[]{encoding});			
-		} catch (NoSuchMethodException e) {
-			// TODO set the encoding in a zapata-way
-			e.printStackTrace();
-			logger.error("not yes implemented: " + e.getMessage());
-		} catch (SecurityException e) {
-			logger.error(e.getMessage());
-			e.printStackTrace();
-		} catch (IllegalArgumentException e) {
-			logger.error(e.getMessage());
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			logger.error(e.getMessage());
-			e.printStackTrace();
-		} catch (InvocationTargetException e) {
-			logger.error(e.getMessage());
-			e.printStackTrace();
-		}
+    try {
+      Class reqClass = request.getClass();
+      Method method = reqClass.getMethod("setCharacterEncoding", new Class[]{String.class});
+      String encoding = configuration.getString("Mir.DefaultHTMLCharset");
+      method.invoke(request, new Object[]{encoding});
+    } catch (NoSuchMethodException e) {
+      // TODO set the encoding in a zapata-way
+//      logger.warn("set encoding not yet implemented: " + e.getMessage());
+    } catch (SecurityException e) {
+      logger.error(e.getMessage());
+      e.printStackTrace();
+    } catch (IllegalArgumentException e) {
+      logger.error(e.getMessage());
+      e.printStackTrace();
+    } catch (IllegalAccessException e) {
+      logger.error(e.getMessage());
+      e.printStackTrace();
+    } catch (InvocationTargetException e) {
+      logger.error(e.getMessage());
+      e.printStackTrace();
+    }
   }
 
   protected final void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
