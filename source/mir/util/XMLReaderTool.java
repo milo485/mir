@@ -36,6 +36,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.List;
 
 public class XMLReaderTool {
 
@@ -95,4 +96,45 @@ public class XMLReaderTool {
     }
 
   }
+
+  /**
+   * Returns the namespace part of a qualified XML Tag name <br>
+   * Example:<br>
+   * <code>getNameSpaceFromQualifiedName("dc:creator");</code> <br>
+   * will return <code>"dc"</code>
+   *
+   * @param aQualifiedName
+   * @return
+   */
+
+  public static String getNameSpaceFromQualifiedName(String aQualifiedName) {
+    List parts = StringRoutines.splitString(aQualifiedName, ":");
+
+    if (parts.size()<=1)
+      return null;
+    else
+      return (String) parts.get(0);
+  }
+
+  /**
+   * Returns the localname part of a qualified XML Tag name <br>
+   * Example:<br>
+   * <code>getLocalNameFromQualifiedName("dc:creator");</code> <br>
+   * will return <code>"creator"</code>
+   *
+   * @param aQualifiedName
+   * @return
+   */
+
+  public static String getLocalNameFromQualifiedName(String aQualifiedName) {
+    List parts = StringRoutines.splitString(aQualifiedName, ":");
+
+    if (parts.size()<1)
+      return null;
+    if (parts.size()==1)
+      return (String) parts.get(0);
+    else
+      return (String) parts.get(1);
+  }
+
 }

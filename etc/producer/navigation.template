@@ -15,9 +15,9 @@
 				<input type="hidden" name="search_sort" value="score">
 				
 					<input type="text" name="search_content" size="10" id="searchfield"><br>
-					${lang("navigation.search.images")} <input type="checkbox" name="search_hasImages"><br>
-					${lang("navigation.search.audio")} <input type="checkbox" name="search_hasAudio"><br>
-					${lang("navigation.search.video")} <input type="checkbox" name="search_hasVideo"><br>
+					<input type="checkbox" name="search_hasImages"> ${lang("navigation.search.images")} <br>
+					<input type="checkbox" name="search_hasAudio"> ${lang("navigation.search.audio")} <br>
+					<input type="checkbox" name="search_hasVideo"> ${lang("navigation.search.video")} <br>
 					
 				<input type="submit" value="${lang("navigation.search.button")}" name="search_submit" size="16">
 			</td></tr></table>

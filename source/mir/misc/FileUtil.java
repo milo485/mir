@@ -54,21 +54,21 @@ public final class FileUtil {
 
   static {
     try {
-      producerStorageRoot = 
-      	MirPropertiesConfiguration.instance().getString("Producer.StorageRoot");
-    } catch (PropertiesConfigExc e) {
+      producerStorageRoot =
+          MirPropertiesConfiguration.instance().getString("Producer.StorageRoot");
+    }
+    catch (PropertiesConfigExc e) {
       e.printStackTrace();
-    } 
+    }
   }
 
   /**
    * Privater Konstruktor, um versehentliche Instantiierung zu verhindern
    */
-  private FileUtil () {
+  private FileUtil() {
   }
 
-  public static File getFile(String filename)
-    throws IOException {
+  public static File getFile(String filename) throws IOException {
 
     try {
       File f = null;
@@ -77,113 +77,115 @@ public final class FileUtil {
       dir.mkdirs();
 
       return f;
-    } catch(Exception e) {
+    }
+    catch (Exception e) {
       throw new IOException(e.toString());
     }
 
   }
 
-  public static long write(File f, InputStream in)
-    throws IOException {
+  public static long write(File f, InputStream in) throws IOException {
 
     long size = 0;
 
-		if (in!=null) {
-			try {
+    if (in != null) {
+      try {
         FileOutputStream out = new FileOutputStream(f);
 
         int read;
         byte[] buf = new byte[8 * 1024];
-        while((read = in.read(buf)) != -1) {
+        while ( (read = in.read(buf)) != -1) {
           out.write(buf, 0, read);
           size += read;
         }
 
         in.close();
-				out.close();
-			} catch(IOException e) {
+        out.close();
+      }
+      catch (IOException e) {
         throw new IOException(e.toString());
       }
     }
-		return size;
-	}
+    return size;
+  }
 
-  public static long write(String filename, InputStream in)
-    throws IOException {
+  public static long write(String filename, InputStream in) throws IOException {
 
     long size = 0;
 
-		if (in!=null) {
-			try {
+    if (in != null) {
+      try {
         File f = getFile(filename);
         size = write(f, in);
-			} catch(IOException e) {
+      }
+      catch (IOException e) {
         throw new IOException(e.toString());
       }
     }
-		return size;
-	}
+    return size;
+  }
 
-  public static long write(String filename, Reader in, String encoding)
-    throws IOException {
+  public static long write(String filename, Reader in, String encoding) throws IOException {
 
     long size = 0;
 
-		if (in!=null) {
-			try {
+    if (in != null) {
+      try {
         File f = getFile(filename);
         FileOutputStream fOut = new FileOutputStream(f);
         OutputStreamWriter out = new OutputStreamWriter(fOut, encoding);
         int read;
-        char[] cbuf = new char[8*1024];
-        while((read = in.read(cbuf)) != -1) {
+        char[] cbuf = new char[8 * 1024];
+        while ( (read = in.read(cbuf)) != -1) {
           out.write(cbuf, 0, read);
           size += read;
         }
 
-				out.close();
+        out.close();
         in.close();
-			} catch(IOException e) {
+      }
+      catch (IOException e) {
         throw new IOException(e.toString());
       }
     }
-		return size;
-	}
+    return size;
+  }
 
-  public static boolean read(String filename, byte out[])
-    throws IOException {
+  public static boolean read(String filename, byte out[]) throws IOException {
 
     File f = null;
     f = new File(filename);
 
-		if (f.exists()) {
-			try {
+    if (f.exists()) {
+      try {
         if (out.length != f.length())
           return false;
-				FileInputStream inStream;
-				inStream = new FileInputStream(f);
-				inStream.read(out);
-				inStream.close();
-			} catch(IOException e) {
+        FileInputStream inStream;
+        inStream = new FileInputStream(f);
+        inStream.read(out);
+        inStream.close();
+      }
+      catch (IOException e) {
         throw new IOException(e.toString());
       }
-    } else {
+    }
+    else {
       return false;
     }
     return true;
   }
-    
+
   public static long getSize(String filename) {
     File f = null;
     f = new File(filename);
-    long l=0;
+    long l = 0;
 
     if (f.exists()) {
       return f.length();
-    } else {
+    }
+    else {
       return -1;
     }
   }
 
- 
 }

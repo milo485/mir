@@ -55,6 +55,7 @@ import mir.producer.GeneratingProducerNode;
 import mir.producer.LoggingProducerNode;
 import mir.producer.LoopProducerNode;
 import mir.producer.ProducerNode;
+import mir.producer.RSSProducerNode;
 import mir.producer.ResourceBundleProducerNode;
 import mir.producer.ScriptCallingProducerNode;
 import mir.util.XMLReader;
@@ -77,6 +78,8 @@ public class DefaultProducerNodeBuilders {
     aBuilderLibrary.registerBuilder("SetFileDate", FileDateSettingProducerNodeBuilder.class);
     aBuilderLibrary.registerBuilder("If", ConditionalProducerNodeBuilder.class);
     aBuilderLibrary.registerBuilder("While", LoopProducerNodeBuilder.class);
+
+    aBuilderLibrary.registerBuilder("RSS", RSSProducerNodeBuilder.class);
 
     aBuilderLibrary.registerFactory("Enumerate", new EnumeratingProducerNodeBuilder.factory(aModel));
     aBuilderLibrary.registerFactory("List", new ListProducerNodeBuilder.factory(aModel));
@@ -121,6 +124,7 @@ public class DefaultProducerNodeBuilders {
   public final static String   SKIP_ATTRIBUTE = "skip";
   public final static String   KEY_ATTRIBUTE = "key";
   public final static String   LIMIT_ATTRIBUTE = "limit";
+  public final static String   URL_ATTRIBUTE = "url";
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -686,6 +690,35 @@ public class DefaultProducerNodeBuilders {
       );
     };
 
+  }
+
+////////////////////////////////////////////////////////////////////////////////
+
+  public static class RSSProducerNodeBuilder extends AbstractProducerNodeBuilder {
+    private final static String   RSS_KEY_ATTRIBUTE = KEY_ATTRIBUTE;
+    private final static String   RSS_URL_ATTRIBUTE = URL_ATTRIBUTE;
+
+    private final static String[] RSS_REQUIRED_ATTRIBUTES = { RSS_KEY_ATTRIBUTE, RSS_URL_ATTRIBUTE };
+    private final static String[] RSS_OPTIONAL_ATTRIBUTES = {  };
+    private final static String[] RSS_SUBNODES = {  };
+
+    private String key;
+    private String url;
+
+    public RSSProducerNodeBuilder() {
+      super(RSS_SUBNODES);
+    }
+
+    public void setAttributes(Map anAttributes) throws ProducerConfigExc, XMLReader.XMLReaderExc {
+      XMLReaderTool.checkAttributes(anAttributes, RSS_REQUIRED_ATTRIBUTES, RSS_OPTIONAL_ATTRIBUTES);
+
+      key = (String) anAttributes.get( RSS_KEY_ATTRIBUTE );
+      url = (String) anAttributes.get( RSS_URL_ATTRIBUTE );
+    };
+
+    public ProducerNode constructNode() {
+      return new RSSProducerNode(key, url);
+    };
   }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -192,7 +192,7 @@
         <input type="checkbox" name="is_html" value="1"<if article.is_html=="1"> checked</if>>&nbsp;
       </td>
       <td colspan="4">
-        <textarea cols="70" rows="20" name="content_data" wrap=virtual>${article.content_data}</textarea>
+        <textarea cols="70" rows="20" name="content_data" wrap=virtual>${utility.encodeHTML(article.content_data)}</textarea>
       </td>
     </tr>
     <tr>

@@ -54,7 +54,7 @@
                 <select name="searcharticletype">
                   <option value="">--</option>
                   <list articletypes as at>
-                    <option value="${at.id}" <if searcharticletype==at.id> selected</if>>${lang("articletype."+at.name)}</option>
+                    <option value="${at.id}" <if searcharticletype==at.id> selected</if>>${lang("articletypes."+at.name)}</option>
                   </list>
                 </select>
             </td>
@@ -130,19 +130,19 @@
                 <if showactions=="1">
                   <if config["Mir.Localizer.Admin.ListOperationsFlavor"]=="0">
                     <list entry.operations as op>
-                      [<a href="${config.actionRoot}?module=Localizer&do=articleoperation&operation=${op}&articleid=${entry.id}&returnurl=${utility.encodeURI(thisurl)}">${op}</a>]
+                      [<a href="${config.actionRoot}?module=Localizer&do=articleoperation&operation=${op}&articleid=${entry.id}&returnurl=${utility.encodeURI(thisurl)}">${lang("content.operation."+op)}</a>]
                     </list>
                   </if>
                   <if config["Mir.Localizer.Admin.ListOperationsFlavor"]=="1">
                     <list entry.operations as op>
-                      [<input type="checkbox" name="operation" value="${entry.id};${op}">${op}]
+                      [<input type="checkbox" name="operation" value="${entry.id};${op}">${lang("content.operation."+op)}]
                     </list>
                   </if>
                   <if config["Mir.Localizer.Admin.ListOperationsFlavor"]=="2">
                     <select name="operation">
                       <option value="" selected>&nbsp;</option>
                       <list entry.operations as op>
-                        <option value="${entry.id};${op}">${op}</option>
+                        <option value="${entry.id};${op}">${lang("content.operation."+op)}</option>
                       </list>
                     </select>
                   </if>
@@ -150,7 +150,7 @@
                     |
                   </if>
                   <a href="${config.actionRoot}?module=Content&do=edit&id=${entry.id}&returnurl=${utility.encodeURI(thisurl)}">${lang("edit")}</a> |
-                  <a href="${config.actionRoot}?module=Comment&do=articlecomments&articleid=${entry.id}">${lang("contentlist.comments")}</a> (${entry.commentcount})
+                  <a href="${config.actionRoot}?module=Comment&do=articlecomments&articleid=${entry.id}&returnurl=${utility.encodeURI(thisurl)}">${lang("contentlist.comments")}</a> (${entry.commentcount})
                 <else>
                   <span class="text">
                     <a href="${config.actionRoot}?${selectarticleurl}&id=${entry.id}">${lang("contentlist.select")}</a>

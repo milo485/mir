@@ -33,8 +33,11 @@ package mir.util;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.StringReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,23 +60,44 @@ import org.xml.sax.helpers.DefaultHandler;
 public class XMLReader {
   private Locator locator;
   private String filename;
+  private boolean namespaceAware;
 
-  public void parseFile(String aFileName, SectionHandler aRootHandler, List aUsedFiles) throws XMLReaderFailure, XMLReaderExc {
+  public XMLReader() {
+    this(false);
+  }
+
+  public XMLReader(boolean aNameSpaceAware) {
+    namespaceAware = aNameSpaceAware;
+    filename="";
+  }
+
+  public void parseFile(String aFileName, SectionHandler aRootHandler) throws XMLReaderFailure, XMLReaderExc {
+    filename= aFileName;
+    try {
+      parseInputStream(new FileInputStream(aFileName), aRootHandler);
+    }
+    catch (Throwable t) {
+      throw new XMLReaderFailure(t);
+    }
+  }
+
+  public void parseInputStream(InputStream anInputStream, SectionHandler aRootHandler) throws XMLReaderFailure, XMLReaderExc {
     try {
       SAXParserFactory parserFactory = SAXParserFactory.newInstance();
 
-      parserFactory.setNamespaceAware(false);
+      parserFactory.setNamespaceAware(namespaceAware);
       parserFactory.setValidating(true);
 
-      XMLReaderHandler handler = new XMLReaderHandler(parserFactory, aRootHandler, aUsedFiles);
+      XMLReaderHandler handler = new XMLReaderHandler(parserFactory, aRootHandler);
 
-      handler.includeFile(aFileName);
+      handler.processInputStream(anInputStream);
     }
     catch (Throwable e) {
-      Throwable t = getRootCause(e);
+      Throwable t = ExceptionFunctions.traceCauseException(e);
 
       if (t instanceof XMLReaderExc) {
-        ((XMLReaderExc) t).setLocation(filename, locator.getLineNumber(), locator.getColumnNumber());
+        if (locator!=null && filename!=null)
+          ((XMLReaderExc) t).setLocation(filename, locator.getLineNumber(), locator.getColumnNumber());
         throw (XMLReaderExc) t;
       }
 
@@ -85,88 +109,35 @@ public class XMLReader {
     }
   }
 
-  private Throwable getRootCause(Throwable t) {
-    if (t instanceof SAXParseException && ((SAXParseException) t).getException()!=null) {
-      return getRootCause(((SAXParseException) t).getException());
-    }
-    else if (t instanceof Failure && ((Failure) t).getCause()!=null) {
-      return getRootCause(((Failure) t).getCause());
-    }
-    else return t;
-  }
-
   private class XMLReaderHandler extends DefaultHandler {
-    private Stack includeFileStack;
     private SAXParserFactory parserFactory;
     private SectionsManager manager;
-    private List usedFiles;
     private InputSource inputSource;
 
-    public XMLReaderHandler(SAXParserFactory aParserFactory, SectionHandler aRootHandler, List aUsedFiles) {
+    public XMLReaderHandler(SAXParserFactory aParserFactory, SectionHandler aRootHandler) {
       super();
 
-      includeFileStack=new Stack();
       parserFactory=aParserFactory;
-      includeFileStack = new Stack();
       manager = new SectionsManager();
-      usedFiles = aUsedFiles;
       manager.pushHandler(aRootHandler);
    }
-
-    public String getLocatorDescription(Locator aLocator) {
-      return aLocator.getPublicId()+" ("+aLocator.getLineNumber()+")";
-    }
 
     public void setDocumentLocator(Locator aLocator) {
       locator=aLocator;
     }
 
-    private void includeFile(String aFileName) throws XMLReaderExc, XMLReaderFailure, SAXParseException, SAXException {
-      File file;
-      SAXParser parser;
-
+    private void processInputStream(InputStream anInputStream) throws XMLReaderExc, XMLReaderFailure {
       try {
-        if (!includeFileStack.empty())
-          file = new File(new File((String) includeFileStack.peek()).getParent(), aFileName);
-        else
-          file = new File(aFileName);
+        SAXParser parser=parserFactory.newSAXParser();
 
-        if (includeFileStack.contains(file.getCanonicalPath())) {
-          throw new XMLReaderExc("recursive inclusion of file "+file.getCanonicalPath());
-        }
-
-        usedFiles.add(file);
-
-        parser=parserFactory.newSAXParser();
-
-        inputSource = new InputSource(new FileInputStream(file));
-        inputSource.setPublicId(file.getCanonicalPath());
-
-        includeFileStack.push(file.getCanonicalPath());
-        filename = file.getCanonicalPath();
-        try {
-          parser.parse(inputSource, this);
-        }
-        finally {
-          includeFileStack.pop();
-        }
-        if (!includeFileStack.empty())
-          filename = (String) includeFileStack.peek();
+        inputSource = new InputSource(anInputStream);
+        parser.parse(inputSource, this);
       }
       catch (ParserConfigurationException e) {
-        throw new XMLReaderExc("Internal exception while including \""+aFileName+"\": "+e.getMessage());
+        throw new XMLReaderExc("Internal exception: "+e.getMessage());
       }
-      catch (SAXParseException e) {
-        throw e;
-      }
-      catch (XMLReaderFailure e) {
-        throw e;
-      }
-      catch (FileNotFoundException e) {
-        throw new XMLReaderExc("Include file \""+aFileName+"\" not found: "+e.getMessage());
-      }
-      catch (IOException e) {
-        throw new XMLReaderExc("unable to open include file \""+aFileName+"\": "+e.getMessage());
+      catch (Throwable e) {
+        throw new XMLReaderFailure(e);
       }
     }
 
@@ -175,24 +146,13 @@ public class XMLReader {
       int i;
 
       try {
-        if (aQualifiedName.equals("include")) {
-          String fileName=anAttributes.getValue("file");
+        attributesMap = new HashMap();
+        for (i=0; i<anAttributes.getLength(); i++)
+          attributesMap.put(anAttributes.getQName(i), anAttributes.getValue(i));
 
-          if (fileName==null) {
-            throw new XMLReaderExc("include has no file attribute");
-          }
+        SectionHandler handler = manager.currentHandler().startElement(aQualifiedName, attributesMap);
 
-          includeFile(fileName);
-        }
-        else {
-          attributesMap = new HashMap();
-          for (i=0; i<anAttributes.getLength(); i++)
-            attributesMap.put(anAttributes.getQName(i), anAttributes.getValue(i));
-
-          SectionHandler handler = manager.currentHandler().startElement(aQualifiedName, attributesMap);
-
-          manager.pushHandler( handler );
-        }
+        manager.pushHandler( handler );
       }
       catch (XMLReaderExc e) {
         throw new SAXParseException(e.getMessage(), null, e);

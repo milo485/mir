@@ -46,7 +46,7 @@
     </verbs>
     <body>
       <Enumerate key="article" table="content" selection="${verbcondition}"
-                  limit="limit" order="webdb_create desc, date desc">
+                  limit="limit" order="webdb_create desc">
         <If condition="article.is_published == '1'">
           <then>
             <Language>
@@ -213,7 +213,7 @@
         
         <List key="special" table="content" 
           selection="is_published='1' and to_article_type = ${articletype.topicspecial} and id in (select content_id from content_x_topic where topic_id = ${topic.id})"
-          order = "webdb_create desc, date desc" limit="1"/>
+          order = "webdb_create desc" limit="1"/>
       
         <Batch key="articles" infokey="batch" table="content" 
                process="pages" batchsize="20" minbatchsize="10"
@@ -254,15 +254,15 @@
     <body>
       <List key="startspecial" table="content" limit="1"
         selection="is_published=true and to_article_type=${articletype.startspecial}"
-        order="webdb_create desc, date desc"/>
+        order="webdb_create desc"/>
                                         
       <List key="features" table="content" limit="10" 
         selection="is_published=true and to_article_type=${articletype.feature}"
-        order="webdb_create desc, date desc"/>
+        order="webdb_create desc"/>
 
       <List key="newswire" table="content" limit="30"
         selection="is_published=true and to_article_type=${articletype.newswire}"
-        order="webdb_create desc, date desc"/>
+        order="webdb_create desc"/>
         
       <List key="breakingnews" table="breakingNews" limit="10"
          order="webdb_create desc"/>
@@ -311,7 +311,7 @@
           key="media" table="image" 
           selection="${verbcondition}"
           limit="limit" 
-          order="webdb_create desc, date desc">
+          order="webdb_create desc">
           
          <GenerateMedia key="media" />
       </Enumerate>
@@ -319,7 +319,7 @@
           key="media" table="video" 
           selection="${verbcondition}"
           limit="limit" 
-          order="webdb_create desc, date desc">
+          order="webdb_create desc">
           
          <GenerateMedia key="media" />
       </Enumerate>
@@ -327,7 +327,7 @@
           key="media" table="audio" 
           selection="${verbcondition}"
           limit="limit" 
-          order="webdb_create desc, date desc">
+          order="webdb_create desc">
           
          <GenerateMedia key="media" />
       </Enumerate>
@@ -335,7 +335,7 @@
           key="media" table="otherMedia" 
           selection="${verbcondition}"
           limit="limit" 
-          order="webdb_create desc, date desc">
+          order="webdb_create desc">
           
          <GenerateMedia key="media" />
       </Enumerate>

@@ -105,6 +105,7 @@ public class MirBasicProducerLocalizer implements MirProducerLocalizer {
       }
       catch (Throwable t) {
         logger.error("MirBasicProducerLocalizer.factories(): Unable to setup factories: "+t.getMessage());
+        t.printStackTrace(logger.asPrintWriter(logger.DEBUG_MESSAGE));
       }
     }
 

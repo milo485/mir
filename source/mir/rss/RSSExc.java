@@ -29,33 +29,12 @@
  * not wish to do so, delete this exception statement from your version.
  */
 
-package mir.producer;
+package mir.rss;
 
-import java.util.Map;
+import multex.Exc;
 
-import mir.log.LoggerWrapper;
-import mir.util.ParameterExpander;
-
-public class ExpandedAssignmentProducerNode implements ProducerNode {
-  private String key;
-  private String bundleIdentifier;
-  private String value;
-
-  public ExpandedAssignmentProducerNode(String aKey, String aValue) {
-    key = aKey;
-    value = aValue;
+public class RSSExc extends Exc {
+  public RSSExc(String aMessage) {
+    super(aMessage);
   }
-
-  public void produce(Map aValueMap, String aVerb, LoggerWrapper aLogger) throws ProducerFailure {
-    try {
-      ParameterExpander.setValueForKey(
-         aValueMap,
-         ParameterExpander.expandExpression( aValueMap, key ),
-         ParameterExpander.expandExpression( aValueMap, value ));
-
-    }
-    catch (Throwable t) {
-      aLogger.error("key " + key + " could not be set to " + value + ": " + t.getMessage());
-    }
-  };
 }

@@ -36,11 +36,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.lucene.index.IndexReader;
+import freemarker.template.SimpleHash;
 import mir.entity.adapter.EntityAdapterModel;
 import mir.entity.adapter.EntityIteratorAdapter;
 import mir.log.LoggerWrapper;
@@ -48,12 +49,12 @@ import mir.misc.StringUtil;
 import mir.servlet.ServletModule;
 import mir.servlet.ServletModuleExc;
 import mir.servlet.ServletModuleFailure;
-import mir.storage.StorageObjectFailure;
 import mir.util.CachingRewindableIterator;
 import mir.util.HTTPRequestParser;
 import mir.util.JDBCStringRoutines;
 import mir.util.SQLQueryBuilder;
 import mir.util.URLBuilder;
+
 import mircoders.entity.EntityContent;
 import mircoders.entity.EntityUsers;
 import mircoders.global.MirGlobal;
@@ -62,16 +63,13 @@ import mircoders.search.IndexUtil;
 import mircoders.storage.DatabaseComment;
 import mircoders.storage.DatabaseContent;
 import mircoders.storage.DatabaseContentToTopics;
-
-import org.apache.lucene.index.IndexReader;
-
-import freemarker.template.SimpleHash;
+import mircoders.storage.DatabaseContentToMedia;
 
 /*
  *  ServletModuleContent -
  *  deliver html for the article admin form.
  *
- * @version $Id: ServletModuleContent.java,v 1.45 2003/03/16 00:11:09 zapata Exp $
+ * @version $Id: ServletModuleContent.java,v 1.46 2003/03/27 20:11:35 zapata Exp $
  * @author rk, mir-coders
  *
  */
@@ -124,7 +122,10 @@ public class ServletModuleContent extends ServletModule
       String selectArticleUrl = requestParser.getParameter("selectarticleurl");
 
       if (searchValue.length()>0) {
-        if (searchField.equals("contents"))
+        if (searchField.equals("id"))
+          queryBuilder.appendAndCondition(
+            "id='"+JDBCStringRoutines.escapeStringLiteral(searchValue)+"'");
+        else if (searchField.equals("contents"))
           queryBuilder.appendAndCondition(
             "(lower(content_data) like " + "'%" + JDBCStringRoutines.escapeStringLiteral(searchValue.toLowerCase()) + "%')"+
             " or (lower(description) like " + "'%" + JDBCStringRoutines.escapeStringLiteral(searchValue.toLowerCase()) + "%')");
@@ -225,11 +226,11 @@ public class ServletModuleContent extends ServletModule
 
           /** @todo the following two should be implied in
            *  DatabaseContent */
-
-          //delete rows in the content_x_topic-table
           DatabaseContentToTopics.getInstance().deleteByContentId(idParam);
-          //delete rows in the comment-table
           DatabaseComment.getInstance().deleteByContentId(idParam);
+          DatabaseContentToMedia.getInstance().deleteByContentId(idParam);
+
+
           //delete from lucene index, if any
           String index = configuration.getString("IndexPath");
           if (IndexReader.indexExists(index)){

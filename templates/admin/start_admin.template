@@ -87,6 +87,7 @@
 		    ${lang("start.content.search")}: <span class="small">
        <input type="text" name="searchvalue" size="15">
        <select name="searchfield">
+       	<option value="id">${lang("content.id")}</option>
        	<option value="title">${lang("content.title")}</option>
         <option value="creator">${lang("content.creator")}</option>
         <option value="source">${lang("content.location")}</option>

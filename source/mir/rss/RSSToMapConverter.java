@@ -29,55 +29,49 @@
  * not wish to do so, delete this exception statement from your version.
  */
 
-package mir.log;
+package mir.rss;
 
-import mir.config.MirPropertiesConfiguration;
-import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
+import java.util.*;
 
-public class Log {
-
-  private static Logger myLogger;
-
-  static {
-    try {
-      String loggerClass = MirPropertiesConfiguration.instance().getString("Log.LogClass");
-      myLogger = (Logger) Class.forName(loggerClass).newInstance();
-    }
-    catch (java.lang.ClassNotFoundException cnfe) {
-      System.err.println("Log was not able to initialize: class not found");
-      cnfe.printStackTrace(System.err);
-    }
-    catch (java.lang.InstantiationException ie) {
-      System.err.println(
-          "Log was not able to initialize: could not initialize class");
-      ie.printStackTrace(System.err);
-    }
-    catch (java.lang.IllegalAccessException iae) {
-      System.err.println("Log was not able to initialize: illegal access");
-      iae.printStackTrace(System.err);
-    }
-    catch (PropertiesConfigExc e) {
-      e.printStackTrace(System.err);
-    }
+public class RSSToMapConverter {
+  private RSSToMapConverter() {
   }
 
-  public static void debug(Object o, String s) {
-    myLogger.debug(o, s);
+  public static Map convertRSSItem(RSSItem anItem) {
+    Map result = new HashMap();
+
+    result.put("title", anItem.getTitle());
+    result.put("description", anItem.getDescription());
+    result.put("link", anItem.getLink());
+
+    return result;
   }
 
-  public static void info(Object o, String s) {
-    myLogger.info(o, s);
-  }
+  public static Map convertRSSData(RSSData anRSSData) {
+    Map result = new HashMap();
 
-  public static void warn(Object o, String s) {
-    myLogger.warn(o, s);
-  }
+    Map channel = null;
+    if (anRSSData.getChannel()!=null) {
+      channel = new HashMap();
+      channel.put("title", anRSSData.getChannel().getTitle());
+      channel.put("description", anRSSData.getChannel().getDescription());
+      channel.put("link", anRSSData.getChannel().getLink());
 
-  public static void error(Object o, String s) {
-    myLogger.error(o, s);
-  }
+      List items = new Vector();
+      Iterator i = anRSSData.getChannel().getItems().iterator();
 
-  public static void fatal(Object o, String s) {
-    myLogger.fatal(o, s);
+      while (i.hasNext()) {
+        RSSItem item = (RSSItem) anRSSData.getItem().get(i.next());
+        if (item!=null) {
+          items.add(convertRSSItem(item));
+        }
+      }
+
+      channel.put("items", items);
+    }
+    result.put("channel", channel);
+    result.put("data", anRSSData);
+
+    return result;
   }
 }

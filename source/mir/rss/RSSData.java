@@ -29,55 +29,42 @@
  * not wish to do so, delete this exception statement from your version.
  */
 
-package mir.log;
+package mir.rss;
 
-import mir.config.MirPropertiesConfiguration;
-import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Vector;
 
-public class Log {
+public class RSSData {
+  private List items;
+  private Map item;
+  private RSSChannel channel;
 
-  private static Logger myLogger;
-
-  static {
-    try {
-      String loggerClass = MirPropertiesConfiguration.instance().getString("Log.LogClass");
-      myLogger = (Logger) Class.forName(loggerClass).newInstance();
-    }
-    catch (java.lang.ClassNotFoundException cnfe) {
-      System.err.println("Log was not able to initialize: class not found");
-      cnfe.printStackTrace(System.err);
-    }
-    catch (java.lang.InstantiationException ie) {
-      System.err.println(
-          "Log was not able to initialize: could not initialize class");
-      ie.printStackTrace(System.err);
-    }
-    catch (java.lang.IllegalAccessException iae) {
-      System.err.println("Log was not able to initialize: illegal access");
-      iae.printStackTrace(System.err);
-    }
-    catch (PropertiesConfigExc e) {
-      e.printStackTrace(System.err);
-    }
+  protected RSSData() {
+    items = new Vector();
+    item = new HashMap();
+    channel = null;
   }
 
-  public static void debug(Object o, String s) {
-    myLogger.debug(o, s);
+  protected void addItem(RSSItem anItem) {
+    items.add(anItem);
+    item.put(anItem.getIdentifier(), anItem);
+  };
+
+  public void setChannel(RSSChannel aChannel) {
+    channel = aChannel;
   }
 
-  public static void info(Object o, String s) {
-    myLogger.info(o, s);
+  public RSSChannel getChannel() {
+    return channel;
   }
 
-  public static void warn(Object o, String s) {
-    myLogger.warn(o, s);
+  public List getItems() {
+    return items;
   }
 
-  public static void error(Object o, String s) {
-    myLogger.error(o, s);
-  }
-
-  public static void fatal(Object o, String s) {
-    myLogger.fatal(o, s);
+  public Map getItem() {
+    return item;
   }
 }

@@ -97,14 +97,17 @@
           <tr <if grey=="1"><assign grey="0">class="list1"<else><assign grey="1">class="list2"</if>>
         
         		<td>${entry.creationdate.formatted["dd.MM.yyyy HH:mm"]}<br>
-          	  <if entry.is_published=="0"><span class="spezialtext">hidden</span><else>-</if>
+          	  <if entry.is_published=="0"><span class="spezialtext">${lang("comment.hidden")}</span><else>-</if>
         		</td>
         
-            <td>
-                ${lang("comment.article")}
-                <a href="${config.actionRoot}?module=Content&do=edit&id=${entry.to_content.id}">
-                  ${utility.encodeHTML(entry.to_content.title)}
-                </a>
+            <td><if entry.to_content>
+                  ${lang("comment.article")}
+                  <a href="${config.actionRoot}?module=Content&do=edit&id=${entry.to_content.id}">
+                    ${utility.encodeHTML(entry.to_content.title)}
+                  </a>
+                  (${lang("articletypes."+entry.to_content.article_type.name)})
+                </if><br>
+                [<a href="${config.actionRoot}?module=Comment&do=articlecomments&articleid=${entry.to_content.id}">${lang("commentlist.allcomments")}</a>]
                 <br>
                   <a name="${entry.id}"></a>
                     <if entry.status>${lang("commentstatus." + entry.status.name)} - </if> 
@@ -116,19 +119,19 @@
                 <br>
                 <if config["Mir.Localizer.Admin.ListOperationsFlavor"]=="0">
        			      <list entry.operations as op>
-      			        [<a href="${config.actionRoot}?module=Localizer&do=commentoperation&operation=${op}&id=${entry.id}&returnurl=${utility.encodeURI(thisurl + "#" + entry.id)}">${op}</a>]
+      			        [<a href="${config.actionRoot}?module=Localizer&do=commentoperation&operation=${op}&id=${entry.id}&returnurl=${utility.encodeURI(thisurl + "#" + entry.id)}">${lang("comment.operation."+op)}</a>]
       			      </list>
       			    </if>
                 <if config["Mir.Localizer.Admin.ListOperationsFlavor"]=="1">
        			      <list entry.operations as op>
-  			            [<input type="checkbox" name="operation" value="${entry.id};${op}">${op}]
+  			            [<input type="checkbox" name="operation" value="${entry.id};${op}">${lang("comment.operation."+op)}]
       			      </list>
       			    </if>
                 <if config["Mir.Localizer.Admin.ListOperationsFlavor"]=="2">
   	              <select name="operation">
                     <option value="" selected>&nbsp;</option>
        			        <list entry.operations as op>
-                      <option value="${entry.id};${op}">${op}</option>
+                      <option value="${entry.id};${op}">${lang("comment.operation."+op)}</option>
       			        </list>
                   </select>
       			    </if>

@@ -17,8 +17,8 @@ fi;
 SCRIPT_FILE="/tmp/createmir.$$.sql"
 
 # database/user creation
-echo "CREATE DATABASE $1 WITH ENCODING='UNICODE';" > ${SCRIPT_FILE}
-echo "CREATE USER "$3" WITH PASSWORD '$4';" >> ${SCRIPT_FILE}
+echo "CREATE DATABASE \"$1\" WITH ENCODING='UNICODE';" > ${SCRIPT_FILE}
+echo "CREATE USER \"$3\" WITH PASSWORD '$4';" >> ${SCRIPT_FILE}
 echo "UPDATE pg_database SET datdba=(select usesysid from pg_user where usename='$3') where datname='$1';" >> ${SCRIPT_FILE}
 
 echo "\connect $1" >> ${SCRIPT_FILE}

@@ -29,33 +29,47 @@
  * not wish to do so, delete this exception statement from your version.
  */
 
-package mir.producer;
+package mir.rss;
 
-import java.util.Map;
+import java.util.*;
 
-import mir.log.LoggerWrapper;
-import mir.util.ParameterExpander;
+public class RSSItem {
+  private String title;
+  private String link;
+  private String description;
+  private String identifier;
 
-public class ExpandedAssignmentProducerNode implements ProducerNode {
-  private String key;
-  private String bundleIdentifier;
-  private String value;
-
-  public ExpandedAssignmentProducerNode(String aKey, String aValue) {
-    key = aKey;
-    value = aValue;
+  protected RSSItem(String anIdentifier) {
+    identifier = anIdentifier;
   }
 
-  public void produce(Map aValueMap, String aVerb, LoggerWrapper aLogger) throws ProducerFailure {
-    try {
-      ParameterExpander.setValueForKey(
-         aValueMap,
-         ParameterExpander.expandExpression( aValueMap, key ),
-         ParameterExpander.expandExpression( aValueMap, value ));
+  public String getIdentifier() {
+    return identifier;
+  }
 
-    }
-    catch (Throwable t) {
-      aLogger.error("key " + key + " could not be set to " + value + ": " + t.getMessage());
-    }
-  };
+  public String getTitle() {
+    return title;
+  }
+
+  public void setTitle(String aTitle) {
+    title = aTitle;
+  }
+
+  public String getLink() {
+    return link;
+  }
+
+  public void setLink(String aLink) {
+    link = aLink;
+  }
+
+  public String getDescription() {
+    return description;
+  }
+
+  public void setDescription(String aDescription) {
+    description = aDescription;
+  }
+
 }
+

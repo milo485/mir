@@ -31,6 +31,7 @@
 
 package  mir.producer.reader;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -61,11 +62,13 @@ public class ProducerConfigReader {
   public void parseFile(String aFileName, ProducerNodeBuilderLibrary aBuilderLibrary, List aProducerFactories, List aUsedFiles) throws ProducerConfigFailure {
     try {
       XMLReader reader = new XMLReader();
+      aUsedFiles.add(new File(aFileName));
 
       builderLibrary = aBuilderLibrary;
       scriptedNodeBuilderLibrary = new ProducerNodeBuilderLibrary();
 
-      reader.parseFile(aFileName, new RootSectionHandler(aProducerFactories), aUsedFiles);
+      reader.parseFile(aFileName, new RootSectionHandler(aProducerFactories));
+
     }
     catch (Throwable e) {
       if ((e instanceof XMLReader.XMLReaderExc) && ((XMLReader.XMLReaderExc) e).getHasLocation()) {
