@@ -76,7 +76,7 @@ import mir.util.JDBCStringRoutines;
  * Treiber, Host, User und Passwort, ueber den der Zugriff auf die
  * Datenbank erfolgt.
  *
- * @version $Id: Database.java,v 1.44 2003/05/06 18:08:05 zapata Exp $
+ * @version $Id: Database.java,v 1.45 2003/06/24 21:49:22 idfx Exp $
  * @author rk
  *
  */
@@ -860,6 +860,7 @@ public class Database implements StorageObject {
       theEntity.setId(returnId);
     }
     catch (SQLException sqe) {
+			sqe.printStackTrace(logger.asPrintWriter(LoggerWrapper.DEBUG_MESSAGE));    	
       throwSQLException(sqe, "insert");
     }
     finally {
@@ -867,6 +868,7 @@ public class Database implements StorageObject {
         con.setAutoCommit(true);
       }
       catch (Exception e) {
+				e.printStackTrace(logger.asPrintWriter(LoggerWrapper.DEBUG_MESSAGE));
       }
 
       freeConnection(con, pstmt);
