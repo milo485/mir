@@ -18,7 +18,7 @@
     
       <table border="0">
         <tr>
-          <td align="right" class="table_left">
+          <td align="right" class="table-left">
       		<B>${lang("commentstatus.id")}:</B></td>
           <td class="listrow2">
             ${data.id}
@@ -27,7 +27,7 @@
         
 		<call TextInputTableRow (lang("commentstatus.name"), 40, 255, "name", data.name)>
         <tr>
-          <td colspan="2" align="right" class="table_foot">
+          <td colspan="2" align="right" class="table-foot">
             <span class="witetext">
               <if data.new>
                 <input type="submit" name="save" value="${lang("insert")}">
@@ -40,7 +40,7 @@
       </table>
 
     </form>
-	<p><a class="link_box" href="${config.actionRoot}?module=CommentStatus&do=list">[&lt;] ${lang("back")} </a> &nbsp;</p>
+	<p><a class="link-box" href="${config.actionRoot}?module=CommentStatus&do=list">[&lt;] ${lang("back")} </a> &nbsp;</p>
     <include "foot.template">
   </body>
 </html>

@@ -21,14 +21,14 @@
 	<assign grey="0">
 	<list producers as p>
 		<tr>
-			<td colspan="4" class="table_head"><b>${p.name}</b></td>
+			<td colspan="4" class="table-head"><b>${p.name}</b></td>
 		</tr>
 
 		<list p.verbs as v>
 		<tr <if grey=="1">class="listrow2"<else>class="listrow2"</if>>
 			<td width="25"></td>
 			<if v.name=="all">
-				<td class="small text_alert">${v.name} [!]</td>
+				<td class="small text-alert">${v.name} [!]</td>
 			<else>
 				<td class="small">${v.name}</td>
 			</if>
@@ -52,11 +52,11 @@
 
 <table border="0" cellspacing="3" cellpadding="2">
 	<tr >
-		<td class="bg_neutral" colspan="2"><b>${lang("producer.job.name")}</b></td>
-		<td class="bg_neutral" ><b>${lang("producer.job.status")}</b></td>
-		<td class="bg_neutral small" ><b>${lang("producer.job.date")}</b></td>
+		<td class="bg-neutral" colspan="2"><b>${lang("producer.job.name")}</b></td>
+		<td class="bg-neutral" ><b>${lang("producer.job.status")}</b></td>
+		<td class="bg-neutral small" ><b>${lang("producer.job.date")}</b></td>
 		<comment>    
-		<td class="box_head" >&nbsp;</td>
+		<td class="box-head" >&nbsp;</td>
 		</comment>    
 	</tr>
 
@@ -68,7 +68,7 @@
 				<td class="small">(${q.verb})</td>
 				
 				<if q.status=="pending">
-					<td class="text_alert small">${q.status}</td>
+					<td class="text-alert small">${q.status}</td>
 				<else>
 					<td class="small">${q.status}</td>
 				</if>
@@ -86,9 +86,9 @@
 		</tr>
 	</if>
 	<tr>
-		<td colspan="5" class="table_foot">
+		<td colspan="5" class="table-foot">
 			<br>
-			<a class="link_box"  href="${config.actionRoot}?${thisurl}">${lang("producer.jobqueue.refresh")}</a>
+			<a class="link-box"  href="${config.actionRoot}?${thisurl}">${lang("producer.jobqueue.refresh")}</a>
 		</td>
 	</tr>
 </table>

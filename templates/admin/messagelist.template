@@ -9,19 +9,19 @@
 <include "head.template">
 
 <p>
-	<a class="link_box" href="${config.actionRoot}?module=Message&do=add">[+] ${lang("add")}</a> &nbsp;
-	<a class="link_box" href="${config.actionRoot}">[&lt;&lt;&lt;] ${lang("head.start")}</a>
+	<a class="link-box" href="${config.actionRoot}?module=Message&do=add">[+] ${lang("add")}</a> &nbsp;
+	<a class="link-box" href="${config.actionRoot}">[&lt;&lt;&lt;] ${lang("head.start")}</a>
 </p>
 
 <if data.contentlist>
 
 <table border="0" cellpadding="2" cellspacing="1" width="70%">
   <tr>
-    <td class="table_head">
+    <td class="table-head">
 		${lang("message.date")}</td>
-    <td class="table_head">
+    <td class="table-head">
 	 	${lang("message.title")} /<br>${lang("message.creator")}</td>
-    <td colspan="2" class="table_head">
+    <td colspan="2" class="table-head">
 		${lang("message.text")}</td>
   </tr>
 
@@ -44,7 +44,7 @@
   </list>
   
   <tr>
-    <td colspan="4" class="table_foot">${data.count} ${lang("records")} /
+    <td colspan="4" class="table-foot">${data.count} ${lang("records")} /
         ${lang("show_from_to", data.from, data.to)}</td>
     
   </tr>

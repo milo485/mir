@@ -42,6 +42,7 @@ public class MirGlobal {
   static private MirLocalizer localizer;
   static private ProducerEngine producerEngine;
   static private Abuse abuse;
+  static private MRUCache mruCache;
 
   public static MirLocalizer localizer() {
     String localizerClassName;
@@ -102,4 +103,15 @@ public class MirGlobal {
 
     return producerEngine;
   }
+
+  public static MRUCache mruCache() {
+    synchronized(MirGlobal.class) {
+      if (mruCache == null) {
+	mruCache = new MRUCache();
+      }
+      return mruCache;
+    }
+  }
 }
+
+ 

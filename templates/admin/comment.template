@@ -20,65 +20,34 @@
     
     	<table border="0">  	
       	
-		<tr><td colspan="2" class="table_head">${lang("comment.htmltitle")}</td></tr>
+		<tr><td colspan="2" class="table-head">${lang("comment.htmltitle")}</td></tr>
 		
 		
 		<tr> 
-          <td align="right" class="table_left">
+          <td align="right" class="table-left">
             ${lang("comment.date")}
           </td>
           <td class="listrow2">
             ${utility.encodeHTML(utility.encodeHTML(comment.webdb_create))}
           </td>
         </tr>
-      
-      	
-		<tr>
-          <td align="right" class="table_left">
-            ${lang("comment.status")}
-          </td>
-          <td class="listrow2">
-            <select name="to_comment_status">
-              <list commentstatuses as a>
-                <option value="${a.id}" <if (a.id == comment.to_comment_status)>selected</if>>${lang("commentstatus."+a.name)}</option>
-              </list>
-            </select>
-          </td>
-        </tr>
-      	
-        
-		<call TextInputTableRow (lang("comment.title"), 40, 255, "title", utility.encodeHTML(comment.title))>
-		<call TextInputTableRow (lang("comment.creator"), 40, 80, "creator", utility.encodeHTML(comment.creator))>
-		<call TextInputTableRow (lang("comment.url"), 40, 255, "main_url", utility.encodeHTML(comment.main_url))>
-		<call TextInputTableRow (lang("comment.email"), 40, 80, "email", utility.encodeHTML(comment.email))>
-		<call TextInputTableRow (lang("comment.phone"), 40, 80, "phone", utility.encodeHTML(comment.phone))>
-		<call TextInputTableRow (lang("comment.address"), 40, 80, "address", utility.encodeHTML(comment.address))>
+
+
+    <call PulldownTableRow (lang("comment.status"), "to_comment_status", commentstatuses, "id", "name", comment.to_comment_status, "commentstatus.")>
+
+		<call TextInputTableRow (lang("comment.title"), 40, 255, "title", comment.title)>
+		<call TextInputTableRow (lang("comment.creator"), 40, 80, "creator", comment.creator)>
+		<call TextInputTableRow (lang("comment.url"), 40, 255, "main_url", comment.main_url)>
+		<call TextInputTableRow (lang("comment.email"), 40, 80, "email", comment.email)>
+		<call TextInputTableRow (lang("comment.phone"), 40, 80, "phone", comment.phone)>
+		<call TextInputTableRow (lang("comment.address"), 40, 80, "address", comment.address)>
 		
-	
+    <call PulldownTableRow (lang("comment.language"), "to_language", languages, "id", "name", comment.to_language, "")>
+    <call CheckboxTableRow       (lang("comment.html"), "is_html", comment.is_html )>
+    <call TextAreaTableRow       (lang("comment.text"), "", 70, 15, "description", comment.description)>
+
         <tr>
-          <td align="right" class="table_left">
-      	    ${lang("comment.language")}
-      	  </td>
-          <td class="listrow2">
-            <select name="to_language">
-              <list languages as l>
-                <option value="${l.id}" <if (l.id == comment.to_language)>selected</if>>${l.name}</option>
-              </list>
-            </select>
-          </td>
-        </tr>
-      
-        <tr>
-          <td align="right" class="table_left" valign="top">
-            ${lang("comment.text")}<br>
-            ${lang("comment.html")}<input type="checkbox" name="is_html" value="1"<if comment.is_html=="1"> checked</if>>
-          </td>
-          <td class="listrow2">
-            <textarea cols="60" rows="10" name="description" wrap="virtual">${utility.encodeHTML(comment.description)}</textarea>
-          </td>
-        </tr>
-        <tr>
-          <td colspan="2" align="right" class="table_foot" > 
+          <td colspan="2" align="right" class="table-foot" > 
             <span class="text">
       	      ${lang("comment.published")} <input type="checkbox" name="is_published" value="1" <if comment.is_published=="1"> checked</if>>
       	      <if new=="1">
@@ -100,13 +69,13 @@
 <td align="left" valign="top">
 <table cellspacing="3" cellpadding="2">
 	<tr>
-		<td class="table_head" colspan="2">
+		<td class="table-head" colspan="2">
 			${lang("content.family")}
 		</td>
 	</tr>
 		
 	<tr>
-		<td align=right valign=top class="table_left">
+		<td align=right valign=top class="table-left">
 			${lang("content.parent")}:
 		</td>
 		<td align="left" valign="top" class="listrow2">
@@ -120,7 +89,7 @@
 	</tr>
 		
 	<tr>
-		<td align=right valign=top class="table_left">
+		<td align=right valign=top class="table-left">
 			${lang("content.children")}:
 		</td>
 		<td align="left" valign="top" class="listrow2">
@@ -142,8 +111,8 @@
     </form>
 	
 	 <p>
-      <a class="link_box" href="${config.actionRoot}?module=Comment&do=list">[&lt;] ${lang("list")} </a> &nbsp;
-      <a class="link_box" href="${config.actionRoot}">[&lt;&lt;&lt;] ${lang("head.start")}</a>
+      <a class="link-box" href="${config.actionRoot}?module=Comment&do=list">[&lt;] ${lang("list")} </a> &nbsp;
+      <a class="link-box" href="${config.actionRoot}">[&lt;&lt;&lt;] ${lang("head.start")}</a>
 	</p>
 	
     <include "foot.template">

@@ -168,12 +168,13 @@ public class StringRoutines {
     int position;
     int endOfNamePosition;
 
-    while ((position = aString.indexOf(aSeparator, previousPosition))>=0) {
-      result.add(aString.substring(previousPosition, position));
-      previousPosition = position + aSeparator.length();
+    if (aString!=null) {
+      while ( (position = aString.indexOf(aSeparator, previousPosition)) >= 0) {
+        result.add(aString.substring(previousPosition, position));
+        previousPosition = position + aSeparator.length();
+      }
+      result.add(aString.substring(previousPosition, aString.length()));
     }
-
-    result.add(aString.substring(previousPosition, aString.length()));
 
     return result;
   }

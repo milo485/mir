@@ -18,7 +18,7 @@
 <table border="0">
   
   <tr>
-    <td align="right" class="table_left">
+    <td align="right" class="table-left">
 	 <B>${lang("breaking.date")}:</B>
 	</td>
     <td class="listrow2">
@@ -29,7 +29,7 @@
   
   
   <tr>
-    <td align="right" class="table_left">
+    <td align="right" class="table-left">
 	<B>${lang("breaking.text")}:</B><br> ${lang("breaking.textinfo")}</td>
     <td class="listrow2">
 	 <textarea cols="50" rows="5" name="text" wrap=virtual>${data.text}</textarea>
@@ -37,7 +37,7 @@
   </tr>
 
   <tr>
-    <td colspan="2" align="right" class="table_foot">
+    <td colspan="2" align="right" class="table-foot">
 		<if data.new>
 			<input type="submit" name="save" value="${lang("insert")}">
 		<else>
@@ -46,7 +46,7 @@
     </td>
 </table>
 </form>
-<p><a class="link_box" href="${config.actionRoot}?module=Breaking&do=list">[&lt;] ${lang("back")}</a></p>
+<p><a class="link-box" href="${config.actionRoot}?module=Breaking&do=list">[&lt;] ${lang("back")}</a></p>
 <include "foot.template">
 </body>
 </html>

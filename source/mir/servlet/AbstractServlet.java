@@ -32,6 +32,8 @@
 package mir.servlet;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Locale;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -54,7 +56,7 @@ import mir.storage.DatabaseAdaptor;
  * Copyright:    Copyright (c) 2001, 2002
  * Company:      Mir-coders group
  * @author       idfx, the Mir-coders group
- * @version      $Id: AbstractServlet.java,v 1.26 2003/03/19 15:34:52 rk Exp $
+ * @version      $Id: AbstractServlet.java,v 1.28 2003/04/20 14:42:09 idfx Exp $
  */
 
 public abstract class AbstractServlet extends HttpServlet {
@@ -195,7 +197,31 @@ public abstract class AbstractServlet extends HttpServlet {
       pool = manager.createPool(meta);
     }
   }
-
+  
+  private void setEncoding(HttpServletRequest request){
+  	try {
+			Class reqClass = request.getClass();
+			Method method = reqClass.getMethod("setCharacterEncoding", new Class[]{String.class});
+			String encoding = configuration.getString("Mir.DefaultHTMLCharset");
+			method.invoke(request, new Object[]{encoding});			
+		} catch (NoSuchMethodException e) {
+			// TODO set the encoding in a zapata-way
+			e.printStackTrace();
+			logger.error("not yes implemented: " + e.getMessage());
+		} catch (SecurityException e) {
+			logger.error(e.getMessage());
+			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			logger.error(e.getMessage());
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			logger.error(e.getMessage());
+			e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			logger.error(e.getMessage());
+			e.printStackTrace();
+		}
+  }
 
   protected final void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     doPost(request, response);
@@ -206,6 +232,7 @@ public abstract class AbstractServlet extends HttpServlet {
         configuration.getString("RootUri").equals("")) {
       configuration.setProperty("RootUri", request.getContextPath());
     }
+    setEncoding(request);
     process(request, response);
   }
 

@@ -49,18 +49,21 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.Vector;
-import java.util.Locale;
+import java.util.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpUtils;
+
+import gnu.regexp.RE;
+import gnu.regexp.REMatch;
+import gnu.regexp.REMatchEnumeration;
+import gnu.regexp.REException;
 
 import org.apache.commons.net.smtp.SMTPClient;
 import org.apache.commons.net.smtp.SMTPReply;
-import org.apache.fop.apps.Driver;
-import org.apache.fop.apps.XSLTInputHandler;
 import org.apache.log.Hierarchy;
 import org.apache.log.Priority;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -71,6 +74,7 @@ import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.Searcher;
 import org.apache.struts.util.MessageResources;
+
 import mir.entity.Entity;
 import mir.entity.EntityList;
 import mir.generator.Generator;
@@ -83,13 +87,16 @@ import mir.servlet.ServletModuleExc;
 import mir.servlet.ServletModuleFailure;
 import mir.servlet.ServletModuleUserExc;
 import mir.storage.StorageObjectFailure;
-import mir.util.ExceptionFunctions;
+import mir.util.*;
+import mircoders.pdf.PDFGenerator;
+import mir.session.*;
 import mir.util.HTTPRequestParser;
 import mir.util.StringRoutines;
 import mircoders.entity.EntityComment;
 import mircoders.entity.EntityContent;
+import mircoders.global.CacheKey;
 import mircoders.global.MirGlobal;
-import mircoders.media.MediaRequest;
+import mircoders.media.*;
 import mircoders.media.UnsupportedMediaFormatExc;
 import mircoders.module.ModuleComment;
 import mircoders.module.ModuleContent;
@@ -99,6 +106,7 @@ import mircoders.search.AudioSearchTerm;
 import mircoders.search.ContentSearchTerm;
 import mircoders.search.ImagesSearchTerm;
 import mircoders.search.KeywordSearchTerm;
+import mircoders.search.MediaSearchTerm;
 import mircoders.search.TextSearchTerm;
 import mircoders.search.TopicSearchTerm;
 import mircoders.search.UnIndexedSearchTerm;
@@ -106,6 +114,7 @@ import mircoders.search.VideoSearchTerm;
 import mircoders.storage.DatabaseComment;
 import mircoders.storage.DatabaseContent;
 import mircoders.storage.DatabaseContentToMedia;
+import mircoders.storage.DatabaseCommentToMedia;
 import mircoders.storage.DatabaseContentToTopics;
 import mircoders.storage.DatabaseImages;
 import mircoders.storage.DatabaseLanguage;
@@ -118,7 +127,7 @@ import mircoders.storage.DatabaseTopics;
  *    open-postings to the newswire
  *
  * @author mir-coders group
- * @version $Id: ServletModuleOpenIndy.java,v 1.72 2003/04/10 03:31:47 zapata Exp $
+ * @version $Id: ServletModuleOpenIndy.java,v 1.77 2003/04/18 15:37:29 john Exp $
  *
  */
 
@@ -146,14 +155,17 @@ public class ServletModuleOpenIndy extends ServletModule
       commentFormTemplate = configuration.getString("ServletModule.OpenIndy.CommentTemplate");
       commentFormDoneTemplate = configuration.getString("ServletModule.OpenIndy.CommentDoneTemplate");
       commentFormDupeTemplate = configuration.getString("ServletModule.OpenIndy.CommentDupeTemplate");
+
       postingFormTemplate = configuration.getString("ServletModule.OpenIndy.PostingTemplate");
       postingFormDoneTemplate = configuration.getString("ServletModule.OpenIndy.PostingDoneTemplate");
       postingFormDupeTemplate = configuration.getString("ServletModule.OpenIndy.PostingDupeTemplate");
+
       searchResultsTemplate = configuration.getString("ServletModule.OpenIndy.SearchResultsTemplate");
       prepareMailTemplate = configuration.getString("ServletModule.OpenIndy.PrepareMailTemplate");
       sentMailTemplate = configuration.getString("ServletModule.OpenIndy.SentMailTemplate");
       directOp = configuration.getString("DirectOpenposting").toLowerCase();
-      mainModule = new ModuleComment(DatabaseComment.getInstance());
+      commentModule = new ModuleComment(DatabaseComment.getInstance());
+      mainModule = commentModule;
       contentModule = new ModuleContent(DatabaseContent.getInstance());
       topicsModule = new ModuleTopics(DatabaseTopics.getInstance());
       imageModule = new ModuleImages(DatabaseImages.getInstance());
@@ -178,13 +190,11 @@ public class ServletModuleOpenIndy extends ServletModule
        configuration.getString("ServletModule.OpenIndy.PostingDisabledTemplate"));
   }
 
-
   /**
    *  Method for making a comment
    */
 
-  public void addcomment(HttpServletRequest req, HttpServletResponse res) throws ServletModuleExc, ServletModuleUserExc, ServletModuleFailure
-  {
+  public void addcomment(HttpServletRequest req, HttpServletResponse res) throws ServletModuleExc, ServletModuleUserExc, ServletModuleFailure {
     if (MirGlobal.abuse().getOpenPostingDisabled()) {
       openPostingDisabled(req, res);
 
@@ -192,11 +202,8 @@ public class ServletModuleOpenIndy extends ServletModule
     }
 
     String aid = req.getParameter("aid"); // the article id the comment will belong to
-/*
-    String language = req.getParameter("language");
- */
 
-    if (aid!=null && !aid.equals("")) {
+    if (aid != null && !aid.equals("")) {
       try {
         Map mergeData = new HashMap();
 
@@ -208,15 +215,8 @@ public class ServletModuleOpenIndy extends ServletModule
           mergeData.put("passwd", passwd);
         }
         else {
-          mergeData.put("passwd", (String) null);
+          mergeData.put("passwd", (String)null);
         }
-/*
-        if (language != null) {
-          HttpSession session = req.getSession(false);
-          session.setAttribute("Locale", new Locale(language, ""));
-          session.setAttribute("language", language);
-        }
-*/
         mergeData.put("aid", aid);
 
         Map extraInfo = new HashMap();
@@ -228,7 +228,8 @@ public class ServletModuleOpenIndy extends ServletModule
         throw new ServletModuleFailure("ServletModuleOpenIndy.addcomment: " + t.getMessage(), t);
       }
     }
-    else throw new ServletModuleExc("aid not set!");
+    else
+      throw new ServletModuleExc("aid not set!");
   }
 
   /**
@@ -236,9 +237,7 @@ public class ServletModuleOpenIndy extends ServletModule
    *  the commentDone Page
    */
 
-  public void inscomment(HttpServletRequest req, HttpServletResponse res)
-    throws ServletModuleExc, ServletModuleUserExc, ServletModuleFailure
-  {
+  public void inscomment(HttpServletRequest req, HttpServletResponse res) throws ServletModuleExc, ServletModuleUserExc, ServletModuleFailure {
     if (MirGlobal.abuse().getOpenPostingDisabled()) {
       openPostingDisabled(req, res);
 
@@ -246,66 +245,68 @@ public class ServletModuleOpenIndy extends ServletModule
     }
 
     String aid = req.getParameter("to_media"); // the article id the comment will belong to
-    if (aid!=null && !aid.equals(""))
-      {
-        // ok, collecting data from form
-        try {
-          Map withValues = getIntersectingValues(req, DatabaseComment.getInstance());
+    if (aid != null && !aid.equals("")) {
+      // ok, collecting data from form
+      try {
+        Map withValues = getIntersectingValues(req, DatabaseComment.getInstance());
 
-          //no html in comments(for now)
-          for (Iterator i=withValues.keySet().iterator(); i.hasNext(); ){
-            String k=(String)i.next();
-            String v=(String)withValues.get(k);
+        //no html in comments(for now)
+        for (Iterator i = withValues.keySet().iterator(); i.hasNext(); ) {
+          String k = (String) i.next();
+          String v = (String) withValues.get(k);
 
-            withValues.put(k,StringUtil.removeHTMLTags(v));
-          }
-          withValues.put("is_published","1");
-          withValues.put("to_comment_status","1");
-
-          //checking the onetimepasswd
-          HttpSession session = req.getSession(false);
-          String sessionPasswd = (String) session.getAttribute("passwd");
-          if ( sessionPasswd != null){
-            String passwd = req.getParameter("passwd");
-            if ( passwd == null || passwd.length()==0) {
-              throw new ServletModuleUserExc("comment.error.missingpassword", new String[] {});
-            }
-            if (!sessionPasswd.equals(passwd)) {
-              throw new ServletModuleUserExc("comment.error.invalidpassword", new String[] {});
-            }
-            session.invalidate();
-          }
-
-          String id = mainModule.add(withValues);
-
-          if(id==null){
-            deliver(req, res, (Map) null, null, commentFormDupeTemplate);
-          }
-          else {
-            MirGlobal.abuse().logComment(req.getRemoteAddr(), id, new Date(), (String) req.getHeader("User-Agent"));
-
-            DatabaseContent.getInstance().setUnproduced("id="+aid);
-
-            try {
-              EntityComment comment = (EntityComment) DatabaseComment.getInstance().selectById(id);
-              MirGlobal.abuse().checkComment(comment, req, res);
-              MirGlobal.localizer().openPostings().afterCommentPosting(comment);
-            }
-            catch (Throwable t) {
-              throw new ServletModuleExc(t.getMessage());
-            }
-          }
-
-          // redirecting to url
-          // should implement back to article
-          Map mergeData = new HashMap();
-          deliver(req, res, mergeData, null, commentFormDoneTemplate);
+          withValues.put(k, StringUtil.removeHTMLTags(v));
         }
-        catch (Throwable e) {
-          throw new ServletModuleFailure(e);
+        withValues.put("is_published", "1");
+        withValues.put("to_comment_status", "1");
+        withValues.put("is_html", "0");
+
+        //checking the onetimepasswd
+        HttpSession session = req.getSession(false);
+        String sessionPasswd = (String) session.getAttribute("passwd");
+        if (sessionPasswd != null) {
+          String passwd = req.getParameter("passwd");
+          if (passwd == null || passwd.length() == 0) {
+            throw new ServletModuleUserExc("comment.error.missingpassword", new String[] {});
+          }
+          if (!sessionPasswd.equals(passwd)) {
+            throw new ServletModuleUserExc("comment.error.invalidpassword", new String[] {});
+          }
+          session.invalidate();
         }
+
+        String id = mainModule.add(withValues);
+
+        SimpleResponse response = new SimpleResponse();
+        response.setResponseGenerator(commentFormDoneTemplate);
+
+        if (id == null) {
+          deliver(req, res, (Map)null, null, commentFormDupeTemplate);
+        }
+        else {
+          DatabaseContent.getInstance().setUnproduced("id=" + aid);
+
+          try {
+            EntityComment comment = (EntityComment) DatabaseComment.getInstance().selectById(id);
+            MirGlobal.localizer().openPostings().afterCommentPosting(comment);
+            MirGlobal.abuse().checkComment(
+                comment, new HTTPAdapters.HTTPRequestAdapter(req), res);
+          }
+          catch (Throwable t) {
+            throw new ServletModuleExc(t.getMessage());
+          }
+        }
+
+        // redirecting to url
+        // should implement back to article
+        deliver(req, res, response.getResponseValues(), null, response.getResponseGenerator());
       }
-    else throw new ServletModuleExc("aid not set!");
+      catch (Throwable e) {
+        throw new ServletModuleFailure(e);
+      }
+    }
+    else
+      throw new ServletModuleExc("aid not set!");
 
   }
 
@@ -327,7 +328,7 @@ public class ServletModuleOpenIndy extends ServletModule
 
       // onetimepasswd
       if (MirGlobal.abuse().getOpenPostingPassword()) {
-        String passwd = this.createOneTimePasswd();
+        String passwd = generateOnetimePassword();
         HttpSession session = req.getSession(false);
         session.setAttribute("passwd", passwd);
         mergeData.put("passwd", passwd);
@@ -408,8 +409,6 @@ public class ServletModuleOpenIndy extends ServletModule
       if (sessionPasswd != null){
         String passwd = (String) withValues.get("passwd");
 
-        logger.debug("session password = " + sessionPasswd + ", form password = " + passwd);
-
         if ( passwd == null || passwd.length()==0) {
           throw new ServletModuleUserExc("posting.error.missingpassword", new String[] {});
         }
@@ -470,8 +469,6 @@ public class ServletModuleOpenIndy extends ServletModule
         return;
       }
 
-      MirGlobal.abuse().logArticle(req.getRemoteAddr(), cid, new Date(), (String) req.getHeader("User-Agent"));
-
       String[] to_topicsArr = mp.getParameterValues("to_topic");
 
       if (to_topicsArr != null && to_topicsArr.length > 0) {
@@ -512,6 +509,149 @@ public class ServletModuleOpenIndy extends ServletModule
     }
 
     deliver(req, res, mergeData, null, postingFormDoneTemplate);
+  }
+
+  /**
+   * Routine for innitiation tha d
+   *
+   * @param aRequest
+   * @param aResponse
+   * @throws ServletModuleExc
+   * @throws ServletModuleUserExc
+   * @throws ServletModuleFailure
+   */
+/*
+  public void comment(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc, ServletModuleUserExc, ServletModuleFailure {
+    try {
+      if (MirGlobal.abuse().getOpenPostingDisabled()) {
+        openPostingDisabled(aRequest, aResponse);
+
+        return;
+      }
+
+      Request request = new HTTPAdapters.HTTPParsedRequestAdapter(new HTTPParsedRequest(aRequest, 1000000, "/tmp"));
+      Session session = new HTTPAdapters.HTTPSessionAdapter(aRequest.getSession());
+      SimpleResponse response = new SimpleResponse(
+          ServletHelper.makeGenerationData(new Locale[] {getLocale(aRequest), getFallbackLocale(aRequest)}, "bundles.open"));
+
+      Iterator i = DatabaseContent.getInstance().getFields().iterator();
+      while (i.hasNext()) {
+        response.setResponseValue((String) i.next(), null);
+      }
+
+      MirGlobal.localizer().openPostings().initializeCommentPosting(request, session, response);
+
+      ServletHelper.generateOpenPostingResponse(aResponse.getWriter(), response.getResponseValues(), response.getResponseGenerator());
+    }
+    catch (Throwable t) {
+      t.printStackTrace(System.out);
+      System.out.println("comment: " + t.toString());
+      throw new ServletModuleFailure("ServletModuleOpenIndy.addcomment: " + t.getMessage(), t);
+    }
+  }
+
+  public void processcomment(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc, ServletModuleUserExc, ServletModuleFailure {
+    try {
+      if (MirGlobal.abuse().getOpenPostingDisabled()) {
+        openPostingDisabled(aRequest, aResponse);
+
+        return;
+      }
+
+      Request request = new HTTPAdapters.HTTPParsedRequestAdapter(new HTTPParsedRequest(aRequest, 1000000, "/tmp"));
+      Session session = new HTTPAdapters.HTTPSessionAdapter(aRequest.getSession());
+      SimpleResponse response = new SimpleResponse(
+          ServletHelper.makeGenerationData(new Locale[] {getLocale(aRequest), getFallbackLocale(aRequest)}, "bundles.open"));
+      Map commentFields = new HashMap();
+
+      Iterator i = DatabaseContent.getInstance().getFields().iterator();
+      while (i.hasNext()) {
+        String field = (String) i.next();
+        response.setResponseValue(field, request.getParameter(field));
+        if (request.getParameter(field)!=null) {
+          commentFields.put(field, request.getParameter(field));
+        }
+      }
+
+      List validationErrors = MirGlobal.localizer().openPostings().validateCommentPosting(request, session);
+
+      if (validationErrors != null && validationErrors.size()>0) {
+        MirGlobal.localizer().openPostings().processCommentPosting(request, session, response);
+
+        ServletHelper.generateOpenPostingResponse(aResponse.getWriter(), response.getResponseValues(), response.getResponseGenerator());
+      }
+      else {
+        EntityComment comment = (EntityComment) commentModule.createNew ();
+        comment.setValues(commentFields);
+        MirGlobal.abuse().checkComment(comment, aRequest, aResponse);
+        MirGlobal.localizer().openPostings().finishCommentPosting(request, session, comment);
+
+        String id = comment.insert();
+        if(id==null){
+          MirGlobal.localizer().openPostings().afterDuplicateCommentPosting(request, session, response, comment);
+
+          logger.info("Dupe comment rejected");
+
+          ServletHelper.generateOpenPostingResponse(aResponse.getWriter(), response.getResponseValues(), response.getResponseGenerator());
+        }
+        else {
+          // media
+          List mediaItems = new Vector();
+          i = request.getUploadedFiles().iterator();
+          while (i.hasNext()) {
+            UploadedFile file = (UploadedFile) i.next();
+            Entity mediaItem = MediaUploadProcessor.processMediaUpload(file);
+            DatabaseCommentToMedia.getInstance().addMedia(comment.getId(), mediaItem.getId());
+          }
+
+          MirGlobal.localizer().openPostings().afterCommentPosting(request, session, response, comment);
+
+          MirGlobal.abuse().logComment(aRequest.getRemoteAddr(), id, new Date(), (String) aRequest.getHeader("User-Agent"));
+          DatabaseContent.getInstance().setUnproduced("id=" + comment.getValue("to_media"));
+          logger.info("Comment posted");
+          ServletHelper.generateOpenPostingResponse(aResponse.getWriter(), response.getResponseValues(), response.getResponseGenerator());
+        }
+      }
+    }
+    catch (Throwable t) {
+      ExceptionFunctions.traceCauseException(t).printStackTrace();
+
+      throw new ServletModuleFailure("ServletModuleOpenIndy.addcomment: " + t.getMessage(), t);
+    }
+  }
+*/
+
+  private static final String SESSION_REQUEST_KEY="sessionid";
+
+  public void opensession(HttpServletRequest aRequest, HttpServletResponse aResponse)
+      throws ServletModuleExc, ServletModuleUserExc, ServletModuleFailure {
+
+    try {
+      Request request = new HTTPAdapters.HTTPParsedRequestAdapter(new HTTPParsedRequest(aRequest, 1000000, "/tmp"));
+
+      if (aRequest.isRequestedSessionIdValid() && !aRequest.isRequestedSessionIdFromURL() &&
+          !aRequest.getRequestedSessionId().equals(aRequest.getParameter(SESSION_REQUEST_KEY)))
+        aRequest.getSession().invalidate();
+
+      Session session = new HTTPAdapters.HTTPSessionAdapter(aRequest.getSession());
+
+      SimpleResponse response = new SimpleResponse(
+          ServletHelper.makeGenerationData(new Locale[] {getLocale(aRequest), getFallbackLocale(aRequest)},
+             "bundles.open"));
+
+      response.setResponseValue("actionURL", aResponse.encodeURL(HttpUtils.getRequestURL(aRequest).toString())+"?"+SESSION_REQUEST_KEY+"="+aRequest.getSession().getId());
+
+      SessionHandler handler = MirGlobal.localizer().openPostings().getOpenSessionHandler(request, session);
+
+      handler.processRequest(request, session, response);
+      ServletHelper.generateOpenPostingResponse(aResponse.getWriter(), response.getResponseValues(), response.getResponseGenerator());
+    }
+    catch (Throwable t) {
+      logger.error(t.toString());
+      t.printStackTrace(logger.asPrintWriter(logger.DEBUG_MESSAGE));
+
+      throw new ServletModuleFailure(t);
+    }
   }
 
   /**
@@ -644,6 +784,8 @@ public class ServletModuleOpenIndy extends ServletModule
     }
   }
 
+
+
   /**
    * Method for querying a lucene index
    *
@@ -680,7 +822,8 @@ public class ServletModuleOpenIndy extends ServletModule
       ImagesSearchTerm imagesTerm = new ImagesSearchTerm();
       AudioSearchTerm audioTerm = new AudioSearchTerm();
       VideoSearchTerm videoTerm = new VideoSearchTerm();
-
+      MediaSearchTerm mediaTerm = new MediaSearchTerm();
+      
       //make the query available to subsequent iterations
 
       Iterator j = Arrays.asList(search_variables).iterator();
@@ -755,6 +898,11 @@ public class ServletModuleOpenIndy extends ServletModule
           String videoFragment = videoTerm.makeTerm(req);
           if (videoFragment != null){
             queryString = queryString + " +" + videoFragment;
+          }
+
+          String mediaFragment = mediaTerm.makeTerm(req);
+          if (mediaFragment != null){
+            queryString = queryString + " +" + mediaFragment;
           }
 
           if (queryString == null || queryString == ""){
@@ -930,98 +1078,106 @@ public class ServletModuleOpenIndy extends ServletModule
   }
 
   /*
-   * Method for dynamically generating a pdf from a fo file
+   * Method for dynamically generating a pdf using iText
    */
+
+
   public void getpdf(HttpServletRequest req, HttpServletResponse res)
       throws ServletModuleExc, ServletModuleUserExc, ServletModuleFailure {
+    long starttime=System.currentTimeMillis();
     String ID_REQUEST_PARAM = "id";
-    String language = req.getParameter("language");
-    String generateFO=configuration.getString("GenerateFO");
-    String generatePDF=configuration.getString("GeneratePDF");
-
-
-    //don't do anything if we are not making FO files, or if we are
-    //pregenerating PDF's
-    if (generateFO.equals("yes") && generatePDF.equals("no")){
-      //fop complains unless you do the logging this way
-      org.apache.log.Logger log = null;
-      Hierarchy hierarchy = Hierarchy.getDefaultHierarchy();
-      log = hierarchy.getLoggerFor("fop");
-      log.setPriority(Priority.WARN);
-
-      String producerStorageRoot=configuration.getString("Producer.StorageRoot");
-      String producerDocRoot=configuration.getString("Producer.DocRoot");
-      //      String templateDir=MirConfig.getPropWithHome("HTMLTemplateProcessor.Dir");
-      String xslSheet=configuration.getString("Producer.HTML2FOStyleSheet");
-      try {
+    int maxArticlesInNewsleter = 15; // it is nice not to be dos'ed
+    try {
         String idParam = req.getParameter(ID_REQUEST_PARAM);
         if (idParam != null) {
-          EntityContent contentEnt =
-            (EntityContent)contentModule.getById(idParam);
-          String publishPath = StringUtil.webdbDate2path(contentEnt.getValue("date"));
-          String foFile;
+          
 
-          if (language == null){
-            foFile = producerStorageRoot + producerDocRoot + "/"
-              + publishPath  + idParam + ".fo";
-          }
-          else{
-            foFile = producerStorageRoot + producerDocRoot + "/"
-              + language + publishPath  + idParam + ".fo";
-          }
-          logger.debug("USING FILES" + foFile + " and " + xslSheet);
-          XSLTInputHandler input = new XSLTInputHandler(new File(foFile),
-                                                        new File(xslSheet));
+          RE re = new RE("[0-9]+");
+	  
+	  
+          REMatch[] idMatches=re.getAllMatches(idParam);
+	  
+	  String cacheSelector="";
+	  
+	  for (int i = 0; i < idMatches.length; i++){
+	    cacheSelector=   cacheSelector + "," + idMatches[i].toString();
+	  }
+	  
+	  String cacheType="pdf";
+	  
+	  CacheKey theCacheKey = new CacheKey(cacheType,cacheSelector);
+	  
+	  byte[] thePDF;
+	  
+	  if (MirGlobal.mruCache().hasObject(theCacheKey)){
+	    logger.info("fetching pdf from cache");
+	    thePDF = (byte[]) MirGlobal.mruCache().getObject(theCacheKey);
+	  }
+	  else {
+	    logger.info("generating pdf and caching it");
+	    ByteArrayOutputStream out = new ByteArrayOutputStream();
+	    PDFGenerator pdfMaker = new PDFGenerator(out);
+	    
+	    if (idMatches.length > 1){
+	      pdfMaker.addLine();
+	      for (int i = 0; i < idMatches.length  && i < maxArticlesInNewsleter; i++){
+		REMatch aMatch = idMatches[i];
+		String id=aMatch.toString();
+		EntityContent contentEnt = (EntityContent)contentModule.getById(id);
+		pdfMaker.addIndexItem(contentEnt);
+	      }
+	    }
+	    
+	    for (int i = 0; i < idMatches.length; i++){
+	      REMatch aMatch = idMatches[i];
+	      String id=aMatch.toString();
+	      EntityContent contentEnt = (EntityContent)contentModule.getById(id);
+	      
+	      pdfMaker.add(contentEnt);
+	    }
+	    
+	    pdfMaker.stop();
+	    thePDF  = out.toByteArray();
+	    
+	    //and save all our hard work!
+	    MirGlobal.mruCache().storeObject(theCacheKey,thePDF);
+	  }
+	  
+	  res.setContentType("application/pdf");
+	  res.setContentLength(thePDF.length);
+	  res.getOutputStream().write(thePDF);
+	  res.getOutputStream().flush();
+	  String elapsedtime=(new Long(System.currentTimeMillis()-starttime)).toString();
+	  logger.info("pdf retireval took "+elapsedtime + " milliseconds"  );
 
-          ByteArrayOutputStream out = new ByteArrayOutputStream();
-          res.setContentType("application/pdf");
-
-          Driver driver = new Driver();
-          driver.setLogger(log);
-          driver.setRenderer(Driver.RENDER_PDF);
-          driver.setOutputStream(out);
-          driver.render(input.getParser(), input.getInputSource());
-
-          byte[] content = out.toByteArray();
-          res.setContentLength(content.length);
-          res.getOutputStream().write(content);
-          res.getOutputStream().flush();
         }
         else {
           throw new ServletModuleExc("Missing id.");
         }
-      }
-      catch (Throwable t) {
-        logger.error(t.toString());
+    }
+    catch (Throwable t) {
+      logger.error(t.toString());
+      throw new ServletModuleFailure(t);
+    }
 
-        throw new ServletModuleFailure(t);
-      }
-    }
-    else {
-      throw new ServletModuleExc("Can't generate a PDF because the config tells me not to.");
-    }
   }
 
-  protected String createOneTimePasswd(){
+
+  public String generateOnetimePassword() {
     Random r = new Random();
     int random = r.nextInt();
+
     long l = System.currentTimeMillis();
-    l = (l*l*l*l)/random;
-    if(l<0) l = l * -1;
-    String returnString = ""+l;
+
+    l = (l * l * l * l) / random;
+    if (l < 0)
+      l = l * -1;
+
+    String returnString = "" + l;
 
     return returnString.substring(5);
   }
 
-
-  /* this is an overwritten method of ServletModule in order
-     to use different bundles for open and admin */
-/*  public void deliver(HttpServletRequest req, HttpServletResponse res,
-                      TemplateModelRoot rtm, TemplateModelRoot popups,
-                      String templateFilename) throws ServletModuleFailure
-  {
-  }
-*/
   public void deliver(HttpServletRequest aRequest, HttpServletResponse aResponse, Map aData, Map anExtra, String aGenerator)
       throws ServletModuleFailure {
     try {
@@ -1084,5 +1240,9 @@ public class ServletModuleOpenIndy extends ServletModule
     catch (Throwable e) {
       throw new ServletModuleFailure(e);
     }
+  }
+
+  private String createOneTimePasswd() {
+    return "";
   }
 }

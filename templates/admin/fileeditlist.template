@@ -15,8 +15,8 @@
 <table border="0" cellpadding="2" cellspacing="2">
 
 	<tr>
-		<td class="table_head"><b>${lang("fileeditlist.dirname")}</b></td>
-		<td class="table_head">&nbsp;</td>
+		<td class="table-head"><b>${lang("fileeditlist.dirname")}</b></td>
+		<td class="table-head">&nbsp;</td>
 	</tr>
 	<assign grey="0">
 
@@ -59,8 +59,8 @@
 <table border="0" cellpadding="2" cellspacing="2">
 
 	<tr>
-		<td class="table_head"><b>${lang("fileeditlist.filename")}</b></td>
-		<td class="table_head">&nbsp;</td>
+		<td class="table-head"><b>${lang("fileeditlist.filename")}</b></td>
+		<td class="table-head">&nbsp;</td>
 	</tr>
 <assign grey="0">
 <list filelist as entry>
@@ -80,7 +80,7 @@
 
 <P>
 <else>
-	<P align="center" class="box">${lang("no_matches_found")}</p>
+	<P align="center" class="box">${lang("no-matches_found")}</p>
 </if>
 <include "foot.template">
 </body>

@@ -27,19 +27,19 @@
     <if data.contentlist>
 	
 	<p>
-      <a class="link_box" href="${config.actionRoot}?module=Breaking&do=add">[+] ${lang("add")}</a> &nbsp;
-      <a class="link_box" href="${config.actionRoot}">[&lt;&lt;&lt;] ${lang("head.start")}</a>
+      <a class="link-box" href="${config.actionRoot}?module=Breaking&do=add">[+] ${lang("add")}</a> &nbsp;
+      <a class="link-box" href="${config.actionRoot}">[&lt;&lt;&lt;] ${lang("head.start")}</a>
 	</p>
 		
 		<call ListTable(contentlist, data_keys, column_head_texts, column_head_CSS, listrow1CSS, listrow2CSS, footer_css, module_name)>	  
 		<call PrevNextPage(module_name)>	  
    <else>
-		<P align="center" class="box">${lang("no_matches_found")}</p>
+		<P align="center" class="box">${lang("no-matches_found")}</p>
     </if>
     
 	 <p>
-      <a class="link_box" href="${config.actionRoot}?module=Breaking&do=add">[+] ${lang("add")}</a> &nbsp;
-      <a class="link_box" href="${config.actionRoot}">[&lt;&lt;&lt;] ${lang("head.start")}</a>
+      <a class="link-box" href="${config.actionRoot}?module=Breaking&do=add">[+] ${lang("add")}</a> &nbsp;
+      <a class="link-box" href="${config.actionRoot}">[&lt;&lt;&lt;] ${lang("head.start")}</a>
 	</p>
 
 

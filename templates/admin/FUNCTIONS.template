@@ -38,7 +38,7 @@
 	
 	
 	<tr>		
-		<td colspan="${column_nr}" class="table_foot">
+		<td colspan="${column_nr}" class="table-foot">
 			${data.count} ${lang("records")} / ${lang("show_from_to", data.from, data.to)}
 		</td>
 	</tr>
@@ -71,61 +71,97 @@
 <comment>extra navigation</comment>
 <function AddOrBack(module_name, module_jumpback, do_jumpback)>
     <p>
-      <a class="link_box" href="${config.actionRoot}?module=${module_name}&do=add">[+] ${lang("add")}</a> &nbsp;
-      <a class="link_box" href="${config.actionRoot}?module=${module_jumpback}&do=${do_jumpback}">[&lt;] ${lang("back")} </a> &nbsp;
-      <a class="link_box" href="${config.actionRoot}">[&lt;&lt;&lt;] ${lang("head.start")}</a>
+      <a class="link-box" href="${config.actionRoot}?module=${module_name}&do=add">[+] ${lang("add")}</a> &nbsp;
+      <a class="link-box" href="${config.actionRoot}?module=${module_jumpback}&do=${do_jumpback}">[&lt;] ${lang("back")} </a> &nbsp;
+      <a class="link-box" href="${config.actionRoot}">[&lt;&lt;&lt;] ${lang("head.start")}</a>
 	</p>
 </function>
 
 
 
+
+<function PulldownTableRow (label, fieldname, entrieslist, keyfield, valuefield, value, langprefix)>
+  <tr>
+     <td align="right" class="table-left">
+       <b>${label}:</b>
+     </td>
+     <td class="listrow2">
+       <select name="${fieldname}">
+         <list entrieslist as a>
+           <option value="${a[keyfield]}" <if (a[keyfield] == value)>selected</if>><if langprefix>${lang(langprefix+a[valuefield])}<else>${a[valuefield]}</if></option>
+         </list>
+       </select>
+     </td>
+   </tr>
+</function>   
+
+
 <comment>4 functions to create Table rows with input-fields</comment>
 <function TextInputTableRow (label, size, maxlength, fieldname, fieldcontent)>
 	<tr>
-		<td align="right" class="table_left">
+		<td align="right" class="table-left">
 			<b>${label}:</b>
 		</td>
 		
 		<td class="listrow2">
-			<input type="text" size="${size}" maxlength="${maxlength}" name="${fieldname}" value="${fieldcontent}">
+			<input type="text" size="${size}" maxlength="${maxlength}" name="${fieldname}" value="${utility.encodeHTML(fieldcontent)}">
 		</td>
 	</tr>
 </function>
 
 <function TextInputTableRowLight (label, size, maxlength, fieldname, fieldcontent)>
 	<tr>
-		<td align="right" class="table_left_light">
+		<td align="right" class="table-left-light">
 			<b>${label}:</b>
 		</td>
 		
 		<td class="listrow1">
-			<input type="text" size="${size}" maxlength="${maxlength}" name="${fieldname}" value="${fieldcontent}">
+			<input type="text" size="${size}" maxlength="${maxlength}" name="${fieldname}" value="${utility.encodeHTML(fieldcontent)}">
 		</td>
 	</tr>
 </function>
 
-
-
-<function TextAreaTableRow (label, cols, rows, fieldname, fieldcontent )>
+<function CheckboxTableRow (label, fieldname, fieldcontent )>
 	<tr>
-		<td align="right" valign="top" class="table_left">
+		<td align="right" valign="top" class="table-left">
 			<b>${label}:</b>
 		</td>
 		
 		<td class="listrow2">
-			<textarea cols="${cols}" rows="${rows}" name="${fieldname}">${fieldcontent}</textarea>
+			<input type="checkbox" name="${fieldname}" value="1"<if fieldcontent=="1"> checked</if>>&nbsp;&nbsp;
+		</td>
+	</tr>
+</function>	
+
+<function TextAreaTableRow (label, hint, cols, rows, fieldname, fieldcontent )>
+	<tr>
+		<td align="right" valign="top" class="table-left">
+			<b>${label}:</b>
+			<if hint>
+        <br>
+        <span class="small">${hint}</span>			
+      </if>
+		</td>
+		
+		<td class="listrow2">
+			<textarea cols="${cols}" rows="${rows}" name="${fieldname}" wrap="virtual">${utility.encodeHTML(fieldcontent)}</textarea>
 		</td>
 	</tr>
 </function>
 
-<function TextAreaTableRowLight (label, cols, rows, fieldname, fieldcontent )>
+
+<function TextAreaTableRowLight (label, hint, cols, rows, fieldname, fieldcontent )>
 	<tr>
-		<td align="right" valign="top" class="table_left_light">
+		<td align="right" valign="top" class="table-left-light">
 			<b>${label}:</b>
+			<if hint>
+        <br>
+        <span class="small">${hint}</span>			
+      </if>
 		</td>
 		
 		<td class="listrow1">
-			<textarea cols="${cols}" rows="${rows}" name="${fieldname}">${fieldcontent}</textarea>
+			<textarea cols="${cols}" rows="${rows}" name="${fieldname}" wrap="virtual">${utility.encodeHTML(fieldcontent)}</textarea>
 		</td>
 	</tr>
 </function>
@@ -139,12 +175,12 @@
         <input type="hidden" name="selectarticleurl" value="${utility.encodeHTML(selectarticleurl)}">
          
         <table border="0" cellpadding="2" cellspacing="3">
-          <tr <if !layout>class="bg_neutral"</if>>
-            <td <if layout>class="table_head"<else>class="small bg_neutral"</if> valign="bottom"> ${lang("contentsearch.value")}</td>
-            <td <if layout>class="table_head"<else>class="small bg_neutral"</if> valign="bottom"> ${lang("contentsearch.field")}</td>
-            <td <if layout>class="table_head"<else>class="small bg_neutral"</if> valign="bottom"> ${lang("contentsearch.publishedstate")}</td>
-            <td <if layout>class="table_head"<else>class="small bg_neutral"</if> valign="bottom"> ${lang("contentsearch.articletype")}</td>
-            <td <if layout>class="table_head"<else>class="small bg_neutral"</if> valign="bottom"> ${lang("contentsearch.order")}</td>
+          <tr <if !layout>class="bg-neutral"</if>>
+            <td <if layout>class="table-head"<else>class="small bg-neutral"</if> valign="bottom"> ${lang("contentsearch.value")}</td>
+            <td <if layout>class="table-head"<else>class="small bg-neutral"</if> valign="bottom"> ${lang("contentsearch.field")}</td>
+            <td <if layout>class="table-head"<else>class="small bg-neutral"</if> valign="bottom"> ${lang("contentsearch.publishedstate")}</td>
+            <td <if layout>class="table-head"<else>class="small bg-neutral"</if> valign="bottom"> ${lang("contentsearch.articletype")}</td>
+            <td <if layout>class="table-head"<else>class="small bg-neutral"</if> valign="bottom"> ${lang("contentsearch.order")}</td>
 			<td <if layout>class="table_head"<else>class="small bg_neutral"</if> valign="bottom"> &nbsp;</td>
           </tr>
           <tr>
@@ -193,10 +229,10 @@
 	<if prevurl || nexturl>      
 		<p align="${align}">
 		<if prevurl>
-			<a class="link_box" href="${config.actionRoot}?${prevurl}"> [ &lt; ] ${lang("list.previous")}</a>&nbsp;&nbsp; 
+			<a class="link-box" href="${config.actionRoot}?${prevurl}"> [ &lt; ] ${lang("list.previous")}</a>&nbsp;&nbsp; 
 		</if>
 		<if nexturl>
-			<a  class="link_box" href="${config.actionRoot}?${nexturl}">   ${lang("list.next")} [ &gt; ]</a>
+			<a  class="link-box" href="${config.actionRoot}?${nexturl}">   ${lang("list.next")} [ &gt; ]</a>
 		</if>
 		</p>
 	</if>
@@ -215,7 +251,7 @@
 		</Script>
 		
 		<a href="JavaScript: openwindowlink()">
-			<if big><span class="link_help"><else><span class="link_help_small"></if>
+			<if big><span class="link-help"><else><span class="link-help-small"></if>
 				<if big> [ ? ] ${lang("help")}<else>[?]</if>
 			</span>
 		</a>		
@@ -223,9 +259,9 @@
 	<else>
 		
 		<if big>
-			<a href="${HelpUrl}" target="_blank"><span class="link_help"> [ ? ] ${lang("help")}</span></a>
+			<a href="${HelpUrl}" target="_blank"><span class="link-help"> [ ? ] ${lang("help")}</span></a>
 		<else>
-			<a href="${HelpUrl}" target="_blank"><span class="link_help_small">[?]</span></a>		
+			<a href="${HelpUrl}" target="_blank"><span class="link-help-small">[?]</span></a>		
 		</if>
 	</if>
 </function>
@@ -252,13 +288,13 @@
 
   <table cellspacing="2" cellpadding="2">
 		<tr>
-			<td class="table_head" colspan="2">
+			<td class="table-head" colspan="2">
 				${lang("content.attachments")}
 			</td>
 		</tr>
 
 		<tr>
-			<td align=right valign=top class="table_left">
+			<td align=right valign=top class="table-left">
 				${lang("content.images")}: 
 			</td>
 			<td align="left" valign="top" class="listrow2">
@@ -279,7 +315,7 @@
 		
 
 		<tr>
-			<td align=right valign=top class="table_left">
+			<td align=right valign=top class="table-left">
 			${lang("content.audio")}:
 			</td>
 			<td align="left" valign="top" class="listrow2">
@@ -300,7 +336,7 @@
 		
 
 		<tr>
-			<td align=right valign=top class="table_left">
+			<td align=right valign=top class="table-left">
 				${lang("content.video")}:
 			</td>
 			<td  align="left" valign="top" class="listrow2">
@@ -320,7 +356,7 @@
 		</list>
 		
 		<tr>
-			<td align=right valign=top class="table_left">
+			<td align=right valign=top class="table-left">
 				${lang("content.other")}:
 			</td>
 			<td align="left" valign="top" class="listrow2">

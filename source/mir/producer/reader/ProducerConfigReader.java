@@ -277,8 +277,7 @@ public class ProducerConfigReader {
         return new ProducerNodeSectionHandler();
       }
       else
-        throw new XMLReader.XMLReaderExc("Only 'verb' tags allowed here, '" +
-                                         aTag + "' encountered.");
+        throw new XMLReader.XMLReaderExc("Only 'verb' tags allowed here, '" + aTag + "' encountered.");
     }
 
     public void endElement(XMLReader.SectionHandler aHandler) {

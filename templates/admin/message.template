@@ -21,7 +21,7 @@
 <table border="0">
   
   <tr>
-    <td align="right" class="table_left">
+    <td align="right" class="table-left">
 	${lang("message.date")}:</td>
     <td>
       ${data.date}
@@ -31,16 +31,16 @@
   
   <call TextInputTableRow (lang("message.title"), 30, 30, "title", data.title)> 
   <call TextInputTableRow (lang("message.creator"), 12, 30, "creator", data.creator)> 
-  <call TextAreaTableRow  (lang("message.text"), 50, 5, "description", data.description)> 
+  <call TextAreaTableRow  (lang("message.text"), "", 50, 5, "description", data.description)> 
   
 
 
   <tr>
-    <td class="table_foot">
+    <td class="table-foot">
 	${lang("message.textinfo")}
 	</td>
 	
-	<td align="right" class="table_foot"> 
+	<td align="right" class="table-foot"> 
 	<if new>
 		<input type="submit" name="save" value="${lang("insert")}">
     <else>
@@ -53,8 +53,8 @@
 </form>
     <p>
       
-      <a class="link_box" href="${config.actionRoot}?module=Message&do=list">[&lt;] ${lang("back")} </a> &nbsp;
-      <a class="link_box" href="${config.actionRoot}">[&lt;&lt;&lt;] ${lang("head.start")}</a>
+      <a class="link-box" href="${config.actionRoot}?module=Message&do=list">[&lt;] ${lang("back")} </a> &nbsp;
+      <a class="link-box" href="${config.actionRoot}">[&lt;&lt;&lt;] ${lang("head.start")}</a>
 	</p>
 
 

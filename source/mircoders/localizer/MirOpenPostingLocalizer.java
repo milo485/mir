@@ -31,14 +31,51 @@
 
 package mircoders.localizer;
 
-import javax.servlet.http.HttpServletRequest;
+import java.util.Arrays;
+import java.util.List;
 
+import mir.session.Request;
+import mir.session.Response;
+import mir.session.*;
 import mircoders.entity.EntityComment;
 import mircoders.entity.EntityContent;
 
 public interface MirOpenPostingLocalizer {
-  public void afterContentPosting(EntityContent aContent);
-  public void afterCommentPosting(EntityComment aComment);
 
-  public String chooseOpenPostingLanguage(HttpServletRequest req);
+  /**
+   * Class to encapsulate a validation error
+   *
+   * <p>Title: </p>
+   * <p>Description: </p>
+   * <p>Copyright: Copyright (c) 2003</p>
+   * <p>Company: </p>
+   * @author not attributable
+   * @version 1.0
+   */
+
+  /**
+   *
+   * @param aRequest
+   * @param aSession
+   * @return
+   * @throws MirLocalizerExc
+   * @throws MirLocalizerFailure
+   */
+  public SessionHandler getOpenSessionHandler(Request aRequest, Session aSession) throws MirLocalizerExc, MirLocalizerFailure;
+
+  /**
+   *
+   * @param aComment
+   * @throws MirLocalizerExc
+   * @throws MirLocalizerFailure
+   */
+  public void afterCommentPosting(EntityComment aComment) throws MirLocalizerExc, MirLocalizerFailure;
+
+  /**
+   *
+   * @param aContent
+   * @throws MirLocalizerExc
+   * @throws MirLocalizerFailure
+   */
+  public void afterContentPosting(EntityContent aContent) throws MirLocalizerExc, MirLocalizerFailure;
 }

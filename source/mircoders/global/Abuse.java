@@ -1,3 +1,34 @@
+/*
+ * Copyright (C) 2001, 2002  The Mir-coders group
+ *
+ * This file is part of Mir.
+ *
+ * Mir is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Mir is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Mir; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * In addition, as a special exception, The Mir-coders gives permission to link
+ * the code of this program with the com.oreilly.servlet library, any library
+ * licensed under the Apache Software License, The Sun (tm) Java Advanced
+ * Imaging library (JAI), The Sun JIMI library (or with modified versions of
+ * the above that use the same license as the above), and distribute linked
+ * combinations including the two.  You must obey the GNU General Public
+ * License in all respects for all of the code used other than the above
+ * mentioned libraries.  If you modify this file, you may extend this exception
+ * to your version of the file, but you are not obligated to do so.  If you do
+ * not wish to do so, delete this exception statement from your version.
+ */
+
 package mircoders.global;
 
 import java.io.File;
@@ -24,6 +55,7 @@ import mir.log.LoggerWrapper;
 import mir.util.DateToMapAdapter;
 import mir.util.InternetFunctions;
 import mir.util.StringRoutines;
+import mir.session.*;
 import mircoders.entity.EntityComment;
 import mircoders.entity.EntityContent;
 import mircoders.localizer.MirAdminInterfaceLocalizer;
@@ -126,7 +158,9 @@ public class Abuse {
     Cookie cookie = new Cookie(cookieName, Integer.toString(random.nextInt(1000000000)));
     cookie.setMaxAge(cookieMaxAge);
     cookie.setPath("/");
-    aResponse.addCookie(cookie);
+
+    if (aResponse!=null)
+      aResponse.addCookie(cookie);
   }
 
   private boolean checkCookie(List aCookies) {
@@ -146,19 +180,37 @@ public class Abuse {
     return false;
   }
 
-  public void checkComment(EntityComment aComment, HttpServletRequest aRequest, HttpServletResponse aResponse) {
+  public void checkComment(EntityComment aComment, Request aRequest, HttpServletResponse aResponse) {
     try {
       long time = System.currentTimeMillis();
+      String address = "0.0.0.0";
+      String browser = "unknown";
+      Cookie[] cookies = {};
+
+      HttpServletRequest request = null;
+
+      if (aRequest instanceof HTTPAdapters.HTTPParsedRequestAdapter) {
+        request = ((HTTPAdapters.HTTPParsedRequestAdapter) aRequest).getRequest();
+      }
+      else if (aRequest instanceof HTTPAdapters.HTTPRequestAdapter) {
+        request = ((HTTPAdapters.HTTPRequestAdapter) aRequest).getRequest();
+      }
+      if (request!=null) {
+        browser = (String) request.getHeader("User-Agent");
+        address = request.getRemoteAddr();
+        cookies = request.getCookies();
+      }
+
+      logComment(address, aComment.getId(), new Date(), browser);
 
       MirAdminInterfaceLocalizer.MirSimpleEntityOperation operation = MirGlobal.localizer().adminInterface().simpleCommentOperationForName(commentBlockAction);
 
-      if (checkCookie(Arrays.asList(aRequest.getCookies())) || checkIpFilter(aRequest.getRemoteAddr()) || checkRegExpFilter(aComment)) {
+      if (checkCookie(Arrays.asList(cookies)) || checkIpFilter(address) || checkRegExpFilter(aComment)) {
         operation.perform(null, MirGlobal.localizer().dataModel().adapterModel().makeEntityAdapter("comment", aComment));
         setCookie(aResponse);
       }
 
       logger.info("checkComment: " + (System.currentTimeMillis()-time) + "ms");
-
     }
     catch (Throwable t) {
       logger.error("Abuse.checkComment: " + t.toString());
@@ -168,6 +220,8 @@ public class Abuse {
   public void checkArticle(EntityContent anArticle, HttpServletRequest aRequest, HttpServletResponse aResponse) {
     try {
       long time = System.currentTimeMillis();
+
+      logArticle(aRequest.getRemoteAddr(), anArticle.getId(), new Date(), (String) aRequest.getHeader("User-Agent"));
 
       MirAdminInterfaceLocalizer.MirSimpleEntityOperation operation = MirGlobal.localizer().adminInterface().simpleCommentOperationForName(commentBlockAction);
 
@@ -324,12 +378,12 @@ public class Abuse {
     List result = new Vector();
 
     Map entry = new HashMap();
-    entry.put("resource", "abuse.filtertype.ip");
+    entry.put("resource", "ip");
     entry.put("id", IP_FILTER_TYPE);
     result.add(entry);
 
     entry = new HashMap();
-    entry.put("resource", "abuse.filtertype.regexp");
+    entry.put("resource", "regexp");
     entry.put("id", REGEXP_FILTER_TYPE);
     result.add(entry);
 
@@ -346,7 +400,7 @@ public class Abuse {
             (MirAdminInterfaceLocalizer.MirSimpleEntityOperation) i.next();
 
         Map action = new HashMap();
-        action.put("resource", "content.operation."+operation.getName());
+        action.put("resource", operation.getName());
         action.put("identifier", operation.getName());
 
         result.add(action);
@@ -369,7 +423,7 @@ public class Abuse {
             (MirAdminInterfaceLocalizer.MirSimpleEntityOperation) i.next();
 
         Map action = new HashMap();
-        action.put("resource", "comment.operation."+operation.getName());
+        action.put("resource", operation.getName());
         action.put("identifier", operation.getName());
 
         result.add(action);

@@ -8,9 +8,9 @@
 
 <table width="70%" align="center"><tr><td>
 
-<p class="box_head" align="center"><font size="+2"><b>${lang("error.title")}</b></font></p>
+<p class="box-head" align="center"><font size="+2"><b>${lang("error.title")}</b></font></p>
 <p align="center">${lang("error.text", config["Mir.Tech-email.address"], config["Mir.Tech-email.name"])}</p>
-<p align="center" class="bg_neutral"><br><font color="red">${data.date} -- ${data.errorstring}</font><br><br></p>
+<p align="center" class="bg-neutral"><br><font color="red">${data.date} -- ${data.errorstring}</font><br><br></p>
 <p align="center">${lang("error.text2", config["Mir.Tech-email.address"], config["Mir.Tech-email.name"])}</p>
 
 </td></tr></table>

@@ -31,6 +31,30 @@
 		#searchselect	{font-size: 12px; width:120px; height:22px;  background-color:#aaaaaa;}
 		#searchbutton 	{font-size: 12px; width:120px; height:20px; background-color:#aaaaaa; text-align: right;}
 	</style>
+   <script language="javascript">
+	function addToNewsletter(id){
+		var previousValue=getCookie("myNewsletter");	
+		document.cookie="myNewsletter="+previousValue+","+id + ";path=/";			
+		alert("Added article id to cookie!");		
+	}
+	
+	function getCookie(name){
+		
+	        var cookies = document.cookie;
+
+        	if (cookies.indexOf(name) != -1){
+                	var startpos = cookies.indexOf(name)+name.length+1;
+                	var endpos = cookies.indexOf(";",startpos)-1;
+	                if (endpos == -2) endpos = cookies.length;
+        	        return unescape(cookies.substring(startpos,endpos));
+        	}
+        	else{
+                	return false; // the cookie couldn't be found! it was never set before, or it expired.
+        	}
+	}
+
+   </script>
+
 </head>
  
 <body bgcolor="#dddddd" marginwidth="0" marginheight="0" leftmargin="0" topmargin="0" link="#003399" alink="#cc0033" vlink="#660033" >
@@ -123,8 +147,13 @@
 					<br>
 					<br>
 					<table border="0" cellpadding="2" cellspacing="0" width="100%"><tr><td bgcolor="#669999">
-            &nbsp;<a href="${article.id}.pdf}">
+            &nbsp;<a href="${config["Producer.OpenAction"]}?do=getpdf&id=${article.id}&forIE=.pdf">
             <font color="#dddddd" size="+1"><b>${lang("article.get_as_pdf")}&gt;&gt;</b></font></a>
+					</td></tr></table> 
+<br>
+					<table border="0" cellpadding="2" cellspacing="0" width="100%"><tr><td bgcolor="#669999">
+            &nbsp;<a href="javascript:addToNewsletter(${article.id})">
+            <font color="#dddddd" size="+1"><b>${lang("article.add_to_pdf")}&gt;&gt;</b></font></a>
 					</td></tr></table> 
 <br>
 					<table border="0" cellpadding="2" cellspacing="0" width="100%"><tr><td bgcolor="#669999">
@@ -133,7 +162,7 @@
 					</td></tr></table>
 <br>
 					<table border="0" cellpadding="2" cellspacing="0" width="100%"><tr><td bgcolor="#669999">
-            &nbsp;<a href="${config["Producer.OpenAction"]}?do=addcomment&aid=${article.id}&language=${language.code}">
+	    &nbsp;<a href="${config["Producer.OpenAction"]}?do=addcomment&aid=${article.id}&language=${language.code}">
             <font color="#dddddd" size="+1"><b>${lang("article.addcomment")}&gt;&gt;</b></font></a>
 					</td></tr></table>
 					<if article.to_comments>
@@ -142,6 +171,31 @@
 								<br>
 								<font size="+1"><b>${utility.encodeHTML(c.title)}</b></font><br>
 								<i>${c.creationdate.formatted["dd.MM.yyyy HH:mm"]}</i><br>
+
+					<list c.to_media_audio as media>
+					  <a href="${media["publish_server"]}${media["publish_path"]}">
+					    ${media["title"]} - ${media["media_descr"]} ${media["human_readable_size"]}
+					  </a>
+					</list>
+					<list c.to_media_video as media>
+  					<img src="../../../img/${media["big_icon"]}" border="0" alt="">
+  					<a href="${media["publish_server"]}${media["publish_path"]}">
+  					${media["title"]} - ${media["media_descr"]} ${media["human_readable_size"]}</a>
+					</list>
+					<list c.to_media_other as media>
+  					<img src="../../../img/${media["big_icon"]}" border="0" alt="">
+  					<a href="${media["publish_server"]}${media["publish_path"]}">
+  					${media["title"]} - ${media["media_descr"]} ${media["human_readable_size"]}</a>
+					</list>
+					
+					<list c.to_media_images as image>
+  					<img src="${image["publish_server"]}${image["publish_path"]}"
+  					border="0" width="${image["img_width"]}"
+  					height="${image["img_height"]}" alt="${image["title"]}">
+  					<br><i>${image["title"]}</i>
+					</list>
+
+
 								${c.description_parsed}
 								<if c.email || c.main_url || c.address || c.phone || c.creator>
 									<i>

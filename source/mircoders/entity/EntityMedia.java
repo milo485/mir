@@ -57,19 +57,21 @@ public class EntityMedia extends Entity
     setStorage(theStorage);
   }
 
-	/**
-	 * fetches the MediaType entry assiciated w/ this media
-	 *
-	 * @return mir.entity.Entity
-	 */
-	public Entity getMediaType() throws StorageObjectFailure {
+  /**
+   * fetches the MediaType entry assiciated w/ this media
+   *
+   * @return mir.entity.Entity
+   */
+  public Entity getMediaType() throws StorageObjectFailure {
     try {
-    	return ((DatabaseMedia)theStorageObject).getMediaType(this);
-    } catch (StorageObjectFailure e) {
-      throw new StorageObjectFailure("getMediaType(): ",e);
-    } catch (StorageObjectExc e) {
-      throw new StorageObjectFailure("getMediaType(): ",e);
+      return ( (DatabaseMedia) theStorageObject).getMediaType(this);
+    }
+    catch (StorageObjectFailure e) {
+      throw new StorageObjectFailure("getMediaType(): ", e);
+    }
+    catch (StorageObjectExc e) {
+      throw new StorageObjectFailure("getMediaType(): ", e);
     }
 
-	}
+  }
 }

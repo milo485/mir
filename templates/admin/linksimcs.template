@@ -39,7 +39,7 @@
     </td>
   </tr>
   <tr>
-    <td align="right" class="darkgrey"><span class="witetext"><B>${lang("linkimcs.sort_by")}:</B></span></td>
+    <td align="right" class="darkgrey"><span class="witetext"><B>${lang("linkimcs.sort-by")}:</B></span></td>
     <td>
       <select name="sortpriority" size="1">
 		<option value="1"<if data.entity.sortpriority == 1> selected</if>> 1

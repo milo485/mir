@@ -38,10 +38,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-import mir.util.RewindableIterator;
-import mir.util.*;
-
 import org.apache.struts.util.MessageResources;
+import org.apache.commons.beanutils.PropertyUtils;
+
 
 import freemarker.template.FileTemplateCache;
 import freemarker.template.SimpleScalar;
@@ -53,6 +52,10 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateModelRoot;
 import freemarker.template.TemplateScalarModel;
+
+import mir.util.RewindableIterator;
+import mir.util.*;
+
 
 public class FreemarkerGenerator implements Generator {
   private Template template;
@@ -92,6 +95,10 @@ public class FreemarkerGenerator implements Generator {
     return new FunctionAdapter(aFunction);
   }
 
+  private static TemplateHashModel makeBeanAdapter(Object anObject)  {
+    return new BeanAdapter(anObject);
+  }
+
   public static TemplateModel makeAdapter(Object anObject) throws TemplateModelException {
     if (anObject == null)
       return null;
@@ -117,12 +124,13 @@ public class FreemarkerGenerator implements Generator {
     else if (anObject instanceof List)
       return makeIteratorAdapter(((List) anObject).iterator());
     else
-      throw new TemplateModelException("Unadaptable class: " + anObject.getClass().getName());
+      return makeBeanAdapter(anObject);
+//      throw new TemplateModelException("Unadaptable class: " + anObject.getClass().getName());
   }
 
   private static class MapAdapter implements TemplateModelRoot {
-    Map map;
-    Map valuesCache;
+    private Map map;
+    private Map valuesCache;
 
     private MapAdapter(Map aMap) {
       map = aMap;
@@ -165,9 +173,9 @@ public class FreemarkerGenerator implements Generator {
   }
 
   private static class IteratorAdapter implements TemplateListModel {
-    Iterator iterator;
-    List valuesCache;
-    int position;
+    private Iterator iterator;
+    private List valuesCache;
+    private int position;
 
     private IteratorAdapter(Iterator anIterator) {
       iterator = anIterator;
@@ -290,7 +298,7 @@ public class FreemarkerGenerator implements Generator {
   }
 
   private static class FunctionAdapter implements TemplateMethodModel {
-    Generator.GeneratorFunction function;
+    private Generator.GeneratorFunction function;
 
     public FunctionAdapter(Generator.GeneratorFunction aFunction) {
       function = aFunction;
@@ -309,6 +317,35 @@ public class FreemarkerGenerator implements Generator {
       return false;
     }
 
+  }
+
+  private static class BeanAdapter implements TemplateHashModel {
+    private Object object;
+
+    public BeanAdapter(Object anObject) {
+      object = anObject;
+    }
+
+    public void put(String aKey, TemplateModel aModel)  throws TemplateModelException  {
+      throw new TemplateModelException("FreemarkerGenerator$BeanAdapter.put not supported");
+    }
+
+    public void remove(String aKey) throws TemplateModelException  {
+      throw new TemplateModelException("FreemarkerGenerator$BeanAdapter.remove not supported");
+    }
+
+    public boolean isEmpty() {
+      return false;
+    }
+
+    public TemplateModel get(String aKey) throws TemplateModelException {
+      try {
+        return makeAdapter(PropertyUtils.getSimpleProperty(object, aKey));
+      }
+      catch (Throwable t) {
+        throw new TemplateModelException(t.getMessage());
+      }
+    }
   }
 
   public static class FreemarkerGeneratorLibrary implements GeneratorLibrary {

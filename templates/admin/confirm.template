@@ -9,7 +9,7 @@
   <include "head_nonavi.template">
       <form method="post" action="${config.actionRoot}">
       <table><tr><td>
-	  <p class="box_head" align="center"><b>${lang("confirm.really_delete")}</b></p>
+	  <p class="box-head" align="center"><b>${lang("confirm.really-delete")}</b></p>
         <p class="box" align="center">
           <input type="hidden" name="module" value="${data.module}">
           <input type="hidden" name="do" value="delete">
@@ -24,7 +24,7 @@
           <input type="submit" name="cancel" value="${lang("cancel")}">
           <input type="submit" name="confirm" value="${lang("delete")}"><br>
 		  <br>
-		  <b><span class="text_alert">${lang("confirm.text")}</span></b>
+		  <b><span class="text-alert">${lang("confirm.text")}</span></b>
         </p>
 		
       </td></tr></table>

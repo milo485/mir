@@ -25,7 +25,7 @@ function openWin(url) {
 	
 	<table border="0">
 		<tr>
-			<td align="right" class="table_left">
+			<td align="right" class="table-left">
 				<b>${lang("media.nr_of_media")} :</b><br>
 			</td>
 			<td class="listrow2">
@@ -70,7 +70,7 @@ function openWin(url) {
 	</if>
 
 	<tr>
-		<td align="right" class="table_left">
+		<td align="right" class="table-left">
 			<B>${lang("media.mediafolder")}:</B>
 		</td>
 		<td class="listrow2">
@@ -87,15 +87,15 @@ function openWin(url) {
 	<call TextInputTableRowLight (lang("year"), 20, 40, "year", data.year)>
 	<call TextInputTableRow (lang("media.location"), 40, 80, "place", data.place)>
 	<call TextInputTableRow (lang("media.creator"), 40, 80, "creator", data.creator)>
-	<call TextAreaTableRow (lang("media.keywords"), 40, 2, "keywords", data.keywords)>
-	<call TextAreaTableRow (lang("media.comment"), 40, 2, "comment", data.comment)>
+	<call TextAreaTableRow (lang("media.keywords"), "", 40, 2, "keywords", data.keywords)>
+	<call TextAreaTableRow (lang("media.comment"), "", 40, 2, "comment", data.comment)>
 	<call TextInputTableRow (lang("media.source"), 40, 80, "source", data.source)>
 	
 	<tr><td colspan="2" class="x-small">&nbsp;</td></tr>
 	
 	<if data.new>
 	<tr>
-		<td align="right" class="table_left">
+		<td align="right" class="table-left">
 			${lang("media.is_published")} : 
 		</td>
 		<td class="listrow2" style='border: 1px solid #FF0000;'>
@@ -107,7 +107,7 @@ function openWin(url) {
 	
 	<list data.mediafields as m>
 	<tr>
-		<td align="right" class="table_left">
+		<td align="right" class="table-left">
 			<B>${lang("media.title")}:<B>
 		 </td>
 		<td class="listrow2">
@@ -125,7 +125,7 @@ function openWin(url) {
 	</list>
 	<else>
 	<tr>
-		<td align="right" class="table_left">
+		<td align="right" class="table-left">
 			<B>${lang("media.title")}:<B>
 		</td>
 		<td class="listrow2">
@@ -134,7 +134,7 @@ function openWin(url) {
 	</tr>
 	</if>
 
-    <td colspan="2" align="right" class="table_foot">
+    <td colspan="2" align="right" class="table-foot">
 	<if data.new>
       <input type="submit" name="save" value="${lang("insert")}">
     <else>
@@ -144,7 +144,7 @@ function openWin(url) {
     </td>
 </table>
 
-<p><a class="link_box" href="${config.actionRoot}?module=OtherMedia&do=list">[&lt;] ${lang("list")} </a> &nbsp;</p>
+<p><a class="link-box" href="${config.actionRoot}?module=OtherMedia&do=list">[&lt;] ${lang("list")} </a> &nbsp;</p>
 
 <include "foot.template">
 

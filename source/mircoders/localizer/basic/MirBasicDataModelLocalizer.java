@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import mir.config.MirPropertiesConfiguration;
 import mir.entity.Entity;
 import mir.entity.adapter.EntityAdapter;
 import mir.entity.adapter.EntityAdapterDefinition;
@@ -44,11 +45,13 @@ import mir.entity.adapter.EntityAdapterModel;
 import mir.log.LoggerWrapper;
 import mir.media.MediaHelper;
 import mir.media.MirMedia;
+import mir.util.ParameterExpander;
 import mir.util.RewindableIterator;
 import mircoders.entity.EntityUploadedMedia;
 import mircoders.global.MirGlobal;
 import mircoders.localizer.MirAdminInterfaceLocalizer;
 import mircoders.localizer.MirDataModelLocalizer;
+import mircoders.localizer.MirLocalizerExc;
 import mircoders.localizer.MirLocalizerFailure;
 import mircoders.storage.DatabaseArticleType;
 import mircoders.storage.DatabaseAudio;
@@ -72,10 +75,18 @@ import mircoders.storage.DatabaseVideo;
 public class MirBasicDataModelLocalizer implements MirDataModelLocalizer {
   private EntityAdapterModel model;
   protected LoggerWrapper logger;
+  protected MirPropertiesConfiguration configuration;
 
-  public MirBasicDataModelLocalizer() {
+  public MirBasicDataModelLocalizer() throws MirLocalizerFailure, MirLocalizerExc {
     model=null;
     logger = new LoggerWrapper("Localizer.DataModel");
+
+    try {
+      configuration = MirPropertiesConfiguration.instance();
+    }
+    catch (Throwable e) {
+      throw new MirLocalizerFailure("Can't get configuration: " + e.getMessage(), e);
+    }
   }
 
   public EntityAdapterModel adapterModel() throws MirLocalizerFailure {
@@ -117,6 +128,8 @@ public class MirBasicDataModelLocalizer implements MirDataModelLocalizer {
       anEntityAdapterDefinition.addCalculatedField("children", new ContentToChildrenField());
       anEntityAdapterDefinition.addCalculatedField("parent", new ContentToParentField());
 
+      anEntityAdapterDefinition.addCalculatedField("publicurl", new ExpandedField(configuration.getString("Article.PublicUrl")));
+
       anEntityAdapterDefinition.addCalculatedField("operations",
           new EntityToSimpleOperationsField(MirGlobal.localizer().adminInterface().simpleArticleOperations()));
     }
@@ -141,6 +154,8 @@ public class MirBasicDataModelLocalizer implements MirDataModelLocalizer {
       anEntityAdapterDefinition.addCalculatedField("to_all_media_audio", new CommentToMediaField( "audio", false));
       anEntityAdapterDefinition.addCalculatedField("to_all_media_video", new CommentToMediaField( "video", false));
       anEntityAdapterDefinition.addCalculatedField("to_all_media_other", new CommentToMediaField( "otherMedia", false));
+
+      anEntityAdapterDefinition.addCalculatedField("publicurl", new ExpandedField(configuration.getString("Comment.PublicUrl")));
 
       anEntityAdapterDefinition.addCalculatedField("description_parsed", new FilteredField("description"));
       anEntityAdapterDefinition.addCalculatedField("operations",
@@ -251,7 +266,7 @@ public class MirBasicDataModelLocalizer implements MirDataModelLocalizer {
   }
 
   protected class FilteredField implements EntityAdapterDefinition.CalculatedField {
-    String fieldName;
+    private String fieldName;
 
     public FilteredField(String aFieldName) {
       fieldName = aFieldName;
@@ -265,6 +280,40 @@ public class MirBasicDataModelLocalizer implements MirDataModelLocalizer {
         else {
           return MirGlobal.localizer().producerAssistant().filterText((String) anEntityAdapter.get(fieldName));
         }
+      }
+      catch (Throwable t) {
+        throw new RuntimeException(t.getMessage());
+      }
+    }
+  }
+
+  protected class ExpandedField implements EntityAdapterDefinition.CalculatedField {
+    private String expression;
+
+    public ExpandedField(String anExpression) {
+      expression = anExpression;
+    }
+
+    public Object getValue(EntityAdapter anEntityAdapter) {
+      try {
+        return ParameterExpander.expandExpression(anEntityAdapter, expression);
+      }
+      catch (Throwable t) {
+        throw new RuntimeException(t.getMessage());
+      }
+    }
+  }
+
+  protected class EvaluatedField implements EntityAdapterDefinition.CalculatedField {
+    private String expression;
+
+    public EvaluatedField(String anExpression) {
+      expression = anExpression;
+    }
+
+    public Object getValue(EntityAdapter anEntityAdapter) {
+      try {
+        return ParameterExpander.evaluateExpression(anEntityAdapter, expression);
       }
       catch (Throwable t) {
         throw new RuntimeException(t.getMessage());

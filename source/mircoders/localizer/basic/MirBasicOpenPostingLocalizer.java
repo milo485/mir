@@ -33,25 +33,38 @@ package mircoders.localizer.basic;
 
 import java.util.List;
 import java.util.Locale;
-
+import java.util.*;
 import javax.servlet.http.HttpServletRequest;
 
 import mir.log.LoggerWrapper;
+import mir.servlet.*;
+import mir.config.*;
+import mir.session.Request;
+import mir.session.Response;
+import mir.session.*;
+
 import mircoders.entity.EntityComment;
 import mircoders.entity.EntityContent;
 import mircoders.global.MirGlobal;
 import mircoders.global.ProducerEngine;
-import mircoders.localizer.MirOpenPostingLocalizer;
+import mircoders.localizer.*;
 
 public class MirBasicOpenPostingLocalizer implements MirOpenPostingLocalizer {
   private List afterContentProducerTasks;
   private List afterCommentProducerTasks;
   protected LoggerWrapper logger;
+  protected MirPropertiesConfiguration configuration;
 
 
-
-  public MirBasicOpenPostingLocalizer() {
+  public MirBasicOpenPostingLocalizer() throws MirLocalizerExc, MirLocalizerFailure {
     logger = new LoggerWrapper("Localizer.Basic.OpenPosting");
+
+    try {
+      configuration = MirPropertiesConfiguration.instance();
+    }
+    catch (Throwable e) {
+      throw new MirLocalizerFailure("Can't get configuration: " + e.getMessage(), e);
+    }
 
     try {
       String contentProducers = MirGlobal.config().getString("Mir.Localizer.OpenPosting.ContentProducers");
@@ -62,7 +75,16 @@ public class MirBasicOpenPostingLocalizer implements MirOpenPostingLocalizer {
     }
     catch (Throwable t) {
       logger.error("Setting up MirBasicOpenPostingLocalizer failed: " + t.getMessage());
+
+      throw new MirLocalizerFailure(t);
     }
+  }
+
+  public SessionHandler getOpenSessionHandler(Request aRequest, Session aSession) throws MirLocalizerExc, MirLocalizerFailure {
+    if (aSession.getAttribute("handler")==null)
+      aSession.setAttribute("handler", new MirBasicCommentPostingSessionHandler());
+
+    return (SessionHandler) aSession.getAttribute("handler");
   }
 
   public void afterContentPosting() {
@@ -73,18 +95,27 @@ public class MirBasicOpenPostingLocalizer implements MirOpenPostingLocalizer {
     afterContentPosting();
   }
 
-  public void afterCommentPosting() {
-    MirGlobal.producerEngine().addTasks(afterCommentProducerTasks);
-  }
-
   public void afterCommentPosting(EntityComment aComment) {
     afterCommentPosting();
   }
 
-  public String chooseOpenPostingLanguage(HttpServletRequest req) {
-    Locale locale = req.getLocale();
+  public void afterCommentPosting() {
+    MirGlobal.producerEngine().addTasks(afterCommentProducerTasks);
+  }
 
-    return locale.getLanguage();
+  public String generateOnetimePassword() {
+    Random r = new Random();
+    int random = r.nextInt();
+
+    long l = System.currentTimeMillis();
+
+    l = (l*l*l*l)/random;
+    if (l<0)
+      l = l * -1;
+
+    String returnString = ""+l;
+
+    return returnString.substring(5);
   }
 
 }

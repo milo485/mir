@@ -47,11 +47,11 @@ public class MirBasicLocalizer implements MirLocalizer {
     return new MirBasicProducerLocalizer();
   }
 
-  public MirGeneratorLocalizer generators() {
+  public MirGeneratorLocalizer generators() throws MirLocalizerFailure, MirLocalizerExc {
     return new MirBasicGeneratorLocalizer();
   }
 
-  public MirOpenPostingLocalizer openPostings() {
+  public MirOpenPostingLocalizer openPostings() throws MirLocalizerFailure, MirLocalizerExc {
     return new MirBasicOpenPostingLocalizer();
   }
 
@@ -59,7 +59,7 @@ public class MirBasicLocalizer implements MirLocalizer {
     return new MirBasicProducerAssistantLocalizer();
   }
 
-  public MirDataModelLocalizer dataModel() {
+  public MirDataModelLocalizer dataModel() throws MirLocalizerFailure, MirLocalizerExc {
     return new MirBasicDataModelLocalizer();
   };
 

@@ -179,6 +179,26 @@ public class AbstractModule {
   }
 
   /**
+   * This function creates an Entity without yet storing it in the database
+   *
+   * @param theValues
+   * @return
+   * @throws ModuleExc
+   * @throws ModuleFailure
+   */
+  public Entity createNew() throws ModuleExc, ModuleFailure {
+    try {
+      Entity result = (Entity)theStorage.getEntityClass().newInstance();
+      result.setStorage(theStorage);
+
+      return result;
+    }
+    catch (Throwable e) {
+      throw new ModuleFailure(e);
+    }
+  }
+
+  /**
    * Standardfunktion, um einen Datensatz via StorageObject zu aktualisieren
    * @param theValues Hash mit Spalte/Wert-Paaren
    * @return Id des eingef?gten Objekts

@@ -47,7 +47,7 @@ import mircoders.servlet.ServletModuleOpenIndy;
  *  OpenMir.java - main servlet for open posting and comment feature to articles
  *
  *  @author RK 1999-2001, the mir-coders group
- *  @version $Id: OpenMir.java,v 1.31 2003/04/09 02:06:06 zapata Exp $
+ *  @version $Id: OpenMir.java,v 1.32 2003/04/16 03:26:44 zapata Exp $
  *
  */
 
@@ -63,6 +63,7 @@ public class OpenMir extends AbstractServlet {
     long startTime = System.currentTimeMillis();
     long sessionConnectTime=0;
 
+
     HttpSession session = aRequest.getSession();
 
     checkLanguage(session, aRequest);
@@ -70,8 +71,7 @@ public class OpenMir extends AbstractServlet {
     //make sure client browsers don't cache anything
     setNoCaching(aResponse);
 
-    aResponse.setContentType("text/html");
-    //aResponse.setContentType("text/html; charset="+MirPropertiesConfiguration.instance().getString("Mir.DefaultHTMLCharset"));
+    aResponse.setContentType("text/html; charset="+configuration.getString("Mir.DefaultHTMLCharset"));
 
     try {
       ServletModuleDispatch.dispatch(ServletModuleOpenIndy.getInstance(), aRequest, aResponse);
@@ -114,9 +114,6 @@ public class OpenMir extends AbstractServlet {
     String sessionLanguage = (String) aSession.getAttribute("language");
     String acceptLanguage = aRequest.getLocale().getLanguage();
     String defaultLanguage = MirGlobal.config().getString("Mir.Login.DefaultLanguage", "en");
-
-    logger.debug(" requestlanguage = " + requestLanguage + ", sessionLanugage = " + sessionLanguage +
-                 ", acceptLanguage = " + acceptLanguage + ", defaultLanguage = " + defaultLanguage);
 
     String language = requestLanguage;
 

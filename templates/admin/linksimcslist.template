@@ -13,7 +13,7 @@
 	<input type="hidden" name="do" value="list">
 	<input type="hidden" name="cid" value="">
 	<table border="0">
-	<tr class="table_head">
+	<tr class="table-head">
 		<td>${lang("linkimcslist.search_in")}:</td>
 		<td>${lang("linkimcs.parent")}:</td>
 		<td>${lang("linkimcs.language")}:</td>

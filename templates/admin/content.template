@@ -22,8 +22,10 @@
 	<tr>
 		<td align="left" valign="top">
 			<if new=="0">
-				<a href="${config.actionRoot}?module=Comment&do=articlecomments&articleid=${article.id}&returnurl=${thisurl}">[ ${lang("content.comments")} ]</a>
+				[ <a href="${config.actionRoot}?module=Comment&do=articlecomments&articleid=${article.id}&returnurl=${thisurl}">${lang("content.comments")}</a> ] &nbsp;&nbsp;
+			    [ <a href="${article.publicurl}">${lang("preview")}</a> ]
 			</if>
+			
 		</td>
 		<td align="right" valign="top">
 			${lang("content.published")} :
@@ -37,7 +39,7 @@
 	</tr>
 
 	<tr>
-		<td align="right" class="table_left">
+		<td align="right" class="table-left">
 			id # :
 		</td>
 		<td class="listrow2">
@@ -46,7 +48,7 @@
 	</tr>
 	
 	<tr>
-		<td align="right" class="table_left">
+		<td align="right" class="table-left">
 			${lang("content.lastchange_date")}:
 		</td>
 		<td class="listrow2">
@@ -55,46 +57,21 @@
 	</tr>
 
 	<tr>
-		<td align="right" valign="top" class="table_left">
+		<td align="right" valign="top" class="table-left">
 			${lang("content.create_date")}:
 		</td>
 		<td class="listrow2">
-			${utility.encodeHTML(article.webdb_create)}<br>${lang("edit")}:
-			<input type="text" size="10" maxlength="16" name="webdb_create" value=""> &nbsp; <span class="small">(yyyy-mm-dd [HH:mm])</span>
+  		${utility.encodeHTML(article.webdb_create)}<br>${lang("edit")}:
+  		<input type="text" size="10" maxlength="16" name="webdb_create" value=""> &nbsp; <span class="small">(yyyy-mm-dd [HH:mm])</span>
 		</td>
 	</tr>
 
-	<tr>
-		<td align="right" valign="top" class="table_left">
-			${lang("content.articletype")}:
-		</td>
-		<td class="listrow2">
-				<select name="to_article_type">
-					<list articletypes as a>
-					<option value="${a.id}" <if (a.id == article.to_article_type)>selected</if>>${lang("articletypes."+a.name)}</option>
-					</list>
-				</select>
-		</td>
-	</tr>
+
+  <call PulldownTableRow (lang("content.articletype"), "to_article_type", articletypes, "id", "name", article.to_article_type, "articletypes.")>
+  <call PulldownTableRow (lang("content.language"), "to_language", languages, "id", "name", article.to_language, "")>
 	
 	<tr>
-		<td align="right" class="table_left">
-			${lang("content.language")}
-		</td>
-		<td class="listrow2">
-			<select name="to_language">
-				<list languages as l>
-				<option value="${l.id}" <if (l.id == article.to_language)>selected</if>>${l.name}</option>
-				</list>
-			</select>
-		</td>
-	</tr>
-	
-	
-	
-	
-	<tr>
-		<td align="right" valign="top" class="table_left">
+		<td align="right" valign="top" class="table-left">
 			${lang("content.topic")}:
 		</td>
 		<td class="listrow2" >
@@ -108,7 +85,7 @@
 				<tr>
 					<assign col=config["Mir.Localizer.Admin.TopicListColumns"]>
 						</if>
-					<td>
+					<td title="${utility.encodeHTML(t.description)}">
 						<input type="checkbox" name="to_topic" value="${t.id}" <list article.to_topics as to><if (t.id == to["id"])>checked</if></list>>
 						<span class="small"> ${t.title}</span>
 					</td>
@@ -131,48 +108,22 @@
 		</td>
 	</tr>
 	
-	<call TextInputTableRow      (lang("content.title"), 40, 255, "title", utility.encodeHTML(article.title))>
-	<call TextInputTableRowLight (lang("content.subtitle"), 20, 20, "subtitle", utility.encodeHTML(article.subtitle))>
-    <comment>
-		<call TextInputTableRowLight ("", 20, 20, "subtitle", utility.encodeHTML(article.edittitle))>
-	</comment>
-	<call TextInputTableRowLight (lang("content.location"), 40, 40, "source", utility.encodeHTML(article.source))>
-	<call TextInputTableRow      (lang("content.creator"), 40, 40, "creator", utility.encodeHTML(article.creator))>
-	<call TextInputTableRowLight (lang("content.creator.email"), 40, 60, "creator_email", utility.encodeHTML(article.creator_email))>
-	<call TextInputTableRowLight (lang("content.creator.url"), 40, 60, "creator_main_url", utility.encodeHTML(article.creator_main_url))>
-	<call TextInputTableRowLight (lang("content.creator.address"), 20, 40, "creator_address", utility.encodeHTML(article.creator_address))>
-	<call TextInputTableRowLight (lang("content.creator.telephone"), 20, 40, "creator_phone", utility.encodeHTML(article.creator_phone))>
+	<call TextInputTableRow      (lang("content.title"), 40, 255, "title", article.title)>
+	<call TextInputTableRowLight (lang("content.subtitle"), 20, 20, "subtitle", article.subtitle)>
+  <comment>
+		<call TextInputTableRowLight ("", 20, 20, "subtitle", article.edittitle)>
+  </comment>
+	<call TextInputTableRowLight (lang("content.location"), 40, 40, "source", article.source)>
+	<call TextInputTableRow      (lang("content.creator"), 40, 40, "creator", article.creator)>
+	<call TextInputTableRowLight (lang("content.creator.email"), 40, 60, "creator_email", article.creator_email)>
+	<call TextInputTableRowLight (lang("content.creator.url"), 40, 60, "creator_main_url", article.creator_main_url)>
+	<call TextInputTableRowLight (lang("content.creator.address"), 20, 40, "creator_address", article.creator_address)>
+	<call TextInputTableRowLight (lang("content.creator.telephone"), 20, 40, "creator_phone", article.creator_phone)>
+  <call CheckboxTableRow       (lang("content.html"), "is_html", article.is_html )>
+	<call TextAreaTableRow       (lang("content.abstract"), "", 70, 15, "description", article.description)>
+	<call TextAreaTableRow       (lang("content.content"), "", 70, 20, "content_data", article.content_data)>
+	<call TextAreaTableRow       (lang("content.comment"), lang("content.internal"), 70, 6, "comment", article.comment)>
 
-	<tr>
-		<td align="right" valign="top" class="table_left">
-			${lang("content.abstract")}:
-		</td>
-		<td class="listrow2">
-			<textarea cols="70" rows="15" name="description" wrap=virtual>${utility.encodeHTML(article.description)}</textarea>
-		</td>
-	</tr>
-
-	<tr>
-		<td align="right" valign="top" class="table_left">
-			${lang("content.content")}: 
-			<br>
-			${lang("content.html")}&nbsp;
-			<input type="checkbox" name="is_html" value="1"<if article.is_html=="1"> checked</if>>&nbsp;&nbsp;
-		</td>
-		<td class="listrow2">
-			<textarea cols="70" rows="20" name="content_data" wrap=virtual>${utility.encodeHTML(article.content_data)}</textarea>
-		</td>
-	</tr>
-	
-	<tr>
-		<td align="right" valign="top" class="table_left">
-			${lang("content.comment")}:<br>
-			<span class="small">${lang("content.internal")}</span>
-		</td>
-		<td class="listrow2">
-			<textarea cols="70" rows="6" name="comment" wrap=virtual>${utility.encodeHTML(article.comment)}</textarea>
-		</td>
-	</tr>
 	<tr>
 		<td colspan="2" align="right" valign="top">
 			<if new=="1">
@@ -193,13 +144,13 @@
 
 <table cellspacing="3" cellpadding="2">
 	<tr>
-		<td class="table_head" colspan="2">
+		<td class="table-head" colspan="2">
 			${lang("content.family")}
 		</td>
 	</tr>
 		
 	<tr>
-		<td align=right valign=top class="table_left">
+		<td align=right valign=top class="table-left">
 			${lang("content.parent")}:
 		</td>
 		<td align="left" valign="top" class="listrow2">
@@ -213,7 +164,7 @@
 	</tr>
 		
 	<tr>
-		<td align=right valign=top class="table_left">
+		<td align=right valign=top class="table-left">
 			${lang("content.children")}:
 		</td>
 		<td align="left" valign="top" class="listrow2">

@@ -6,6 +6,7 @@
   <body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
     
 		<include "FUNCTIONS.template">
+    <include "head.template">
 
 		<assign contentlist = data.contentlist>
 		<assign column_nr = 3>
@@ -19,17 +20,16 @@
 		<assign module_jumpback = "Admin">
 		<assign do_jumpback = "superusermenu">
 	
-	<include "templates/admin/head.template">
+    <include "templates/admin/head.template">
 	
-	<call AddOrBack(module_name, module_jumpback, do_jumpback)>
+    <call AddOrBack(module_name, module_jumpback, do_jumpback)>
 
     <if data.contentlist>
-		<call ListTable(contentlist, data_keys, column_head_texts, column_head_CSS, listrow1CSS, listrow2CSS, footer_css, module_name)>
-		<call AddOrBack(module_name, module_jumpback, do_jumpback)>
-	<else>
+      <call ListTable(contentlist, data_keys, column_head_texts, column_head_CSS, listrow1CSS, listrow2CSS, footer_css, module_name)>
+      <call AddOrBack(module_name, module_jumpback, do_jumpback)>
+    <else>
       <P align="center">${lang("no_matches_found")}</p>
     </if>
-    
 
     <include "foot.template">
   </body>

@@ -13,7 +13,7 @@
 	<tr>
 		<td valign="top" width="40%">
 		<!-- ###### left column ###### -->
-		<p class="box_head"><b>${lang("start.administer.title")}</b></p>
+		<p class="box-head"><b>${lang("start.administer.title")}</b></p>
 		<p class="box"> 
 			
 			<a href="${config.actionRoot}?module=Content&do=list&where=is_published%3d'1'%20and%20to_article_type%3D0&order=webdb_create%20desc">&gt; ${lang("start.allarticlesoftype", lang("articletypes.openposting"))}</a>	
@@ -23,7 +23,7 @@
 			</a>
 		</p>
 
-	 	<p class="box_head"><b>${lang("start.list.title")}</b></p>	
+	 	<p class="box-head"><b>${lang("start.list.title")}</b></p>	
 		<p class="box">
       <list articletypes as a>
     			<a href="${config.actionRoot}?module=Content&do=list&where=is_published%3d'1'%20and%20to_article_type%3D${a.id}&order=webdb_create%20desc">&gt; ${lang("start.allarticlesoftype", lang("articletypes."+a.name))}</a><br>
@@ -37,7 +37,7 @@
 			<a href="${config.actionRoot}?module=Content&do=list&where=&order=${utility.encodeURI("webdb_create desc")}">&gt; ${lang("start.content.all")}</a><br>
 		</p>
 
-		<p class="box_head"><b>${lang("start.extra.title")}</b></p>		
+		<p class="box-head"><b>${lang("start.extra.title")}</b></p>		
 		<p class="box">	
 			<a href="${config.actionRoot}?module=Hidden&do=list">&gt; ${lang("start.content.hidden")}</a><br>
 			<a href="${config.actionRoot}?module=FileEdit&do=list">&gt; ${lang("start.fileedit.title")}</a>
@@ -53,7 +53,7 @@
 			
     <td valign="top" width="30%">
 		
-		<p class="box_head"><b>${lang("start.addandedit.title")}</b></p>
+		<p class="box-head"><b>${lang("start.addandedit.title")}</b></p>
 		<div class="box">
 			<a href="${config.actionRoot}?module=Content&do=add&where=aktuell">&gt; ${lang("start.content.new")}</a>
 			<br>
@@ -71,7 +71,7 @@
 			
 		</div>
 		
-		<p class="box_head"><b>${lang("start.media.title")}</b></p>	
+		<p class="box-head"><b>${lang("start.media.title")}</b></p>	
 		<div class="box">
 			
 			<a href="${config.actionRoot}?module=Images&do=list">&gt; ${lang("start.images.title")}</a>&nbsp;
@@ -95,13 +95,13 @@
 		
 		
 		
-		<p class="box_head"><b>${lang("start.producers.title")}</b></p>
+		<p class="box-head"><b>${lang("start.producers.title")}</b></p>
 		<p class="box">
 			<a href="${config.actionRoot}?module=Producer&do=produceAllNew">&gt; ${lang("start.producers.produceAllNew")}</a><br>
 			<a href="${config.actionRoot}?module=Producer&do=showProducerQueueStatus">&gt; ${lang("start.producers.advanced")}</a>
 		</p>
 		
-		<p class="box bg_neutral">
+		<p class="box bg-neutral">
 			<a href="${config.actionRoot}?module=Admin&do=superusermenu">${lang("start.superusermenu")}</a>		
 		</p>
 
@@ -116,8 +116,8 @@
 	<comment>internal messageboard</comment>
 
 
-		<p class="box_head"><b>${lang("start.messageboard.title")}</b></p>
-		<div class="box_bg">
+		<p class="box-head"><b>${lang("start.messageboard.title")}</b></p>
+		<div class="box-bg">
 			<span class="small">
 				<a href="${config.actionRoot}?module=Message&do=add">[ + ${lang("add")}]</a> 
 				<a href="${config.actionRoot}?module=Message&do=list">[${lang("edit")}]</a>
@@ -143,7 +143,7 @@
 	<comment> BOTTOM ROW FOR SEARCH </comment>
 	<tr>
 		<td colspan="3" valign="top">
-			<p class="box_head"><b>${lang("start.search.title")}</b></p>
+			<p class="box-head"><b>${lang("start.search.title")}</b></p>
 			<div class="box">
 				<call ContentSearch ("")>
 			</div>

@@ -19,19 +19,19 @@ function openWin(url) {
 <table>
 
   <tr class="darkgrey" >
-  	<td class="table_head">
+  	<td class="table-head">
 	<b>${lang("media.icon")}</b></td>
-	<td class="table_head">
+	<td class="table-head">
 	<b>${lang("media.title")}</b></td>
-    <td class="table_head">
+    <td class="table-head">
 	<b>${lang("media.format")}</b></td>
-    <td class="table_head">
+    <td class="table-head">
 	<b>${lang("media.size")}</b></td>
-    <td class="table_head">
+    <td class="table-head">
 	<b>${lang("media.mediafolder")}</b></td>
-    <td class="table_head">
+    <td class="table-head">
 	<b>${lang("media.creator")}</b></td>
-    <td class="table_head">
+    <td class="table-head">
 	&nbsp;</td>
 
   </tr>
@@ -77,7 +77,7 @@ function openWin(url) {
   	</tr>
 	</list>
 	<tr>
-		<td colspan="7" class="table_foot">
+		<td colspan="7" class="table-foot">
 			${data.count} ${lang("records")} / ${lang("show_from_to", data.from, data.to)}
 		</td>
 	</tr>
@@ -94,7 +94,7 @@ function openWin(url) {
 	</tr>
 
 <else>
-  <tr><td align="center" class="box" colspan="7">${lang("no_matches_found")}</td></tr>
+  <tr><td align="center" class="box" colspan="7">${lang("no-matches_found")}</td></tr>
 </if>
 </table>
 

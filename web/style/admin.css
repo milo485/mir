@@ -16,7 +16,7 @@ h6, p, li, dt, dd, div, td, blockquote {
 
 /* ... boxes ... */
 
-.box_head {  
+.box-head {  
 	background-color:#006600; 
 	padding:2px;
 	margin:0px; 
@@ -35,7 +35,7 @@ h6, p, li, dt, dd, div, td, blockquote {
 
 /* ... for MESSAGEBOX ... */
 
-.box_bg {  
+.box-bg {  
 	background-color:#FFFFCC; 
 	padding:8px;
 	margin-top:0px;
@@ -45,7 +45,7 @@ h6, p, li, dt, dd, div, td, blockquote {
 
 /* ... creates indent ... */
 
-.box_invis {   
+.box-invis {   
 	margin-top:4px;
 	margin-bottom:4px;
 	margin-left:12px;
@@ -53,14 +53,14 @@ h6, p, li, dt, dd, div, td, blockquote {
 	padding:4px;
 }
 
-.bg_neutral {
+.bg-neutral {
 	background-color:#DDDDDD; 
 }
 
 
 /* ... TABLE def ... */
 
-.table_head  {
+.table-head  {
 	color: #FFFFFF;
 	background-color: #990000;
 	font-weight: bold;
@@ -68,7 +68,7 @@ h6, p, li, dt, dd, div, td, blockquote {
 	padding-left:6px;
 }
 
-.table_left  {
+.table-left  {
 	color: #FFFFFF;
 	background-color: #006600;
 	font-size:1em;
@@ -80,7 +80,7 @@ h6, p, li, dt, dd, div, td, blockquote {
 }
 
 /* ... for unimportent fields ... */
-.table_left_light 
+.table-left-light 
  {
 	color: #FFFFFF;
 	background-color: #999999;
@@ -90,7 +90,7 @@ h6, p, li, dt, dd, div, td, blockquote {
 	padding-left:6px;
 }
 
-.table_foot  {
+.table-foot  {
 	color: #006600;
 	text-align:right;
 	font-weight: bold;
@@ -136,7 +136,7 @@ a:hover		{
 	background-color:#990000;
 }
 
-.link_box {  
+.link-box {  
 	background-color:#DDDDDD; 
 	font-size:0.9em;
 	padding:2px;
@@ -145,7 +145,7 @@ a:hover		{
 	border:1px solid #990000; 
 }
 
-.link_help {  
+.link-help {  
 	background-color:#DDDDDD; 
 	font-size:0.9em;
 	padding:2px;
@@ -155,7 +155,7 @@ a:hover		{
 	color: #003399;
 }
 
-.link_help_small {  
+.link-help-small {  
 	background-color:#EEEEEE;
 	font-size:0.7em;
 	color: #003399;
@@ -163,7 +163,7 @@ a:hover		{
 
 
 /* ... for important text ... */
-.text_alert {
+.text-alert {
 	color: #CC0000;
 
 }

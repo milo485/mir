@@ -77,7 +77,7 @@ import freemarker.template.SimpleList;
  * Treiber, Host, User und Passwort, ueber den der Zugriff auf die
  * Datenbank erfolgt.
  *
- * @version $Id: Database.java,v 1.37 2003/04/09 02:06:07 zapata Exp $
+ * @version $Id: Database.java,v 1.38 2003/04/16 03:26:45 zapata Exp $
  * @author rk
  *
  */
@@ -831,7 +831,7 @@ public class Database implements StorageObject {
                                         .append(") values (").append(v).append(")");
       String sql = sqlBuf.toString();
 
-      //theLog.printInfo("INSERT: " + sql);
+      logger.debug("INSERT: " + sql);
       con = getPooledCon();
       con.setAutoCommit(false);
       pstmt = con.prepareStatement(sql);

@@ -9,7 +9,7 @@
           <td>
             <select name="type">
               <list filtertypes as t>
-                <option value="${t.id}" <if t.id==aType>selected</if>>${lang(t.resource)}</option>
+                <option value="${t.id}" <if t.id==aType>selected</if>>${lang("abuse.filtertype."+t.resource)}</option>
               </list>
             </select>
           </td>
@@ -41,16 +41,16 @@
 <body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
 <include "head.template">
 <p>
-	<a class="link_box" href="${config.actionRoot}?module=Abuse">[ &lt; ] ${lang("back")}</a>&nbsp;&nbsp;
-	<a class="link_box" href="${config.actionRoot}?module=Abuse&do=showlog">${lang("abuse.showlog")}</a>
+	<a class="link-box" href="${config.actionRoot}?module=Abuse">[ &lt; ] ${lang("back")}</a>&nbsp;&nbsp;
+	<a class="link-box" href="${config.actionRoot}?module=Abuse&do=showlog">${lang("abuse.showlog")}</a>
 	<br><br>
 </p>
 <table border="0" cellpadding="2" cellspacing="1">
 	<tr>
-		<td class="table_head"><b>${lang("abuse.filter.type")}</b></td>
-		<td class="table_head"><b>${lang("abuse.filter.expression")}</b></td>
-		<td class="table_head"><b>&nbsp;</b></td>
-		<td class="table_head"><b>&nbsp;</b></td>
+		<td class="table-head"><b>${lang("abuse.filter.type")}</b></td>
+		<td class="table-head"><b>${lang("abuse.filter.expression")}</b></td>
+		<td class="table-head"><b>&nbsp;</b></td>
+		<td class="table-head"><b>&nbsp;</b></td>
 	</tr>
 
 	<assign grey="0">      
@@ -63,8 +63,8 @@
 
 	
 <p>
-	<a class="link_box" href="${config.actionRoot}?module=Abuse">[ &lt; ] ${lang("back")}</a>&nbsp;&nbsp;
-	<a class="link_box" href="${config.actionRoot}?module=Abuse&do=showlog">${lang("abuse.showlog")}</a>
+	<a class="link-box" href="${config.actionRoot}?module=Abuse">[ &lt; ] ${lang("back")}</a>&nbsp;&nbsp;
+	<a class="link-box" href="${config.actionRoot}?module=Abuse&do=showlog">${lang("abuse.showlog")}</a>
 </p>
  
  

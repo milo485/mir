@@ -18,7 +18,7 @@
     
 	<table border="0">
 		<tr>
-			<td align="right" class="table_left">
+			<td align="right" class="table-left">
 				<B>${lang("articletype.id")}: </B>
 			</td>
 			<td class="listrow2">
@@ -30,7 +30,7 @@
 
 
 		<tr>
-			<td colspan="2" align="right" class="table_foot">
+			<td colspan="2" align="right" class="table-foot">
 				<if data.new>
 					<input type="submit" name="save" value="${lang("insert")}">
 				<else>
@@ -42,7 +42,7 @@
 
 </form>
 
-<p><a class="link_box" href="${config.actionRoot}?module=ArticleType&do=list">[&lt;] ${lang("back")} </a> &nbsp;</p>
+<p><a class="link-box" href="${config.actionRoot}?module=ArticleType&do=list">[&lt;] ${lang("back")} </a> &nbsp;</p>
 
 <include "foot.template">
 </body>

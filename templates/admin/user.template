@@ -23,7 +23,7 @@
 		<call TextInputTableRow (lang("user.password"), 40, 40, "newpassword", "")>
 		<call TextInputTableRow (lang("user.password2"), 40, 40, "newpassword2", "")>
 		<tr>
-			<td align="right" class="table_left">
+			<td align="right" class="table-left">
 				<b>${lang("user.admin")}:</b>
 			</td>
 			<td class="listrow2">
@@ -31,7 +31,7 @@
 			</td>
 		</tr>
 		<tr>
-		<td colspan="2" align="right" class="table_foot"> 
+		<td colspan="2" align="right" class="table-foot"> 
 			<span class="witetext">
 			<if data.new>
 				<input type="submit" name="save" value="${lang("insert")}">
@@ -44,7 +44,7 @@
 	</table>
 </form>
 	
-	<p><a class="link_box" href="${config.actionRoot}?module=Users&do=list">[&lt;] ${lang("back")} </a> &nbsp;</p>
+	<p><a class="link-box" href="${config.actionRoot}?module=Users&do=list">[&lt;] ${lang("back")} </a> &nbsp;</p>
 	
 	<include "foot.template">
 

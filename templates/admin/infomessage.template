@@ -13,7 +13,7 @@
 			<p>
 			<p>
 				<br>
-				<a class="link_box" href="${config.actionRoot}">[&lt;&lt;&lt;] ${lang("head.start")}</a>&nbsp;&nbsp;&nbsp;
+				<a class="link-box" href="${config.actionRoot}">[&lt;&lt;&lt;] ${lang("head.start")}</a>&nbsp;&nbsp;&nbsp;
 				
 			</p>
 			

@@ -35,18 +35,21 @@ import mir.log.LoggerWrapper;
 import mir.module.AbstractModule;
 import mir.storage.StorageObject;
 
-/*
- *  ThemenModule -
+/**
  *
- *
- * @author RK
+ * <p>Title: </p>
+ * <p>Description: </p>
+ * <p>Copyright: Copyright (c) 2003</p>
+ * <p>Company: </p>
+ * @author the mir coders
+ * @version 1.0
  */
 
 public class ModuleUploadedMedia extends AbstractModule
 {
   static LoggerWrapper logger = new LoggerWrapper("Module.UploadedMedia");
 
-  public ModuleUploadedMedia(StorageObject theStorage) {
-    this.theStorage = theStorage;
+  public ModuleUploadedMedia(StorageObject aStorage) {
+    theStorage = aStorage;
   }
 }

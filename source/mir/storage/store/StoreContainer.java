@@ -109,7 +109,7 @@ public class StoreContainer {
     if (sid != null && sid.hasReference()) {
       if (has(sid)) {
         moveToHead(sid);
-        logger.error("OBJECTStore: tried to add sid " + sid.toString() + " that was already in store.");
+        logger.debug("OBJECTStore: tried to add sid " + sid.toString() + " that was already in store.");
       }
       else {
         container.addFirst(sid);

@@ -1,0 +1,234 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title>${lang("comment.htmltitle")}</title> 
+  </head>
+  
+  <body marginwidth="0" marginheight="0" leftmargin="0" topmargin="0" bgcolor="#dddddd">
+    <form enctype="multipart/form-data" action="${actionURL}&do=opensession" method="post">
+      <input type="hidden" name="do" value="processcomment">
+      <input type="hidden" name="to_media" value="${to_media}">
+    
+      <table cellspacing="0" cellpadding="0" width="100%">
+        <tr>
+          <td colspan="3"><span>&nbsp;</span></td>
+        </tr>
+        <if errors>
+        <tr>
+          <td colspan="3">
+            Your input had the following errors:<br><br>
+            <list errors as e>
+              <font color="red">
+              <if e.field>
+                ${lang("comment."+e.field)}:
+              </if>
+              ${lang(e.message)} <br>
+              </font>
+            </list>
+          </td>
+        </tr>
+        </if>
+        <if password>
+          <tr>
+            <td align="right">&nbsp;</td>
+            <td>
+              ${lang("comment.note")}
+                     <br>${data.passwd}<br>
+               <br>
+            </td>
+            <td>&nbsp;</td>
+          </tr>
+          <tr>
+            <td></td>
+            <td  valign="top">
+                  ${lang("comment.password")}: <input type="text" name="passwd" size="10">
+            </td>
+            <td>&nbsp;</td>
+          </tr>
+        </if>
+        <tr>
+          <td width="20%" bgcolor="#cc0033">
+          </td>
+          <td width="60%" bgcolor="#cc0033">
+            <span id="title"><b>${lang("comment.formtitle")}</b></span>
+          </td>
+          <td width="20%">&nbsp;</td>
+        </tr>
+        <tr>
+          <td colspan="3"><span>&nbsp;</span></td>
+        </tr>
+
+        <tr>
+          <td align="right" valign="top">&nbsp;</td>
+          <td valign="top" bgcolor="#cc9999" cellpadding="8" >
+            <b><font color="#cc0033">R E Q U I R E D</font> information</b>
+          </td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td colspan="3"><span>&nbsp;</span></td>
+        </tr>
+        <tr>
+          <td align="right">
+            ${lang("comment.title")}:
+          </td>
+          <td>
+            <input type="text" name="title"  maxlength="45" value="${utility.encodeHTML(title)}">
+          </td>
+          <td></td>
+        </tr>
+        <tr>
+          <td align="right" valign="top">
+            ${lang("comment.text")}:
+          </td>
+          <td> 
+            <textarea name="description" rows="10" wrap="virtual">${utility.encodeHTML(description)}</textarea>
+          </td>
+          <td></td>
+        </tr>
+        <tr>
+          <td align="right">
+            ${lang("comment.name")}:<br><br>
+          </td>
+          <td>
+            <input type="text" name="creator"  maxlength="45" value="${utility.encodeHTML(creator)}">
+            <br><br>
+          </td>
+          <td></td>
+        </tr>
+        
+        <tr>
+          <td align="right" valign="top">&nbsp;</td>
+          <td valign="top" bgcolor="#cc9999">
+            <b>Additional information</b>
+          </td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td colspan="3"><span>&nbsp;</span></td>
+        </tr>
+        <tr>
+          <td align="right">
+            ${lang("comment.language")}:<br><br>
+          </td>
+          <td>      
+            <select name="to_language"  size="1">
+              <list languages as l>
+                <option value="${l.id}" <if to_language==l.id>selected="1"</if>>${l.name}</option>
+              </list>
+            </select>
+            <br><br>
+          </td>
+          <td>&nbsp;</td>
+        </tr>
+        
+        <tr>
+          <td align="right" valign="top">&nbsp;</td>
+          <td valign="top" bgcolor="#cc9999">
+            <b>Contact information</b>
+          </td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td colspan="3"><span>&nbsp;</span></td>
+        </tr>
+        <tr>
+          <td align="right">&nbsp;</td>
+          <td>
+             ${lang("comment.contact.info")}
+          </td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td align="right">
+            ${lang("comment.email")}:
+          </td>
+          <td>
+            <input type="text" name="email" maxlength="80" value="">
+          </td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td align="right">
+            ${lang("comment.url")}:
+          </td>
+          <td>
+            <input type="text" name="main_url" maxlength="160" value="http://">
+          </td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td align="right">
+            ${lang("comment.address")}:
+          </td>
+          <td>
+            <input type="text" name="address" maxlength="160" value="">
+          </td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td align="right">
+            ${lang("comment.phone")}<br><br>
+          </td>
+          <td>
+            <input type="text" name="phone" maxlength="20" value=""><br><br>
+          </td>
+          <td>&nbsp;</td>
+        </tr>
+        
+	<tr>
+ 		<td>
+		${lang("posting.media.title")} 1:
+		</td>
+		<td colspan="2">
+			<input type="text" name="media_title1" size="40" maxlength="80" value=""><br>
+		</td>
+	</tr>
+	<tr>
+		<td>${lang("posting.media.media")} 1</td>
+		<td colspan="2">
+			<INPUT TYPE="file" NAME="media1">
+		</td>
+	</tr>
+	<tr>
+ 		<td>
+		${lang("posting.media.title")} 2:
+		</td>
+		<td colspan="2">
+			<input type="text" name="media_title2" size="40" maxlength="80" value=""><br>
+		</td>
+	</tr>
+	<tr>
+		<td>${lang("posting.media.media")} 2</td>
+		<td colspan="2">
+			<INPUT TYPE="file" NAME="media2">
+		</td>
+	</tr>
+	<tr>
+ 		<td>
+		${lang("posting.media.title")} 3:
+		</td>
+		<td colspan="2">
+			<input type="text" name="media_title3" size="40" maxlength="80" value=""><br>
+		</td>
+	</tr>
+	<tr>
+		<td>${lang("posting.media.media")} 3</td>
+		<td colspan="2">
+			<INPUT TYPE="file" NAME="media3">
+		</td>
+	</tr>
+        <tr>
+          <td align="right">&nbsp;</td>
+          <td  bgcolor="#cc0033">
+            <input id="button" type="submit" value="${lang("comment.submit")}">
+          </td>
+          <td bgcolor="#cc0033">&nbsp;</td>
+        </tr>
+        <tr>
+          <td colspan="3">&nbsp;<br><br></td>
+        </tr>
+      </table>
+    </form>
+  </body>
+</html>

@@ -14,12 +14,12 @@
 
 <table border="0" cellspacing="2" cellpadding="2">
 	<tr>
-		<td class="table_head">${lang("search")}:</td>
-		<td class="table_head">${lang("medialist.search_text_in")}:</td>
-		<td class="table_head">${lang("media.published")}:</td>
-		<td class="table_head">${lang("media.mediafolder")}:</td>
-		<td class="table_head">&nbsp;</td>
-		<td><a class="link_box" href="${config.actionRoot}?module=${module}&do=add">[+] ${lang("add")} </a></td>
+		<td class="table-head">${lang("search")}:</td>
+		<td class="table-head">${lang("medialist.search_text_in")}:</td>
+		<td class="table-head">${lang("media.published")}:</td>
+		<td class="table-head">${lang("media.mediafolder")}:</td>
+		<td class="table-head">&nbsp;</td>
+		<td><a class="link-box" href="${config.actionRoot}?module=${module}&do=add">[+] ${lang("add")} </a></td>
 	</tr>
 
 	<tr>
@@ -70,19 +70,19 @@
 <table>
 
   <tr class="darkgrey" >
-  	<td class="table_head">
+  	<td class="table-head">
 	<b>${lang("media.icon")}</b></td>
-	<td class="table_head">
+	<td class="table-head">
 	<b>${lang("media.title")}</b></td>
-    <td class="table_head">
+    <td class="table-head">
 	<b>${lang("media.format")}</b></td>
-    <td class="table_head">
+    <td class="table-head">
 	<b>${lang("media.size")}</b></td>
-    <td class="table_head">
+    <td class="table-head">
 	<b>${lang("media.mediafolder")}</b></td>
-    <td class="table_head">
+    <td class="table-head">
 	<b>${lang("media.creator")}</b></td>
-    <td class="table_head">
+    <td class="table-head">
 	&nbsp;</td>
 
   </tr>
@@ -124,7 +124,7 @@
   	</tr>
 	</list>
 	<tr>
-		<td colspan="7" class="table_foot">
+		<td colspan="7" class="table-foot">
 			${data.count} ${lang("records")} / ${lang("show_from_to", data.from, data.to)}
 		</td>
 	</tr>

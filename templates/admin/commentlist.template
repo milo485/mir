@@ -17,12 +17,12 @@
    
 	<table border="0" cellpadding="2" cellspacing="3">
 	<tr>
-		<td class="table_head">${lang("commentsearch.field")}</td>
-		<td class="table_head">${lang("commentsearch.value")}</td>
-		<td class="table_head">${lang("commentsearch.publishedstate")}</td>
-		<td class="table_head">${lang("commentsearch.status")}</td>
-		<td class="table_head">${lang("commentsearch.order")}</td>
-		<td class="table_head">&nbsp;</td>
+		<td class="table-head">${lang("commentsearch.field")}</td>
+		<td class="table-head">${lang("commentsearch.value")}</td>
+		<td class="table-head">${lang("commentsearch.publishedstate")}</td>
+		<td class="table-head">${lang("commentsearch.status")}</td>
+		<td class="table-head">${lang("commentsearch.order")}</td>
+		<td class="table-head">&nbsp;</td>
 	</tr>
 
 	<tr>
@@ -90,13 +90,12 @@
 		</tr>
 	</if>
 
-	<tr class="table_head">
+	<tr class="table-head">
 		<td valign="top">
 			${lang("comment.date")}
 		</td>
 		<td>
-			${lang("comment.title")}/ ${lang("comment.creator")}<br>
-			${lang("comment.text")}
+			${lang("comment.article")} / ${lang("comment.title")} / ${lang("comment.creator")} / ${lang("comment.text")}
 		</td>
 		<td>
 			&nbsp;
@@ -107,20 +106,42 @@
 	<tr <if grey=="1"><assign grey="0">class="listrow1"<else><assign grey="1">class="listrow2"</if>>
 		<td valign="top" class="small">
 			${entry.creationdate.formatted["dd.MM.yyyy HH:mm"]}<br>
-			<if entry.is_published=="0"><b>${lang("commentlist.hidden")}</b><else>-</if>
+			<if entry.is_published=="0"><b>${lang("commentlist.hidden")}</b><else>-</if><br>
+			<br>
+			${lang("comment.status")}: <br>
+			<if entry.status>
+				<b>
+					${lang("commentstatus." + entry.status.name)}
+				</b>
+			<else> 
+				- 
+			</if>
 		</td>
         
 		<td>
-			
 			<a name="${entry.id}"></a>
 			<if entry.to_content>
-  			${lang("comment.article")}:
-  			<a href="${config.actionRoot}?module=Content&do=edit&id=${entry.to_content.id}">
-  				${utility.encodeHTML(entry.to_content.title)}
-  			</a>
-        (${lang("articletypes."+entry.to_content.article_type.name)})<br> 
-        [<a href="${config.actionRoot}?module=Comment&do=articlecomments&articleid=${entry.to_content.id}">${lang("commentlist.allcomments")}</a>]<br>
-      </if>
+  				<div class="small">
+  				${lang("comment.article")}:
+  				<a href="${config.actionRoot}?module=Content&do=edit&id=${entry.to_content.id}">
+  					${utility.encodeHTML(entry.to_content.title)}
+  				</a>
+        		(${lang("articletypes."+entry.to_content.article_type.name)}) 
+
+        		[
+        		<a href="${config.actionRoot}?module=Content&do=edit&id=${entry.to_content.id}">
+  					${lang("edit")}
+  				</a> |
+        		<a href="${entry.publicurl}">
+        			${lang("start.show")}
+        		</a> |
+        		<a href="${config.actionRoot}?module=Comment&do=articlecomments&articleid=${entry.to_content.id}">
+        			${lang("commentlist.allcomments")}
+        		</a>
+        		]
+        		</div>
+      		</if>
+
 			
 			<b>${entry.title}</b> &nbsp;
 			<if entry.creator>
@@ -130,8 +151,7 @@
 			${utility.encodeHTML(entry.description)}
 			
 			<if entry.main_url><br>URL: ${entry.main_url}</if>
-			<br><if entry.status>${lang("commentstatus." + entry.status.name)}<else> - </if> &nbsp;
-			<br>
+			<div class="bg-neutral small">
 			<if config["Mir.Localizer.Admin.ListOperationsFlavor"]=="0">
 				<list entry.operations as op>
 					[ <a href="${config.actionRoot}?module=Localizer&do=commentoperation&operation=${op}&id=${entry.id}&returnurl=${utility.encodeURI(thisurl + "#" + entry.id)}">${lang("comment.operation."+op)}</a> ]
@@ -139,7 +159,7 @@
 			</if>
 			<if config["Mir.Localizer.Admin.ListOperationsFlavor"]=="1">
 				<list entry.operations as op>
-					[ <input type="checkbox" name="operation" value="${entry.id};${op}">${lang("comment.operation."+op)} ]
+					 <input type="checkbox" name="operation" value="${entry.id};${op}">${lang("comment.operation."+op)} 
 				</list>
 			</if>
 			<if config["Mir.Localizer.Admin.ListOperationsFlavor"]=="2">
@@ -150,8 +170,9 @@
 					</list>
 				</select>
 			</if>
-			<if entry.operations>|</if>
+			<if entry.operations>&nbsp;|&nbsp;</if>
 			<a href="${config.actionRoot}?module=Comment&do=edit&id=${entry.id}">${lang("edit")}</a>                
+			</div>
 		</td>
       
 		<td valign="top">
@@ -162,7 +183,7 @@
 </list>
       
 	<tr>
-		<td colspan="3" class="table_foot">
+		<td colspan="3" class="table-foot">
 			${count} ${lang("records")} / ${lang("show_from_to", from, to)}
 		</td>
 	</tr>
@@ -187,7 +208,7 @@
 </if>  
   
 <else>
-<P align="center" class="box">${lang("no_matches_found")}</p>
+<P align="center" class="box">${lang("no-matches_found")}</p>
 </if>
 
 <include "foot.template">

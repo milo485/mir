@@ -42,21 +42,21 @@
 
 <table border="0" width="100%" cellspacing="3" cellpadding="2">
 	<tr>
-		<td class="table_head" valign="top">
+		<td class="table-head" valign="top">
 			<span class="small">	  
 			${lang("content.creationdate")}<br>
 			${lang("content.modificationdate")}<br>
 			${lang("content.status")}
 			</span>
 		</td>
-		<td class="table_head" valign="top">
+		<td class="table-head" valign="top">
 			${lang("content.type")} - ${lang("content.title")} <br>
 			${lang("content.creator")}
 		</td>
-		<td class="table_head" valign="top">
+		<td class="table-head" valign="top">
 			${lang("content.comment")}
 		</td>
-		<td class="table_head" valign="top">&nbsp;</td>
+		<td class="table-head" valign="top">&nbsp;</td>
 	</tr>
 
 <assign grey="0">
@@ -110,7 +110,7 @@
 	</tr>
 </list>
 	<tr>
-		<td colspan="4" class="table_foot">
+		<td colspan="4" class="table-foot">
 			${count} ${lang("records")} / ${lang("show_from_to", from, to)}
 		</td>
 	</tr>
@@ -131,7 +131,7 @@
 
 
 <else>
-<p align="center" class="box">${lang("no_matches_found")}</p>
+<p align="center" class="box">${lang("no-matches_found")}</p>
 </if>
 
 <include "foot.template">

@@ -43,7 +43,7 @@ import javax.servlet.http.HttpSession;
 import freemarker.template.SimpleHash;
 import freemarker.template.TemplateModelRoot;
 import mir.config.MirPropertiesConfiguration;
-import mir.config.MirPropertiesConfiguration$PropertiesConfigExc;
+import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
 import mir.entity.EntityList;
 import mir.log.LoggerWrapper;
 import mir.misc.HTMLTemplateProcessor;
@@ -474,8 +474,6 @@ public abstract class ServletModule {
 
       for (int i = 0; i < theFieldList.size(); i++) {
         aField = (String) theFieldList.get(i);
-
-        logger.debug("field " + aField + " = " + parser.getParameter(aField));
 
         aValue = parser.getParameter(aField);
         if (aValue != null)

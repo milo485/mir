@@ -90,6 +90,11 @@ Mir.Localizer.Admin.TopicListFlavor=1
 # For the checkboxes flavour, how many columns should there be?
 Mir.Localizer.Admin.TopicListColumns=3
 
+# Article Preview Link URL (Link to produced articles from within admin) 
+ContentList.ArticleLink=http://production.indy.code-foo.org/en/${date.formatted.yyyy}/${date.formatted.MM}/${id}.shtml
+CommentList.ArticleLink=http://production.indy.code-foo.org/en/${co_content.date.formatted.yyyy}/${to_content.date.formatted.MM}/${to_content.id}.shtml
+
+
 # In which order should the topic appear?
 Mir.Localizer.Admin.TopicListOrder=title
 
@@ -211,7 +216,33 @@ Producer.IntLinkName=intlink.gif
 Producer.MailLinkName=maillink.gif
 
 #the style sheet used to turn html into xsl:fo
+#this is not currently in use, so don't worry about it
 Producer.HTML2FOStyleSheet=/some/dir/mir/etc/producer/html2fo.xsl 
+
+# the following lines are used to construct PDFs on the fly from one or more articles
+# for the moment, if you want to change anything else about your pdfs, you 
+# will have to learn some java!
+#
+# keep in mind that there may not be enough room for all the text you enter as the 
+# value of one these options, if text doesn't appear, the only easy thing to do is 
+# use less text!
+#
+
+# a single line of big text which will appear at the top of the first page of all generated pdfs
+
+PDF.Title=INDYMEDIA SOMEWHERE
+
+# about two lines of small text which will appear at the bottom of every page 
+
+PDF.Footer=Indymedia does blah.  Content is good, and free to use for non-commercial purposes under the Open Content license. if you have questions, email someone.
+ 
+#
+# the size paper your target audience will likely have in their printers.  pick one of A4 or LETTER
+#
+
+PDF.PageSize=A4
+
+
 
 
 #

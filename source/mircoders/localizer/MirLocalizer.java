@@ -38,5 +38,4 @@ public interface MirLocalizer {
   public MirProducerAssistantLocalizer producerAssistant() throws MirLocalizerFailure, MirLocalizerExc;
   public MirGeneratorLocalizer generators() throws MirLocalizerFailure, MirLocalizerExc;
   public MirDataModelLocalizer dataModel() throws MirLocalizerFailure, MirLocalizerExc;
-
 }

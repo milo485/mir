@@ -51,6 +51,7 @@ echo "grant all on topic           to $3;"   >> ${SCRIPT_FILE}
 echo "grant all on uploaded_media  to $3;"   >> ${SCRIPT_FILE}
 echo "grant all on images          to $3;"   >> ${SCRIPT_FILE}
 echo "grant all on content_x_media to $3;"   >> ${SCRIPT_FILE}
+echo "grant all on comment_x_media to $3;"   >> ${SCRIPT_FILE}
 echo "grant all on audio           to $3;"   >> ${SCRIPT_FILE}
 echo "grant all on video           to $3;"   >> ${SCRIPT_FILE}
 echo "grant all on content         to $3;"   >> ${SCRIPT_FILE}
