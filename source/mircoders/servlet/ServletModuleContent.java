@@ -31,16 +31,16 @@
 
 package mircoders.servlet;
 
+import java.io.PrintWriter;
 import java.io.IOException;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import mir.entity.EntityList;
+import mir.entity.adapter.EntityAdapter;
 import mir.entity.adapter.EntityAdapterModel;
 import mir.entity.adapter.EntityIteratorAdapter;
 import mir.log.LoggerWrapper;
@@ -52,6 +52,11 @@ import mir.storage.StorageObjectFailure;
 import mir.util.CachingRewindableIterator;
 import mir.util.HTMLRoutines;
 import mir.util.JDBCStringRoutines;
+import mir.util.HTTPRequestParser;
+import mir.util.URLBuilder;
+import mir.util.SQLQueryBuilder;
+import mir.log.*;
+
 import mircoders.entity.EntityContent;
 import mircoders.entity.EntityUsers;
 import mircoders.global.MirGlobal;
@@ -79,20 +84,15 @@ import freemarker.template.TemplateModelRoot;
  *  ServletModuleContent -
  *  deliver html for the article admin form.
  *
- * @version $Id: ServletModuleContent.java,v 1.32 2003/01/25 17:50:36 idfx Exp $
+ * @version $Id: ServletModuleContent.java,v 1.34 2003/02/21 05:37:59 zapata Exp $
  * @author rk, mir-coders
  *
  */
 
 public class ServletModuleContent extends ServletModule
 {
-  static ModuleTopics         themenModule;
-  static ModuleSchwerpunkt    schwerpunktModule;
-  static ModuleImages         imageModule;
-
-  static String templateOpString;
-
-// Singelton / Kontruktor
+  private String editTemplate = configuration.getString("ServletModule.Content.ObjektTemplate");;
+  private String listTemplate = configuration.getString("ServletModule.Content.ListTemplate");
 
   private static ServletModuleContent instance = new ServletModuleContent();
   public static ServletModule getInstance() { return instance; }
@@ -101,88 +101,82 @@ public class ServletModuleContent extends ServletModule
     super();
     logger = new LoggerWrapper("ServletModule.Content");
     try {
-      
+
       templateListString = configuration.getString("ServletModule.Content.ListTemplate");
       templateObjektString = configuration.getString("ServletModule.Content.ObjektTemplate");
       templateConfirmString = configuration.getString("ServletModule.Content.ConfirmTemplate");
 
       mainModule = new ModuleContent(DatabaseContent.getInstance());
-      themenModule = new ModuleTopics(DatabaseTopics.getInstance());
-      schwerpunktModule = new ModuleSchwerpunkt(DatabaseFeature.getInstance());
-      imageModule = new ModuleImages(DatabaseImages.getInstance());
     }
     catch (StorageObjectFailure e) {
       logger.error("servletmodulecontent konnte nicht initialisiert werden");
     }
   }
 
-// Methoden
-
-  public void list(HttpServletRequest req, HttpServletResponse res) throws ServletModuleException
+  public void list(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleException
   {
-    EntityUsers user = _getUser(req);
-    String offsetParam = req.getParameter("offset");
-    String whereParam = req.getParameter("where");
-    String orderParam = req.getParameter("order");
+    HTTPRequestParser requestParser = new HTTPRequestParser(aRequest);
 
-    int offset =0;
+    String where = requestParser.getParameter("where");
+    String order = requestParser.getParameterWithDefault("order", "webdb_create desc");
+    int offset = requestParser.getIntegerWithDefault("offset", 0);
+    String selectArticleUrl = requestParser.getParameter("selectarticleurl");
 
-    if (offsetParam != null && !offsetParam.equals(""))
-      offset = Integer.parseInt(offsetParam);
-
-    if (req.getParameter("next") != null)
-      offset=Integer.parseInt(req.getParameter("nextoffset"));
-    else
-      if (req.getParameter("prev") != null)
-        offset = Integer.parseInt(req.getParameter("prevoffset"));
-
-    returnArticleList(req, res, whereParam, orderParam, offset);
+    returnArticleList(aRequest, aResponse, where, order, offset, selectArticleUrl);
   }
 
-  public void listop(HttpServletRequest req, HttpServletResponse res) throws ServletModuleException
-  {
-    EntityUsers user = _getUser(req);
-    String       offsetParam = req.getParameter("offset");
-    int          offset =0;
-
-    String whereParam = req.getParameter("where");
-
-    if (whereParam==null) whereParam = "to_article_type='0'";
-
-// hier offsetcode bearbeiteb
-    if (offsetParam != null && !offsetParam.equals(""))
-      offset = Integer.parseInt(offsetParam);
-
-    if (req.getParameter("next") != null)
-      offset=Integer.parseInt(req.getParameter("nextoffset"));
-    else
-      if (req.getParameter("prev") != null)
-        offset = Integer.parseInt(req.getParameter("prevoffset"));
-
-    String orderParam = req.getParameter("order");
-
-    returnArticleList(req, res, whereParam, orderParam, offset);
-  }
-
-
-  public void search(HttpServletRequest req, HttpServletResponse res)
-      throws ServletModuleException {
+  public void search(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleException {
     try {
-      EntityUsers   user = _getUser(req);
-      EntityList    theList;
-      String        fieldParam = req.getParameter("field");
-      String        fieldValueParam = req.getParameter("fieldvalue");
-      String        orderParam = req.getParameter("order");
+      HTTPRequestParser requestParser = new HTTPRequestParser(aRequest);
+      SQLQueryBuilder queryBuilder = new SQLQueryBuilder();
+      String searchField = requestParser.getParameterWithDefault("searchfield", "");
+      String searchValue = requestParser.getParameterWithDefault("searchvalue", "").trim();
+      String searchOrder = requestParser.getParameterWithDefault("searchorder", "");
+      String searchispublished = requestParser.getParameterWithDefault("searchispublished", "");
+      String searchArticleType = requestParser.getParameterWithDefault("searcharticletype", "");
+      String selectArticleUrl = requestParser.getParameter("selectarticleurl");
 
-      theList = ((ModuleContent)mainModule).getContentByField(fieldParam, fieldValueParam, orderParam, 0, user);
-      returnArticleList(req, res, "lower("+ fieldParam + ") like lower('%" + JDBCStringRoutines.escapeStringLiteral(fieldValueParam) + "%')", orderParam, 0);
-    } catch (ModuleException e) {
+      if (searchValue.length()>0) {
+        if (searchField.equals("contents"))
+          queryBuilder.appendAndCondition(
+            "(lower(content_data) like " + "'%" + JDBCStringRoutines.escapeStringLiteral(searchValue.toLowerCase()) + "%')"+
+            " or (lower(description) like " + "'%" + JDBCStringRoutines.escapeStringLiteral(searchValue.toLowerCase()) + "%')");
+        else
+          queryBuilder.appendAndCondition(
+            "lower("+ searchField + ") like " +
+            "'%" + JDBCStringRoutines.escapeStringLiteral(searchValue.toLowerCase()) + "%'");
+      }
+
+      if (searchispublished.length()>0) {
+        if (searchispublished.equals("0"))
+          queryBuilder.appendAndCondition("is_published='f'");
+        else
+          queryBuilder.appendAndCondition("is_published='t'");
+      }
+
+      if (searchArticleType.length()>0) {
+        queryBuilder.appendAndCondition("to_article_type="+Integer.parseInt(searchArticleType));
+      }
+
+      if (searchOrder.length()>0) {
+        if (searchOrder.equals("datedesc"))
+          queryBuilder.appendAscendingOrder("webdb_create");
+        else if (searchOrder.equals("dateasc"))
+          queryBuilder.appendDescendingOrder("webdb_create");
+        else if (searchOrder.equals("title"))
+          queryBuilder.appendDescendingOrder("title");
+        else if (searchOrder.equals("creator"))
+          queryBuilder.appendDescendingOrder("creator");
+      }
+
+      returnArticleList(aRequest, aResponse, queryBuilder.getWhereClause(), queryBuilder.getOrderByClause(), 0, selectArticleUrl);
+    }
+    catch (Throwable e) {
       throw new ServletModuleException(e.toString());
     }
   }
 
-  public void add(HttpServletRequest req, HttpServletResponse res)
-      throws ServletModuleException {
+  public void add(HttpServletRequest req, HttpServletResponse res) throws ServletModuleException {
     _showObject(null, req, res);
   }
 
@@ -252,19 +246,22 @@ public class ServletModuleContent extends ServletModule
           DatabaseContentToTopics.getInstance().deleteByContentId(idParam);
           //delete rows in the comment-table
           DatabaseComment.getInstance().deleteByContentId(idParam);
-	  //delete from lucene index, if any
-	  String index = configuration.getString("IndexPath");
-	  if (IndexReader.indexExists(index)){
-	    IndexUtil.unindexID(idParam,index);
-	  }
-	  
-        } catch (ModuleException e) {
+          //delete from lucene index, if any
+          String index = configuration.getString("IndexPath");
+          if (IndexReader.indexExists(index)){
+            IndexUtil.unindexID(idParam,index);
+          }
+
+        }
+        catch (ModuleException e) {
           throw new ServletModuleException(e.toString());
-        } catch (StorageObjectFailure e) {
+        }
+        catch (StorageObjectFailure e) {
           throw new ServletModuleException(e.toString());
-        } catch (IOException e) {
-	  throw new ServletModuleException(e.toString());
-	}
+        }
+        catch (IOException e) {
+          throw new ServletModuleException(e.toString());
+        }
         list(req,res);
       }
       else {
@@ -276,8 +273,9 @@ public class ServletModuleContent extends ServletModule
 
   public void edit(HttpServletRequest req, HttpServletResponse res) throws ServletModuleException
   {
-    String        idParam = req.getParameter("id");
-    if (idParam == null) throw new ServletModuleException("Invalid call: id not supplied ");
+    String idParam = req.getParameter("id");
+    if (idParam == null)
+      throw new ServletModuleException("Invalid call: id not supplied ");
     _showObject(idParam, req, res);
   }
 
@@ -323,40 +321,21 @@ public class ServletModuleContent extends ServletModule
     _showObject(cidParam, req, res);
   }
 
-  public void newswire(HttpServletRequest req, HttpServletResponse res) throws ServletModuleException
-  {
-    String  idParam = req.getParameter("id");
-    if (idParam == null) throw new ServletModuleException("smod content :: newswire :: id missing");
-    try {
-      EntityContent entContent = (EntityContent)mainModule.getById(idParam);
-      entContent.newswire();
-    }
-    catch(ModuleException e) {
-      logger.error("smod content :: newswire :: could not get entityContent");
-    }
-    catch(StorageObjectFailure e) {
-      logger.error("smod content :: dettach :: could not get entityContent");
-    }
-
-    list(req, res);
-  }
-
-
-  public void update(HttpServletRequest req, HttpServletResponse res)
+  public void update(HttpServletRequest aRequest, HttpServletResponse aResponse)
       throws ServletModuleException
   {
     try {
+      HTTPRequestParser requestParser = new HTTPRequestParser(aRequest);
 
-      EntityUsers   user = _getUser(req);
-      if (user==null) logger.debug("user null!");
-      String idParam = req.getParameter("id");
+      String returnUrl = requestParser.getParameter("returnurl");
+
+      String idParam = aRequest.getParameter("id");
       if (idParam == null) throw new ServletModuleException("Wrong call: (id) is missing");
 
-      HashMap withValues = getIntersectingValues(req, DatabaseContent.getInstance());
-      String[] topic_id = req.getParameterValues("to_topic");
-      String content_id = req.getParameter("id");
+      HashMap withValues = getIntersectingValues(aRequest, DatabaseContent.getInstance());
+      String[] topic_id = aRequest.getParameterValues("to_topic");
+      String content_id = aRequest.getParameter("id");
 
-      if(user != null) withValues.put("user_id", user.getId());
       withValues.put("is_produced", "0");
       if (!withValues.containsKey("is_published"))
         withValues.put("is_published","0");
@@ -364,21 +343,18 @@ public class ServletModuleContent extends ServletModule
         withValues.put("is_html","0");
 
       String id = mainModule.set(withValues);
-      DatabaseContentToTopics.getInstance().setTopics(req.getParameter("id"),topic_id);
+      DatabaseContentToTopics.getInstance().setTopics(aRequest.getParameter("id"),topic_id);
 
-      String whereParam = req.getParameter("where");
-      String orderParam = req.getParameter("order");
+      String whereParam = aRequest.getParameter("where");
+      String orderParam = aRequest.getParameter("order");
 
-      if ((whereParam!=null && !whereParam.equals("")) || (orderParam!=null && !orderParam.equals(""))){
-        list(req,res);
+      if (returnUrl!=null){
+        redirect(aResponse, returnUrl);
       }
       else
-        _showObject(idParam, req, res);
+        _showObject(idParam, aRequest, aResponse);
     }
-    catch (StorageObjectFailure e) {
-      throw new ServletModuleException(e.toString());
-    }
-    catch (ModuleException e) {
+    catch (Throwable e) {
       throw new ServletModuleException(e.toString());
     }
   }
@@ -389,50 +365,60 @@ public class ServletModuleContent extends ServletModule
   * if the "id" parameter is null, it means show an empty form to add a new
   * article.
 */
-  private void _showObject(String id, HttpServletRequest req, HttpServletResponse res)
+  private void _showObject(String id, HttpServletRequest aRequest, HttpServletResponse aResponse)
       throws ServletModuleException {
 
-    SimpleHash extraInfo = new SimpleHash();
     try {
-      TemplateModelRoot entContent;
+      HTTPRequestParser requestParser = new HTTPRequestParser(aRequest);
+      Map responseData = ServletHelper.makeGenerationData(getLocale(aRequest));
+      EntityAdapterModel model = MirGlobal.localizer().dataModel().adapterModel();
+      Map article;
+      URLBuilder urlBuilder = new URLBuilder();
 
-      if (id != null) {
-        entContent = (TemplateModelRoot)mainModule.getById(id);
+      urlBuilder.setValue("module", "Content");
+      urlBuilder.setValue("do", "edit");
+      urlBuilder.setValue("id", id);
+      urlBuilder.setValue("returnurl", requestParser.getParameter("returnurl"));
+
+      if (id!=null) {
+        responseData.put("new", Boolean.FALSE);
+        article = model.makeEntityAdapter("content", mainModule.getById(id));
       }
       else {
-        SimpleHash withValues = new SimpleHash();
-        withValues.put("new", "1");
-        withValues.put("is_published", "0");
-        String now = StringUtil.date2webdbDate(new GregorianCalendar());
-        withValues.put("date", new SimpleScalar(now));
-        EntityUsers   user = _getUser(req);
-        withValues.put("login_user", user);
-        entContent = withValues;
+        List fields = DatabaseContent.getInstance().getFields();
+        responseData.put("new", Boolean.TRUE);
+        article = new HashMap();
+        Iterator i = fields.iterator();
+        while (i.hasNext()) {
+          article.put(i.next(), null);
+        }
+
+        article.put("to_topics", null);
+
+        MirGlobal.localizer().adminInterface().initializeArticle(article);
       }
+      responseData.put("article", article);
 
-      extraInfo.put("themenPopupData", themenModule.getTopicsAsSimpleList());
-      extraInfo.put("articletypePopupData", DatabaseArticleType.getInstance().getPopupData());
-      extraInfo.put("languagePopupData", DatabaseLanguage.getInstance().getPopupData());
+      responseData.put("returnurl", requestParser.getParameter("returnurl"));
+      responseData.put("thisurl", urlBuilder.getQuery());
 
-      // code to be able to return to the list:
-      String offsetParam, whereParam, orderParam;
-      if ((offsetParam = req.getParameter("offset"))!=null) extraInfo.put("offset", offsetParam);
-      if ((whereParam = req.getParameter("where"))!=null) extraInfo.put("where", whereParam);
-      if ((orderParam = req.getParameter("order"))!=null) extraInfo.put("order", orderParam);
-
-      extraInfo.put("login_user", _getUser(req));
-      deliver(req, res, entContent, extraInfo, templateObjektString);
+      ServletHelper.generateResponse(aResponse.getWriter(), responseData, editTemplate);
     }
     catch (Exception e) {
       throw new ServletModuleException(e.toString());
     }
   }
 
-  public void returnArticleList(HttpServletRequest aRequest, HttpServletResponse aResponse,
-                                String aWhereClause, String anOrderByClause, int anOffset) throws ServletModuleException {
-    // ML: experiment in using the producer's generation system instead of the
-    //     old one...
+  public void returnArticleList(
+       HttpServletRequest aRequest,
+       HttpServletResponse aResponse,
+       String aWhereClause,
+       String anOrderByClause,
+       int anOffset,
+       String aSelectArticleUrl) throws ServletModuleException {
 
+    HTTPRequestParser requestParser = new HTTPRequestParser(aRequest);
+    URLBuilder urlBuilder = new URLBuilder();
     EntityAdapterModel model;
     int nrArticlesPerPage = 20;
     int count;
@@ -441,10 +427,10 @@ public class ServletModuleContent extends ServletModule
       Map responseData = ServletHelper.makeGenerationData(getLocale(aRequest));
       model = MirGlobal.localizer().dataModel().adapterModel();
 
-      Object contentList =
+      Object articleList =
           new CachingRewindableIterator(
-          new EntityIteratorAdapter( aWhereClause, anOrderByClause, nrArticlesPerPage,
-          MirGlobal.localizer().dataModel().adapterModel(), "content", nrArticlesPerPage, anOffset)
+            new EntityIteratorAdapter( aWhereClause, anOrderByClause, nrArticlesPerPage,
+               MirGlobal.localizer().dataModel().adapterModel(), "content", nrArticlesPerPage, anOffset)
       );
 
       responseData.put("nexturl", null);
@@ -452,25 +438,41 @@ public class ServletModuleContent extends ServletModule
 
       count=mainModule.getSize(aWhereClause);
 
+      urlBuilder.setValue("module", "Content");
+      urlBuilder.setValue("do", "list");
+      urlBuilder.setValue("where", aWhereClause);
+      urlBuilder.setValue("order", anOrderByClause);
+
+
+      urlBuilder.setValue("searchfield", requestParser.getParameter("searchfield"));
+      urlBuilder.setValue("searchvalue", requestParser.getParameter("searchvalue"));
+      urlBuilder.setValue("searchispublished", requestParser.getParameter("searchispublished"));
+      urlBuilder.setValue("searchorder", requestParser.getParameter("searchorder"));
+      urlBuilder.setValue("searcharticletype", requestParser.getParameter("searcharticletype"));
+      urlBuilder.setValue("selectarticleurl", aSelectArticleUrl);
+
+      responseData.put("searchfield", requestParser.getParameter("searchfield"));
+      responseData.put("searchvalue", requestParser.getParameter("searchvalue"));
+      responseData.put("searchispublished", requestParser.getParameter("searchispublished"));
+      responseData.put("searchorder", requestParser.getParameter("searchorder"));
+      responseData.put("searcharticletype", requestParser.getParameter("searcharticletype"));
+      responseData.put("selectarticleurl", aSelectArticleUrl);
+
+      urlBuilder.setValue("offset", anOffset);
+      responseData.put("offset" , new Integer(anOffset).toString());
+      responseData.put("thisurl" , urlBuilder.getQuery());
+
       if (count>=anOffset+nrArticlesPerPage) {
-        responseData.put("nexturl" ,
-                         "module=Content&do=list&where=" + HTMLRoutines.encodeURL(aWhereClause) +
-                         "&order=" + HTMLRoutines.encodeURL(anOrderByClause) +
-                         "&offset=" + (anOffset + nrArticlesPerPage));
+        urlBuilder.setValue("offset", anOffset + nrArticlesPerPage);
+        responseData.put("nexturl" , urlBuilder.getQuery());
       }
+
       if (anOffset>0) {
-        responseData.put("prevurl" ,
-                         "module=Content&do=list&where=" + HTMLRoutines.encodeURL(aWhereClause) +
-                         "&order=" + HTMLRoutines.encodeURL(anOrderByClause) +
-                         "&offset=" + Math.max(anOffset - nrArticlesPerPage, 0));
+        urlBuilder.setValue("offset", Math.max(anOffset - nrArticlesPerPage, 0));
+        responseData.put("prevurl" , urlBuilder.getQuery());
       }
 
-      responseData.put("articles", contentList);
-
-      responseData.put("thisurl" ,
-                       "module=Content&do=list&where=" + HTMLRoutines.encodeURL(aWhereClause) +
-                       "&order=" + HTMLRoutines.encodeURL(anOrderByClause) +
-                       "&offset=" + anOffset);
+      responseData.put("articles", articleList);
 
       responseData.put("from" , Integer.toString(anOffset+1));
       responseData.put("count", Integer.toString(count));
@@ -479,16 +481,94 @@ public class ServletModuleContent extends ServletModule
       responseData.put("order", anOrderByClause);
       responseData.put("where" , aWhereClause);
 
-      ServletHelper.generateResponse(aResponse.getWriter(), responseData, "contentlist.template");
+      ServletHelper.generateResponse(aResponse.getWriter(), responseData, listTemplate);
     }
     catch (Throwable e) {
       throw new ServletModuleException(e.toString());
     }
   }
 
+  public void selectparent(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleException
+  {
+    try {
+      HTTPRequestParser requestParser = new HTTPRequestParser(aRequest);
+      URLBuilder urlBuilder = new URLBuilder();
+
+      urlBuilder.setValue("module", "Content");
+      urlBuilder.setValue("do", "setparent");
+      urlBuilder.setValue("childid", requestParser.getParameter("id"));
+      urlBuilder.setValue("returnurl", requestParser.getParameter("returnurl"));
+
+      returnArticleList(aRequest, aResponse, "", "", 0, urlBuilder.getQuery());
+    }
+    catch (Throwable e) {
+      throw new ServletModuleException(e.getMessage());
+    }
+  }
+
+  public void listchildren(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleException
+  {
+    try {
+      HTTPRequestParser requestParser = new HTTPRequestParser(aRequest);
+      String articleId = requestParser.getParameter("article_id");
+
+      if (articleId == null)
+        throw new ServletModuleException("ServletModuleContent.listchildren: article_id not set!");
+
+      returnArticleList(aRequest, aResponse, "to_content = " + articleId, "", 0, null);
+    }
+    catch (Throwable e) {
+      throw new ServletModuleException(e.getMessage());
+    }
+  }
+
+  public void setparent(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleException
+  {
+    HTTPRequestParser requestParser = new HTTPRequestParser(aRequest);
+    String articleId = aRequest.getParameter("childid");
+    String parentId  = aRequest.getParameter("id");
+    String returnUrl = aRequest.getParameter("returnurl");
+
+    try {
+      EntityContent article = (EntityContent) mainModule.getById(articleId);
+      article.setValueForProperty("to_content", parentId);
+      article.setProduced(false);
+      article.update();
+    }
+    catch(Throwable e) {
+      logger.error("ServletModuleContent.setparent: " + e.getMessage());
+      throw new ServletModuleException("ServletModuleContent.setparent: " + e.getMessage());
+    }
+
+    redirect(aResponse, returnUrl);
+  }
+
+  public void clearparent(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleException
+  {
+    HTTPRequestParser requestParser = new HTTPRequestParser(aRequest);
+    String articleId = requestParser.getParameter("id");
+    String returnUrl = requestParser.getParameter("returnurl");
+
+    try {
+      EntityContent article = (EntityContent) mainModule.getById(articleId);
+      article.setValueForProperty("to_content", "");
+      article.setProduced(false);
+      article.update();
+    }
+    catch(Throwable e) {
+      e.printStackTrace(logger.asPrintWriter(logger.DEBUG_MESSAGE));
+      logger.error("ServletModuleContent.clearparent: " + e.getMessage());
+
+      throw new ServletModuleException("ServletModuleContent.clearparent: " + e.getMessage());
+    }
+
+    redirect(aResponse, returnUrl);
+  }
+
   private EntityUsers _getUser(HttpServletRequest req)
   {
     HttpSession session=req.getSession(false);
+
     return (EntityUsers)session.getAttribute("login.uid");
   }
 }

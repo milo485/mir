@@ -35,8 +35,8 @@ package mir.misc;
  * Title:
  * Description:
  * Copyright:    Copyright (c) 2002 Mir-coders
- * @author $Author: idfx $
- * @version $Id: WebdbImage.java,v 1.9 2003/01/25 17:45:18 idfx Exp $
+ * @author $Author: zapata $
+ * @version $Id: WebdbImage.java,v 1.10 2003/02/21 05:37:59 zapata Exp $
  */
 
 import java.io.File;
@@ -51,108 +51,108 @@ import javax.media.jai.PlanarImage;
 
 import com.sun.media.jai.codec.FileSeekableStream;
 
+import mir.config.MirPropertiesConfiguration;
+import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
+
 public class WebdbImage
 {
 
-	// default values for scaling
-	private int               maxIconSize=120;
-	private int               maxImageSize=640;
+  // default values for scaling
+  private int maxIconSize;
+  private int maxImageSize;
 
-	private int               iconWidth;
-	private int               iconHeight;
+  private int iconWidth;
+  private int iconHeight;
 
   Random r = new Random();
 
-	// internal representation of the image
-	private PlanarImage       planarImage;
+  // internal representation of the image
+  private PlanarImage planarImage;
 
   // type of the image
   private String _type;
 
+  private WebdbImage() {
+  }
 
-	// constructor
+  // constructor
   // takes a temporary file as a parameter
-	public WebdbImage(File f, String type)
-		throws IOException
-	{
+  public WebdbImage(File f, String type) throws Exception {
     // It has to be a FileSeekableStream cause the image conversion
     // needs to seek backwards.
-		planarImage = JAI.create("stream",new FileSeekableStream(f));
+    maxImageSize = MirPropertiesConfiguration.instance().getInt("Producer.Image.MaxSize");
+    maxIconSize = MirPropertiesConfiguration.instance().getInt("Producer.Image.MaxIconSize");
+
+    planarImage = JAI.create("stream", new FileSeekableStream(f));
     _type = type;
-		scaleImage();
-	}
+    scaleImage();
+  }
 
-	// acc3ssor-methods
+  // acc3ssor-methods
   // must be run after scaleIcon()
-	public int getIconWidth() throws IOException {
-		return iconWidth;
-	}
+  public int getIconWidth() throws IOException {
+    return iconWidth;
+  }
 
   // must be run after scaleIcon()
-	public int getIconHeight() throws IOException {
-		return iconHeight;
-	}
+  public int getIconHeight() throws IOException {
+    return iconHeight;
+  }
 
-	public int getImageWidth() {
-		return (int)planarImage.getWidth();
-	}
+  public int getImageWidth() {
+    return (int) planarImage.getWidth();
+  }
 
-	public int getImageHeight() {
-		return (int)planarImage.getHeight();
-	}
+  public int getImageHeight() {
+    return (int) planarImage.getHeight();
+  }
 
-	public void setImage(OutputStream outStream) {
+  public void setImage(OutputStream outStream) {
     JAI.create("encode", planarImage, outStream, _type, null);
-	}
+  }
 
-	public void setIcon(OutputStream outStream)
-		throws IOException
-	{
-		scaleIcon(outStream);
-	}
+  public void setIcon(OutputStream outStream) throws IOException {
+    scaleIcon(outStream);
+  }
 
-	private void scaleImage()
-		throws java.io.IOException
-	{
-		if (maxImageSize>0 && ( getImageHeight()> maxImageSize|| getImageWidth() >maxImageSize))
-		{
-			float scale;
+  private void scaleImage() throws java.io.IOException {
+    if (maxImageSize > 0 &&
+        (getImageHeight() > maxImageSize || getImageWidth() > maxImageSize)) {
+      float scale;
       ParameterBlockJAI params = new ParameterBlockJAI("scale");
       params.addSource(planarImage);
-			if (getImageHeight() > getImageWidth())
-        scale = (float)maxImageSize / (float)getImageHeight();
+      if (getImageHeight() > getImageWidth())
+        scale = (float) maxImageSize / (float) getImageHeight();
       else
-        scale = (float)maxImageSize / (float)getImageWidth();
+        scale = (float) maxImageSize / (float) getImageWidth();
 
       params.setParameter("xScale", scale);
       params.setParameter("yScale", scale);
-			params.setParameter("xTrans",0.0F);
-			params.setParameter("yTrans",0.0F);
-			params.setParameter("interpolation",new InterpolationBilinear());
-			planarImage = JAI.create("scale", params);
-		}
-	}
+      params.setParameter("xTrans", 0.0F);
+      params.setParameter("yTrans", 0.0F);
+      params.setParameter("interpolation", new InterpolationBilinear());
+      planarImage = JAI.create("scale", params);
+    }
+  }
 
-	private void scaleIcon(OutputStream outStream)
-		throws java.io.IOException
-	{
+  private void scaleIcon(OutputStream outStream) throws java.io.IOException {
     float scale;
     ParameterBlockJAI params = new ParameterBlockJAI("scale");
     params.addSource(planarImage);
     if (getImageHeight() > getImageWidth())
-      scale = (float)maxIconSize / (float)getImageHeight();
+      scale = (float) maxIconSize / (float) getImageHeight();
     else
-      scale = (float)maxIconSize / (float)getImageWidth();
+      scale = (float) maxIconSize / (float) getImageWidth();
 
     params.setParameter("xScale", scale);
     params.setParameter("yScale", scale);
-    params.setParameter("xTrans",0.0F);
-    params.setParameter("yTrans",0.0F);
-    params.setParameter("interpolation",new InterpolationBilinear());
+    params.setParameter("xTrans", 0.0F);
+    params.setParameter("yTrans", 0.0F);
+    params.setParameter("interpolation", new InterpolationBilinear());
     PlanarImage temp = JAI.create("scale", params);
     JAI.create("encode", temp, outStream, _type, null);
-    iconWidth=temp.getWidth();
-    iconHeight=temp.getHeight();
-	}
+    iconWidth = temp.getWidth();
+    iconHeight = temp.getHeight();
+  }
 
 }

@@ -46,7 +46,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -130,7 +130,7 @@ public interface StorageObject {
    * @return ArrayList
    * @exception StorageObjectException
    */
-  abstract public ArrayList getFields() throws StorageObjectFailure;
+  abstract public List getFields() throws StorageObjectFailure;
 
   /**
    * Dokumentation siehe Database.java
@@ -144,7 +144,7 @@ public interface StorageObject {
    * @return ArrayList
    * @exception StorageObjectException
    */
-  abstract public ArrayList getLabels() throws StorageObjectFailure;
+  abstract public List getLabels() throws StorageObjectFailure;
 
   /**
    * Dokumentation siehe Database.java

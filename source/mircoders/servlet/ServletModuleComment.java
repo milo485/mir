@@ -48,6 +48,7 @@ import mir.util.CachingRewindableIterator;
 import mir.util.HTTPRequestParser;
 import mir.util.JDBCStringRoutines;
 import mir.util.URLBuilder;
+import mir.util.SQLQueryBuilder;
 import mircoders.global.MirGlobal;
 import mircoders.module.ModuleComment;
 import mircoders.module.ModuleContent;
@@ -134,56 +135,44 @@ public class ServletModuleComment extends ServletModule
   public void search(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleException
   {
     HTTPRequestParser requestParser = new HTTPRequestParser(aRequest);
+    SQLQueryBuilder queryBuilder = new SQLQueryBuilder();
 
     String queryField = "";
     String searchField = requestParser.getParameter("searchfield");
     String searchText = requestParser.getParameter("searchtext");
     String searchIsPublished = requestParser.getParameter("searchispublished");
+    String searchStatus = requestParser.getParameter("searchstatus");
     String searchOrder = requestParser.getParameter("searchorder");
 
-    String whereClause = " (1=1) ";
-    String orderClause = "webdb_create desc";
-
     if (searchIsPublished.equals("0")) {
-      whereClause=whereClause + "is_published='f'";
+      queryBuilder.appendAndCondition("is_published='f'");
     }
     else if (searchIsPublished.equals("1")) {
-      whereClause=whereClause + "is_published='t'";
+      queryBuilder.appendAndCondition("is_published='t'");
     }
 
-    if (!searchField.equals("") && !searchText.equals("")) {
-      queryField="";
-
-      if (searchField.equals("title"))
-        queryField = "title";
-      else if (searchField.equals("creator"))
-        queryField = "creator";
-      else if (searchField.equals("description"))
-        queryField = "description";
-      else
-        queryField = "";
-
-      if (!queryField.equals("")) {
-        if (!whereClause.equals(""))
-          whereClause = whereClause + " and ";
-
-        whereClause = whereClause + "lower(" + queryField + ") like '%" + JDBCStringRoutines.escapeStringLiteral(searchText.toLowerCase()) + "%'";
-      }
+    if (searchText.length()>0) {
+        queryBuilder.appendAndCondition(
+          "lower("+ searchField + ") like " +
+          "'%" + JDBCStringRoutines.escapeStringLiteral(searchText.toLowerCase()) + "%'");
     }
 
-    System.out.println("search order = " + searchOrder);
-
-    if (searchOrder.equals("datedesc")) {
-      orderClause = "webdb_create desc";
-    }
-    else if (searchOrder.equals("dateasc")) {
-      orderClause = "webdb_create asc";
-    }
-    else if (searchOrder.equals("articletitle")) {
-      orderClause = "(select content.title from content where content.id = comment.to_media) asc";
+    if (searchStatus.length()>0) {
+      queryBuilder.appendAndCondition("to_comment_status="+Integer.parseInt(searchStatus));
     }
 
-    returnCommentList(aRequest, aResponse, whereClause, orderClause, 0);
+    if (searchOrder.length()>0) {
+      if (searchOrder.equals("datedesc"))
+        queryBuilder.appendAscendingOrder("webdb_create");
+      else if (searchOrder.equals("dateasc"))
+        queryBuilder.appendDescendingOrder("webdb_create");
+      else if (searchOrder.equals("articletitle"))
+        queryBuilder.appendAscendingOrder("(select content.title from content where content.id = comment.to_media)");
+      else if (searchOrder.equals("creator"))
+        queryBuilder.appendDescendingOrder("creator");
+    }
+
+    returnCommentList(aRequest, aResponse, queryBuilder.getWhereClause(), queryBuilder.getOrderByClause(), 0);
   }
 
   public void articlecomments(HttpServletRequest req, HttpServletResponse res) throws ServletModuleException
@@ -238,11 +227,13 @@ public class ServletModuleComment extends ServletModule
       urlBuilder.setValue("searchfield", requestParser.getParameter("searchfield"));
       urlBuilder.setValue("searchtext", requestParser.getParameter("searchtext"));
       urlBuilder.setValue("searchispublished", requestParser.getParameter("searchispublished"));
+      urlBuilder.setValue("searchstatus", requestParser.getParameter("searchstatus"));
       urlBuilder.setValue("searchorder", requestParser.getParameter("searchorder"));
 
       responseData.put("searchfield", requestParser.getParameter("searchfield"));
       responseData.put("searchtext", requestParser.getParameter("searchtext"));
       responseData.put("searchispublished", requestParser.getParameter("searchispublished"));
+      responseData.put("searchstatus", requestParser.getParameter("searchstatus"));
       responseData.put("searchorder", requestParser.getParameter("searchorder"));
 
       urlBuilder.setValue("offset", anOffset);

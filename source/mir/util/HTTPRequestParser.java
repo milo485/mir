@@ -31,14 +31,12 @@ public class HTTPRequestParser {
       String result = request.getParameter(aName);
 
       if (result != null && encoding!=null && !encoding.equals(request.getCharacterEncoding())) {
-        System.out.println("recoding");
         result = new String(result.getBytes(request.getCharacterEncoding()), encoding);
       }
 
       return result;
     }
     catch (Throwable t) {
-      t.printStackTrace(System.out);
       throw new RuntimeException("HTTPRequestParser.getParameter: " + t.getMessage());
     }
   }

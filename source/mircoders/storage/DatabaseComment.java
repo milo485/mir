@@ -35,6 +35,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import mir.log.LoggerWrapper;
 import mir.storage.Database;
 import mir.storage.StorageObject;
 import mir.storage.StorageObjectFailure;
@@ -49,56 +50,60 @@ import freemarker.template.SimpleList;
 
 public class DatabaseComment extends Database implements StorageObject{
 
-	private static DatabaseComment instance;
+  private static DatabaseComment instance;
 
-	// the following *has* to be sychronized cause this static method
-	// could get preemted and we could end up with 2 instances of DatabaseFoo..
-	// see the "Singletons with needles and thread" article at JavaWorld -mh
-	public synchronized static DatabaseComment getInstance() 
-	  throws StorageObjectFailure {
-		if (instance == null) {
-			instance = new DatabaseComment();
-			instance.myselfDatabase = instance;
-		}
-		return instance;
-	}
+  // the following *has* to be sychronized cause this static method
+  // could get preemted and we could end up with 2 instances of DatabaseFoo..
+  // see the "Singletons with needles and thread" article at JavaWorld -mh
+  public synchronized static DatabaseComment getInstance() throws
+      StorageObjectFailure {
+    if (instance == null) {
+      instance = new DatabaseComment();
+      instance.myselfDatabase = instance;
+    }
+    return instance;
+  }
 
-	private DatabaseComment() throws StorageObjectFailure
-	{
-		super();
-		this.hasTimestamp = false;
-		////this.cache = new HashMap();
-		this.theTable="comment";
-		try {
-			this.theEntityClass = Class.forName("mircoders.entity.EntityComment");
-		}
-		catch (Exception e) { throw new StorageObjectFailure(e);	}
-	}
+  private DatabaseComment() throws StorageObjectFailure {
+    super();
+    hasTimestamp = false;
+    theTable = "comment";
+    logger = new LoggerWrapper("Database.Comment");
 
-	public SimpleList getPopupData()
-        throws StorageObjectFailure { return getPopupData("title",true); }
+    try {
+      this.theEntityClass = Class.forName("mircoders.entity.EntityComment");
+    }
+    catch (Exception e) {
+      throw new StorageObjectFailure(e);
+    }
+  }
 
-	public boolean deleteByContentId(String id)
-		throws StorageObjectFailure {
-		Statement   stmt=null;
-		Connection  con=null;
-		String      sql;
-		int         res = 0;
+  public SimpleList getPopupData() throws StorageObjectFailure {
+    return getPopupData("title", true);
+  }
 
-		/** @todo comments and topics should be deleted */
-		sql = "delete from "+ theTable + " where to_media="+id;
-		//theLog.printInfo("DELETE "+ sql);
+  public boolean deleteByContentId(String id) throws StorageObjectFailure {
+    Statement stmt = null;
+    Connection con = null;
+    String sql;
+    int res = 0;
 
-		try {
-			con=getPooledCon();
-			stmt = con.createStatement();
-			res = stmt.executeUpdate(sql);
-		}	catch (SQLException sqe) {
-			new StorageObjectFailure(sqe);
-			return false;
-		} finally {
-			freeConnection(con,stmt);
-		}
-		return true;
-	}
+    /** @todo comments and topics should be deleted */
+    sql = "delete from " + theTable + " where to_media=" + id;
+    logger.info("DELETE "+ sql);
+
+    try {
+      con = getPooledCon();
+      stmt = con.createStatement();
+      res = stmt.executeUpdate(sql);
+    }
+    catch (SQLException sqe) {
+      new StorageObjectFailure(sqe);
+      return false;
+    }
+    finally {
+      freeConnection(con, stmt);
+    }
+    return true;
+  }
 }

@@ -41,38 +41,37 @@ import mir.storage.StorageObjectFailure;
  * This class handles storage of audio data and meta data
  *
  * @author mh
- * @version $Id: EntityAudio.java,v 1.5 2003/01/25 17:50:34 idfx Exp $
+ * @version $Id: EntityAudio.java,v 1.6 2003/02/23 05:00:13 zapata Exp $
  */
 
 
 public class EntityAudio extends EntityUploadedMedia
 {
-	public EntityAudio()
-	{
-		super();
-	}
+  public EntityAudio() {
+    super();
+  }
 
-	public EntityAudio(StorageObject theStorage) {
-		this();
-		setStorage(theStorage);
-	}
+  public EntityAudio(StorageObject theStorage) {
+    this();
+    setStorage(theStorage);
+  }
 
-	public void update() throws StorageObjectFailure {
-		super.update();
-		try {
-			theStorageObject.executeUpdate("update content set is_produced='0' where to_media="+getId());
-		} catch (SQLException e) {
-			throwStorageObjectFailure(e, "EntityAudio :: update :: failed!! ");
-		}
-	}
+  public void update() throws StorageObjectFailure {
+    super.update();
+    try {
+      theStorageObject.executeUpdate("update content set is_produced='0' where existto_media=" + getId());
+    }
+    catch (SQLException e) {
+      throwStorageObjectFailure(e, "EntityAudio :: update :: failed!! ");
+    }
+  }
 
-	public void setValues(HashMap theStringValues)
-	{
-		if (theStringValues != null) {
-			if (!theStringValues.containsKey("is_published"))
-			 theStringValues.put("is_published","0");
-		}
-		super.setValues(theStringValues);
-	}
+  public void setValues(HashMap theStringValues) {
+    if (theStringValues != null) {
+      if (!theStringValues.containsKey("is_published"))
+        theStringValues.put("is_published", "0");
+    }
+    super.setValues(theStringValues);
+  }
 
 }

@@ -31,7 +31,17 @@
 
 package mir.misc;
 
+import java.io.PrintWriter;
+import java.net.URLEncoder;
+import java.util.*;
+
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.struts.util.MessageResources;
+
 import freemarker.template.*;
+
+import mir.log.LoggerWrapper;
 import mir.util.*;
 import mir.generator.*;
 import mir.config.MirPropertiesConfiguration;
@@ -39,13 +49,6 @@ import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
 import mir.entity.Entity;
 import mir.entity.EntityList;
 import mir.storage.StorageObjectFailure;
-import org.apache.struts.util.MessageResources;
-
-import javax.servlet.http.HttpServletResponse;
-import java.io.PrintWriter;
-import java.net.URLEncoder;
-import java.util.*;
-
 
 /**
  * Hilfsklasse zum Mergen von Template und Daten
@@ -55,21 +58,25 @@ public final class HTMLTemplateProcessor {
   public static String templateDir;
   private static MirPropertiesConfiguration configuration;
   private static FileTemplateCache templateCache;
-  private static Logfile theLog;
   private static String docRoot;
   private static String actionRoot;
+  private static LoggerWrapper logger;
 
   static {
+    // ML: configuration is not thread safe: it's risky to use it like this
+    //     actually I don't see why HTMLTemplateProcessor needs to be a
+    //     class with static methods. This causes more problems than it solves.
     try {
       configuration = MirPropertiesConfiguration.instance();
-    } catch (PropertiesConfigExc e) {
+    }
+    catch (PropertiesConfigExc e) {
       e.printStackTrace();
     }
-    theLog = Logfile.getInstance(
-      configuration.getStringWithHome("HTMLTemplateProcessor.Logfile"));
-    templateDir = 
-    	configuration.getStringWithHome("HTMLTemplateProcessor.Dir");
-    theLog.printDebugInfo("templateDir: " + templateDir);
+
+    logger = new LoggerWrapper("TemplateEngine");
+
+    templateDir =
+        configuration.getStringWithHome("HTMLTemplateProcessor.Dir");
     templateCache = new FileTemplateCache(templateDir);
     templateCache.setLoadingPolicy(FileTemplateCache.LOAD_ON_DEMAND);
     // gone in freemarker 1.7.1: templateCache.startAutoUpdate();
@@ -225,8 +232,7 @@ public final class HTMLTemplateProcessor {
   public static void process(HttpServletResponse res, String templateFilename,
                              TemplateModelRoot tmr, TemplateModelRoot extra,
                              PrintWriter out, Locale locale, String bundles,
-                             String bundles2) throws
-      HTMLParseException {
+                             String bundles2) throws HTMLParseException {
     if (out == null)
       throw new HTMLParseException("no outputstream");
     Template tmpl = getTemplateFor(templateFilename);
@@ -249,7 +255,7 @@ public final class HTMLTemplateProcessor {
     while (it.hasNext()) {
       key = (String) it.next();
       configHash.put(key, new SimpleScalar(
-      	configuration.getString(key))
+        configuration.getString(key))
       );
     }
 
@@ -288,13 +294,6 @@ public final class HTMLTemplateProcessor {
 
     if (extra != null) {
       outPutHash.put("extra", extra);
-      try {
-        while ( ( (SimpleList) extra).hasNext()) {
-          theLog.printDebugInfo( ( (SimpleList) extra).next().toString());
-        }
-      }
-      catch (Exception e) {
-      }
     }
     outPutHash.put("data", tmr);
     outPutHash.put("config", configHash);
@@ -318,10 +317,8 @@ public final class HTMLTemplateProcessor {
    *
    *    @deprecated EntityLists comply with TemplateListModel now.
    */
-  public static SimpleList makeSimpleList(EntityList aList) throws
-      StorageObjectFailure {
-    theLog.printWarning(
-        "## using deprecated makeSimpleList(entityList) - a waste of resources");
+  public static SimpleList makeSimpleList(EntityList aList) throws StorageObjectFailure {
+    logger.warn("using deprecated makeSimpleList(entityList) - a waste of resources");
     SimpleList simpleList = new SimpleList();
     if (aList != null) {
       for (int i = 0; i < aList.size(); i++) {
@@ -431,9 +428,8 @@ public final class HTMLTemplateProcessor {
           "template");
 
     if (returnTemplate == null) {
-      theLog.printError("CACHE (ERR): Unknown template: " + templateFilename);
-      throw new HTMLParseException("Templatefile: " + templateFilename +
-                                   " not found.");
+      logger.error("CACHE (ERR): Unknown template: " + templateFilename);
+      throw new HTMLParseException("Templatefile: " + templateFilename + " not found.");
     }
 
     return returnTemplate;

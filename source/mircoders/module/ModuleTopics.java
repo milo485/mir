@@ -117,10 +117,9 @@ public class ModuleTopics extends AbstractModule {
       return theEntity.getId();
     }
     catch (StorageObjectFailure e) {
-      e.printStackTrace(System.err);
       throw new ModuleException(e.toString());
-    } catch (StorageObjectExc e) {
-      e.printStackTrace(System.err);
+    }
+    catch (StorageObjectExc e) {
       throw new ModuleException(e.toString());
     }
   }

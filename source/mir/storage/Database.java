@@ -30,31 +30,6 @@
  */
 package mir.storage;
 
-import com.codestudio.util.SQLManager;
-
-import freemarker.template.SimpleHash;
-import freemarker.template.SimpleList;
-
-import mir.config.MirPropertiesConfiguration;
-
-import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
-
-import mir.entity.Entity;
-import mir.entity.EntityList;
-import mir.entity.StorableObjectEntity;
-
-import mir.misc.HTMLTemplateProcessor;
-import mir.misc.Logfile;
-import mir.misc.StringUtil;
-
-import mir.storage.store.ObjectStore;
-import mir.storage.store.StorableObject;
-import mir.storage.store.StoreContainerType;
-import mir.storage.store.StoreIdentifier;
-import mir.storage.store.StoreUtil;
-
-import mir.util.JDBCStringRoutines;
-
 import java.io.IOException;
 import java.io.InputStreamReader;
 
@@ -70,9 +45,36 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+
+import com.codestudio.util.SQLManager;
+
+import freemarker.template.SimpleHash;
+import freemarker.template.SimpleList;
+
+import mir.config.MirPropertiesConfiguration;
+
+import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
+
+import mir.entity.Entity;
+import mir.entity.EntityList;
+import mir.entity.StorableObjectEntity;
+
+import mir.log.LoggerWrapper;
+
+import mir.misc.HTMLTemplateProcessor;
+import mir.misc.StringUtil;
+
+import mir.storage.store.ObjectStore;
+import mir.storage.store.StorableObject;
+import mir.storage.store.StoreContainerType;
+import mir.storage.store.StoreIdentifier;
+import mir.storage.store.StoreUtil;
+
+import mir.util.JDBCStringRoutines;
 
 
 /**
@@ -83,33 +85,27 @@ import java.util.HashMap;
  * Treiber, Host, User und Passwort, ueber den der Zugriff auf die
  * Datenbank erfolgt.
  *
- * @version $Id: Database.java,v 1.32 2003/01/28 21:47:42 idfx Exp $
+ * @version $Id: Database.java,v 1.34 2003/02/23 05:00:12 zapata Exp $
  * @author rk
  *
  */
 public class Database implements StorageObject {
-  private static Class GENERIC_ENTITY_CLASS = null;
-  private static Class STORABLE_OBJECT_ENTITY_CLASS = null;
-  private static SimpleHash POPUP_EMTYLINE = new SimpleHash();
+  private static Class GENERIC_ENTITY_CLASS = mir.entity.StorableObjectEntity.class;
+  private static Class STORABLE_OBJECT_ENTITY_CLASS = mir.entity.StorableObjectEntity.class;
+
+
+  private static SimpleHash POPUP_EMPTYLINE = new SimpleHash();
   protected static final ObjectStore o_store = ObjectStore.getInstance();
   private static final int _millisPerHour = 60 * 60 * 1000;
   private static final int _millisPerMinute = 60 * 1000;
 
   static {
     // always same object saves a little space
-    POPUP_EMTYLINE.put("key", "");
-    POPUP_EMTYLINE.put("value", "--");
-
-    try {
-      GENERIC_ENTITY_CLASS = Class.forName("mir.entity.StorableObjectEntity");
-      STORABLE_OBJECT_ENTITY_CLASS =
-        Class.forName("mir.entity.StorableObjectEntity");
-    } catch (Exception e) {
-      System.err.println("FATAL: Database.java could not initialize" +
-        e.getMessage());
-    }
+    POPUP_EMPTYLINE.put("key", "");
+    POPUP_EMPTYLINE.put("value", "--");
   }
 
+  protected LoggerWrapper logger;
   protected MirPropertiesConfiguration configuration;
   protected String theTable;
   protected String theCoreTable = null;
@@ -131,7 +127,6 @@ public class Database implements StorageObject {
   private String database_url;
   private int defaultLimit;
   protected DatabaseAdaptor theAdaptor;
-  protected Logfile theLog;
   private SimpleDateFormat _dateFormatterOut =
     new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
   private SimpleDateFormat _dateFormatterIn =
@@ -151,23 +146,21 @@ public class Database implements StorageObject {
   public Database() throws StorageObjectFailure {
     try {
       configuration = MirPropertiesConfiguration.instance();
-    } catch (PropertiesConfigExc e) {
+    }
+    catch (PropertiesConfigExc e) {
       throw new StorageObjectFailure(e);
     }
-
-    theLog =
-      Logfile.getInstance(configuration.getStringWithHome("Database.Logfile"));
+    logger = new LoggerWrapper("Database");
 
     String theAdaptorName = configuration.getString("Database.Adaptor");
     defaultLimit = Integer.parseInt(configuration.getString("Database.Limit"));
 
     try {
       theEntityClass = GENERIC_ENTITY_CLASS;
-      theAdaptor =
-        (DatabaseAdaptor) Class.forName(theAdaptorName).newInstance();
-    } catch (Exception e) {
-      theLog.printError("Error in Database() constructor with " +
-        theAdaptorName + " -- " + e.getMessage());
+      theAdaptor = (DatabaseAdaptor) Class.forName(theAdaptorName).newInstance();
+    }
+    catch (Throwable e) {
+      logger.error("Error in Database() constructor with " + theAdaptorName + " -- " + e.getMessage());
       throw new StorageObjectFailure("Error in Database() constructor.", e);
     }
   }
@@ -244,7 +237,7 @@ public class Database implements StorageObject {
    * @return ArrayListe mit Labeln
    * @exception StorageObjectException
    */
-  public ArrayList getLabels() throws StorageObjectFailure {
+  public List getLabels() throws StorageObjectFailure {
     if (metadataLabels == null) {
       get_meta_data();
     }
@@ -257,7 +250,7 @@ public class Database implements StorageObject {
    * @return ArrayList mit Feldern
    * @exception StorageObjectException
    */
-  public ArrayList getFields() throws StorageObjectFailure {
+  public List getFields() throws StorageObjectFailure {
     if (metadataFields == null) {
       get_meta_data();
     }
@@ -379,8 +372,7 @@ public class Database implements StorageObject {
 
         default:
           outValue = "<unsupported value>";
-          theLog.printWarning("Unsupported Datatype: at " + valueIndex + " (" +
-            aType + ")");
+          logger.warn( "Unsupported Datatype: at " + valueIndex + " (" + aType + ")");
         }
       } catch (SQLException e) {
         throw new StorageObjectFailure("Could not get Value out of Resultset -- ",
@@ -398,7 +390,7 @@ public class Database implements StorageObject {
    */
   public Entity selectById(String id) throws StorageObjectExc {
     if ((id == null) || id.equals("")) {
-      throw new StorageObjectExc("id war null");
+      throw new StorageObjectExc("Database.selectById: Missing id");
     }
 
     // ask object store for object
@@ -409,10 +401,8 @@ public class Database implements StorageObject {
         uniqueId += ("@" + theTable);
       }
 
-      StoreIdentifier search_sid =
-        new StoreIdentifier(theEntityClass, uniqueId);
-      theLog.printDebugInfo("CACHE: (dbg) looking for sid " +
-        search_sid.toString());
+      StoreIdentifier search_sid = new StoreIdentifier(theEntityClass, uniqueId);
+      logger.debug("CACHE: (dbg) looking for sid " + search_sid.toString());
 
       Entity hit = (Entity) o_store.use(search_sid);
 
@@ -441,26 +431,28 @@ public class Database implements StorageObject {
 
         if (rs.next()) {
           returnEntity = makeEntityFromResultSet(rs);
-        } else {
-          theLog.printDebugInfo("Keine daten fuer id: " + id + "in Tabelle" +
-            theTable);
+        }
+        else {
+          logger.debug("No data for id: " + id + " in table " + theTable);
         }
 
         rs.close();
-      } else {
-        theLog.printDebugInfo("No Data for Id " + id + " in Table " + theTable);
       }
-    } catch (SQLException sqe) {
+      else {
+        logger.debug("No Data for Id " + id + " in Table " + theTable);
+      }
+    }
+    catch (SQLException sqe) {
       throwSQLException(sqe, "selectById");
-
       return null;
-    } catch (NumberFormatException e) {
-      theLog.printError("ID ist keine Zahl: " + id);
-    } finally {
+    }
+    catch (NumberFormatException e) {
+      logger.error("ID is no number: " + id);
+    }
+    finally {
       freeConnection(con, stmt);
     }
 
-    /** @todo OS: Entity should be saved in ostore */
     return returnEntity;
   }
 
@@ -470,8 +462,7 @@ public class Database implements StorageObject {
    *   @param value  Wert die der key anehmen muss.
    *   @return EntityList mit den gematchten Entities
    */
-  public EntityList selectByFieldValue(String aField, String aValue)
-    throws StorageObjectFailure {
+  public EntityList selectByFieldValue(String aField, String aValue) throws StorageObjectFailure {
     return selectByFieldValue(aField, aValue, 0);
   }
 
@@ -482,8 +473,7 @@ public class Database implements StorageObject {
    *   @param offset  Gibt an ab welchem Datensatz angezeigt werden soll.
    *   @return EntityList mit den gematchten Entities
    */
-  public EntityList selectByFieldValue(String aField, String aValue, int offset)
-    throws StorageObjectFailure {
+  public EntityList selectByFieldValue(String aField, String aValue, int offset) throws StorageObjectFailure {
     return selectByWhereClause(aField + "=" + aValue, offset);
   }
 
@@ -565,7 +555,7 @@ public class Database implements StorageObject {
       EntityList hit = (EntityList) o_store.use(search_sid);
 
       if (hit != null) {
-        theLog.printDebugInfo("CACHE (hit): " + search_sid.toString());
+        logger.debug("CACHE (hit): " + search_sid.toString());
 
         return hit;
       }
@@ -583,7 +573,7 @@ public class Database implements StorageObject {
 
     /** @todo count sql string should only be assembled if we really count
      *  see below at the end of method //rk */
-    if ((wc != null) && (wc.length() == 0)) {
+    if ((wc != null) && (wc.trim().length() == 0)) {
       wc = null;
     }
 
@@ -597,7 +587,7 @@ public class Database implements StorageObject {
       countSql.append(" where ").append(wc);
     }
 
-    if ((ob != null) && !(ob.length() == 0)) {
+    if ((ob != null) && !(ob.trim().length() == 0)) {
       selectSql.append(" order by ").append(ob);
     }
 
@@ -654,8 +644,9 @@ public class Database implements StorageObject {
               }
 
               rs.close();
-            } else {
-              theLog.printError("Could not count: " + countSql);
+            }
+            else {
+              logger.error("Could not count: " + countSql);
             }
           }
         }
@@ -677,7 +668,7 @@ public class Database implements StorageObject {
 
         if (StoreUtil.implementsStorableObject(theEntityClass)) {
           StoreIdentifier sid = theReturnList.getStoreIdentifier();
-          theLog.printDebugInfo("CACHE (add): " + sid.toString());
+          logger.debug("CACHE (add): " + sid.toString());
           o_store.add(sid);
         }
       }
@@ -749,8 +740,7 @@ public class Database implements StorageObject {
         returnEntity.setStorage(myselfDatabase);
 
         if (returnEntity instanceof StorableObject) {
-          theLog.printDebugInfo("CACHE: ( in) " + returnEntity.getId() + " :" +
-            theTable);
+          logger.debug("CACHE: ( in) " + returnEntity.getId() + " :" + theTable);
           o_store.add(((StorableObject) returnEntity).getStoreIdentifier());
         }
       } else {
@@ -795,7 +785,7 @@ public class Database implements StorageObject {
     PreparedStatement pstmt = null;
 
     try {
-      ArrayList streamedInput = theEntity.streamedInput();
+      List streamedInput = theEntity.streamedInput();
       StringBuffer f = new StringBuffer();
       StringBuffer v = new StringBuffer();
       String aField;
@@ -809,7 +799,7 @@ public class Database implements StorageObject {
         if (!aField.equals(thePKeyName)) {
           aValue = null;
 
-          // sonderfaelle
+          // exceptions
           if (aField.equals("webdb_create") ||
               aField.equals("webdb_lastchange")) {
             aValue = "NOW()";
@@ -831,7 +821,8 @@ public class Database implements StorageObject {
             if (firstField == false) {
               f.append(",");
               v.append(",");
-            } else {
+            }
+            else {
               firstField = false;
             }
 
@@ -876,13 +867,15 @@ public class Database implements StorageObject {
       rs.next();
       returnId = rs.getString(1);
       theEntity.setId(returnId);
-    } catch (SQLException sqe) {
+    }
+    catch (SQLException sqe) {
       throwSQLException(sqe, "insert");
-    } finally {
+    }
+    finally {
       try {
         con.setAutoCommit(true);
-      } catch (Exception e) {
-        ;
+      }
+      catch (Exception e) {
       }
 
       freeConnection(con, pstmt);
@@ -918,7 +911,7 @@ public class Database implements StorageObject {
       o_store.invalidate(stoc_type);
     }
 
-    ArrayList streamedInput = theEntity.streamedInput();
+    List streamedInput = theEntity.streamedInput();
     String id = theEntity.getId();
     String aField;
     StringBuffer fv = new StringBuffer();
@@ -932,19 +925,19 @@ public class Database implements StorageObject {
       aField = (String) metadataFields.get(i);
 
       // only normal cases
-      if (!(aField.equals(thePKeyName) || aField.equals("webdb_create") ||
-          aField.equals("webdb_lastchange") ||
-          ((streamedInput != null) && streamedInput.contains(aField)))) {
+      if (  !(aField.equals(thePKeyName) ||
+            aField.equals("webdb_create") ||
+            aField.equals("webdb_lastchange") ||
+            ((streamedInput != null) && streamedInput.contains(aField)))) {
         if (theEntity.hasValueForField(aField)) {
           if (firstField == false) {
             fv.append(", ");
-          } else {
+          }
+          else {
             firstField = false;
           }
 
-          fv.append(aField).append("='")
-            .append(JDBCStringRoutines.escapeStringLiteral(
-              (String) theEntity.getValue(aField))).append("'");
+          fv.append(aField).append("='").append(JDBCStringRoutines.escapeStringLiteral((String) theEntity.getValue(aField))).append("'");
 
           //              fv.append(aField).append("='").append(StringUtil.quote((String)theEntity.getValue(aField))).append("'");
         }
@@ -1036,7 +1029,7 @@ public class Database implements StorageObject {
         uniqueId += ("@" + theTable);
       }
 
-      theLog.printInfo("CACHE: (del) " + id);
+      logger.debug("CACHE: (del) " + id);
 
       StoreIdentifier search_sid =
         new StoreIdentifier(theEntityClass,
@@ -1163,7 +1156,7 @@ public class Database implements StorageObject {
 
         // if popup has null-selector
         if (hasNullValue) {
-          simpleList.add(POPUP_EMTYLINE);
+          simpleList.add(POPUP_EMPTYLINE);
         }
 
         SimpleHash popupDict;
@@ -1177,8 +1170,9 @@ public class Database implements StorageObject {
 
         rs.close();
       }
-    } catch (Exception e) {
-      theLog.printError("getPopupData: " + e.getMessage());
+    }
+    catch (Exception e) {
+      logger.error("getPopupData: " + e.getMessage());
       throw new StorageObjectFailure(e);
     } finally {
       freeConnection(con, stmt);
@@ -1204,8 +1198,9 @@ public class Database implements StorageObject {
       try {
         hashCache =
           HTMLTemplateProcessor.makeSimpleHash(selectByWhereClause("", -1));
-      } catch (StorageObjectFailure e) {
-        theLog.printDebugInfo(e.getMessage());
+      }
+      catch (StorageObjectFailure e) {
+        logger.debug(e.getMessage());
       }
     }
 
@@ -1228,35 +1223,19 @@ public class Database implements StorageObject {
    * @exception StorageObjectException
    */
   public ResultSet executeSql(Statement stmt, String sql)
-    throws StorageObjectFailure, SQLException {
-    long startTime = System.currentTimeMillis();
+                            throws StorageObjectFailure, SQLException {
     ResultSet rs;
+    long startTime = System.currentTimeMillis();
 
     try {
       rs = stmt.executeQuery(sql);
 
-      //theLog.printInfo((System.currentTimeMillis() - startTime) + "ms. for: " + sql);
-    } catch (SQLException e) {
-      theLog.printDebugInfo("Failed: " +
-        (System.currentTimeMillis() - startTime) + "ms. for: " + sql);
+      logger.debug((System.currentTimeMillis() - startTime) + "ms. for: " + sql);
+    }
+    catch (SQLException e) {
+      logger.error(e.getMessage() +"\n" + (System.currentTimeMillis() - startTime) + "ms. for: " + sql);
       throw e;
     }
-
-    return rs;
-  }
-
-  /**
-   * Fuehrt Statement stmt aus und liefert Resultset zurueck. Das SQL-Statment wird
-   * getimed und geloggt.
-   * @param stmt PreparedStatement mit der SQL-Anweisung
-   * @return Liefert ResultSet des Statements zurueck.
-   * @exception StorageObjectException, SQLException
-   */
-  public ResultSet executeSql(PreparedStatement stmt)
-    throws StorageObjectFailure, SQLException {
-    long startTime = (new java.util.Date()).getTime();
-    ResultSet rs = stmt.executeQuery();
-    theLog.printInfo((new java.util.Date().getTime() - startTime) + "ms.");
 
     return rs;
   }
@@ -1285,29 +1264,32 @@ public class Database implements StorageObject {
       while (rs.next()) {
         result = rs.getInt(1);
       }
-    } catch (SQLException e) {
-      theLog.printError(e.getMessage());
-    } finally {
+    }
+    catch (SQLException e) {
+      logger.error("Database.getSize: " + e.getMessage());
+    }
+    finally {
       freeConnection(con, stmt);
     }
 
     //theLog.printInfo(theTable + " has "+ result +" rows where " + where);
-    //theLog.printInfo((System.currentTimeMillis() - startTime) + "ms. for: " + sql);
+    logger.debug((System.currentTimeMillis() - startTime) + "ms. for: " + sql);
+
     return result;
   }
 
   public int executeUpdate(Statement stmt, String sql)
     throws StorageObjectFailure, SQLException {
     int rs;
-    long startTime = (new java.util.Date()).getTime();
+    long startTime = System.currentTimeMillis();
 
     try {
       rs = stmt.executeUpdate(sql);
 
-      //theLog.printInfo((new java.util.Date().getTime() - startTime) + "ms. for: " + sql);
-    } catch (SQLException e) {
-      theLog.printDebugInfo("Failed: " +
-        (new java.util.Date().getTime() - startTime) + "ms. for: " + sql);
+      logger.debug((System.currentTimeMillis() - startTime) + "ms. for: " + sql);
+    }
+    catch (SQLException e) {
+      logger.debug("Failed: " + (System.currentTimeMillis() - startTime) + "ms. for: " + sql);
       throw e;
     }
 
@@ -1317,7 +1299,7 @@ public class Database implements StorageObject {
   public int executeUpdate(String sql)
     throws StorageObjectFailure, SQLException {
     int result = -1;
-    long startTime = (new java.util.Date()).getTime();
+    long startTime = System.currentTimeMillis();
     Connection con = null;
     PreparedStatement pstmt = null;
 
@@ -1325,14 +1307,16 @@ public class Database implements StorageObject {
       con = getPooledCon();
       pstmt = con.prepareStatement(sql);
       result = pstmt.executeUpdate();
-    } catch (Exception e) {
-      theLog.printDebugInfo("executeUpdate failed: " + e.getMessage());
-      throw new StorageObjectFailure("executeUpdate failed", e);
-    } finally {
+    }
+    catch (Throwable e) {
+      logger.error("Database.executeUpdate(" + sql + "): " + e.getMessage());
+      throw new StorageObjectFailure("Database.executeUpdate(" + sql + "): " + e.getMessage(), e);
+    }
+    finally {
       freeConnection(con, pstmt);
     }
 
-    //theLog.printInfo((new java.util.Date().getTime() - startTime) + "ms. for: " + sql);
+    logger.debug((System.currentTimeMillis() - startTime) + "ms. for: " + sql);
     return result;
   }
 
@@ -1370,7 +1354,8 @@ public class Database implements StorageObject {
           metadataNotNullFields.add(aField);
         }
       }
-    } catch (SQLException e) {
+    }
+    catch (SQLException e) {
       throwSQLException(e, "evalMetaData");
     }
   }
@@ -1388,32 +1373,28 @@ public class Database implements StorageObject {
       con = getPooledCon();
       pstmt = con.prepareStatement(sql);
 
-      //theLog.printInfo("METADATA: " + sql);
+      logger.debug("METADATA: " + sql);
       ResultSet rs = pstmt.executeQuery();
       evalMetaData(rs.getMetaData());
       rs.close();
-    } catch (SQLException e) {
+    }
+    catch (SQLException e) {
       throwSQLException(e, "get_meta_data");
-    } finally {
+    }
+    finally {
       freeConnection(con, pstmt);
     }
   }
 
   public Connection getPooledCon() throws StorageObjectFailure {
-    /* @todo , doublecheck but I'm pretty sure that this is unnecessary. -mh
-            try{
-            Class.forName("com.codestudio.sql.PoolMan").newInstance();
-    } catch (Exception e){
-            throw new StorageObjectException("Could not find the PoolMan Driver"
-                +e.toString());
-    }*/
     Connection con = null;
 
     try {
       con = SQLManager.getInstance().requestConnection();
-    } catch (SQLException e) {
-      theLog.printError("could not connect to the database " + e.getMessage());
-      System.err.println("could not connect to the database " + e.getMessage());
+    }
+    catch (SQLException e) {
+      logger.error("could not connect to the database " + e.getMessage());
+
       throw new StorageObjectFailure("Could not connect to the database", e);
     }
 
@@ -1432,7 +1413,7 @@ public class Database implements StorageObject {
    * @param wo Funktonsname, in der die SQLException geworfen wurde
    * @exception StorageObjectException
    */
-  protected void throwSQLException(SQLException sqe, String wo)
+  protected void throwSQLException(SQLException sqe, String aFunction)
     throws StorageObjectFailure {
     String state = "";
     String message = "";
@@ -1444,20 +1425,24 @@ public class Database implements StorageObject {
       vendor = sqe.getErrorCode();
     }
 
-    theLog.printError(state + ": " + vendor + " : " + message + " Funktion: " +
-      wo);
-    throw new StorageObjectFailure((sqe == null) ? "undefined sql exception"
-                                                 : sqe.getMessage(), sqe);
+    String information =
+        "SQL Error: " +
+        "state= " + state +
+        ", vendor= " + vendor +
+        ", message=" + message +
+        ", function= " + aFunction;
+
+    logger.error(information);
+
+    throw new StorageObjectFailure(information, sqe);
   }
 
-  protected void _throwStorageObjectException(Exception e, String wo)
+  protected void _throwStorageObjectException(Exception e, String aFunction)
     throws StorageObjectFailure {
+
     if (e != null) {
-      theLog.printError(e.getMessage() + wo);
-      throw new StorageObjectFailure(wo, e);
-    } else {
-      theLog.printError(wo);
-      throw new StorageObjectFailure(wo, null);
+      logger.error(e.getMessage() + aFunction);
+      throw new StorageObjectFailure(aFunction, e);
     }
   }
 
@@ -1467,7 +1452,8 @@ public class Database implements StorageObject {
    * @param message Nachricht mit dem Fehler
    * @exception StorageObjectException
    */
-  void throwStorageObjectException(String message) throws StorageObjectFailure {
-    _throwStorageObjectException(null, message);
+  void throwStorageObjectException(String aMessage) throws StorageObjectFailure {
+    logger.error(aMessage);
+    throw new StorageObjectFailure(aMessage, null);
   }
 }

@@ -40,6 +40,7 @@ package mircoders.storage;
  * @version 1.0
  */
 
+import mir.log.LoggerWrapper;
 import mir.storage.Database;
 import mir.storage.StorageObject;
 import mir.storage.StorageObjectFailure;
@@ -65,8 +66,9 @@ public class DatabaseCommentStatus extends Database implements StorageObject{
 
   private DatabaseCommentStatus() throws StorageObjectFailure {
     super();
-    this.hasTimestamp = false;
-    this.theTable = "comment_status";
+    hasTimestamp = false;
+    theTable = "comment_status";
+    logger = new LoggerWrapper("Database.CommentStatus");
   }
 
   public SimpleList getPopupData() throws StorageObjectFailure {

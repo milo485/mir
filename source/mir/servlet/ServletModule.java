@@ -33,7 +33,7 @@ package mir.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.HashMap;
 import java.util.Locale;
 
@@ -88,8 +88,9 @@ public abstract class ServletModule {
   public ServletModule(){
     try {
       configuration = MirPropertiesConfiguration.instance();
-    } catch (PropertiesConfigExc e) {
-      e.printStackTrace(System.err);
+    }
+    catch (PropertiesConfigExc e) {
+      throw new RuntimeException("Can't get configuration: " + e.getMessage());
     }
   }
 
@@ -457,18 +458,18 @@ public abstract class ServletModule {
 
     try {
       HTTPRequestParser parser;
-      ArrayList theFieldList;
-      System.out.println("using charset: " + req.getParameter("charset"));
-      System.out.println("using method: " + req.getParameter("do"));
+      List theFieldList;
+
+      logger.debug("using charset: " + req.getParameter("charset"));
+      logger.debug("using method: " + req.getParameter("do"));
       if (req.getParameter("charset") != null) {
         parser = new HTTPRequestParser(req, req.getParameter("charset"));
-        System.out.println("using charset: " + req.getParameter("charset"));
-        System.out.println("original charset: " + req.getCharacterEncoding());
+        logger.debug("using charset: " + req.getParameter("charset"));
+        logger.debug("original charset: " + req.getCharacterEncoding());
       }
       else {
         parser = new HTTPRequestParser(req);
       }
-
 
       theFieldList = theStorage.getFields();
 
@@ -478,7 +479,7 @@ public abstract class ServletModule {
       for (int i = 0; i < theFieldList.size(); i++) {
         aField = (String) theFieldList.get(i);
 
-        System.out.println("field " + aField + " = " + parser.getParameter(aField));
+        logger.debug("field " + aField + " = " + parser.getParameter(aField));
 
         aValue = parser.getParameter(aField);
         if (aValue != null)
@@ -487,7 +488,7 @@ public abstract class ServletModule {
       return withValues;
     }
     catch (Throwable e) {
-      e.printStackTrace(System.out);
+      e.printStackTrace(logger.asPrintWriter(logger.DEBUG_MESSAGE));
       throw new ServletModuleException(
           "ServletModule.getIntersectingValues: " + e.getMessage());
     }

@@ -44,6 +44,7 @@ import mir.entity.adapter.EntityAdapterModel;
 import mir.media.MediaHelper;
 import mir.media.MirMedia;
 import mir.util.RewindableIterator;
+import mir.log.LoggerWrapper;
 import mircoders.entity.EntityUploadedMedia;
 import mircoders.global.MirGlobal;
 import mircoders.localizer.MirAdminInterfaceLocalizer;
@@ -71,8 +72,11 @@ import mircoders.storage.DatabaseVideo;
 
 public class MirBasicDataModelLocalizer implements MirDataModelLocalizer {
   private EntityAdapterModel model;
+  protected LoggerWrapper logger;
 
   public MirBasicDataModelLocalizer() {
+    model=null;
+    logger = new LoggerWrapper("Localizer.DataModel");
   }
 
   public EntityAdapterModel adapterModel() throws MirLocalizerFailure {
@@ -105,6 +109,9 @@ public class MirBasicDataModelLocalizer implements MirDataModelLocalizer {
 
       anEntityAdapterDefinition.addCalculatedField("description_parsed", new FilteredField("description"));
       anEntityAdapterDefinition.addCalculatedField("content_data_parsed", new FilteredField("content_data"));
+
+      anEntityAdapterDefinition.addCalculatedField("children", new ContentToChildrenField());
+      anEntityAdapterDefinition.addCalculatedField("parent", new ContentToParentField());
 
       anEntityAdapterDefinition.addCalculatedField("operations",
           new EntityToSimpleOperationsField(MirGlobal.localizer().adminInterface().simpleArticleOperations()));
@@ -251,6 +258,35 @@ public class MirBasicDataModelLocalizer implements MirDataModelLocalizer {
     }
   }
 
+  protected class ContentToParentField implements EntityAdapterDefinition.CalculatedField {
+    public Object getValue(EntityAdapter anEntityAdapter) {
+      try {
+        logger.debug("ContentToParentField.getValue");
+        return anEntityAdapter.getToOneRelation(
+                    "id="+anEntityAdapter.get("to_content"),
+                    "id",
+                    "content" );
+      }
+      catch (Throwable t) {
+        throw new RuntimeException(t.getMessage());
+      }
+    }
+  }
+
+  protected class ContentToChildrenField implements EntityAdapterDefinition.CalculatedField {
+    public Object getValue(EntityAdapter anEntityAdapter) {
+      try {
+        return anEntityAdapter.getRelation(
+                    "to_content="+anEntityAdapter.get("id"),
+                    "id",
+                    "content" );
+      }
+      catch (Throwable t) {
+        throw new RuntimeException(t.getMessage());
+      }
+    }
+  }
+
   protected class ContentToLanguageField implements EntityAdapterDefinition.CalculatedField {
     public Object getValue(EntityAdapter anEntityAdapter) {
       try {
@@ -370,8 +406,7 @@ public class MirBasicDataModelLocalizer implements MirDataModelLocalizer {
         }
       }
       catch (Throwable t) {
-        System.out.println("ContentToIconField: exception: " +t.getMessage());
-        t.printStackTrace(System.out);
+        logger.error("ContentToIconField: " +t.getMessage());
         throw new RuntimeException(t.getMessage());
       }
 

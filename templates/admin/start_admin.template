@@ -17,7 +17,7 @@
 		<b>${lang("start.openpostings.title")}</b></span>
 
 	 <p>
-	 	<a href="${config.actionRoot}?module=Content&do=listop&order=webdb_create+desc">
+	 	<a href="${config.actionRoot}?module=Content&do=list&to_article_type%3D1&order=webdb_create+desc">
 		<img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp;${lang("edit")}</a>
 
 		<p>
@@ -83,16 +83,15 @@
      <form action="${config.actionRoot}" method="post">
 	     <input type="hidden" name="module" value="Content">
        <input type="hidden" name="do" value="search">
-       <input type="hidden" name="order" value="date desc">
+       <input type="hidden" name="order" value="datedesc">
 		    ${lang("start.content.search")}: <span class="small">
-       <input type="text" name="fieldvalue" size="15">
-       <select name="field">
+       <input type="text" name="searchvalue" size="15">
+       <select name="searchfield">
        	<option value="title">${lang("content.title")}</option>
         <option value="creator">${lang("content.creator")}</option>
-        <option value="place">${lang("content.location")}</option>
-        <option value="description">${lang("content.abstract")}</option>
+        <option value="source">${lang("content.location")}</option>
 				<option value="comment">${lang("content.comment")}</option>
-        <option value="content_data">${lang("content.content")}</option>
+        <option value="contents">${lang("content.content")}</option>
        </select></span>
       </form>
 

@@ -125,8 +125,6 @@ public class XMLReader {
         else
           file = new File(aFileName);
 
-        System.err.println("about to include "+file.getCanonicalPath());
-
         if (includeFileStack.contains(file.getCanonicalPath())) {
           throw new XMLReaderExc("recursive inclusion of file "+file.getCanonicalPath());
         }
@@ -219,10 +217,17 @@ public class XMLReader {
       }
     }
 
-    public void characters(char[] aBuffer, int aStart, int anEnd) throws SAXParseException {
-      String text = new String(aBuffer, aStart, anEnd).trim();
-      if ( text.length() > 0) {
-        throw new SAXParseException("Text not allowed", null, new XMLReaderExc("Text not allowed"));
+    public void characters(char[] aBuffer, int aStart, int anEnd) throws SAXException {
+      try {
+        String text = new String(aBuffer, aStart, anEnd);
+
+        manager.currentHandler().characters(text);
+      }
+      catch (XMLReaderExc e) {
+        throw new SAXParseException(e.getMessage(), null, e);
+      }
+      catch (Exception e) {
+        throw new SAXException(e);
       }
     }
   }
@@ -256,6 +261,8 @@ public class XMLReader {
 
     public abstract void endElement(SectionHandler aHandler) throws XMLReaderExc;
 
+    public void characters(String aCharacters) throws XMLReaderExc;
+
     public void finishSection() throws XMLReaderExc;
   }
 
@@ -268,6 +275,12 @@ public class XMLReader {
     };
 
     public void finishSection() throws XMLReaderExc {
+    }
+
+    public void characters(String aCharacters) throws XMLReaderExc {
+      if ( aCharacters.trim().length() > 0) {
+        throw new XMLReaderExc("Text not allowed");
+      }
     }
   }
 

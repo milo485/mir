@@ -2,7 +2,7 @@
 			<table cellpadding="8" cellspacing="0" border="0" width="100%" bgcolor="#aaaaaa"><tr><td>
 				<b>${lang("navigation.languages")}</b>
 				  <list languages as l> 
-				    <br><a href="${config["Producer.DocRoot"]}/${l.code}">${l.name}</a>
+				    <br><a href="${config["Producer.DocRoot"]}/${l.code}/">${l.name}</a>
 				  </list> 
 			</td></tr></table>
 

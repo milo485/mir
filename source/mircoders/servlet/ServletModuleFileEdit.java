@@ -54,8 +54,8 @@ import freemarker.template.SimpleList;
  *  Allows one to do a basic edit of a file in a directory specified
  *  in the config file.
  *
- * @author $Author: idfx $
- * @version $Revision: 1.4 $ $Date: 2003/01/25 17:50:36 $
+ * @author $Author: zapata $
+ * @version $Revision: 1.5 $ $Date: 2003/02/23 05:00:15 $
  *
  */
 
@@ -94,12 +94,11 @@ public class ServletModuleFileEdit extends ServletModule
       if (offset==null || offset.equals("")) offset="0";
       mergeData.put("offset",offset);
       File dir = new File(_dirName);
-      System.out.println("DIRNAME: "+_dirName);
+
       FileExtFilter extFilter = new FileExtFilter(_extName);
       String[] dirEntries = dir.list(extFilter);
       SimpleList theList = new SimpleList();
       for ( int i = 0; i < dirEntries.length; ++i ) {
-        System.out.println(" FILE: "+dirEntries[i]);
         theList.add(dirEntries[i]);
       }
       mergeData.put("filelist",theList);

@@ -35,17 +35,19 @@ package mircoders.media;
 import java.io.File;
 import java.io.InputStream;
 
+import freemarker.template.SimpleList;
+
 import mir.config.MirPropertiesConfiguration;
 import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
 import mir.entity.Entity;
 import mir.media.MirMedia;
 import mir.media.MirMediaException;
 import mir.misc.FileUtil;
-import mir.misc.Logfile;
 import mir.misc.StringUtil;
 import mir.storage.StorageObjectFailure;
+import mir.log.LoggerWrapper;
+
 import mircoders.entity.EntityImages;
-import freemarker.template.SimpleList;
 
 /**
  * This class handles saving, fetching creating representations
@@ -61,36 +63,42 @@ import freemarker.template.SimpleList;
  *
  * @see mir.media.MirMedia
  * @author mh
- * @version $Id: MediaHandlerImages.java,v 1.16 2003/01/25 17:50:35 idfx Exp $
+ * @version $Id: MediaHandlerImages.java,v 1.17 2003/02/23 05:00:14 zapata Exp $
  */
 
 
 public abstract class MediaHandlerImages implements MirMedia
 {
-  static MirPropertiesConfiguration configuration;
-  static Logfile theLog;
-  static final String PNG = "PNG";
-  static final String JPEG = "JPEG";
+  protected static MirPropertiesConfiguration configuration;
+  protected static final String PNG = "PNG";
+  protected static final String JPEG = "JPEG";
+
+  protected LoggerWrapper logger;
 
   static {
     try {
       configuration = MirPropertiesConfiguration.instance();
-    } catch (PropertiesConfigExc e) {
-      e.printStackTrace();
     }
-    theLog = Logfile.getInstance(configuration.getString("Home")+"log/media.log");
+    catch (PropertiesConfigExc e) {
+      throw new RuntimeException("Can't get configuration: " + e.getMessage());
+    }
   }
-  
+
   abstract String getType();
 
-        public InputStream getMedia(Entity ent, Entity mediaTypeEnt)
+  public MediaHandlerImages() {
+    logger = new LoggerWrapper("Media.Images");
+  }
+
+  public InputStream getMedia(Entity ent, Entity mediaTypeEnt)
     throws MirMediaException
         {
     InputStream in;
     try {
       in = ((EntityImages)ent).getImage();
-    } catch ( StorageObjectFailure e) {
-      theLog.printDebugInfo("MediaHandlerImages.getImage: "+e.toString());
+    }
+    catch ( StorageObjectFailure e) {
+      logger.error("MediaHandlerImages.getImage: "+e.toString());
       throw new MirMediaException(e.toString());
     }
 
@@ -104,8 +112,8 @@ public abstract class MediaHandlerImages implements MirMedia
       ((EntityImages)ent).setImage(in, getType());
     }
     catch ( StorageObjectFailure e) {
-      e.printStackTrace(System.out);
-      theLog.printError("MediaHandlerImages.set: "+e.getMessage());
+      logger.error("MediaHandlerImages.set: "+e.getMessage());
+      e.printStackTrace(logger.asPrintWriter(logger.DEBUG_MESSAGE));
       throw new MirMediaException(e.getMessage());
     }
   }
@@ -132,16 +140,15 @@ public abstract class MediaHandlerImages implements MirMedia
         ent.setValueForProperty("icon_path",getIconStoragePath()+filepath);
         ent.setValueForProperty("publish_path",filepath);
         ent.update();
-      } catch ( Exception e) {
-        String msg = "MediaHandlerImages.produce - Error: " + e.toString();
-        theLog.printError(msg);
-        throw new MirMediaException(msg);
       }
-    } else {
-      String msg="MediaHandlerImages.produce - missing image or icon OID for: "+
-                  ent.getId();
-      theLog.printError(msg);
-      throw new MirMediaException(msg);
+      catch (Throwable e) {
+        logger.error("MediaHandlerImages.produce: " + e.toString());
+        throw new MirMediaException("MediaHandlerImages.produce: " + e.toString());
+      }
+    }
+    else {
+      logger.error("MediaHandlerImages.produce: missing image or icon OID for: " + ent.getId());
+      throw new MirMediaException("MediaHandlerImages.produce: missing image or icon OID for: " + ent.getId());
     }
   }
 
@@ -151,8 +158,9 @@ public abstract class MediaHandlerImages implements MirMedia
     InputStream in;
     try {
       in = ((EntityImages)ent).getIcon();
-    } catch ( StorageObjectFailure e) {
-      theLog.printDebugInfo("MediaHandlerImages.getIcon: "+e.toString());
+    }
+    catch (Throwable e) {
+      logger.error("MediaHandlerImages.getIcon: " + e.toString());
       throw new MirMediaException(e.toString());
     }
 

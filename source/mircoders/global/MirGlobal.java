@@ -74,10 +74,10 @@ public class MirGlobal {
   }
 
   public static MirPropertiesConfiguration config() {
-  	try {
+    try {
       return MirPropertiesConfiguration.instance();
-    } catch (PropertiesConfigExc e) {
-      e.printStackTrace();
+    }
+    catch (PropertiesConfigExc e) {
       throw new RuntimeException(e.getMessage());
     }
   }
@@ -101,7 +101,7 @@ public class MirGlobal {
     } catch (Throwable t) {
       result = aDefault;
     }
-       
+
 
     if (result==null)
       result = aDefault;

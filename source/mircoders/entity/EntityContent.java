@@ -36,6 +36,11 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
 
+import freemarker.template.SimpleScalar;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
+
+import mir.log.LoggerWrapper;
 import mir.entity.Entity;
 import mir.entity.EntityList;
 import mir.storage.StorageObject;
@@ -44,15 +49,12 @@ import mir.storage.StorageObjectFailure;
 import mircoders.storage.DatabaseContent;
 import mircoders.storage.DatabaseContentToMedia;
 import mircoders.storage.DatabaseContentToTopics;
-import freemarker.template.SimpleScalar;
-import freemarker.template.TemplateModel;
-import freemarker.template.TemplateModelException;
 
 /**
  * this class implements mapping of one line of the database table content
  * to a java object
  *
- * @version $Id: EntityContent.java,v 1.14 2003/01/25 17:50:34 idfx Exp $
+ * @version $Id: EntityContent.java,v 1.15 2003/02/23 05:00:13 zapata Exp $
  * @author mir-coders group
  *
  */
@@ -77,9 +79,8 @@ public class EntityContent extends Entity
   public EntityContent()
   {
     super();
-    //content_data is now filed-type "text"
-    //streamedInput = new ArrayList();
-    //streamedInput.add("content_data");
+
+    logger = new LoggerWrapper("Entity.Content");
   }
 
   public EntityContent(StorageObject theStorage) {
@@ -169,8 +170,9 @@ public class EntityContent extends Entity
       }
       //set Content to unproduced
       setProduced(false);
-    }	else {
-      theLog.printError("EntityContent: attach without mid");
+    }
+    else {
+      logger.error("EntityContent: attach without mid");
     }
   }
 
@@ -191,7 +193,7 @@ public class EntityContent extends Entity
           return (TemplateModel)_entCache.get(key);
         }
         catch (Exception ex) {
-          theLog.printWarning("-- getComments: could not fetch data " + ex.toString());
+          logger.warn("EntityContent.getComments: could not fetch data " + ex.toString());
 
           throw new TemplateModelException(ex.toString());
         }
@@ -202,7 +204,7 @@ public class EntityContent extends Entity
           return (TemplateModel)_entCache.get(key);
         }
         catch (Exception ex) {
-          theLog.printWarning("-- getImagesForContent: could not fetch data " + ex.toString());
+          logger.warn("EntityContent.getImagesForContent: could not fetch data " + ex.toString());
           throw new TemplateModelException(ex.toString());
         }
       }
@@ -212,7 +214,7 @@ public class EntityContent extends Entity
           return (TemplateModel)_entCache.get(key);
         }
         catch (Exception ex) {
-          theLog.printWarning("-- getAudioForContent: could not fetch data " + ex.toString());
+          logger.warn("EntityContent.getAudioForContent: could not fetch data " + ex.toString());
           throw new TemplateModelException(ex.toString());
         }
       }
@@ -222,7 +224,7 @@ public class EntityContent extends Entity
           return (TemplateModel)_entCache.get(key);
         }
         catch (Exception ex) {
-          theLog.printWarning("-- getVideoForContent: could not fetch data " + ex.toString());
+          logger.warn("EntityContent.getVideoForContent: could not fetch data " + ex.toString());
           throw new TemplateModelException(ex.toString());
         }
       }
@@ -232,7 +234,7 @@ public class EntityContent extends Entity
           return (TemplateModel)_entCache.get(key);
         }
         catch (Exception ex) {
-          theLog.printWarning("-- getOtherMediaForContent: could not fetch data " + ex.toString());
+          logger.warn("EntityContent.getOtherMediaForContent: could not fetch data " + ex.toString());
           throw new TemplateModelException(ex.toString());
         }
       }
@@ -243,7 +245,7 @@ public class EntityContent extends Entity
           return (TemplateModel)_entCache.get(key);
         }
         catch (Exception ex) {
-          theLog.printWarning("-- getTopics: could not fetch data " + ex.toString());
+          logger.warn("EntityContent.getTopics: could not fetch data " + ex.toString());
           throw new TemplateModelException(ex.toString());
         }
       }

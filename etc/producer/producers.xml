@@ -7,6 +7,7 @@
     - a newswire archive
     - a feature archive
     - articles
+    - media
 -->  
 
 <producers>
@@ -30,7 +31,7 @@
   <producer name="articles">
     <verbs>
       <verb name="changed" default="1">
-        <Define key="verbcondition" value=" and (not is_produced)"/>
+        <Define key="verbcondition" value="(not is_produced)"/>
         <Set key="limit" value="10"/>
       </verb>
       <verb name="all">
@@ -44,68 +45,43 @@
       </verb>
     </verbs>
     <body>
-      <Enumerate key="article" table="content" selection="1=1 ${verbcondition}"
+      <Enumerate key="article" table="content" selection="${verbcondition}"
                   limit="limit" order="webdb_create desc, date desc">
         <If condition="article.is_published == '1'">
-	  <then>
-	    <Language>
+          <then>
+            <Language>
               <Generate 
                 generator="/article.template" 
                 destination="${config.storageRoot}/${pathprefix}/${article.date.formatted.yyyy}/${article.date.formatted.MM}/${article.id}.shtml"/>
-	      <Generate 
+              <Generate 
                 generator="/emailThisArticle.template" 
                 destination="${config.storageRoot}/${pathprefix}/${article.date.formatted.yyyy}/${article.date.formatted.MM}/${article.id}.txt"/>
-	      <PDFPreFormat 
-	        key="article" 
-	        numLinesBetweenImages="3" 
-	        charWidthCM="0.19" 
-	        pixelWidthCM="0.035"
-	        contentAreaWidthCM="16" 
-	        lineHeightCM="0.5" />
-	      <Generate 
+              <PDFPreFormat 
+                key="article" 
+                numLinesBetweenImages="3" 
+                charWidthCM="0.19" 
+                pixelWidthCM="0.035"
+                contentAreaWidthCM="16" 
+                lineHeightCM="0.5" />
+              <Generate 
                 generator="/printablecontent.template" 
                 destination="${config.storageRoot}/${pathprefix}/${article.date.formatted.yyyy}/${article.date.formatted.MM}/${article.id}.fo"
-	        parameters="UTF-8" />
-	      <PDFGenerate
+                parameters="UTF-8" />
+              <PDFGenerate
                 generator="${config.storageRoot}/${pathprefix}/${article.date.formatted.yyyy}/${article.date.formatted.MM}/${article.id}.fo"
-	        destination="${config.storageRoot}/${pathprefix}/${article.date.formatted.yyyy}/${article.date.formatted.MM}/${article.id}.pdf"
-	        stylesheet="${config[&quot;Producer.HTML2FOStyleSheet&quot;]}" />
-            </Language>
-            <MarkContent key="article"/>            
-	    <IndexContent key="article" pathToIndex="${config[&quot;IndexPath&quot;]}"/>
-	  </then>
-	  <else>
-	    <UnIndexContent key="article" pathToIndex="${config[&quot;IndexPath&quot;]}"/>
-	  </else>
-	</If>
+                destination="${config.storageRoot}/${pathprefix}/${article.date.formatted.yyyy}/${article.date.formatted.MM}/${article.id}.pdf"
+                stylesheet="${config['Producer.HTML2FOStyleSheet']}" />
+             </Language>
+             <IndexContent key="article" pathToIndex="${config['IndexPath']}"/>
+          </then>
+          <else>
+            <UnIndexContent key="article" pathToIndex="${config['IndexPath']}"/>
+          </else>
+        </If>
+        <MarkContent key="article"/>            
       </Enumerate>
     </body>
   </producer>  
-
-<!--  <producer name="index-articles">
-    <verbs>
-      <verb name="changed" default="1">
-        <Define key="verbcondition" value=" and (not is_produced)"/>
-        <Set key="limit" value="10"/>
-      </verb>
-      <verb name="all">
-        <Define key="verbcondition" value=""/>
-        <Set key="limit" value="-1"/>
-      </verb>
-
-      <verb name="sample">
-        <Define key="verbcondition" value=""/>
-        <Set key="limit" value="10"/>
-      </verb>
-    </verbs>
-    <body>
-      <Enumerate key="article" table="content" selection="is_published='t' ${verbcondition}"
-                  limit="limit" order="webdb_create desc, date desc">
-	<IndexContent key="article" pathToIndex="/tmp/index"/>
-      </Enumerate>
-    </body>
-  </producer>  -->
-
 
   <producer name="navigation">
     <verbs>
@@ -310,6 +286,59 @@
           <Execute command="${config['Rsync.Script.Path']}"/>
         </then>
       </If>
+    </body>
+  </producer>  
+  
+  
+  <producer name="media">
+    <verbs>
+      <verb name="new" default="1">
+        <Define key="verbcondition" value="(not is_produced)"/>
+        <Set key="limit" value="10"/>
+      </verb>
+      <verb name="all">
+        <Define key="verbcondition" value=""/>
+        <Set key="limit" value="-1"/>
+      </verb>
+
+      <verb name="sample">
+        <Define key="verbcondition" value=""/>
+        <Set key="limit" value="10"/>
+      </verb>
+    </verbs>
+    <body>
+      <Enumerate 
+          key="media" table="image" 
+          selection="${verbcondition}"
+          limit="limit" 
+          order="webdb_create desc, date desc">
+          
+         <GenerateMedia key="media" />
+      </Enumerate>
+      <Enumerate 
+          key="media" table="video" 
+          selection="${verbcondition}"
+          limit="limit" 
+          order="webdb_create desc, date desc">
+          
+         <GenerateMedia key="media" />
+      </Enumerate>
+      <Enumerate 
+          key="media" table="audio" 
+          selection="${verbcondition}"
+          limit="limit" 
+          order="webdb_create desc, date desc">
+          
+         <GenerateMedia key="media" />
+      </Enumerate>
+      <Enumerate 
+          key="media" table="otherMedia" 
+          selection="${verbcondition}"
+          limit="limit" 
+          order="webdb_create desc, date desc">
+          
+         <GenerateMedia key="media" />
+      </Enumerate>
     </body>
   </producer>  
   

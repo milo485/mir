@@ -33,12 +33,14 @@ package mircoders.storage;
 
 import java.util.GregorianCalendar;
 
+import freemarker.template.SimpleList;
+
+import mir.log.LoggerWrapper;
 import mir.entity.Entity;
 import mir.misc.StringUtil;
 import mir.storage.Database;
 import mir.storage.StorageObject;
 import mir.storage.StorageObjectFailure;
-import freemarker.template.SimpleList;
 
 /**
  * <b>Diese Klasse implementiert die Datenbankverbindung zur MetaObjekt-Tabelle
@@ -48,60 +50,56 @@ import freemarker.template.SimpleList;
 
 public class DatabaseImages extends Database implements StorageObject{
 
-	private static DatabaseImages instance;
-	private static SimpleList publisherPopupData;
+  private static DatabaseImages instance;
+  private static SimpleList publisherPopupData;
 
   // the following *has* to be sychronized cause this static method
   // could get preemted and we could end up with 2 instances of DatabaseFoo..
   // see the "Singletons with needles and thread" article at JavaWorld -mh
-	public synchronized static DatabaseImages getInstance()
-    throws StorageObjectFailure
-	{
-		if (instance == null) {
-			instance = new DatabaseImages();
-			instance.myselfDatabase = instance;
-		}
-		return instance;
-	}
+  public synchronized static DatabaseImages getInstance() {
+    if (instance == null) {
+      instance = new DatabaseImages();
+      instance.myselfDatabase = instance;
+    }
+    return instance;
+  }
 
-	private DatabaseImages() throws StorageObjectFailure
-	{
-		super();
-		this.hasTimestamp = true;
-		this.theTable="images";
-		this.theCoreTable="media";
-		try {
-			this.theEntityClass = Class.forName("mircoders.entity.EntityImages");
-		}
-		catch (Exception e) { throw new StorageObjectFailure(e);	}
-	}
+  private DatabaseImages() {
+    super();
 
-	public SimpleList getPopupData() throws StorageObjectFailure {
-		return getPopupData("title",true);
-	}
+    logger = new LoggerWrapper("Database.Images");
 
-	public void update(Entity theEntity) throws StorageObjectFailure
-	{
-		String date = theEntity.getValue("date");
-		if (date==null){
-			date = StringUtil.date2webdbDate(new GregorianCalendar());
-			theEntity.setValueForProperty("date",date);
-		}
+    hasTimestamp = true;
+    theTable = "images";
+    theCoreTable = "media";
+    theEntityClass = mircoders.entity.EntityImages.class;
+  }
 
-		super.update(theEntity);
-	}
+  public SimpleList getPopupData() throws StorageObjectFailure {
+    return getPopupData("title", true);
+  }
 
+  public void update(Entity theEntity) throws StorageObjectFailure {
+    String date = theEntity.getValue("date");
+    if (date == null) {
+      date = StringUtil.date2webdbDate(new GregorianCalendar());
+      theEntity.setValueForProperty("date", date);
+    }
 
-	public String insert(Entity theEntity) throws StorageObjectFailure
-	{
-		String date = theEntity.getValue("date");
-		if (date==null){
-			date = StringUtil.date2webdbDate(new GregorianCalendar());
-			theEntity.setValueForProperty("date",date);
-		}
-		return super.insert(theEntity);
-	}
+    super.update(theEntity);
+  }
 
-	// initialisierungen aus den statischen Tabellen
+  public String insert(Entity theEntity) throws StorageObjectFailure {
+    String date = theEntity.getValue("date");
+
+    if (date == null) {
+      date = StringUtil.date2webdbDate(new GregorianCalendar());
+      theEntity.setValueForProperty("date", date);
+    }
+
+    return super.insert(theEntity);
+  }
+
+  // initialisierungen aus den statischen Tabellen
 
 }

@@ -31,6 +31,7 @@
 
 package mircoders.storage;
 
+import mir.log.LoggerWrapper;
 import mir.storage.Database;
 import mir.storage.StorageObject;
 import mir.storage.StorageObjectFailure;
@@ -49,8 +50,7 @@ public class DatabaseMediaType extends Database implements StorageObject{
   // the following *has* to be sychronized cause this static method
   // could get preemted and we could end up with 2 instances of DatabaseFoo..
   // see the "Singletons with needles and thread" article at JavaWorld -mh
-  public synchronized static DatabaseMediaType getInstance() 
-    throws StorageObjectFailure {
+  public synchronized static DatabaseMediaType getInstance() {
     if (instance == null) {
       instance = new DatabaseMediaType();
       instance.myselfDatabase = instance;
@@ -61,13 +61,12 @@ public class DatabaseMediaType extends Database implements StorageObject{
   private DatabaseMediaType() throws StorageObjectFailure
   {
     super();
-    this.hasTimestamp = false;
-    //this.cache = new DatabaseCache(20);
-    this.theTable="media_type";
-    try {
-      this.theEntityClass = Class.forName("mir.entity.GenericEntity");
-    }
-    catch (Exception e) { throw new StorageObjectFailure(e); }
+
+    logger = new LoggerWrapper("Database.MediaType");
+
+    hasTimestamp = false;
+    theTable="media_type";
+    theEntityClass = mir.entity.GenericEntity.class;
   }
 
 }

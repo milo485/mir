@@ -41,7 +41,7 @@ import java.util.Vector;
 import mir.entity.adapter.EntityAdapterModel;
 import mir.generator.Generator;
 import mir.generator.WriterEngine;
-import mir.misc.Logfile;
+import mir.log.LoggerWrapper;
 import mir.producer.CompositeProducerNode;
 import mir.producer.ProducerFactory;
 import mir.producer.reader.DefaultProducerNodeBuilders;
@@ -53,12 +53,6 @@ import mircoders.global.ProducerEngine;
 import mircoders.localizer.MirLocalizerExc;
 import mircoders.localizer.MirLocalizerFailure;
 import mircoders.localizer.MirProducerLocalizer;
-import mircoders.producer.CompositeProducerFactory;
-import mircoders.producer.OldProducerAdapterFactory;
-import mircoders.producer.ProducerAudio;
-import mircoders.producer.ProducerImages;
-import mircoders.producer.ProducerOther;
-import mircoders.producer.ProducerVideo;
 import mircoders.producer.reader.SupplementalProducerNodeBuilders;
 
 public class MirBasicProducerLocalizer implements MirProducerLocalizer {
@@ -71,10 +65,12 @@ public class MirBasicProducerLocalizer implements MirProducerLocalizer {
   protected Generator.GeneratorLibrary generatorLibrary;
   protected WriterEngine writerEngine;
 
-  protected static Logfile logger = Logfile.getInstance( MirGlobal.getConfigProperty("Home") + "/" + MirGlobal.getConfigProperty("Mir.Localizer.Logfile"));
+  protected LoggerWrapper logger;
 
   public MirBasicProducerLocalizer() {
     try {
+      logger = new LoggerWrapper("Localizer.Basic.Producer");
+
       String allNewProducers = MirGlobal.getConfigProperty("Mir.Localizer.Producer.AllNewProducers");
       allNewProducerTasks = ProducerEngine.ProducerTask.parseProducerTaskList(allNewProducers);
 
@@ -85,7 +81,7 @@ public class MirBasicProducerLocalizer implements MirProducerLocalizer {
       nameToFactory = new HashMap();
     }
     catch (Throwable t) {
-      logger.printError("MirBasicProducerLocalizer(): Exception "+t.getMessage());
+      logger.error("MirBasicProducerLocalizer(): Exception "+t.getMessage());
       model = new EntityAdapterModel();
     }
   }
@@ -99,7 +95,7 @@ public class MirBasicProducerLocalizer implements MirProducerLocalizer {
 
         producerFactories = newProducers;
         fileMonitor = newFileMonitor;
-        logger.printInfo("MirBasicProducerLocalizer.factories(): successfully setup factories");
+        logger.info("MirBasicProducerLocalizer.factories(): successfully setup factories");
 
         nameToFactory.clear();
         Iterator i = producerFactories.iterator();
@@ -109,7 +105,7 @@ public class MirBasicProducerLocalizer implements MirProducerLocalizer {
         }
       }
       catch (Throwable t) {
-        logger.printError("MirBasicProducerLocalizer.factories(): Unable to setup factories: "+t.getMessage());
+        logger.error("MirBasicProducerLocalizer.factories(): Unable to setup factories: "+t.getMessage());
       }
     }
 
@@ -142,27 +138,7 @@ public class MirBasicProducerLocalizer implements MirProducerLocalizer {
     i = usedFiles.iterator();
     while (i.hasNext())
       aFileMonitor.addFile((File) i.next());
-
-    setupFactories(aFactories);
   }
-
-  protected void setupFactories(List aFactories) throws MirLocalizerExc, MirLocalizerFailure {
-    CompositeProducerNode node;
-
-    try {
-      aFactories.add(
-                   new CompositeProducerFactory("media", new ProducerFactory[] {
-                      new OldProducerAdapterFactory("images", new ProducerImages()),
-                      new OldProducerAdapterFactory("audio", new ProducerAudio()),
-                      new OldProducerAdapterFactory("video", new ProducerVideo()),
-                      new OldProducerAdapterFactory("other", new ProducerOther())
-                  } )
-      );
-    }
-    catch (Exception e) {
-      throw new MirLocalizerFailure(e);
-    }
-  };
 
   public void produceAllNew() {
     MirGlobal.producerEngine().addTasks(allNewProducerTasks);

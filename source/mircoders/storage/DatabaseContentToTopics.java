@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
+import mir.log.LoggerWrapper;
 import mir.entity.EntityList;
 import mir.storage.Database;
 import mir.storage.StorageObject;
@@ -67,12 +68,13 @@ public class DatabaseContentToTopics extends Database implements StorageObject{
     return instance;
   }
 
-  private DatabaseContentToTopics()
-    throws StorageObjectFailure {
-
+  private DatabaseContentToTopics() throws StorageObjectFailure {
     super();
-    this.hasTimestamp = false;
-    this.theTable="content_x_topic";
+
+    logger = new LoggerWrapper("Database.ContentToTopics");
+
+    hasTimestamp = false;
+    theTable="content_x_topic";
     try { this.theEntityClass = Class.forName("mir.entity.GenericEntity"); }
     catch (Exception e) { throw new StorageObjectFailure(e); }
 
@@ -92,8 +94,9 @@ public class DatabaseContentToTopics extends Database implements StorageObject{
 
       try {
         returnList = DatabaseTopics.getInstance().selectByWhereClause(subselect,-1);
-      } catch (Exception e) {
-        theLog.printDebugInfo("-- get topics failed " + e.toString());
+      }
+      catch (Exception e) {
+        logger.error("-- get topics failed " + e.toString());
       }
     }
     return returnList;
@@ -106,6 +109,7 @@ public class DatabaseContentToTopics extends Database implements StorageObject{
   public ArrayList getTopicsOfContent(String contentId)
     throws StorageObjectFailure {
     ArrayList returnList = new ArrayList();
+
     if (contentId != null) {
       String sql = "select topic_id from " + theTable + " where content_id=" + contentId;
       Connection con=null;Statement stmt=null;
@@ -119,10 +123,11 @@ public class DatabaseContentToTopics extends Database implements StorageObject{
             returnList.add(new Integer(rs.getInt("topic_id")));
           }
         }
-      } catch (Exception e) {
-        theLog.printError(e.toString());
-        theLog.printError("-- get topicsofcontent failed");
-      } finally {
+      }
+      catch (Exception e) {
+        logger.error("DatabaseContentToTopics.getTopicsOfContent: " + e.getMessage());
+      }
+      finally {
         freeConnection(con,stmt);
       }
     }
@@ -160,7 +165,7 @@ public class DatabaseContentToTopics extends Database implements StorageObject{
         }
         if(set==false){
           toSet.add(topicId[i]);
-          theLog.printDebugInfo("to set: "+ topicId[i]);
+          logger.debug("to set: "+ topicId[i]);
         }
       }
       //now we check if we have to delete topics
@@ -177,14 +182,14 @@ public class DatabaseContentToTopics extends Database implements StorageObject{
         }
         if(delete==true){
           toDelete.add(topic.toString());
-          theLog.printDebugInfo("to delete: "+ topic.toString());
+          logger.debug("to delete: "+ topic.toString());
         }
       }
     } else {
       //all the topics has to be set, so we copy all to the array
-			for (int i = 0; i < topicId.length; i++){
-				toSet.add(topicId[i]);
-			}
+                        for (int i = 0; i < topicId.length; i++){
+                                toSet.add(topicId[i]);
+                        }
     }
 
     //first delete all row with content_id=contentId
@@ -207,7 +212,7 @@ public class DatabaseContentToTopics extends Database implements StorageObject{
       stmt = con.createStatement();
       int rs = executeUpdate(stmt,sql);
     } catch (Exception e) {
-      theLog.printDebugInfo("-- deleting topics failed");
+      logger.error("-- deleting topics failed");
     } finally {
       freeConnection(con,stmt);
     }
@@ -222,8 +227,9 @@ public class DatabaseContentToTopics extends Database implements StorageObject{
         // should be a preparedStatement because is faster
         stmt = con.createStatement();
         int rs = executeUpdate(stmt,sql);
-      } catch (Exception e) {
-        theLog.printDebugInfo("-- set topics failed -- insert laenge topicId" + topicId.length);
+      }
+      catch (Exception e) {
+        logger.error("-- set topics failed -- insert laenge topicId" + topicId.length);
       } finally {
         freeConnection(con,stmt);
       }
@@ -267,9 +273,11 @@ public class DatabaseContentToTopics extends Database implements StorageObject{
       // should be a preparedStatement because is faster
       stmt = con.createStatement();
       ResultSet rs = executeSql(stmt,sql);
-    } catch (Exception e) {
-      theLog.printDebugInfo("-- delete topics failed ");
-    } finally {
+    }
+    catch (Exception e) {
+      logger.error("-- delete topics failed ");
+    }
+    finally {
       freeConnection(con,stmt);
     }
   }
@@ -302,7 +310,9 @@ public class DatabaseContentToTopics extends Database implements StorageObject{
             returnList = DatabaseContent.getInstance().selectByWhereClause(topicSelect,-1);
         }
       }
-      catch (Exception e) {theLog.printDebugInfo("-- get contetn failed");}
+      catch (Exception e) {
+        logger.error("-- get contetn failed");
+      }
       finally { freeConnection(con,stmt);}
     }
     return returnList;

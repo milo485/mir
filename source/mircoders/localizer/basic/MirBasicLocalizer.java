@@ -42,7 +42,6 @@ import mircoders.localizer.MirProducerAssistantLocalizer;
 import mircoders.localizer.MirProducerLocalizer;
 
 public class MirBasicLocalizer implements MirLocalizer {
-//  protected static Logfile logger = Logfile.getInstance( MirGlobal.getConfigProperty("Home") + "/" + MirGlobal.getConfigProperty("Mir.Localizer.Logfile"));
 
   public MirProducerLocalizer producers() throws MirLocalizerFailure, MirLocalizerExc {
     return new MirBasicProducerLocalizer();

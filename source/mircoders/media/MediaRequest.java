@@ -37,6 +37,9 @@ import java.util.Iterator;
 
 import javax.servlet.ServletContext;
 
+import com.oreilly.servlet.multipart.FilePart;
+
+import mir.log.LoggerWrapper;
 import mir.config.MirPropertiesConfiguration;
 import mir.entity.Entity;
 import mir.entity.EntityList;
@@ -51,10 +54,9 @@ import mir.module.ModuleException;
 import mir.storage.Database;
 import mir.storage.StorageObjectExc;
 import mir.storage.StorageObjectFailure;
-import mircoders.producer.ProducerMedia;
+
 import mircoders.storage.DatabaseMediaType;
 
-import com.oreilly.servlet.multipart.FilePart;
 
 /*
  *  MediaRequest.java -
@@ -63,21 +65,21 @@ import com.oreilly.servlet.multipart.FilePart;
  *    appropriate media objects are set.
  *
  * @author mh
- * @version $Id: MediaRequest.java,v 1.12 2003/01/25 17:50:35 idfx Exp $
+ * @version $Id: MediaRequest.java,v 1.13 2003/02/23 05:00:14 zapata Exp $
  *
  */
 
 public class MediaRequest implements FileHandler
 {
+  private String _user;
+  private EntityList _returnList = new EntityList();
+  private boolean _publish;
+  private LoggerWrapper logger;
 
-  String _user;
-  EntityList _returnList = new EntityList();
-  boolean _produce, _publish;
-
-  public MediaRequest(String user, boolean produce, boolean publish) {
+  public MediaRequest(String user, boolean publish) {
     _user = user;
-    _produce = produce;
     _publish = publish;
+    logger = new LoggerWrapper("Media.Request");
   }
 
   public EntityList getEntityList() {
@@ -97,7 +99,6 @@ public class MediaRequest implements FileHandler
     String mediaId=null;
     MirMedia mediaHandler;
     Database mediaStorage = null;
-    ProducerMedia mediaProducer = null;
 
     try {
       String fileName = filePart.getFileName();
@@ -154,7 +155,7 @@ public class MediaRequest implements FileHandler
       for (Iterator i=mediaValues.keySet().iterator(); i.hasNext(); ){
         String k=(String)i.next();
         String v=(String)mediaValues.get(k);
-        
+
         if (k.equals("description")) {
           String tmp = StringUtil.deleteForbiddenTags(v);
           mediaValues.put(k,StringUtil.deleteHTMLTableTags(tmp));
@@ -162,7 +163,7 @@ public class MediaRequest implements FileHandler
           //we don't want people fucking with the author/title, etc..
           mediaValues.put(k,StringUtil.removeHTMLTags(v));
         }
-        
+
       }
 
       String mediaTitle = (String)mediaValues.get("media_title"+fileNum);
@@ -246,12 +247,8 @@ public class MediaRequest implements FileHandler
       Entity mediaEnt = null;
       try {
         mediaEnt = (Entity)mediaStorage.getEntityClass().newInstance();
-        if (_produce == true) {
-          Class prodCls = Class.forName("mircoders.producer.Producer"+
-                                        mediaType.getValue("tablename"));
-          mediaProducer = (ProducerMedia)prodCls.newInstance();
-        }
-      } catch (Exception e) {
+      }
+      catch (Exception e) {
         throw new FileHandlerException("Error in MediaRequest: "+e.toString());
       }
 
@@ -264,25 +261,21 @@ public class MediaRequest implements FileHandler
         mediaHandler.set(filePart.getInputStream(), mediaEnt, mediaType);
       }
       catch (MirMediaException e) {
-        e.printStackTrace(System.out);
         throw new FileHandlerException(e.getMessage());
-      }
-      try {
-        if (_produce == true )
-          mediaProducer.handle(null, null, false, false, mediaId);
-      } catch (ModuleException e) {
-        // first try to delete it.. don't catch exception as we've already..
-        try { mediaStorage.delete(mediaId); } catch (Exception e2) {}
-        throw new FileHandlerException("error in MediaRequest: "+e.toString());
       }
 
       _returnList.add(mediaEnt);
     }
     catch (StorageObjectFailure e) {
       // first try to delete it.. don't catch exception as we've already..
-      try { mediaStorage.delete(mediaId); } catch (Exception e2) {}
+      try {
+        mediaStorage.delete(mediaId);
+      }
+      catch (Exception e2) {
+      }
       throw new FileHandlerException("error in MediaRequest: "+e.toString());
-    } catch (StorageObjectExc e) {
+    }
+    catch (StorageObjectExc e) {
       throw new FileHandlerException("error in MediaRequest: "+e.toString());
     } //end try/catch block
 

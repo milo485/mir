@@ -31,6 +31,7 @@
 
 package mircoders.storage;
 
+import mir.log.LoggerWrapper;
 import mir.entity.Entity;
 import mir.entity.EntityRelation;
 import mir.storage.Database;
@@ -65,6 +66,9 @@ public class DatabaseUploadedMedia extends Database implements StorageObject {
     throws StorageObjectFailure {
 
     super();
+
+    logger = new LoggerWrapper("Database.UploadedMedia");
+
     this.theTable="uploaded_media";
     this.theCoreTable="media";
     relationMediaType = new EntityRelation("to_media_type", "id", DatabaseMediaType.getInstance(), EntityRelation.TO_ONE);
@@ -79,15 +83,15 @@ public class DatabaseUploadedMedia extends Database implements StorageObject {
    * returns the media_type that belongs to the media item (via entityrelation)
    * where db-flag is_published is true
    */
-  public Entity getMediaType(Entity ent) 
-  	throws StorageObjectFailure, StorageObjectExc {
+  public Entity getMediaType(Entity ent) throws StorageObjectFailure {
     Entity type=null;
     try {
       type = relationMediaType.getOne(ent);
     }
-    catch (StorageObjectFailure e) {
-      theLog.printError("DatabaseUploadedMedia :: failed to get media_type");
-      throw new StorageObjectFailure("DatabaseUploadedMedia :: failed to get media_type", e);
+    catch (Throwable t) {
+      logger.error("DatabaseUploadedMedia :: failed to get media_type: " + t.getMessage());
+
+      throw new StorageObjectFailure("DatabaseUploadedMedia :: failed to get media_type", t);
     }
     return type;
   }

@@ -35,11 +35,13 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
+import mir.log.LoggerWrapper;
 import mir.entity.EntityList;
 import mir.storage.Database;
 import mir.storage.StorageObject;
 import mir.storage.StorageObjectExc;
 import mir.storage.StorageObjectFailure;
+
 import mircoders.entity.EntityContent;
 import mircoders.entity.EntityUploadedMedia;
 
@@ -47,7 +49,7 @@ import mircoders.entity.EntityUploadedMedia;
  * <b>implements abstract DB connection to the content_x_media SQL table
  *
  * @author RK, mir-coders group
- * @version $Id: DatabaseContentToMedia.java,v 1.12 2003/01/25 17:50:36 idfx Exp $
+ * @version $Id: DatabaseContentToMedia.java,v 1.13 2003/02/20 16:05:35 zapata Exp $
  *
  */
 
@@ -58,8 +60,8 @@ public class DatabaseContentToMedia extends Database implements StorageObject{
   // the following *has* to be sychronized cause this static method
   // could get preemted and we could end up with 2 instances of DatabaseFoo.
   // see the "Singletons with needles and thread" article at JavaWorld -mh
-  public synchronized static DatabaseContentToMedia getInstance()
-    throws StorageObjectFailure {
+  public synchronized static DatabaseContentToMedia getInstance() throws
+      StorageObjectFailure {
     if (instance == null) {
       instance = new DatabaseContentToMedia();
       instance.myselfDatabase = instance;
@@ -67,85 +69,90 @@ public class DatabaseContentToMedia extends Database implements StorageObject{
     return instance;
   }
 
-  private DatabaseContentToMedia()
-    throws StorageObjectFailure {
-
+  private DatabaseContentToMedia() throws StorageObjectFailure {
     super();
-    this.hasTimestamp = false;
-    this.theTable="content_x_media";
-    try { this.theEntityClass = Class.forName("mir.entity.GenericEntity"); }
-    catch (Exception e) { throw new StorageObjectFailure(e); }
+    logger = new LoggerWrapper("Database.ContentToMedia");
+
+    hasTimestamp = false;
+    theTable = "content_x_media";
+
+    theEntityClass = mir.entity.GenericEntity.class;
   }
 
   /**
    * get all the media-files belonging to a content entity
    *
    */
-  public EntityList getMedia(EntityContent content)
-    throws StorageObjectFailure {
-    EntityList returnList=null;
+  public EntityList getMedia(EntityContent content) throws StorageObjectFailure {
+    EntityList returnList = null;
     if (content != null) {
       // get all to_topic from media_x_topic
       String id = content.getId();
-      //this is not supported by mysql
-      String subselect = "id in (select media_id from " + theTable + " where content_id=" + id+")";
+      String subselect = "id in (select media_id from " + theTable +
+          " where content_id=" + id + ")";
 
       try {
         // media should stay in uploaded order. this is especially important
         // for photo stories which require a specific chronologic order.
         // this is why we have the the second parameter "id"
-        returnList = DatabaseMedia.getInstance().selectByWhereClause(subselect,"id",-1);
-      } catch (Exception e) {
-        theLog.printDebugInfo("-- get media failed " + e.toString());
+        returnList = DatabaseMedia.getInstance().selectByWhereClause(subselect,
+            "id", -1);
+      }
+      catch (Throwable e) {
+        logger.debug("-- get media failed " + e.toString());
         throw new StorageObjectFailure("-- get media failed ", e);
       }
     }
     return returnList;
   }
 
-  public boolean hasMedia(EntityContent content)
-    throws StorageObjectFailure, StorageObjectExc {
-    String wc = "content_id="+content.getId();
-    if( content != null) {
+  public boolean hasMedia(EntityContent content) throws StorageObjectFailure,
+      StorageObjectExc {
+    if (content != null) {
       try {
-        if(selectByWhereClause(wc,-1).size() == 0)
+        if (selectByWhereClause("content_id=" + content.getId(), -1).size() ==
+            0)
           return false;
         else
           return true;
-      } catch (Exception e) {
-        theLog.printError("-- hasMedia failed " + e.toString());
-        throw new StorageObjectFailure("-- hasMedia failed ",e);
       }
-    } else {
-      theLog.printError("-- hasMedia failed: content is NULL");
-      throw new StorageObjectExc("-- hasMedia failed: content is NULL");
+      catch (Exception e) {
+        logger.error("DatabaseContentToMedia.hasMedia: " + e.toString());
+        throw new StorageObjectFailure("DatabaseContentToMedia.hasMedia: " +
+                                       e.toString(), e);
+      }
+    }
+    else {
+      logger.error("DatabaseContentToMedia.hasMedia: content == null");
+      throw new StorageObjectExc(
+          "DatabaseContentToMedia.hasMedia: content == null");
     }
   }
-
-
-
 
   /**
    * get all the audio belonging to a content entity
    *
    */
-  public EntityList getAudio(EntityContent content)
-    throws StorageObjectFailure {
-    EntityList returnList=null;
+  public EntityList getAudio(EntityContent content) throws StorageObjectFailure {
+    EntityList returnList = null;
     if (content != null) {
       // get all to_topic from media_x_topic
       String id = content.getId();
       //this is not supported by mysql
-      String subselect = "id in (select media_id from " + theTable + " where content_id=" + id+")";
+      String subselect = "id in (select media_id from " + theTable +
+          " where content_id=" + id + ")";
 
       try {
         // media should stay in uploaded order. this is especially important
         // for photo stories which require a specific chronologic order.
         // this is why we have the the second parameter "id"
-        returnList = DatabaseAudio.getInstance().selectByWhereClause(subselect,"id",-1);
-      } catch (Exception e) {
-        theLog.printDebugInfo("-- get audio failed " + e.toString());
-        throw new StorageObjectFailure("-- get audio failed ",e);
+        returnList = DatabaseAudio.getInstance().selectByWhereClause(subselect,
+            "id", -1);
+      }
+      catch (Exception e) {
+        logger.error("DatabaseContentToMedia.getAudio: " + e.toString());
+        throw new StorageObjectFailure("DatabaseContentToMedia.getAudio: " +
+                                       e.toString(), e);
       }
     }
     return returnList;
@@ -155,23 +162,26 @@ public class DatabaseContentToMedia extends Database implements StorageObject{
    * get all the video belonging to a content entity
    *
    */
-  public EntityList getVideo(EntityContent content)
-    throws StorageObjectFailure {
-    EntityList returnList=null;
+  public EntityList getVideo(EntityContent content) throws StorageObjectFailure {
+    EntityList returnList = null;
     if (content != null) {
       // get all to_topic from media_x_topic
       String id = content.getId();
       //this is not supported by mysql
-      String subselect = "id in (select media_id from " + theTable + " where content_id=" + id+")";
+      String subselect = "id in (select media_id from " + theTable +
+          " where content_id=" + id + ")";
 
       try {
         // media should stay in uploaded order. this is especially important
         // for photo stories which require a specific chronologic order.
         // this is why we have the the second parameter "id"
-        returnList = DatabaseVideo.getInstance().selectByWhereClause(subselect,"id",-1);
-      } catch (Exception e) {
-        theLog.printDebugInfo("-- get video failed " + e.toString());
-        throw new StorageObjectFailure("-- get video failed ",e);
+        returnList = DatabaseVideo.getInstance().selectByWhereClause(subselect,
+            "id", -1);
+      }
+      catch (Exception e) {
+        logger.error("DatabaseContentToMedia.getVideo: " + e.toString());
+        throw new StorageObjectFailure("DatabaseContentToMedia.getVideo: " +
+                                       e.toString(), e);
       }
     }
     return returnList;
@@ -181,56 +191,59 @@ public class DatabaseContentToMedia extends Database implements StorageObject{
    * get all the images belonging to a content entity
    *
    */
-  public EntityList getImages(EntityContent content)
-    throws StorageObjectFailure {
-    EntityList returnList=null;
-    if (content != null) {
-      // get all to_topic from media_x_topic
-      String id = content.getId();
-      //this is not supported by mysql
-      String subselect = "id in (select media_id from " + theTable + " where content_id=" + id+")";
-
-      try {
-        // media should stay in uploaded order. this is especially important
-        // for photo stories which require a specific chronologic order.
-        // this is why we have the the second parameter "id"
-        returnList = DatabaseImages.getInstance().selectByWhereClause(subselect,"id",-1);
-      } catch (Exception e) {
-        theLog.printDebugInfo("-- get images failed " + e.toString());
-        throw new StorageObjectFailure("-- get images failed ",e);
-      }
-    }
-    return returnList;
-  }
-
-
-  /**
-   * get all the uploaded/other Media belonging to a content entity
-   *
-   */
-  public EntityList getOther(EntityContent content)
-    throws StorageObjectFailure
-  {
-    /** @todo this should only fetch published media / rk */
-
-    EntityList returnList=null;
+  public EntityList getImages(EntityContent content) throws
+      StorageObjectFailure {
+    EntityList returnList = null;
     if (content != null) {
       // get all to_topic from media_x_topic
       String id = content.getId();
       //this is not supported by mysql
       String subselect = "id in (select media_id from " + theTable +
-                                " where content_id=" + id+")";
+          " where content_id=" + id + ")";
+
+      try {
+        // media should stay in uploaded order. this is especially important
+        // for photo stories which require a specific chronologic order.
+        // this is why we have the the second parameter "id"
+        returnList = DatabaseImages.getInstance().selectByWhereClause(subselect,
+            "id", -1);
+      }
+      catch (Exception e) {
+        logger.error("DatabaseContentToMedia.getImages: " + e.toString());
+        throw new StorageObjectFailure("DatabaseContentToMedia.getImages: " +
+                                       e.toString(), e);
+      }
+    }
+    return returnList;
+  }
+
+  /**
+   * get all the uploaded/other Media belonging to a content entity
+   *
+   */
+  public EntityList getOther(EntityContent content) throws StorageObjectFailure {
+    /** @todo this should only fetch published media / rk */
+
+    EntityList returnList = null;
+    if (content != null) {
+      // get all to_topic from media_x_topic
+      String id = content.getId();
+      //this is not supported by mysql
+      String subselect = "id in (select media_id from " + theTable +
+          " where content_id=" + id + ")";
 
       try {
         // media should stay in uploaded order. this is especially important
         // for photo stories which require a specific chronologic order.
         // this is why we have the the second parameter "id"
         returnList = DatabaseOther.getInstance().selectByWhereClause(subselect,
-                                                                    "id");
-      } catch (Exception e) {
+            "id");
+      }
+      catch (Exception e) {
         e.printStackTrace();
-        theLog.printDebugInfo("-- get Other failed " + e.toString());
-        throw new StorageObjectFailure("-- get Other failed ",e);                                        
+        logger.error("DatabaseContentToMedia.getOther: " + e.toString());
+        throw new StorageObjectFailure("DatabaseContentToMedia.getOther: " +
+                                       e.toString(), e);
       }
     }
     return returnList;
@@ -240,280 +253,312 @@ public class DatabaseContentToMedia extends Database implements StorageObject{
    * get all the uploaded/other Media belonging to a content entity
    *
    */
-  public EntityList getUploadedMedia(EntityContent content)
-    throws StorageObjectFailure
-  {
+  public EntityList getUploadedMedia(EntityContent content) throws
+      StorageObjectFailure {
     /** @todo this should only fetch published media / rk */
 
-    EntityList returnList=null;
+    EntityList returnList = null;
     if (content != null) {
       // get all to_topic from media_x_topic
       String id = content.getId();
       //this is not supported by mysql
       String subselect = "id in (select media_id from " + theTable +
-                                " where content_id=" + id+")";
+          " where content_id=" + id + ")";
 
       try {
-        returnList = DatabaseUploadedMedia.getInstance().selectByWhereClause(subselect,
-                                                                    "id");
-      } catch (Exception e) {
+        returnList = DatabaseUploadedMedia.getInstance().selectByWhereClause(
+            subselect,
+            "id");
+      }
+      catch (Exception e) {
         e.printStackTrace();
-        theLog.printDebugInfo("-- get uploadedMedia failed " + e.toString());
-        throw new StorageObjectFailure("-- get uploadedMedia failed ", e);
+        logger.error("DatabaseContentToMedia.getUploadedMedia: " + e.toString());
+        throw new StorageObjectFailure(
+            "DatabaseContentToMedia.getUploadedMedia: " + e.toString(), e);
       }
     }
     return returnList;
   }
 
-
-  public void setMedia(String contentId, String[] mediaId)
-    throws StorageObjectFailure {
-    if (contentId == null){
+  public void setMedia(String contentId, String[] mediaId) throws
+      StorageObjectFailure {
+    if (contentId == null) {
       return;
     }
-    if (mediaId==null || mediaId[0]==null) {
+    if (mediaId == null || mediaId[0] == null) {
       return;
     }
     //first delete all row with content_id=contentId
-    String sql = "delete from "+ theTable +" where content_id=" + contentId;
+    String sql = "delete from " + theTable + " where content_id=" + contentId;
 
-    Connection con=null;Statement stmt=null;
+    Connection con = null;
+    Statement stmt = null;
     try {
       con = getPooledCon();
       // should be a preparedStatement because is faster
       stmt = con.createStatement();
-      ResultSet rs = executeSql(stmt,sql);
-    } catch (Exception e) {
-      theLog.printDebugInfo("-- set media failed -- delete");
-      throw new StorageObjectFailure("-- set media failed -- delete",e);
-    } finally {
-      freeConnection(con,stmt);
+      ResultSet rs = executeSql(stmt, sql);
+    }
+    catch (Exception e) {
+      logger.error("-- set media failed -- delete");
+      throw new StorageObjectFailure("-- set media failed -- delete", e);
+    }
+    finally {
+      freeConnection(con, stmt);
     }
 
     //now insert
     //first delete all row with content_id=contentId
-    for (int i=0;i<mediaId.length;i++) {
-      sql = "insert into "+ theTable +" (content_id,media_id) values ("
-            + contentId + "," + mediaId[i] + ")";
+    for (int i = 0; i < mediaId.length; i++) {
+      sql = "insert into " + theTable + " (content_id,media_id) values ("
+          + contentId + "," + mediaId[i] + ")";
       try {
         con = getPooledCon();
         // should be a preparedStatement because is faster
         stmt = con.createStatement();
-        int rs = executeUpdate(stmt,sql);
-      } catch (Exception e) {
-        theLog.printDebugInfo("-- set topics failed -- insert");
-        throw new StorageObjectFailure("-- set topics failed -- insert ",e);
-      } finally {
-        freeConnection(con,stmt);
+        int rs = executeUpdate(stmt, sql);
+      }
+      catch (Exception e) {
+        logger.error("-- set topics failed -- insert");
+        throw new StorageObjectFailure("-- set topics failed -- insert ", e);
+      }
+      finally {
+        freeConnection(con, stmt);
       }
     }
   }
 
-  public void addMedia(String contentId, String mediaId)
-    throws StorageObjectFailure {
+  public void addMedia(String contentId, String mediaId) throws
+      StorageObjectFailure {
     if (contentId == null && mediaId == null) {
       return;
     }
 
-    Connection con=null;Statement stmt=null;
+    Connection con = null;
+    Statement stmt = null;
     //now insert
 
-    String sql = "insert into "+ theTable +" (content_id,media_id) values ("
-          + contentId + "," + mediaId + ")";
+    String sql = "insert into " + theTable + " (content_id,media_id) values ("
+        + contentId + "," + mediaId + ")";
     try {
       con = getPooledCon();
       // should be a preparedStatement because is faster
       stmt = con.createStatement();
-      int rs = executeUpdate(stmt,sql);
-    } catch (Exception e) {
-      theLog.printDebugInfo("-- add media failed -- insert");
-      throw new StorageObjectFailure("-- add media failed -- insert ",e);
-    } finally {
-      freeConnection(con,stmt);
+      int rs = executeUpdate(stmt, sql);
+    }
+    catch (Exception e) {
+      logger.error("-- add media failed -- insert");
+      throw new StorageObjectFailure("-- add media failed -- insert ", e);
+    }
+    finally {
+      freeConnection(con, stmt);
     }
   }
 
-  public void setMedia(String contentId, String mediaId)
-    throws StorageObjectFailure {
+  public void setMedia(String contentId, String mediaId) throws
+      StorageObjectFailure {
     if (contentId == null && mediaId == null) {
       return;
     }
     //first delete all row with content_id=contentId
-    String sql = "delete from "+ theTable +" where content_id=" + contentId;
+    String sql = "delete from " + theTable + " where content_id=" + contentId;
 
-    Connection con=null;Statement stmt=null;
+    Connection con = null;
+    Statement stmt = null;
     try {
       con = getPooledCon();
       // should be a preparedStatement because is faster
       stmt = con.createStatement();
-      int rs = executeUpdate(stmt,sql);
-    } catch (Exception e) {
-      theLog.printDebugInfo("-- set media failed -- delete");
-      throw new StorageObjectFailure("-- set media failed -- delete ",e);
-    } finally {
-      freeConnection(con,stmt);
+      int rs = executeUpdate(stmt, sql);
+    }
+    catch (Exception e) {
+      logger.error("-- set media failed -- delete");
+      throw new StorageObjectFailure("-- set media failed -- delete ", e);
+    }
+    finally {
+      freeConnection(con, stmt);
     }
 
     //now insert
     //first delete all row with content_id=contentId
 
-    sql = "insert into "+ theTable +" (content_id,media_id) values ("
-          + contentId + "," + mediaId + ")";
+    sql = "insert into " + theTable + " (content_id,media_id) values ("
+        + contentId + "," + mediaId + ")";
     try {
       con = getPooledCon();
       // should be a preparedStatement because is faster
       stmt = con.createStatement();
-      int rs = executeUpdate(stmt,sql);
-    } catch (Exception e) {
-      theLog.printDebugInfo("-- set media failed -- insert");
-      throw new StorageObjectFailure("-- set media failed -- insert ",e);
-    } finally {
-      freeConnection(con,stmt);
+      int rs = executeUpdate(stmt, sql);
+    }
+    catch (Exception e) {
+      logger.error("-- set media failed -- insert");
+      throw new StorageObjectFailure("-- set media failed -- insert ", e);
+    }
+    finally {
+      freeConnection(con, stmt);
     }
   }
 
-  public void deleteByContentId(String contentId)
-    throws StorageObjectFailure {
+  public void deleteByContentId(String contentId) throws StorageObjectFailure {
     if (contentId == null) {
       //theLog.printDebugInfo("-- delete topics failed -- no content id");
       return;
     }
     //delete all row with content_id=contentId
-    String sql = "delete from "+ theTable +" where content_id=" + contentId;
+    String sql = "delete from " + theTable + " where content_id=" + contentId;
 
-    Connection con=null;Statement stmt=null;
+    Connection con = null;
+    Statement stmt = null;
     try {
       con = getPooledCon();
       // should be a preparedStatement because is faster
       stmt = con.createStatement();
-      int rs = executeUpdate(stmt,sql);
-    } catch (Exception e) {
-      theLog.printDebugInfo("-- delete by contentId failed  ");
-      throw new StorageObjectFailure("-- delete by content id failed -- delete ",e);
-    } finally {
-      freeConnection(con,stmt);
+      int rs = executeUpdate(stmt, sql);
+    }
+    catch (Exception e) {
+      logger.error("-- delete by contentId failed  ");
+      throw new StorageObjectFailure(
+          "-- delete by content id failed -- delete ", e);
+    }
+    finally {
+      freeConnection(con, stmt);
     }
   }
 
-  public void deleteByMediaId(String mediaId)
-    throws StorageObjectFailure {
+  public void deleteByMediaId(String mediaId) throws StorageObjectFailure {
     if (mediaId == null) {
       //theLog.printDebugInfo("-- delete topics failed -- no topic id");
       return;
     }
     //delete all row with content_id=contentId
-    String sql = "delete from "+ theTable +" where media_id=" + mediaId;
+    String sql = "delete from " + theTable + " where media_id=" + mediaId;
 
-    Connection con=null;Statement stmt=null;
+    Connection con = null;
+    Statement stmt = null;
     try {
       con = getPooledCon();
       // should be a preparedStatement because is faster
       stmt = con.createStatement();
-      int rs = executeUpdate(stmt,sql);
-      theLog.printDebugInfo("-- delete media success ");
-    } catch (Exception e) {
-      theLog.printDebugInfo("-- delete media failed ");
-      throw new StorageObjectFailure("-- delete by media id failed -- ",e);
-    } finally {
-      freeConnection(con,stmt);
+      int rs = executeUpdate(stmt, sql);
+      logger.debug("-- delete media success ");
+    }
+    catch (Exception e) {
+      logger.error("-- delete media failed ");
+      throw new StorageObjectFailure("-- delete by media id failed -- ", e);
+    }
+    finally {
+      freeConnection(con, stmt);
     }
   }
 
-  public void delete(String contentId, String mediaId)
-    throws StorageObjectFailure {
-    if (mediaId == null || contentId==null) {
-      theLog.printDebugInfo("-- delete media failed -- missing parameter");
+  public void delete(String contentId, String mediaId) throws
+      StorageObjectFailure {
+    if (mediaId == null || contentId == null) {
+      logger.debug("-- delete media failed -- missing parameter");
       return;
     }
     //delete all row with content_id=contentId and media_id=mediaId
-    String sql = "delete from "+ theTable +" where media_id=" + mediaId + " and content_id= "+contentId;
+    String sql = "delete from " + theTable + " where media_id=" + mediaId +
+        " and content_id= " + contentId;
 
-    Connection con=null;Statement stmt=null;
+    Connection con = null;
+    Statement stmt = null;
     try {
       con = getPooledCon();
       // should be a preparedStatement because is faster
       stmt = con.createStatement();
-      int rs = executeUpdate(stmt,sql);
-      theLog.printDebugInfo("-- delete content_x_media success ");
-    } catch (Exception e) {
-      theLog.printDebugInfo("-- delete content_x_media failed ");
-      throw new StorageObjectFailure("-- delete content_x_media failed -- ",e );
-    } finally {
-      freeConnection(con,stmt);
+      int rs = executeUpdate(stmt, sql);
+      logger.debug("-- delete content_x_media success ");
+    }
+    catch (Exception e) {
+      logger.error("-- delete content_x_media failed ");
+      throw new StorageObjectFailure("-- delete content_x_media failed -- ", e);
+    }
+    finally {
+      freeConnection(con, stmt);
     }
   }
 
-
-  public EntityList getContent(EntityUploadedMedia media)
-    throws StorageObjectFailure {
-    EntityList returnList=null;
+  public EntityList getContent(EntityUploadedMedia media) throws
+      StorageObjectFailure {
+    EntityList returnList = null;
     if (media != null) {
       String id = media.getId();
-      String select = "select content_id from " + theTable + " where media_id=" + id;
+      String select = "select content_id from " + theTable + " where media_id=" +
+          id;
 
       // execute select statement
-      Connection con=null;Statement stmt=null;
+      Connection con = null;
+      Statement stmt = null;
       try {
         con = getPooledCon();
         // should be a preparedStatement because is faster
         stmt = con.createStatement();
-        ResultSet rs = executeSql(stmt,select);
-        if (rs!=null) {
-          String mediaSelect= "id IN (";
-          boolean first=true;
+        ResultSet rs = executeSql(stmt, select);
+        if (rs != null) {
+          String mediaSelect = "id IN (";
+          boolean first = true;
           while (rs.next()) {
-            if (first==false) mediaSelect+=",";
+            if (first == false)
+              mediaSelect += ",";
             mediaSelect += rs.getString(1);
-            first=false;
+            first = false;
           }
-          mediaSelect+=")";
-          if (first==false)
-            returnList = DatabaseContent.getInstance().selectByWhereClause(mediaSelect,-1);
+          mediaSelect += ")";
+          if (first == false)
+            returnList = DatabaseContent.getInstance().selectByWhereClause(
+                mediaSelect, -1);
         }
       }
       catch (Exception e) {
-        theLog.printDebugInfo("-- get content failed");
+        logger.error("-- get content failed");
         throw new StorageObjectFailure("-- get content failed -- ", e);
       }
-      finally { freeConnection(con,stmt);}
+      finally {
+        freeConnection(con, stmt);
+      }
     }
     return returnList;
   }
 
-/**
- * Returns a EntityList with all content-objects having a relation to a media
- */
+  /**
+   * Returns a EntityList with all content-objects having a relation to a media
+   */
 
-public EntityList getContent()
-    throws StorageObjectFailure {
-    EntityList returnList=null;
+  public EntityList getContent() throws StorageObjectFailure {
+    EntityList returnList = null;
 
     String select = "select distinct content_id from " + theTable;
     // execute select statement
-    Connection con=null;Statement stmt=null;
+    Connection con = null;
+    Statement stmt = null;
     try {
       con = getPooledCon();
       // should be a preparedStatement because is faster
       stmt = con.createStatement();
-      ResultSet rs = executeSql(stmt,select);
-      if (rs!=null) {
-        String mediaSelect= "id IN (";
-        boolean first=true;
+      ResultSet rs = executeSql(stmt, select);
+      if (rs != null) {
+        String mediaSelect = "id IN (";
+        boolean first = true;
         while (rs.next()) {
-          if (first==false) mediaSelect+=",";
+          if (first == false)
+            mediaSelect += ",";
           mediaSelect += rs.getString(1);
-          first=false;
+          first = false;
         }
-        mediaSelect+=")";
-        if (first==false)
-          returnList = DatabaseContent.getInstance().selectByWhereClause(mediaSelect,"webdb_lastchange desc");
+        mediaSelect += ")";
+        if (first == false)
+          returnList = DatabaseContent.getInstance().selectByWhereClause(
+              mediaSelect, "webdb_lastchange desc");
       }
     }
     catch (Exception e) {
-        theLog.printDebugInfo("-- get content failed");
-        throw new StorageObjectFailure("-- get content failed -- ",e );
+      logger.error("-- get content failed");
+      throw new StorageObjectFailure("-- get content failed -- ", e);
     }
-    finally { freeConnection(con,stmt);}
+    finally {
+      freeConnection(con, stmt);
+    }
 
     return returnList;
   }

@@ -36,29 +36,30 @@
 
 package  mir.entity;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 
-import mir.config.MirPropertiesConfiguration;
-import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
-import mir.misc.Logfile;
-import mir.misc.StringUtil;
-import mir.storage.StorageObject;
-import mir.storage.StorageObjectExc;
-import mir.storage.StorageObjectFailure;
 import freemarker.template.SimpleScalar;
 import freemarker.template.TemplateHashModel;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateModelRoot;
 
+import mir.config.MirPropertiesConfiguration;
+import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
+import mir.log.LoggerWrapper;
+import mir.misc.StringUtil;
+import mir.storage.StorageObject;
+import mir.storage.StorageObjectExc;
+import mir.storage.StorageObjectFailure;
+
 /**
  * Base Class of Entities
  * Interfacing TemplateHashModel and TemplateModelRoot to be freemarker compliant
  *
- * @version $Id: Entity.java,v 1.13 2003/01/25 17:45:17 idfx Exp $
+ * @version $Id: Entity.java,v 1.15 2003/02/23 05:00:11 zapata Exp $
  * @author rk
  *
  */
@@ -66,32 +67,33 @@ import freemarker.template.TemplateModelRoot;
 public class Entity implements TemplateHashModel, TemplateModelRoot
 {
   protected static MirPropertiesConfiguration configuration;
-  protected static Logfile    theLog;
-  
-  private boolean             changed;
-  protected HashMap           theValuesHash;   // tablekey / value
-  protected StorageObject     theStorageObject;
-  protected ArrayList         streamedInput=null;
-  
 
-    static {      
-      try {
-        configuration = MirPropertiesConfiguration.instance();
-      } catch (PropertiesConfigExc e) {
-        e.printStackTrace();
-      }
-      theLog = Logfile.getInstance(configuration.getStringWithHome("Entity.Logfile"));
-    }
+  private boolean changed;
+  protected HashMap theValuesHash; // tablekey / value
+  protected StorageObject theStorageObject;
+  protected List streamedInput = null;
+  protected LoggerWrapper logger;
 
-    public Entity() {
-      this.changed = false;
+  static {
+    try {
+      configuration = MirPropertiesConfiguration.instance();
     }
+    catch (PropertiesConfigExc e) {
+      throw new RuntimeException(e.getMessage());
+    }
+  }
+
+  public Entity() {
+    logger = new LoggerWrapper("Entity");
+
+    this.changed = false;
+  }
 
   /**
    * Constructor
    * @param StorageObject The StorageObject of the Entity.
    */
-  public Entity (StorageObject StorageObject) {
+  public Entity(StorageObject StorageObject) {
     this();
     setStorage(StorageObject);
   }
@@ -99,7 +101,7 @@ public class Entity implements TemplateHashModel, TemplateModelRoot
   /*
    * Sets the StorageObject of the Entity.
    */
-  public void setStorage (StorageObject storage) {
+  public void setStorage(StorageObject storage) {
     this.theStorageObject = storage;
   }
 
@@ -108,75 +110,72 @@ public class Entity implements TemplateHashModel, TemplateModelRoot
    * @param theStringValues HashMap containing the new values of the Entity
    */
 
-  public void setValues(HashMap theStringValues)
-  {
+  public void setValues(HashMap theStringValues) {
     /** @todo should be synchronized */
-    if (theStringValues!=null) {
+    if (theStringValues != null) {
       theValuesHash = new HashMap();
       String aKey;
       Set set = theStringValues.keySet();
       Iterator it = set.iterator();
       int size = set.size();
       for (int i = 0; i < size; i++) {
-        aKey = (String)it.next();
-        theValuesHash.put(aKey, (String)theStringValues.get(aKey));
+        aKey = (String) it.next();
+        theValuesHash.put(aKey, (String) theStringValues.get(aKey));
       }
     }
-    else theLog.printWarning("Entity.setValues called with null HashMap");
- }
+    else
+      logger.warn("Entity.setValues called with null HashMap");
+  }
 
   /**
    * Returns whether the content of the Entity has changed.
    * @return true wenn ja, sonst false
    */
-  public boolean changed () {
-    return  changed;
+  public boolean changed() {
+    return changed;
   }
 
   /**
    * Returns the primary key of the Entity.
    * @return String Id
    */
-  public String getId () {
-    return  (String) getValue(theStorageObject.getIdName());
+  public String getId() {
+    return (String) getValue(theStorageObject.getIdName());
   }
 
   /**
    * Defines the primary key of the Entity
    * @param id
    */
-  public void setId (String id) {
+  public void setId(String id) {
     theValuesHash.put(theStorageObject.getIdName(), id);
-      }
+  }
 
   /**
    * Returns the value of a field by field name.
    * @param field The name of the field
    * @return value of the field
    */
-  public String getValue (String field) {
+  public String getValue(String field) {
     String returnValue = null;
-    if (field != null)
-    {
-      if (field.equals("webdb_create_formatted"))
-      {
+    if (field != null) {
+      if (field.equals("webdb_create_formatted")) {
         if (hasValueForField("webdb_create"))
-          returnValue=StringUtil.dateToReadableDate(getValue("webdb_create"));
+          returnValue = StringUtil.dateToReadableDate(getValue("webdb_create"));
       }
-      else if (field.equals("webdb_lastchange_formatted"))
-      {
+      else if (field.equals("webdb_lastchange_formatted")) {
         if (hasValueForField("webdb_lastchange"))
-          returnValue=StringUtil.dateToReadableDate(getValue("webdb_lastchange"));
+          returnValue = StringUtil.dateToReadableDate(getValue(
+              "webdb_lastchange"));
       }
       else
-        returnValue = (String)theValuesHash.get(field);
+        returnValue = (String) theValuesHash.get(field);
     }
     return returnValue;
   }
 
-  public boolean hasValueForField(String field)
-  {
-    if (theValuesHash!=null)
+  public boolean hasValueForField(String field) {
+    if (theValuesHash != null)
       return theValuesHash.containsKey(field);
     return false;
   }
@@ -186,21 +185,21 @@ public class Entity implements TemplateHashModel, TemplateModelRoot
    * @return Primary Key of the Entity
    * @exception StorageObjectException
    */
-  public String insert () throws StorageObjectExc {
-    theLog.printDebugInfo("Entity: trying to insert ...");
+  public String insert() throws StorageObjectExc {
+    logger.debug("Entity: trying to insert ...");
     if (theStorageObject != null) {
-      return theStorageObject.insert((Entity)this);
+      return theStorageObject.insert( (Entity)this);
     }
     else
-      throw  new StorageObjectExc("Kein StorageObject gesetzt!");
+      throw new StorageObjectExc("theStorageObject == null!");
   }
 
   /**
    * Saves changes of this Entity to the database
    * @exception StorageObjectException
    */
-  public void update () throws StorageObjectFailure {
-    theStorageObject.update((Entity)this);
+  public void update() throws StorageObjectFailure {
+    theStorageObject.update( (Entity)this);
   }
 
   /**
@@ -210,13 +209,13 @@ public class Entity implements TemplateHashModel, TemplateModelRoot
    * @param theValue The new value of the field
    * @exception StorageObjectException
    */
-  public void setValueForProperty (String theProp, String theValue)
-    throws StorageObjectFailure {
+  public void setValueForProperty(String theProp, String theValue) throws
+      StorageObjectFailure {
     this.changed = true;
     if (isField(theProp))
       theValuesHash.put(theProp, theValue);
     else {
-      theLog.printWarning("Property not found: " + theProp+theValue);
+      logger.warn("Entity.setValueForProperty: Property not found: " + theProp + " (" + theValue + ")");
     }
 
   }
@@ -224,76 +223,74 @@ public class Entity implements TemplateHashModel, TemplateModelRoot
   /**
    * Returns the field names of the Entity as ArrayListe.
    * @return ArrayList with field names
-   * @exception StorageObjectException is throuwn if database access was impossible
+       * @exception StorageObjectException is throuwn if database access was impossible
    */
-  public ArrayList getFields () throws StorageObjectFailure {
-    return  theStorageObject.getFields();
-    }
+  public List getFields() throws StorageObjectFailure {
+    return theStorageObject.getFields();
+  }
 
   /**
    * Returns an int[] with the types of the fields
    * @return int[] that contains the types of the fields
    * @exception StorageObjectException
    */
-  public int[] getTypes () throws StorageObjectFailure {
-    return  theStorageObject.getTypes();
-    }
+  public int[] getTypes() throws StorageObjectFailure {
+    return theStorageObject.getTypes();
+  }
 
   /**
    * Returns an ArrayList with field names
    * @return List with field names
    * @exception StorageObjectException
    */
-  public ArrayList getLabels () throws StorageObjectFailure {
-    return  theStorageObject.getLabels();
-    }
+  public List getLabels() throws StorageObjectFailure {
+    return theStorageObject.getLabels();
+  }
 
   /**
    * Returns a Hashmap with all values of the Entity.
    * @return HashMap with field name as key and the corresponding values
    *
-   * @deprecated This method is deprecated and will be deleted in the next release.
+       * @deprecated This method is deprecated and will be deleted in the next release.
    *  Entity interfaces freemarker.template.TemplateHashModel now and can
    *  be used in the same way as SimpleHash.
-
    */
-    public HashMap getValues() {
-      theLog.printWarning("## using deprecated Entity.getValues() - a waste of resources");
-      return theValuesHash;
-    }
+  public HashMap getValues() {
+    logger.warn("using deprecated Entity.getValues() - a waste of resources");
+    return theValuesHash;
+  }
 
-    /**
-     * Returns an ArrayList with all database fields that can
-     * be evaluated as streamedInput.
-     * Could be automated by the types (blob, etc.)
-     * Until now to be created manually in the inheriting class
-     *
-     *  Liefert einen ArrayList mit allen Datenbankfeldern, die
-     *  als streamedInput ausgelesen werden muessen.
-     *  Waere automatisierbar ueber die types (blob, etc.)
-     *  Bisher manuell anzulegen in der erbenden Klasse
-     */
+  /**
+   * Returns an ArrayList with all database fields that can
+   * be evaluated as streamedInput.
+   * Could be automated by the types (blob, etc.)
+   * Until now to be created manually in the inheriting class
+   *
+   *  Liefert einen ArrayList mit allen Datenbankfeldern, die
+   *  als streamedInput ausgelesen werden muessen.
+   *  Waere automatisierbar ueber die types (blob, etc.)
+   *  Bisher manuell anzulegen in der erbenden Klasse
+   */
 
-  public ArrayList streamedInput() {
+  public List streamedInput() {
     return streamedInput;
   }
 
-   /** Returns whether fieldName is a valid field name of this Entity.
+  /** Returns whether fieldName is a valid field name of this Entity.
    * @param fieldName
    * @return true in case fieldName is a field name, else false.
    * @exception StorageObjectException
    */
-  public boolean isField (String fieldName) throws StorageObjectFailure {
-    return  theStorageObject.getFields().contains(fieldName);
+  public boolean isField(String fieldName) throws StorageObjectFailure {
+    return theStorageObject.getFields().contains(fieldName);
   }
 
+  protected void throwStorageObjectFailure(Throwable e, String wo) throws
+      StorageObjectFailure {
+    logger.error(e.toString() + " function: " + wo);
+    e.printStackTrace(logger.asPrintWriter(logger.DEBUG_MESSAGE));
 
-
-  protected void throwStorageObjectFailure (Exception e, String wo) 
-  	throws StorageObjectFailure {
-    theLog.printError( e.toString() + " Funktion: "+ wo);
-    e.printStackTrace(System.out);
-    throw  new StorageObjectFailure("Storage Object Exception in entity", e);
+    throw new StorageObjectFailure("Storage Object Exception in entity", e);
   }
 
   // Now implements freemarkers TemplateHashModel
@@ -301,32 +298,25 @@ public class Entity implements TemplateHashModel, TemplateModelRoot
   // 1. public boolean isEmpty() throws TemplateModelException
   // 2. public TemplateModel get(java.lang.String key) throws TemplateModelException
 
-  public boolean isEmpty() throws TemplateModelException
-  {
-    return (theValuesHash==null || theValuesHash.isEmpty()) ? true : false;
+  public boolean isEmpty() throws TemplateModelException {
+    return (theValuesHash == null || theValuesHash.isEmpty()) ? true : false;
   }
 
-  public TemplateModel get(java.lang.String key) throws TemplateModelException
-  {
-                return new SimpleScalar(getValue(key));
+  public TemplateModel get(java.lang.String key) throws TemplateModelException {
+    return new SimpleScalar(getValue(key));
   }
 
-        public void put(java.lang.String key, TemplateModel model)
-  {
+  public void put(java.lang.String key, TemplateModel model) {
     // putting should only take place via setValue and is limited to the
     // database fields associated with the entity. no additional freemarker
     // stuff will be available via Entity.
-    theLog.printWarning("### put is called on entity! - the values will be lost!");
+    logger.warn("put is called on entity! - the values will be lost!");
   }
 
-  public void remove(java.lang.String key)
-  {
+  public void remove(java.lang.String key) {
     // do we need this?
   }
 
-
   //////////////////////////////////////////////////////////////////////////////////
-
-
 }
 

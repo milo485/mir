@@ -69,7 +69,7 @@ import freemarker.template.SimpleList;
  *  ServletModuleBilder -
  *  liefert HTML fuer Bilder
  *
- * @version $Id: ServletModuleUploadedMedia.java,v 1.15 2003/01/25 17:50:36 idfx Exp $
+ * @version $Id: ServletModuleUploadedMedia.java,v 1.16 2003/02/23 05:00:15 zapata Exp $
  * @author RK, the mir-coders group
  */
 
@@ -91,7 +91,7 @@ public abstract class ServletModuleUploadedMedia
           throws ServletModuleException, ServletModuleUserException {
     try {
       EntityUsers user = _getUser(req);
-      MediaRequest mediaReq =  new MediaRequest(user.getId(), false, false);
+      MediaRequest mediaReq =  new MediaRequest(user.getId(), false);
       WebdbMultipartRequest mp = new WebdbMultipartRequest(req, (FileHandler)mediaReq);
       EntityList mediaList = mediaReq.getEntityList();
 

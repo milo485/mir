@@ -16,23 +16,11 @@
    
   <table border="0" cellpadding="2" cellspacing="1">
     <tr class="pink">
-      <td>
-        search in field
-      </td>
-      <td>
-        for value
-      </td>
-      <td>
-        published
-      </td>
-<comment>      
-      <td>
-        status
-      </td>
-</comment>      
-      <td>
-        order
-      </td>
+      <td>${lang("commentsearch.field")}</td>
+      <td>${lang("commentsearch.value")}</td>
+      <td>${lang("commentsearch.publishedstate")}</td>
+      <td>${lang("commentsearch.status")}</td>
+      <td>${lang("commentsearch.order")}</td>
     </tr>
     <tr>
       <td>
@@ -41,36 +29,35 @@
 
       <td>
   	      <select name="searchfield">
-            <option value="title"<if searchfield=="title"> selected</if>>${lang("comment.title")}</option>
-            <option value="creator"<if searchfield=="creator"> selected</if>>${lang("comment.creator")}</option>
-            <option value="description"<if searchfield=="description"> selected</if>>${lang("comment.text")}</option>
+            <option value="title"<if searchfield=="title"> selected</if>>${lang("commentsearch.field.title")}</option>
+            <option value="creator"<if searchfield=="creator"> selected</if>>${lang("commentsearch.field.creator")}</option>
+            <option value="description"<if searchfield=="description"> selected</if>>${lang("commentsearch.field.description")}</option>
           </select>
       </td>
       <td>
           <select name="searchispublished">
             <option value="">--</option>
-            <option value="0" <if searchispublished=="0"> selected</if>>${lang("commentlist.hidden")}</option>
-            <option value="1" <if searchispublished=="1"> selected</if>>${lang("commentlist.published")}</option>
+            <option value="0" <if searchispublished=="0"> selected</if>>${lang("commentsearch.publishedstate.hidden")}</option>
+            <option value="1" <if searchispublished=="1"> selected</if>>${lang("commentsearch.publishedstate.published")}</option>
           </select>
       </td>
-<comment>
       <td>
           <select name="searchstatus">
             <option value="">--</option>
-            <option value="0" <if searchstatus=="0"> selected</if>>${lang("commentlist.hidden")}</option>
-            <option value="1" <if searchstatus=="1"> selected</if>>${lang("commentlist.published")}</option>
+            <list commentstatuses as cs>
+              <option value="${cs.id}" <if searchstatus==cs.id> selected</if>>${lang("commentstatus." + cs.name)}</option>
+            </list>
           </select>
       </td>
-</comment>
       <td>
           <select name="searchorder">
-            <option value="datedesc" <if searchorder=="datedesc"> selected</if>>${lang("commentlist.order.datedesc")}</option>
-            <option value="dateasc" <if searchorder=="dateasc"> selected</if>>${lang("commentlist.order.dateasc")}</option>
-            <option value="articletitle" <if searchorder=="articletitle"> selected</if>>${lang("commentlist.order.articletitle")}</option>
+            <option value="datedesc" <if searchorder=="datedesc"> selected</if>>${lang("commentsearch.order.datedesc")}</option>
+            <option value="dateasc" <if searchorder=="dateasc"> selected</if>>${lang("commentsearch.order.dateasc")}</option>
+            <option value="articletitle" <if searchorder=="articletitle"> selected</if>>${lang("commentsearch.order.articletitle")}</option>
           </select>
       </td>
       <td>
-          <input type="submit" name="search" value="${lang("commentlist.search")}">
+          <input class="majorbutton" type="submit" name="search" value="${lang("commentsearch.searchbutton")}">
       </td>
     </tr>
   </table>

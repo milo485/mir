@@ -36,15 +36,17 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import freemarker.template.SimpleList;
+
+import mir.log.LoggerWrapper;
+
 import mir.config.MirPropertiesConfiguration;
 import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
 import mir.entity.Entity;
 import mir.media.MirMedia;
 import mir.media.MirMediaException;
 import mir.misc.FileUtil;
-import mir.misc.Logfile;
 import mir.misc.StringUtil;
-import freemarker.template.SimpleList;
 
 
 /**
@@ -64,7 +66,7 @@ import freemarker.template.SimpleList;
  *
  * @see mir.media.MirMedia
  * @author mh <mh@nadir.org>
- * @version $Id: MediaHandlerGeneric.java,v 1.13 2003/01/25 17:50:35 idfx Exp $
+ * @version $Id: MediaHandlerGeneric.java,v 1.14 2003/02/23 05:00:14 zapata Exp $
  */
 
 public class MediaHandlerGeneric implements MirMedia
@@ -72,9 +74,9 @@ public class MediaHandlerGeneric implements MirMedia
     protected static MirPropertiesConfiguration configuration;
     protected static String imageHost;
     protected static String imageRoot;
-    protected static Logfile theLog;
-    private final String sepChar = File.separator;
-    
+
+    protected LoggerWrapper logger;
+
     static {
       try {
         configuration = MirPropertiesConfiguration.instance();
@@ -83,27 +85,28 @@ public class MediaHandlerGeneric implements MirMedia
       }
       imageHost = configuration.getString("Producer.Image.Host");
       imageRoot = configuration.getString("Producer.ImageRoot");
-      theLog = Logfile.getInstance(configuration.getStringWithHome("log/media.log"));
     }
 
-    public void set (InputStream in, Entity ent, Entity mediaTypeEnt )
-        throws MirMediaException {
+    public MediaHandlerGeneric() {
+      logger = new LoggerWrapper("Media.Generic");
+    }
 
-        String ext = mediaTypeEnt.getValue("name");
-        String mediaFname = ent.getId()+"."+ext;
-        String date = ent.getValue("date");
-        String datePath = StringUtil.webdbDate2path(date);
-        try {
-            long size = FileUtil.write(getStoragePath()+sepChar+datePath+
-                                      sepChar+mediaFname, in);
-            ent.setValueForProperty("publish_path",datePath+mediaFname);
-            ent.setValueForProperty("size", new Long(size).toString());
-            ent.update();
-        } catch (Exception e) {
-            theLog.printError(e.toString());
-            throw new MirMediaException(e.toString());
-        }
-
+    public void set (InputStream in, Entity ent, Entity mediaTypeEnt ) throws MirMediaException {
+      String ext = mediaTypeEnt.getValue("name");
+      String mediaFname = ent.getId() + "." + ext;
+      String date = ent.getValue("date");
+      String datePath = StringUtil.webdbDate2path(date);
+      try {
+        long size = FileUtil.write(getStoragePath() + File.separator + datePath +
+                                   File.separator + mediaFname, in);
+        ent.setValueForProperty("publish_path", datePath + mediaFname);
+        ent.setValueForProperty("size", new Long(size).toString());
+        ent.update();
+      }
+      catch (Throwable e) {
+        logger.error("MediaHandlerGeneric.set: " + e.toString());
+        throw new MirMediaException(e.toString());
+      }
     }
 
     public void produce (Entity ent, Entity mediaTypeEnt )

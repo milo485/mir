@@ -36,10 +36,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 
+import mir.log.LoggerWrapper;
 import mir.config.MirPropertiesConfiguration;
 import mir.entity.Entity;
 import mir.media.MirMediaException;
 import mir.misc.StringUtil;
+
 import mircoders.storage.DatabaseUploadedMedia;
 
 
@@ -52,6 +54,10 @@ import mircoders.storage.DatabaseUploadedMedia;
 
 public class MediaHandlerImagesExtern extends MediaHandlerGeneric
 {
+  public MediaHandlerImagesExtern() {
+    logger = new LoggerWrapper("Media.Images.Extern");
+  }
+
   public void produce(Entity anImageEntity, Entity mediaTypeEnt) throws MirMediaException
   {
     try {
@@ -61,6 +67,7 @@ public class MediaHandlerImagesExtern extends MediaHandlerGeneric
       String filePath = datePath + anImageEntity.getId() + ext;
       String iconFilePath = MirPropertiesConfiguration.instance().getString("Producer.StorageRoot") + getIconStoragePath() + filePath;
       String imageFilePath = getStoragePath() + File.separator + filePath;
+      int maxIconSize = MirPropertiesConfiguration.instance().getInt("Producer.Image.MaxIconSize");
 
       File imageFile = new File(imageFilePath);
       File iconFile = new File(iconFilePath);
@@ -71,12 +78,14 @@ public class MediaHandlerImagesExtern extends MediaHandlerGeneric
       else {
         ImageProcessor processor = new ImageProcessor(imageFile, "JPEG");
 
-        processor.descaleImage(150, 0.8F);
+        processor.descaleImage(maxIconSize, 0.2F);
         File dir = new File(iconFile.getParent());
           if (dir!=null && !dir.exists()){
             dir.mkdirs();
         }
         processor.writeScaledData(iconFile);
+
+        logger.info(processor.getWidth()+"x"+processor.getHeight());
 
         anImageEntity.setValueForProperty("img_height", new Integer(processor.getHeight()).toString());
         anImageEntity.setValueForProperty("img_width", new Integer(processor.getWidth()).toString());
@@ -91,7 +100,8 @@ public class MediaHandlerImagesExtern extends MediaHandlerGeneric
       }
     }
     catch(Throwable t) {
-      t.printStackTrace(System.out);
+      logger.error("MediaHandlerImagesExtern.produce: " + t.getMessage());
+      t.printStackTrace(logger.asPrintWriter(logger.DEBUG_MESSAGE));
       throw new MirMediaException(t.getMessage());
     }
   }

@@ -82,7 +82,7 @@ public class ProducerConfigReader {
   }
 
 
-  public class RootSectionHandler implements XMLReader.SectionHandler {
+  public class RootSectionHandler extends XMLReader.AbstractSectionHandler {
     private List producers;
 
     public RootSectionHandler(List aProducers) {
@@ -113,7 +113,7 @@ public class ProducerConfigReader {
   private final static String[] NODE_DEFINITION_REQUIRED_ATTRIBUTES = { NODE_DEFINITION_NAME_ATTRIBUTE };
   private final static String[] NODE_DEFINITION_OPTIONAL_ATTRIBUTES = {  };
 
-  public class ProducersSectionHandler implements XMLReader.SectionHandler {
+  public class ProducersSectionHandler extends XMLReader.AbstractSectionHandler {
     private List producers;
     private Set producerNames;
     private String name;
@@ -172,7 +172,7 @@ public class ProducerConfigReader {
     }
   }
 
-  public class ProducerSectionHandler implements XMLReader.SectionHandler {
+  public class ProducerSectionHandler extends XMLReader.AbstractSectionHandler {
     private ProducerFactory producerFactory;
     private String factoryName;
 
@@ -237,7 +237,7 @@ public class ProducerConfigReader {
   private final static String[] PRODUCER_VERB_REQUIRED_ATTRIBUTES = { PRODUCER_VERB_NAME_ATTRIBUTE };
   private final static String[] PRODUCER_VERB_OPTIONAL_ATTRIBUTES = { PRODUCER_VERB_DEFAULT_ATTRIBUTE, PRODUCER_VERB_DESCRIPTION_ATTRIBUTE };
 
-  public class ProducerVerbsSectionHandler implements XMLReader.SectionHandler {
+  public class ProducerVerbsSectionHandler extends XMLReader.AbstractSectionHandler {
     private Map verbNodes;
     private List verbs;
     private String defaultVerb;
@@ -304,7 +304,7 @@ public class ProducerConfigReader {
     }
   }
 
-  public class EmptySectionHandler implements XMLReader.SectionHandler {
+  public class EmptySectionHandler extends XMLReader.AbstractSectionHandler {
     public XMLReader.SectionHandler startElement(String aTag, Map anAttributes) throws XMLReader.XMLReaderExc {
       throw new XMLReader.XMLReaderExc("No tags are allowed here");
     }
@@ -316,7 +316,7 @@ public class ProducerConfigReader {
     }
   }
 
-  public class MultiProducerNodeSectionHandler implements XMLReader.SectionHandler {
+  public class MultiProducerNodeSectionHandler extends XMLReader.AbstractSectionHandler {
     private Map nodeParameters;
     private Set validNodeParameters;
     private String currentNodeParameter;
@@ -363,7 +363,7 @@ public class ProducerConfigReader {
     }
   }
 
-  public class ProducerNodeSectionHandler implements XMLReader.SectionHandler {
+  public class ProducerNodeSectionHandler extends XMLReader.AbstractSectionHandler {
     private CompositeProducerNode producerNode;
     private ProducerNodeBuilder currentBuilder;
     private String scriptedNodeName;
@@ -473,7 +473,7 @@ public class ProducerConfigReader {
     }
   }
 
-  public class NodeDefinitionSectionHandler implements XMLReader.SectionHandler {
+  public class NodeDefinitionSectionHandler extends XMLReader.AbstractSectionHandler {
     private ScriptedProducerNodeDefinition nodeDefinition;
     private ProducerNode body;
     private Map stringParameters;
@@ -561,7 +561,7 @@ public class ProducerConfigReader {
   private final static String[] NODE_DEFINITION_PARAMETER_OPTIONAL_ATTRIBUTES = { NODE_DEFINITION_PARAMETER_DEFAULTVALUE_ATTRIBUTE };
   private final static String[] NODE_DEFINITION_NODE_PARAMETER_OPTIONAL_ATTRIBUTES = { };
 
-  public class NodeDefinitionParametersSectionHandler implements XMLReader.SectionHandler {
+  public class NodeDefinitionParametersSectionHandler extends XMLReader.AbstractSectionHandler {
     private Map nodeParameters;
     private Map stringParameters;
     private Map integerParameters;

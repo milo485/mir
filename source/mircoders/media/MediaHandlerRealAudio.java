@@ -33,13 +33,15 @@ package  mircoders.media;
 
 import java.io.StringReader;
 
+import freemarker.template.SimpleHash;
+import freemarker.template.SimpleList;
+
+import mir.log.LoggerWrapper;
 import mir.entity.Entity;
 import mir.media.MirMedia;
 import mir.media.MirMediaException;
 import mir.misc.FileUtil;
 import mir.misc.StringUtil;
-import freemarker.template.SimpleHash;
-import freemarker.template.SimpleList;
 
 
 
@@ -51,13 +53,16 @@ import freemarker.template.SimpleList;
  * @see mir.media.MediaHandlerGeneric
  * @see mir.media.MirMedia
  * @author john <john@manifestor.org>, mh <heckmann@hbe.ca>
- * @version $Id: MediaHandlerRealAudio.java,v 1.14 2003/01/25 17:50:35 idfx Exp $
+ * @version $Id: MediaHandlerRealAudio.java,v 1.15 2003/02/23 05:00:14 zapata Exp $
  */
 
 
-public class MediaHandlerRealAudio extends MediaHandlerAudio implements
-  MirMedia
+public class MediaHandlerRealAudio extends MediaHandlerAudio implements MirMedia
 {
+  public MediaHandlerRealAudio() {
+    logger = new LoggerWrapper("Media.Audio.Real");
+  }
+
   public void produce (Entity ent, Entity mediaTypeEnt )
     throws MirMediaException {
 
@@ -76,8 +81,9 @@ public class MediaHandlerRealAudio extends MediaHandlerAudio implements
       //write an rm (ram?. -mh) file
       FileUtil.write(super.getStoragePath()+"/"+RealMediaFile,
                       new StringReader(RealMediaPointer), "US-ASCII");
-    } catch (Exception e) {
-      theLog.printError(e.toString());
+    }
+    catch (Throwable e) {
+      logger.error("MediaHandlerRealAudio.produce: " + e.toString());
       throw new MirMediaException(e.toString());
     }
   }
@@ -89,7 +95,7 @@ public class MediaHandlerRealAudio extends MediaHandlerAudio implements
     //String stringSize = ent.getValue("size");
     //int size = Integer.parseInt(stringSize, 10)/1024;
     theList.add(ent);
-   
+
     String basePath=StringUtil.regexpReplace(ent.getValue("publish_path"),
                                             ".ra$","");
 
@@ -102,7 +108,6 @@ public class MediaHandlerRealAudio extends MediaHandlerAudio implements
     theList.add(ramHash);
 
     return theList;
-
   }
 
   public String getStoragePath()
@@ -121,6 +126,6 @@ public class MediaHandlerRealAudio extends MediaHandlerAudio implements
   }
 
 }
-        
-        
+
+
 

@@ -4,12 +4,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 import mir.util.SimpleParser;
+import mir.log.LoggerWrapper;
 
 public class GeneratorLibraryRepository {
   private Map factories;
+  private LoggerWrapper logger;
 
   public GeneratorLibraryRepository() {
     factories = new HashMap();
+    logger = new LoggerWrapper("TemplateEngine");
   }
 
   public void registerLibraryFactory(String aName, Generator.GeneratorLibraryFactory aFactory) {
@@ -32,7 +35,6 @@ public class GeneratorLibraryRepository {
   private final static String SEMICOLON = ";";
 
   public Generator.GeneratorLibrary constructCompositeLibrary(String aSpecification) throws GeneratorExc, GeneratorFailure {
-    //main=freemarker(path=/var/www/test); test=freemarker(path=/var/www/test2)
     String identifier;
     String factory;
     String factoryParameters;
@@ -63,7 +65,7 @@ public class GeneratorLibraryRepository {
       }
     }
     catch (Exception e) {
-      e.printStackTrace(System.out);
+      e.printStackTrace(logger.asPrintWriter(logger.DEBUG_MESSAGE));
       throw new GeneratorFailure("Failed to construct generator library: " + e.getMessage(), e);
     }
 

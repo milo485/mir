@@ -55,15 +55,14 @@ import com.codestudio.util.SQLManager;
  * Copyright:    Copyright (c) 2001, 2002
  * Company:      Mir-coders group
  * @author       idfx, the Mir-coders group
- * @version      $Id: AbstractServlet.java,v 1.21 2003/01/28 23:37:08 idfx Exp $
+ * @version      $Id: AbstractServlet.java,v 1.22 2003/02/20 16:05:33 zapata Exp $
  */
 
 public abstract class AbstractServlet extends HttpServlet {
     protected static String lang;
-    //protected static Logfile theLog;
-  	protected LoggerWrapper logger;
-		protected MirPropertiesConfiguration configuration;  	
-  	
+    protected LoggerWrapper logger;
+    protected MirPropertiesConfiguration configuration;
+
   /**
    * Constructor for AbstractServlet.
    */
@@ -139,18 +138,19 @@ public abstract class AbstractServlet extends HttpServlet {
    */
   public void init(ServletConfig config) throws ServletException {
     super.init(config);
-    MirPropertiesConfiguration.setContext(config.getServletContext());	   
+    MirPropertiesConfiguration.setContext(config.getServletContext());
     try {
       configuration = MirPropertiesConfiguration.instance();
     } catch (PropertiesConfigExc e) {
       throw new ServletException(e);
     }
-    
+
     String dbUser=configuration.getString("Database.Username");
     String dbPassword=configuration.getString("Database.Password");
     String dbHost=configuration.getString("Database.Host");
     String dbAdapName=configuration.getString("Database.Adaptor");
-    
+    String dbName=configuration.getString("Database.Name");
+
     DatabaseAdaptor adaptor;
     try {
       adaptor = (DatabaseAdaptor)Class.forName(dbAdapName).newInstance();
@@ -158,22 +158,7 @@ public abstract class AbstractServlet extends HttpServlet {
       throw new ServletException("Could not load DB adapator: "+
                                         e.toString());
     }
-    
-    String min,max,log,reset,dbname,dblogfile;
 
-    min=configuration.getString("Database.poolMin");
-    System.out.println(min);
-    max=configuration.getString("Database.poolMax");
-    System.out.println(max);
-    dbname=configuration.getString("Database.Name");
-    System.out.println(dbname);
-    log=configuration.getStringWithHome("Database.PoolLog");
-    System.out.println(log);
-    reset=configuration.getString("Database.poolResetTime");
-    System.out.println(reset);
-    dblogfile=configuration.getStringWithHome("Database.Logfile");
-    System.out.println(dblogfile);
-    
     String dbDriver;
     String dbUrl;
     try{
@@ -184,7 +169,7 @@ public abstract class AbstractServlet extends HttpServlet {
     }
 
     JDBCPoolMetaData meta = new JDBCPoolMetaData();
-    meta.setDbname(dbname);
+    meta.setDbname(dbName);
     meta.setDriver(dbDriver);
     meta.setURL(dbUrl);
     meta.setUserName(dbUser);
@@ -196,7 +181,7 @@ public abstract class AbstractServlet extends HttpServlet {
     meta.setCacheEnabled(false);
     meta.setCacheSize(15);
     meta.setDebugging(false);
-    meta.setLogFile(dblogfile+".pool");
+//    meta.setLogFile(dblogfile+".pool");
 
     SQLManager manager = SQLManager.getInstance();
     JDBCPool pool = null;

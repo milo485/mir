@@ -1,5 +1,7 @@
 package mir.log;
 
+import java.io.*;
+
 public class LoggerWrapper {
   private Object object;
   public final static int DEBUG_MESSAGE = 1;
@@ -52,6 +54,10 @@ public class LoggerWrapper {
       default:
         warn("LoggerWrapper.message: Unknown message type ("+aType+") for message '" + aMessage + "'");
     }
+  }
+
+  public PrintWriter asPrintWriter(int aMessageType) {
+    return new PrintWriter(new LoggerToWriterAdapter(this, aMessageType));
   }
 }
 

@@ -120,7 +120,7 @@ import freemarker.template.TemplateModelRoot;
  *    open-postings to the newswire
  *
  * @author mir-coders group
- * @version $Id: ServletModuleOpenIndy.java,v 1.58 2003/01/25 17:50:36 idfx Exp $
+ * @version $Id: ServletModuleOpenIndy.java,v 1.59 2003/02/23 05:00:15 zapata Exp $
  *
  */
 
@@ -188,7 +188,6 @@ public class ServletModuleOpenIndy extends ServletModule
         // onetimepasswd
         if (passwdProtection.equals("yes")) {
           String passwd = this.createOneTimePasswd();
-          System.out.println(passwd);
           HttpSession session = req.getSession(false);
           session.setAttribute("passwd", passwd);
           mergeData.put("passwd", passwd);
@@ -295,7 +294,6 @@ public class ServletModuleOpenIndy extends ServletModule
     // onetimepasswd
     if(passwdProtection.equals("yes")){
       String passwd = this.createOneTimePasswd();
-      System.out.println(passwd);
       HttpSession session = req.getSession(false);
       session.setAttribute("passwd",passwd);
       mergeData.put("passwd", passwd);
@@ -358,7 +356,7 @@ public class ServletModuleOpenIndy extends ServletModule
       EntityList mediaList = null;
       try {
         // new MediaRequest, "1" is the id for the openPosting user
-        MediaRequest mediaReq = new MediaRequest("1", true, true);
+        MediaRequest mediaReq = new MediaRequest("1", true);
         mp = new WebdbMultipartRequest(req, (FileHandler)mediaReq);
         mediaList = mediaReq.getEntityList();
       }
@@ -467,7 +465,7 @@ public class ServletModuleOpenIndy extends ServletModule
       }
     }
     catch (FileHandlerException e) {
-      e.printStackTrace(System.out);
+      e.printStackTrace(logger.asPrintWriter(logger.DEBUG_MESSAGE));
       throw new ServletModuleException("MediaException: "+ e.getMessage());
     }
     catch (IOException e) { throw new ServletModuleException("IOException: "+ e.getMessage());}
@@ -529,8 +527,8 @@ public class ServletModuleOpenIndy extends ServletModule
       String producerStorageRoot=configuration.getString("Producer.StorageRoot");
       String producerDocRoot=configuration.getString("Producer.DocRoot");
       String publishPath = contentEnt.getValue("publish_path");
-      String txtFilePath = producerStorageRoot + producerDocRoot + "/" + mail_language + 
-					 								 publishPath + "/" + aid + ".txt";
+      String txtFilePath = producerStorageRoot + producerDocRoot + "/" + mail_language +
+                                                                                                         publishPath + "/" + aid + ".txt";
 
 
       File inputFile = new File(txtFilePath);
@@ -574,23 +572,23 @@ public class ServletModuleOpenIndy extends ServletModule
 
       SMTPClient client=new SMTPClient();
       try {
-				int reply;
-				client.connect(configuration.getString("ServletModule.OpenIndy.SMTPServer"));
-				System.out.print(client.getReplyString());
-				
-				reply = client.getReplyCode();
-				
-				if(!SMTPReply.isPositiveCompletion(reply)) {
-				  client.disconnect();
-				  throw new ServletModuleUserException("SMTP server refused connection.");
-				}
-				
-				client.sendSimpleMessage(configuration.getString("ServletModule.OpenIndy.EmailIsFrom"),to,content);
-				
-				client.disconnect();
-				//mission accomplished
-				deliver(req,res,mergeData,sentMailTemplate); 
-      } catch(IOException e) {
+        int reply;
+        client.connect(configuration.getString("ServletModule.OpenIndy.SMTPServer"));
+
+        reply = client.getReplyCode();
+
+        if (!SMTPReply.isPositiveCompletion(reply)) {
+          client.disconnect();
+          throw new ServletModuleUserException("SMTP server refused connection.");
+        }
+
+        client.sendSimpleMessage(configuration.getString("ServletModule.OpenIndy.EmailIsFrom"), to, content);
+
+        client.disconnect();
+        //mission accomplished
+        deliver(req, res, mergeData, sentMailTemplate);
+      }
+      catch(IOException e) {
         if(client.isConnected()) {
           try {
             client.disconnect();

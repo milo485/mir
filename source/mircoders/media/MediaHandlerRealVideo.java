@@ -32,14 +32,17 @@
 package  mircoders.media;
 
 import java.io.StringReader;
+import java.io.File;
 
+import freemarker.template.SimpleHash;
+import freemarker.template.SimpleList;
+
+import mir.log.LoggerWrapper;
 import mir.entity.Entity;
 import mir.media.MirMedia;
 import mir.media.MirMediaException;
 import mir.misc.FileUtil;
 import mir.misc.StringUtil;
-import freemarker.template.SimpleHash;
-import freemarker.template.SimpleList;
 
 
 
@@ -51,13 +54,18 @@ import freemarker.template.SimpleList;
  * @see mir.media.MediaHandlerGeneric
  * @see mir.media.MirMedia
  * @author john <john@manifestor.org>, mh <mh@nadir.org>
- * @version $Id: MediaHandlerRealVideo.java,v 1.14 2003/01/25 17:50:35 idfx Exp $
+ * @version $Id: MediaHandlerRealVideo.java,v 1.15 2003/02/23 05:00:14 zapata Exp $
  */
 
 
-public class MediaHandlerRealVideo extends MediaHandlerVideo implements
-  MirMedia
+public class MediaHandlerRealVideo extends MediaHandlerVideo implements MirMedia
 {
+  protected LoggerWrapper logger;
+
+  public MediaHandlerRealVideo() {
+    logger = new LoggerWrapper("Media.Video.Real");
+  }
+
   public void produce (Entity ent, Entity mediaTypeEnt )
     throws MirMediaException {
 
@@ -74,10 +82,12 @@ public class MediaHandlerRealVideo extends MediaHandlerVideo implements
     String RealMediaFile = datePath+ent.getId()+".ram";
     try {
       //write an rm (ram?. -mh) file
-      FileUtil.write(super.getStoragePath()+"/"+RealMediaFile,
+      FileUtil.write(super.getStoragePath()+File.separator+RealMediaFile,
                       new StringReader(RealMediaPointer), "US-ASCII");
-    } catch (Exception e) {
-      theLog.printError(e.toString());
+    }
+    catch (Exception e) {
+      logger.error("MediaHandlerRealVideo.produce: " + e.toString());
+
       throw new MirMediaException(e.toString());
     }
   }
@@ -89,7 +99,7 @@ public class MediaHandlerRealVideo extends MediaHandlerVideo implements
     //String stringSize = ent.getValue("size");
     //int size = Integer.parseInt(stringSize, 10)/1024;
     theList.add(ent);
-   
+
     String basePath=StringUtil.regexpReplace(ent.getValue("publish_path"),
                                             ".rm$","");
 
@@ -121,6 +131,6 @@ public class MediaHandlerRealVideo extends MediaHandlerVideo implements
   }
 
 }
-        
-        
+
+
 

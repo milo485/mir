@@ -33,6 +33,11 @@ package mircoders.entity;
 
 import java.util.HashMap;
 
+import freemarker.template.SimpleList;
+import freemarker.template.SimpleScalar;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
+
 import mir.entity.Entity;
 import mir.entity.EntityList;
 import mir.media.MediaHelper;
@@ -41,18 +46,15 @@ import mir.misc.NumberUtils;
 import mir.storage.StorageObject;
 import mir.storage.StorageObjectExc;
 import mir.storage.StorageObjectFailure;
+import mir.log.LoggerWrapper;
+
 import mircoders.storage.DatabaseContentToMedia;
 import mircoders.storage.DatabaseUploadedMedia;
-import freemarker.template.SimpleList;
-import freemarker.template.SimpleScalar;
-import freemarker.template.TemplateModel;
-import freemarker.template.TemplateModelException;
 
 /**
- * Diese Klasse enth?lt die Daten eines MetaObjekts
  *
  * @author mh, mir-coders group
- * @version $Id: EntityUploadedMedia.java,v 1.17 2003/01/25 17:50:34 idfx Exp $
+ * @version $Id: EntityUploadedMedia.java,v 1.19 2003/02/23 05:00:13 zapata Exp $
  */
 
 
@@ -61,6 +63,8 @@ public class EntityUploadedMedia extends Entity {
 
   public EntityUploadedMedia() {
     super();
+
+    logger = new LoggerWrapper("Entity.UploadedMedia");
   }
 
   public EntityUploadedMedia(StorageObject theStorage) {
@@ -99,8 +103,6 @@ public class EntityUploadedMedia extends Entity {
       ent = DatabaseUploadedMedia.getInstance().getMediaType(this);
     }
     catch (StorageObjectFailure e) {
-      throwStorageObjectFailure(e, "get MediaType failed -- ");
-    } catch (StorageObjectExc e) {
       throwStorageObjectFailure(e, "get MediaType failed -- ");
     }
     return ent;
@@ -155,8 +157,7 @@ public class EntityUploadedMedia extends Entity {
         return "other";
     }
     catch (Exception ex) {
-      theLog.printWarning("-- getMediaTypeString: could not fetch data "
-                          + this.getClass().toString() + " " + ex.toString());
+      logger.warn("EntityUploadedMedia.getMediaTypeString: could not fetch data: " + ex.toString());
     }
     return null;
   }
@@ -171,8 +172,7 @@ public class EntityUploadedMedia extends Entity {
       return mediaHandler.getBigIconName();
     }
     catch (Exception ex) {
-      theLog.printWarning("-- getBigIconName: could not fetch data "
-                          + this.getClass().toString() + " " + ex.toString());
+      logger.warn("EntityUploadedMedia.getBigIconName: could not fetch data: " + ex.toString());
     }
     return null;
   }
@@ -187,8 +187,7 @@ public class EntityUploadedMedia extends Entity {
       return mediaHandler.getURL(this, mediaType);
     }
     catch (Exception ex) {
-      theLog.printWarning("-- getUrl: could not fetch data "
-                          + this.getClass().toString() + " " + ex.toString());
+      logger.warn("EntityUploadedMedia.getUrl: could not fetch data: " + ex.toString());
     }
     return null;
   }
@@ -203,8 +202,7 @@ public class EntityUploadedMedia extends Entity {
       return mediaHandler.getDescr(mediaType);
     }
     catch (Exception ex) {
-      theLog.printWarning("-- getDescr: could not fetch data "
-                          + this.getClass().toString() + " " + ex.toString());
+      logger.warn("EntityUploadedMedia.getDescr: could not fetch data: " + ex.toString());
     }
     return null;
   }
@@ -216,8 +214,7 @@ public class EntityUploadedMedia extends Entity {
       return mediaType.getValue("mime_type");
     }
     catch (Exception ex) {
-      theLog.printWarning("-- getBigIconName: could not fetch data "
-                          + this.getClass().toString() + " " + ex.toString());
+      logger.warn("EntityUploadedMedia.getBigIconName: could not fetch data: " + ex.toString());
     }
     return null;
   }

@@ -36,6 +36,7 @@ import java.util.HashMap;
 
 import mir.storage.StorageObject;
 import mir.storage.StorageObjectFailure;
+import mir.log.LoggerWrapper;
 
 /**
  * Diese Klasse enth?lt die Daten eines MetaObjekts
@@ -47,36 +48,37 @@ import mir.storage.StorageObjectFailure;
 
 public class EntityVideo extends EntityUploadedMedia
 {
+  public EntityVideo() {
+    super();
 
-	public EntityVideo()
-	{
-		super();
-	}
+    logger = new LoggerWrapper("Entity.UploadedMedia.Video");
+  }
 
-	public EntityVideo(StorageObject theStorage) {
-		this();
-		setStorage(theStorage);
-	}
+  public EntityVideo(StorageObject theStorage) {
+    this();
+    setStorage(theStorage);
+  }
 
-	//
-	// methods
+  //
+  // methods
 
-	public void update() throws StorageObjectFailure {
-		super.update();
-		try {
-			theStorageObject.executeUpdate("update content set is_produced='0' where to_media="+getId());
-		} catch (SQLException e) {
-			theLog.printError("video :: update :: failed!! "+ e.toString());
-		}
-	}
+  public void update() throws StorageObjectFailure {
+    super.update();
 
-	public void setValues(HashMap theStringValues)
-	{
-		if (theStringValues != null) {
-			if (!theStringValues.containsKey("is_published"))
-			 theStringValues.put("is_published","0");
-		}
-		super.setValues(theStringValues);
-	}
+    try {
+      theStorageObject.executeUpdate("update content set is_produced='0' where to_media=" + getId());
+    }
+    catch (SQLException e) {
+      logger.error("EntityVideo.update: " + e.toString());
+    }
+  }
+
+  public void setValues(HashMap theStringValues) {
+    if (theStringValues != null) {
+      if (!theStringValues.containsKey("is_published"))
+        theStringValues.put("is_published", "0");
+    }
+    super.setValues(theStringValues);
+  }
 
 }

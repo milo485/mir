@@ -31,10 +31,12 @@
 
 package mircoders.storage;
 
+import freemarker.template.SimpleList;
+
+import mir.log.LoggerWrapper;
 import mir.storage.Database;
 import mir.storage.StorageObject;
 import mir.storage.StorageObjectFailure;
-import freemarker.template.SimpleList;
 
 /**
  * <b>Diese Klasse implementiert die Datenbankverbindung zur MetaObjekt-Tabelle
@@ -43,32 +45,29 @@ import freemarker.template.SimpleList;
  */
 
 public class DatabaseImageType extends Database implements StorageObject{
+  private static DatabaseImageType instance;
 
-	private static DatabaseImageType instance;
-	private static SimpleList publisherPopupData;
+  // the following *has* to be sychronized cause this static method
+  // could get preemted and we could end up with 2 instances of DatabaseFoo..
+  // see the "Singletons with needles and thread" article at JavaWorld -mh
+  public synchronized static DatabaseImageType getInstance() {
+    if (instance == null) {
+      instance = new DatabaseImageType();
+      instance.myselfDatabase = instance;
+    }
+    return instance;
+  }
 
-	// the following *has* to be sychronized cause this static method
-	// could get preemted and we could end up with 2 instances of DatabaseFoo..
-	// see the "Singletons with needles and thread" article at JavaWorld -mh
-	public synchronized static DatabaseImageType getInstance() 
-	  throws StorageObjectFailure
-	{
-		if (instance == null) {
-			instance = new DatabaseImageType();
-			instance.myselfDatabase = instance;
-		}
-		return instance;
-	}
+  private DatabaseImageType() {
+    super();
+    logger = new LoggerWrapper("Database.ImageType");
 
-	private DatabaseImageType() throws StorageObjectFailure
-	{
-		super();
-		this.hasTimestamp = false;
-		this.theTable="img_type";
-	}
+    hasTimestamp = false;
+    theTable = "img_type";
+  }
 
-	public SimpleList getPopupData()
-        throws StorageObjectFailure { return getPopupData("name",true); }
-
+  public SimpleList getPopupData() throws StorageObjectFailure {
+    return getPopupData("name", true);
+  }
 
 }

@@ -38,21 +38,22 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
-import mir.config.MirPropertiesConfiguration;
-import mir.misc.FileUtil;
-import mir.misc.WebdbImage;
-import mir.storage.StorageObject;
-import mir.storage.StorageObjectFailure;
-
 import org.postgresql.largeobject.BlobInputStream;
 import org.postgresql.largeobject.LargeObject;
 import org.postgresql.largeobject.LargeObjectManager;
+
+import mir.config.MirPropertiesConfiguration;
+import mir.misc.FileUtil;
+import mir.misc.WebdbImage;
+import mir.log.LoggerWrapper;
+import mir.storage.StorageObject;
+import mir.storage.StorageObjectFailure;
 
 /**
  * Diese Klasse enth?lt die Daten eines MetaObjekts
  *
  * @author RK, mh, mir-coders
- * @version $Id: EntityImages.java,v 1.14 2003/01/25 17:50:34 idfx Exp $
+ * @version $Id: EntityImages.java,v 1.15 2003/02/23 05:00:13 zapata Exp $
  */
 
 
@@ -62,6 +63,8 @@ public class EntityImages extends EntityUploadedMedia
   public EntityImages()
   {
     super();
+
+    logger = new LoggerWrapper("Entity.UploadedMedia.Images");
   }
 
   public EntityImages(StorageObject theStorage) {
@@ -75,7 +78,7 @@ public class EntityImages extends EntityUploadedMedia
 
   public InputStream getImage() throws StorageObjectFailure
   {
-    theLog.printDebugInfo("--getimage started");
+    logger.debug("EntityImages.getimage started");
     java.sql.Connection con=null;Statement stmt=null;
     BlobInputStream in; InputStream img_in = null;
 
@@ -100,17 +103,22 @@ public class EntityImages extends EntityUploadedMedia
       }
     }
     catch (Exception e) {
-      e.printStackTrace();
-      theLog.printError("EntityImages -- getImage failed"+e.toString());
+      logger.error("EntityImages.getImage failed: "+e.toString());
+      e.printStackTrace(logger.asPrintWriter(logger.DEBUG_MESSAGE));
       try {
         con.setAutoCommit(true);
-      } catch (Exception e2) {
-        e.printStackTrace();
-        theLog.printError(
-            "EntityImages -- getImage reseting transaction mode failed"
-            +e2.toString());
       }
-      theStorageObject.freeConnection(con,stmt);
+      catch (Exception e2) {
+        logger.error("EntityImages.getImage reseting transaction mode failed: " + e2.toString());
+        e2.printStackTrace(logger.asPrintWriter(logger.DEBUG_MESSAGE));
+      }
+
+      try {
+        theStorageObject.freeConnection(con, stmt);
+      }
+      catch (Throwable t) {
+      }
+
       throwStorageObjectFailure(e, "EntityImages -- getImage failed: ");
     }
     //}
@@ -124,18 +132,17 @@ public class EntityImages extends EntityUploadedMedia
       java.sql.Connection con=null;PreparedStatement pstmt=null;
       File f = null;
       try {
-
-        theLog.printDebugInfo("settimage :: making internal representation of image");
+        logger.debug("EntityImages.settimage :: making internal representation of image");
 
         File tempDir = new File(MirPropertiesConfiguration.instance().getString("TempDir"));
         f = File.createTempFile("mir", ".tmp", tempDir);
         FileUtil.write(f, in);
         WebdbImage webdbImage= new WebdbImage(f, type);
-        theLog.printDebugInfo("settimage :: made internal representation of image");
+        logger.debug("EntityImages.settimage :: made internal representation of image");
 
         con = theStorageObject.getPooledCon();
         con.setAutoCommit(false);
-        theLog.printDebugInfo("settimage :: trying to insert image");
+        logger.debug("EntityImages.settimage :: trying to insert image");
 
         // setting values
         LargeObjectManager lom;
@@ -154,14 +161,10 @@ public class EntityImages extends EntityUploadedMedia
         lobImage.close();
         lobIcon.close();
 
-        setValueForProperty("img_height",
-                          new Integer(webdbImage.getImageHeight()).toString());
-        setValueForProperty("img_width",
-                          new Integer(webdbImage.getImageWidth()).toString());
-        setValueForProperty("icon_height",
-                          new Integer(webdbImage.getIconHeight()).toString());
-        setValueForProperty("icon_width",
-                          new Integer(webdbImage.getIconWidth()).toString());
+        setValueForProperty("img_height", new Integer(webdbImage.getImageHeight()).toString());
+        setValueForProperty("img_width", new Integer(webdbImage.getImageWidth()).toString());
+        setValueForProperty("icon_height", new Integer(webdbImage.getIconHeight()).toString());
+        setValueForProperty("icon_width", new Integer(webdbImage.getIconWidth()).toString());
         setValueForProperty("image_data", new Integer(oidImage).toString());
         setValueForProperty("icon_data", new Integer(oidIcon).toString());
         update();
@@ -202,8 +205,7 @@ public class EntityImages extends EntityUploadedMedia
       LargeObjectManager lom;
       java.sql.Connection jCon;
       stmt = con.createStatement();
-      ResultSet rs = theStorageObject.executeSql(stmt,
-          "select icon_data from images where id="+getId());
+      ResultSet rs = theStorageObject.executeSql(stmt, "select icon_data from images where id="+getId());
       jCon = ((com.codestudio.sql.PoolManConnectionHandle)con)
            .getNativeConnection();
       lom = ((org.postgresql.Connection)jCon).getLargeObjectAPI();
@@ -217,19 +219,23 @@ public class EntityImages extends EntityUploadedMedia
         rs.close();
       }
     }
-    catch (Exception e) {
-      e.printStackTrace();
-      theLog.printError("EntityImages -- getIcon failed"+e.toString());
+    catch (Throwable e) {
+      logger.error("EntityImages.getIcon failed: "+e.toString());
+      e.printStackTrace(logger.asPrintWriter(logger.DEBUG_MESSAGE));
       try {
         con.setAutoCommit(true);
       }
-      catch (Exception e2) {
-        e.printStackTrace();
-        theLog.printError(
-            "EntityImages -- getIcon reseting transaction mode failed"
-            +e2.toString());
+      catch (Throwable e2) {
+        logger.error("EntityImages.getIcon reseting transaction mode failed: " + e2.toString());
+        e2.printStackTrace(logger.asPrintWriter(logger.DEBUG_MESSAGE));
       }
-      theStorageObject.freeConnection(con,stmt);
+
+      try {
+        theStorageObject.freeConnection(con, stmt);
+      }
+      catch (Throwable t) {
+      }
+
       throwStorageObjectFailure(e, "EntityImages -- getIcon failed:");
     }
 

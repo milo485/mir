@@ -35,45 +35,39 @@ import mir.media.MirMedia;
 
 
 /**
- * Handles video media, like mpeg, av, and qt 
+ * Handles video media, like mpeg, av, and qt
  * It is like MediaHandlerAudio with different icons.
  * It is MediaHandlerGeneric with different icons.
  *
  * @see mir.media.MediaHandlerGeneric
  * @see mir.media.MirMedia
  * @author john <john@manifestor.org>
- * @version $Id: MediaHandlerVideo.java,v 1.6 2003/01/25 17:50:35 idfx Exp $
+ * @version $Id: MediaHandlerVideo.java,v 1.7 2003/02/23 05:00:14 zapata Exp $
  */
 
 public class MediaHandlerVideo extends MediaHandlerGeneric implements MirMedia
 {
-
   private static String tinyIcon;
   private static String bigIcon;
 
-	static {
+  static {
     tinyIcon = configuration.getString("Producer.Icon.TinyVideo");
     bigIcon = configuration.getString("Producer.Icon.BigVideo");
-		   
-	}
-	
-  public String getTinyIcon()
-  {
+  }
+
+  public String getTinyIcon() {
     return tinyIcon;
   }
 
-  public String getBigIconName()
-  {
+  public String getBigIconName() {
     return bigIcon;
   }
 
-  public String getIconAlt()
-  {
+  public String getIconAlt() {
     return "Video";
   }
 
-  public boolean isVideo()
-  {
+  public boolean isVideo() {
     return true;
   }
 }

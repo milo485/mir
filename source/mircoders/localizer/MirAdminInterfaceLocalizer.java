@@ -32,10 +32,28 @@
 package mircoders.localizer;
 
 import java.util.List;
+import java.util.Map;
 
 import mir.entity.adapter.EntityAdapter;
 
+/**
+ *
+ * <p>Title: Interface to allow for localized changed to the workings of the admin system</p>
+ * @author Zapata
+ * @version 1.0
+ */
+
 public interface MirAdminInterfaceLocalizer {
+  /**
+   * Every time an article gets made inside the admin system, this function is called. It is
+   * possible to set different initial values for the article here.
+   *
+   * @param anArticle The map that can be changed. For example, to set a default author, do
+   *   <p>
+   *     <code>anArticle.put("creator", "editorial team");</code>
+   */
+  public void initializeArticle(Map anArticle);
+
   public List simpleCommentOperations();
   public MirSimpleEntityOperation simpleCommentOperationForName(String aName);
 

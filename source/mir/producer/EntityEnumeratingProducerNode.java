@@ -48,7 +48,6 @@ public class EntityEnumeratingProducerNode extends ProducerNodeDecorator {
   private String whereClause;
   private String orderByClause;
 
-
   public EntityEnumeratingProducerNode(
               String aKey,
               EntityAdapterModel aModel, String aDefinition,

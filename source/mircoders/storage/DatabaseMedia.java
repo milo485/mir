@@ -31,6 +31,7 @@
 
 package mircoders.storage;
 
+import mir.log.LoggerWrapper;
 import mir.entity.Entity;
 import mir.entity.EntityRelation;
 import mir.storage.Database;
@@ -52,8 +53,7 @@ public class DatabaseMedia extends Database implements StorageObject{
   // the following *has* to be sychronized cause this static method
   // could get preemted and we could end up with 2 instances of DatabaseFoo..
   // see the "Singletons with needles and thread" article at JavaWorld -mh
-  public synchronized static DatabaseMedia getInstance() 
-    throws StorageObjectFailure {
+  public synchronized static DatabaseMedia getInstance() {
     if (instance == null) {
       instance = new DatabaseMedia();
       instance.myselfDatabase = instance;
@@ -61,20 +61,16 @@ public class DatabaseMedia extends Database implements StorageObject{
     return instance;
   }
 
-  private DatabaseMedia() throws StorageObjectFailure
-  {
+  private DatabaseMedia() {
     super();
-    //this.cache = new DatabaseCache(100);
-    this.hasTimestamp = false;
-    this.theTable="media";
-    relationMediaType = new EntityRelation("to_media_type", "id", 
-                        DatabaseMediaType.getInstance(), EntityRelation.TO_ONE);
-    try {
-      this.theEntityClass = Class.forName("mircoders.entity.EntityMedia");
-    }
-    catch (Exception e) {
-      throw new StorageObjectFailure(e);
-    }
+
+    logger = new LoggerWrapper("Database.Media");
+
+    hasTimestamp = false;
+    theTable="media";
+    relationMediaType =
+        new EntityRelation("to_media_type", "id", DatabaseMediaType.getInstance(), EntityRelation.TO_ONE);
+    theEntityClass = mircoders.entity.EntityMedia.class;
   }
 
   // methods
@@ -84,17 +80,14 @@ public class DatabaseMedia extends Database implements StorageObject{
    * returns the comments that belong to the article (via entityrelation)
    * where db-flag is_published is true
    */
-  public Entity getMediaType(Entity ent) 
-  	throws StorageObjectFailure, StorageObjectExc {
-    Entity type=null;
+  public Entity getMediaType(Entity ent) throws StorageObjectFailure, StorageObjectExc {
     try {
-      type = relationMediaType.getOne(ent);
+      return relationMediaType.getOne(ent);
     }
-    catch (StorageObjectFailure e) {
-      theLog.printError("DatabaseMedia :: failed to get media_type");
-      throw new StorageObjectFailure("DatabaseMedia :",e);
+    catch (Throwable e) {
+      logger.error("failed to get media_type: " + e.getMessage());
+      throw new StorageObjectFailure("DatabaseMedia.getMediaType :" + e.getMessage(),e);
     }
-    return type;
   }
 
 }

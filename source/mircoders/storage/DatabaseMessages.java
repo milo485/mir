@@ -31,6 +31,7 @@
 
 package mircoders.storage;
 
+import mir.log.LoggerWrapper;
 import mir.storage.Database;
 import mir.storage.StorageObject;
 import mir.storage.StorageObjectFailure;
@@ -53,8 +54,7 @@ public class DatabaseMessages extends Database implements StorageObject{
   // the following *has* to be sychronized cause this static method
   // could get preemted and we could end up with 2 instances of DatabaseFoo..
   // see the "Singletons with needles and thread" article at JavaWorld -mh
-  public synchronized static DatabaseMessages getInstance() 
-    throws StorageObjectFailure {
+  public synchronized static DatabaseMessages getInstance() {
     if (instance == null) {
       instance = new DatabaseMessages();
       instance.myselfDatabase = instance;
@@ -62,10 +62,12 @@ public class DatabaseMessages extends Database implements StorageObject{
     return instance;
   }
 
-  private DatabaseMessages() throws StorageObjectFailure
+  private DatabaseMessages()
   {
     super();
-    //this.cache = new DatabaseCache(10);
+
+    logger = new LoggerWrapper("Database.Messages");
+
     this.theTable="messages";
   }
 

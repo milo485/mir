@@ -41,6 +41,7 @@ import java.util.Vector;
 import mir.entity.Entity;
 import mir.entity.adapter.EntityAdapter;
 import mir.storage.StorageObjectFailure;
+import mir.misc.StringUtil;
 import mir.util.StringRoutines;
 import mircoders.entity.EntityComment;
 import mircoders.entity.EntityContent;
@@ -70,6 +71,11 @@ public class MirBasicAdminInterfaceLocalizer implements MirAdminInterfaceLocaliz
     addSimpleCommentOperation(new ModifyCommentFieldOperation("unhide", "is_published", "1"));
     addSimpleCommentOperation(new ModifyCommentFieldOperation("hide", "is_published", "0"));
   }
+
+  public void initializeArticle(Map anArticle) {
+    anArticle.put("is_published", "0");
+    anArticle.put("date", StringUtil.date2webdbDate(new GregorianCalendar()));
+  };
 
   public List simpleCommentOperations() {
     return simpleCommentOperations;
@@ -181,11 +187,11 @@ public class MirBasicAdminInterfaceLocalizer implements MirAdminInterfaceLocaliz
 
       if (logOperation) {
         StringBuffer comment = new StringBuffer();
-	try {
+        try {
           comment.append(StringRoutines.interpretAsString(anEntity.getValue("comment")));
-	}
-	catch (Throwable t) {
-	}
+        }
+        catch (Throwable t) {
+        }
         if (comment.length()>0 && comment.charAt(comment.length()-1)!='\n') {
           comment.append('\n');
         }

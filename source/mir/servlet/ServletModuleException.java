@@ -36,15 +36,15 @@ package mir.servlet;
  *  ServletModuleException -
  *  wird vom ServletModule geschmissen</b>
  *
- * 
+ *
  * @version 28.6.199
  * @author RK
  */
 
 public final class ServletModuleException extends Exception
 {
-	public ServletModuleException(String msg) {
-		super(msg);
-	}
+  public ServletModuleException(String msg) {
+    super(msg);
+  }
 }
 

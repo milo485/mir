@@ -35,9 +35,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.HashMap;
 
+import mir.log.LoggerWrapper;
 import mir.entity.Entity;
 import mir.storage.Database;
 import mir.storage.StorageObject;
@@ -50,41 +51,34 @@ import mir.util.JDBCStringRoutines;
  *
  *
  */
-public class DatabaseLinksImcs extends Database
-    implements StorageObject {
+public class DatabaseLinksImcs extends Database implements StorageObject {
+
   private static DatabaseLinksImcs instance;
 
-  /**
-   * put your documentation comment here
-   * @return
-   * @exception StorageObjectException
-   */
-  // the following *has* to be sychronized cause this static method
-  // could get preemted and we could end up with 2 instances of DatabaseFoo..
-  // see the "Singletons with needles and thread" article at JavaWorld -mh
-  public synchronized static DatabaseLinksImcs getInstance() throws
-      StorageObjectFailure {
+  public static DatabaseLinksImcs getInstance() {
     if (instance == null) {
-      instance = new DatabaseLinksImcs();
-      instance.myselfDatabase = instance;
+      synchronized (DatabaseLinksImcs.class) {
+        if (instance == null) {
+          DatabaseLinksImcs newInstance;
+
+          newInstance = new DatabaseLinksImcs();
+          newInstance.myselfDatabase = newInstance;
+          instance = newInstance;
+        }
+      }
     }
+
     return instance;
   }
 
-  /**
-   * put your documentation comment here
-   */
-  private DatabaseLinksImcs() throws StorageObjectFailure {
+  private DatabaseLinksImcs() {
     super();
-    ////this.cache = new HashMap();
-    this.hasTimestamp = false;
-    this.theTable = "links_imcs";
-    try {
-      this.theEntityClass = Class.forName("mircoders.entity.EntityLinksImcs");
-    }
-    catch (Exception e) {
-      throw new StorageObjectFailure(e);
-    }
+
+    logger = new LoggerWrapper("ServletModule.Database.LinksImcs");
+    hasTimestamp = false;
+    theTable = "links_imcs";
+
+    theEntityClass = mircoders.entity.EntityLinksImcs.class;
   }
 
   /** @todo toooo much copy/paste in this class //rk  */
@@ -97,7 +91,7 @@ public class DatabaseLinksImcs extends Database
     invalidatePopupCache();
     try {
       HashMap theEntityValues = theEntity.getValues();
-      ArrayList streamedInput = theEntity.streamedInput();
+      List streamedInput = theEntity.streamedInput();
       StringBuffer f = new StringBuffer();
       StringBuffer v = new StringBuffer();
       String aField, aValue;
@@ -141,10 +135,12 @@ public class DatabaseLinksImcs extends Database
         }
       } // end for
       // insert into db
-      StringBuffer sqlBuf = new StringBuffer("insert into ").append(theTable).
-          append("(").append(f).append(") values (").append(v).append(")");
+      StringBuffer sqlBuf =
+          new StringBuffer("insert into ").append(theTable).append("(").append(f).append(") values (").append(v).append(")");
       String sql = sqlBuf.toString();
-      theLog.printInfo("INSERT: " + sql);
+
+      logger.info("INSERT: " + sql);
+
       con = getPooledCon();
       con.setAutoCommit(false);
       pstmt = con.prepareStatement(sql);
@@ -180,7 +176,7 @@ public class DatabaseLinksImcs extends Database
   public void update(Entity theEntity) throws StorageObjectFailure {
     Connection con = null;
     PreparedStatement pstmt = null;
-    ArrayList streamedInput = theEntity.streamedInput();
+    List streamedInput = theEntity.streamedInput();
     HashMap theEntityValues = theEntity.getValues();
     String id = theEntity.getId();
     String aField;
@@ -223,7 +219,7 @@ public class DatabaseLinksImcs extends Database
       }
     }
     sql.append(" where id=").append(id);
-    theLog.printInfo("UPDATE: " + sql);
+    logger.info("UPDATE: " + sql);
     // execute sql
     try {
       con = getPooledCon();

@@ -34,12 +34,13 @@ package  mir.module;
 import java.sql.SQLException;
 import java.util.HashMap;
 
+import freemarker.template.SimpleHash;
+
 import mir.entity.Entity;
 import mir.entity.EntityList;
 import mir.storage.StorageObject;
 import mir.storage.StorageObjectExc;
 import mir.storage.StorageObjectFailure;
-import freemarker.template.SimpleHash;
 
 
 /**
@@ -189,7 +190,6 @@ public class AbstractModule {
       return theEntity.getId();
     }
     catch (StorageObjectExc e){
-      e.printStackTrace(System.err);
       throw new ModuleException(e.toString());
     }
   }

@@ -35,18 +35,21 @@ import mir.generator.FreemarkerGenerator;
 import mir.generator.Generator;
 import mir.generator.GeneratorLibraryRepository;
 import mir.generator.WriterEngine;
-import mir.misc.Logfile;
+import mir.log.LoggerWrapper;
+
 import mircoders.global.MirGlobal;
 import mircoders.localizer.MirGeneratorLocalizer;
 import mircoders.localizer.MirLocalizerExc;
 import mircoders.localizer.MirLocalizerFailure;
 
 public class MirBasicGeneratorLocalizer implements MirGeneratorLocalizer {
-  protected static Logfile logger = Logfile.getInstance( MirGlobal.getConfigProperty("Home") + "/" + MirGlobal.getConfigProperty("Mir.Localizer.Logfile"));
   private GeneratorLibraryRepository repository;
+  protected LoggerWrapper logger;
 
   public MirBasicGeneratorLocalizer () {
     repository = new GeneratorLibraryRepository();
+    logger = new LoggerWrapper("Localizer.Basic.Generator");
+
 
     buildRepository(repository);
   }

@@ -51,13 +51,10 @@ import java.util.ListIterator;
 
 import javax.servlet.http.HttpServletRequest;
 
-import mir.misc.Logfile;
 import mir.misc.StringUtil;
 
 public class StoreContainer {
-
   private final static int DEFAULT_SIZE = 10;
-  private static Logfile storeLog;
   private static int uniqueCounter = 10000;
 
   private LinkedList container;

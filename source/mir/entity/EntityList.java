@@ -34,16 +34,17 @@ package  mir.entity;
 import java.util.ArrayList;
 import java.util.Set;
 
+import freemarker.template.TemplateListModel;
+import freemarker.template.TemplateModel;
+
+import mir.log.LoggerWrapper;
 import mir.config.MirPropertiesConfiguration;
 import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
-import mir.misc.Logfile;
 import mir.storage.StorageObject;
 import mir.storage.store.StorableObject;
 import mir.storage.store.StoreContainerType;
 import mir.storage.store.StoreIdentifier;
 import mir.storage.store.StoreUtil;
-import freemarker.template.TemplateListModel;
-import freemarker.template.TemplateModel;
 
 /**
  *
@@ -57,9 +58,8 @@ import freemarker.template.TemplateModel;
  *  @version 1.0 (freemarker compliant & and storable in ObjectStore)
  */
 public class EntityList implements TemplateListModel, StorableObject {
-
-  private static Logfile      theLog;
   protected static MirPropertiesConfiguration configuration;
+  protected LoggerWrapper logger;
   private ArrayList           theEntityArrayList = new ArrayList();
   private String              whereClause, orderClause;
   private StorageObject       theStorage;
@@ -71,16 +71,18 @@ public class EntityList implements TemplateListModel, StorableObject {
   static {
     try {
       configuration = MirPropertiesConfiguration.instance();
-    } catch (PropertiesConfigExc e) {
-      e.printStackTrace();
     }
-    theLog = Logfile.getInstance(configuration.getStringWithHome("Entity.Logfile"));
+    catch (PropertiesConfigExc e) {
+      throw new RuntimeException("Unable to get configuration: " + e.getMessage());
+    }
   }
 
   /**
    * Constructor.
    */
-  public EntityList(){		}
+  public EntityList(){
+    logger = new LoggerWrapper("Entity.List");
+  }
 
 /* get/set EntityClass of Objects stored in EntityList */
   public void setStorage(StorageObject storage) { this.theStorage=storage; }
@@ -229,7 +231,7 @@ public class EntityList implements TemplateListModel, StorableObject {
     if (anEntity!=null)
       theEntityArrayList.add(anEntity);
     else
-      theLog.printWarning("EntityList: add called with empty Entity");
+      logger.warn("EntityList: add called with empty Entity");
   }
 
 
@@ -302,7 +304,7 @@ public class EntityList implements TemplateListModel, StorableObject {
       StoreUtil.getEntityListUniqueIdentifierFor( theStorage.getTableName(),
       whereClause, orderClause, offset, limit ));
     }
-    theLog.printWarning("EntityList could not return StoreIdentifier");
+    logger.warn("EntityList could not return StoreIdentifier");
     return null;
   }
 

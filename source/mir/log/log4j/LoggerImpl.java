@@ -14,10 +14,10 @@ public class LoggerImpl implements mir.log.Logger {
   private static Map loggers = new HashMap();
 
   public LoggerImpl() throws PropertiesConfigExc {
-    System.setProperty("log.home", 
-                       MirPropertiesConfiguration.instance().getStringWithHome("Log.Home"));
-    PropertyConfigurator.configure(MirPropertiesConfiguration.instance()
-                                   .getStringWithHome("Log.log4j.ConfigurationFile").trim());
+    System.setProperty("log.home",
+        MirPropertiesConfiguration.instance().getStringWithHome("Log.Home"));
+    PropertyConfigurator.configure(
+        MirPropertiesConfiguration.instance().getStringWithHome("Log.log4j.ConfigurationFile").trim());
   }
 
   public void debug(Object o, String s) {

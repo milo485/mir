@@ -34,6 +34,7 @@ package mircoders.storage;
 import java.sql.Connection;
 import java.sql.Statement;
 
+import mir.log.LoggerWrapper;
 import mir.entity.EntityList;
 import mir.entity.EntityRelation;
 import mir.storage.Database;
@@ -68,17 +69,18 @@ public class DatabaseContent extends Database implements StorageObject {
     return instance;
   }
 
-  private DatabaseContent()
-    throws StorageObjectFailure {
+  private DatabaseContent() throws StorageObjectFailure {
 
     super();
-    this.theTable="content";
-    this.theCoreTable="media";
+    theTable="content";
+    theCoreTable="media";
+    logger = new LoggerWrapper("Database.Content");
 
-    relationComments = new EntityRelation("id", "to_media", DatabaseComment.getInstance(), EntityRelation.TO_MANY);
-    relationFeature = new EntityRelation("id", "to_feature", DatabaseFeature.getInstance(), EntityRelation.TO_ONE);
-    try { this.theEntityClass = Class.forName("mircoders.entity.EntityContent"); }
-    catch (Exception e) { throw new StorageObjectFailure(e); }
+    relationComments =
+        new EntityRelation("id", "to_media", DatabaseComment.getInstance(), EntityRelation.TO_MANY);
+    relationFeature =
+        new EntityRelation("id", "to_feature", DatabaseFeature.getInstance(), EntityRelation.TO_ONE);
+    theEntityClass = mircoders.entity.EntityContent.class;
   }
 
   // methods
@@ -91,13 +93,13 @@ public class DatabaseContent extends Database implements StorageObject {
   {
     Connection con=null;Statement stmt=null;
     String sql = "update content set is_produced='0' where " + where;
-    theLog.printDebugInfo("set unproduced: "+where);
+    logger.debug("set unproduced: "+where);
     try {
       con = getPooledCon();
       // should be a preparedStatement because is faster
       stmt = con.createStatement();
       executeUpdate(stmt,sql);
-      theLog.printDebugInfo("set unproduced: "+where);
+      logger.debug("set unproduced: "+where);
     }
     catch (Exception e) {_throwStorageObjectException(e, "-- set unproduced failed");}
     finally { freeConnection(con,stmt);}

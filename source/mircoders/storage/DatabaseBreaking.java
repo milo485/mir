@@ -31,6 +31,7 @@
 
 package mircoders.storage;
 
+import mir.log.LoggerWrapper;
 import mir.storage.Database;
 import mir.storage.StorageObject;
 import mir.storage.StorageObjectFailure;
@@ -60,7 +61,7 @@ public class DatabaseBreaking extends Database implements StorageObject{
   private DatabaseBreaking() throws StorageObjectFailure
   {
     super();
-    //this.cache = new DatabaseCache(4);
+    logger = new LoggerWrapper("Database.Breaking");
     this.theTable="breaking";
   }
 

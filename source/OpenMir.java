@@ -39,6 +39,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import freemarker.template.SimpleHash;
+import freemarker.template.SimpleScalar;
+
 import mir.config.MirPropertiesConfiguration;
 import mir.misc.HTMLTemplateProcessor;
 import mir.misc.StringUtil;
@@ -47,14 +50,12 @@ import mir.servlet.ServletModuleDispatch;
 import mir.servlet.ServletModuleException;
 import mir.servlet.ServletModuleUserException;
 import mircoders.servlet.ServletModuleOpenIndy;
-import freemarker.template.SimpleHash;
-import freemarker.template.SimpleScalar;
 
 /**
  *  OpenMir.java - main servlet for open posting and comment feature to articles
  *
  *  @author RK 1999-2001, the mir-coders group
- *  @version $Id: OpenMir.java,v 1.19 2003/01/25 17:50:34 idfx Exp $
+ *  @version $Id: OpenMir.java,v 1.20 2003/02/23 05:00:10 zapata Exp $
  *
  */
 
@@ -73,9 +74,9 @@ public class OpenMir extends AbstractServlet {
   public void doPost(HttpServletRequest req, HttpServletResponse res)
     throws ServletException, IOException {
 
-    long            startTime = (new java.util.Date()).getTime();
-    long            sessionConnectTime=0;
-      
+    long startTime = System.currentTimeMillis();
+    long sessionConnectTime=0;
+
     session = req.getSession();
 
     if(session.getAttribute("Language")==null){
@@ -106,7 +107,7 @@ public class OpenMir extends AbstractServlet {
       handleError(req,res,res.getWriter(), "OpenIndy :: ServletException in Module ServletModule -- " + e.getMessage());
     }
     // timing...
-    sessionConnectTime = new java.util.Date().getTime() - startTime;
+    sessionConnectTime = System.currentTimeMillis() - startTime;
     logger.debug("EXECTIME (ServletModuleOpenIndy): " + sessionConnectTime + " ms");
   }
 
@@ -122,7 +123,7 @@ public class OpenMir extends AbstractServlet {
       out.close();
     }
     catch (Exception e) {
-      System.err.println("Error in UserErrorTemplate");
+      logger.error("Error in UserErrorTemplate");
     }
 
   }
@@ -140,7 +141,7 @@ public class OpenMir extends AbstractServlet {
       out.close();
     }
     catch (Exception e) {
-      System.err.println("Error in ErrorTemplate");
+      logger.error("Error in ErrorTemplate");
     }
 
   }

@@ -40,10 +40,12 @@ package mircoders.storage;
  * @version 1.0
  */
 
+import freemarker.template.SimpleList;
+
+import mir.log.LoggerWrapper;
 import mir.storage.Database;
 import mir.storage.StorageObject;
 import mir.storage.StorageObjectFailure;
-import freemarker.template.SimpleList;
 
 
 public class DatabaseLanguage extends Database implements StorageObject{
@@ -65,18 +67,16 @@ public class DatabaseLanguage extends Database implements StorageObject{
 
   private DatabaseLanguage() throws StorageObjectFailure {
     super();
+    logger = new LoggerWrapper("Database.Language");
+
     this.hasTimestamp = false;
     this.theTable = "language";
   }
 
   public SimpleList getPopupData() throws StorageObjectFailure {
     SimpleList pData = null;
-    try {
-      pData = getPopupData("name", false);
-    }
-    catch (StorageObjectFailure e) {
-      System.err.println("FF");
-    }
+    pData = getPopupData("name", false);
+
     return pData;
   }
 }

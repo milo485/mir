@@ -36,7 +36,7 @@ import java.util.Locale;
 
 import javax.servlet.http.HttpServletRequest;
 
-import mir.misc.Logfile;
+import mir.log.LoggerWrapper;
 import mircoders.entity.EntityComment;
 import mircoders.entity.EntityContent;
 import mircoders.global.MirGlobal;
@@ -46,10 +46,13 @@ import mircoders.localizer.MirOpenPostingLocalizer;
 public class MirBasicOpenPostingLocalizer implements MirOpenPostingLocalizer {
   private List afterContentProducerTasks;
   private List afterCommentProducerTasks;
+  protected LoggerWrapper logger;
 
-  protected static Logfile logger = Logfile.getInstance( MirGlobal.getConfigProperty("Home") + "/" + MirGlobal.getConfigProperty("Mir.Localizer.Logfile"));
+
 
   public MirBasicOpenPostingLocalizer() {
+    logger = new LoggerWrapper("Localizer.Basic.OpenPosting");
+
     try {
       String contentProducers = MirGlobal.getConfigProperty("Mir.Localizer.OpenPosting.ContentProducers");
       String commentProducers = MirGlobal.getConfigProperty("Mir.Localizer.OpenPosting.CommentProducers");
@@ -58,7 +61,7 @@ public class MirBasicOpenPostingLocalizer implements MirOpenPostingLocalizer {
       afterCommentProducerTasks = ProducerEngine.ProducerTask.parseProducerTaskList(commentProducers);
     }
     catch (Throwable t) {
-      logger.printError("Setting up MirBasicOpenPostingLocalizer failed: " + t.getMessage());
+      logger.error("Setting up MirBasicOpenPostingLocalizer failed: " + t.getMessage());
     }
   }
 

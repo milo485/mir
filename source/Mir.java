@@ -1,36 +1,3 @@
-import freemarker.template.SimpleHash;
-import freemarker.template.SimpleList;
-import freemarker.template.SimpleScalar;
-import freemarker.template.TemplateModel;
-
-import mir.config.MirPropertiesConfiguration;
-
-import mir.generator.FreemarkerGenerator;
-
-import mir.misc.HTMLTemplateProcessor;
-import mir.misc.StringUtil;
-
-import mir.servlet.AbstractServlet;
-import mir.servlet.ServletModule;
-import mir.servlet.ServletModuleDispatch;
-import mir.servlet.ServletModuleException;
-import mir.servlet.ServletModuleUserException;
-
-import mir.util.StringRoutines;
-
-import mircoders.entity.EntityUsers;
-
-import mircoders.global.MirGlobal;
-
-import mircoders.module.ModuleMessage;
-import mircoders.module.ModuleUsers;
-
-import mircoders.storage.DatabaseArticleType;
-import mircoders.storage.DatabaseMessages;
-import mircoders.storage.DatabaseUsers;
-
-import org.apache.struts.util.MessageResources;
-
 /*
  * Copyright (C) 2001, 2002 The Mir-coders group
  *
@@ -61,6 +28,7 @@ import org.apache.struts.util.MessageResources;
  * to your version of the file, but you are not obligated to do so.  If you do
  * not wish to do so, delete this exception statement from your version.
  */
+
 import java.io.IOException;
 import java.io.PrintWriter;
 
@@ -80,12 +48,40 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.struts.util.MessageResources;
+
+
+import freemarker.template.SimpleHash;
+import freemarker.template.SimpleList;
+import freemarker.template.SimpleScalar;
+import freemarker.template.TemplateModel;
+
+import mir.config.MirPropertiesConfiguration;
+import mir.generator.FreemarkerGenerator;
+import mir.misc.HTMLTemplateProcessor;
+import mir.misc.StringUtil;
+import mir.servlet.AbstractServlet;
+import mir.servlet.ServletModule;
+import mir.servlet.ServletModuleDispatch;
+import mir.servlet.ServletModuleException;
+import mir.servlet.ServletModuleUserException;
+import mir.util.StringRoutines;
+
+import mircoders.entity.EntityUsers;
+import mircoders.global.MirGlobal;
+import mircoders.module.ModuleMessage;
+import mircoders.module.ModuleUsers;
+import mircoders.storage.DatabaseArticleType;
+import mircoders.storage.DatabaseMessages;
+import mircoders.storage.DatabaseUsers;
+
+
 
 /**
  * Mir.java - main servlet, that dispatches to servletmodules
  *
- * @author $Author: idfx $
- * @version $Id: Mir.java,v 1.28 2003/01/28 23:37:08 idfx Exp $
+ * @author $Author: zapata $
+ * @version $Id: Mir.java,v 1.29 2003/02/23 05:00:10 zapata Exp $
  *
  */
 public class Mir extends AbstractServlet {
@@ -93,7 +89,7 @@ public class Mir extends AbstractServlet {
   private static ModuleMessage messageModule = null;
   private final static HashMap servletModuleInstanceHash = new HashMap();
 
-  //I don't know about making this static cause it removes the 
+  //I don't know about making this static cause it removes the
   //possibility to change the config on the fly.. -mh
   private static List loginLanguages = null;
   public HttpSession session;
@@ -146,7 +142,7 @@ public class Mir extends AbstractServlet {
     }
   }
 
-  // FIXME: this should probalby go into AbstractServlet so it can be used in 
+  // FIXME: this should probalby go into AbstractServlet so it can be used in
   // OpenMir as well -mh
   protected String getDefaultLanguage(HttpServletRequest req) {
     String defaultlanguage =
@@ -188,7 +184,7 @@ public class Mir extends AbstractServlet {
     //make sure client browsers don't cache anything
     setNoCaching(res);
 
-    //FIXME: this seems kind of hackish and only here because we can have 
+    //FIXME: this seems kind of hackish and only here because we can have
     // default other than the one that the browser is set to.
     Locale locale = new Locale(getDefaultLanguage(req), "");
     MessageResources messageResources =
@@ -377,9 +373,10 @@ public class Mir extends AbstractServlet {
         MirPropertiesConfiguration.instance().getString("Mir.ErrorTemplate"),
         modelRoot, out, getLocale(req));
       out.close();
-    } catch (Exception e) {
-      e.printStackTrace(System.out);
-      System.err.println("Error in ErrorTemplate: " + e.getMessage());
+    }
+    catch (Exception e) {
+      logger.error("Error in ErrorTemplate: " + e.getMessage());
+      e.printStackTrace(logger.asPrintWriter(logger.DEBUG_MESSAGE));
     }
   }
 
@@ -397,8 +394,9 @@ public class Mir extends AbstractServlet {
         MirPropertiesConfiguration.instance().getString("Mir.UserErrorTemplate"),
         modelRoot, out, getLocale(req));
       out.close();
-    } catch (Exception e) {
-      System.err.println("Error in UserErrorTemplate");
+    }
+    catch (Exception e) {
+      logger.error("Error in UserErrorTemplate");
     }
   }
 
@@ -465,10 +463,10 @@ public class Mir extends AbstractServlet {
 
       HTMLTemplateProcessor.process(res, startTemplate, mergeData, out,
         getLocale(req));
-    } catch (Exception e) {
-      e.printStackTrace(System.out);
-      handleError(req, res, out,
-        "error while trying to send startpage. " + e.getMessage());
+    }
+    catch (Exception e) {
+      e.printStackTrace(logger.asPrintWriter(logger.DEBUG_MESSAGE));
+      handleError(req, res, out, "error while trying to send startpage. " + e.getMessage());
     }
   }
 

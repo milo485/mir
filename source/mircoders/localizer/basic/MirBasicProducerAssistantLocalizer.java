@@ -41,7 +41,7 @@ import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
 import mir.entity.EntityList;
 import mir.entity.adapter.EntityAdapter;
 import mir.entity.adapter.EntityIteratorAdapter;
-import mir.misc.Logfile;
+import mir.log.LoggerWrapper;
 import mir.misc.StringUtil;
 import mir.util.DateToMapAdapter;
 import mir.util.GeneratorHTMLFunctions;
@@ -56,13 +56,15 @@ import mircoders.storage.DatabaseLanguage;
 import mircoders.storage.DatabaseTopics;
 
 public class MirBasicProducerAssistantLocalizer implements MirProducerAssistantLocalizer {
-  protected static Logfile logger = Logfile.getInstance( MirGlobal.getConfigProperty("Home") + "/" + MirGlobal.getConfigProperty("Mir.Localizer.Logfile"));
+  protected LoggerWrapper logger;
 
   public void initializeGenerationValueSet(Map aValueSet) {
     Iterator i;
 
     Map configMap = new HashMap();
     Map utilityMap = new HashMap();
+
+    logger = new LoggerWrapper("Localizer.ProducerAssistant");
 
 // obsolete:
     configMap.put("producerDocRoot", MirGlobal.getConfigProperty("Producer.DocRoot"));
@@ -82,8 +84,9 @@ public class MirBasicProducerAssistantLocalizer implements MirProducerAssistantL
 // "new":
     try {
       configMap.putAll( MirPropertiesConfiguration.instance().allSettings() );
-    } catch (PropertiesConfigExc e) {
-      e.printStackTrace(System.err);
+    }
+    catch (PropertiesConfigExc e) {
+      throw new RuntimeException("Can't get configuration: " + e.getMessage());
     }
 
     utilityMap.put("compressWhitespace", new freemarker.template.utility.CompressWhitespace() );
@@ -100,10 +103,8 @@ public class MirBasicProducerAssistantLocalizer implements MirProducerAssistantL
     aValueSet.put("utility", utilityMap);
 
 
-
     EntityList topicList=null;
     EntityList entityList=null;
-    EntityList parentList=null;
     EntityList languageList=null;
 
     try {
@@ -115,12 +116,11 @@ public class MirBasicProducerAssistantLocalizer implements MirProducerAssistantL
 
     }
     catch (Throwable t) {
-      logger.printError("initializeGenerationValueSet: Exception "+t.getMessage());
+      logger.error("initializeGenerationValueSet: Exception "+t.getMessage());
     }
 
     aValueSet.put("topics", topicList);
     aValueSet.put("imclist", entityList);
-    aValueSet.put("parentlist", parentList);
 
     Map articleTypeMap = new HashMap();
     articleTypeMap.put("openposting", "0");
@@ -139,7 +139,7 @@ public class MirBasicProducerAssistantLocalizer implements MirProducerAssistantL
       }
     }
     catch (Throwable t) {
-      logger.printError("initializeGenerationValueSet: Exception while collecting article types "+t.getMessage());
+      logger.error("initializeGenerationValueSet: Exception while collecting article types "+t.getMessage());
     }
     aValueSet.put("articletype", articleTypeMap);
 
@@ -154,7 +154,7 @@ public class MirBasicProducerAssistantLocalizer implements MirProducerAssistantL
       }
     }
     catch (Throwable t) {
-      logger.printError("initializeGenerationValueSet: Exception while collecting comment statuses"+t.getMessage());
+      logger.error("initializeGenerationValueSet: Exception while collecting comment statuses"+t.getMessage());
     }
     aValueSet.put("commentstatus", commentStatusMap);
 

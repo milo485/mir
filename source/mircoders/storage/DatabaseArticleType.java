@@ -40,6 +40,7 @@ package mircoders.storage;
  * @version 1.0
  */
 
+import mir.log.LoggerWrapper;
 import mir.storage.Database;
 import mir.storage.StorageObject;
 import mir.storage.StorageObjectFailure;
@@ -65,6 +66,7 @@ public class DatabaseArticleType extends Database implements StorageObject{
 
   private DatabaseArticleType() throws StorageObjectFailure {
     super();
+    logger = new LoggerWrapper("Database.ArticleType");
     this.hasTimestamp = false;
     this.theTable = "article_type";
   }

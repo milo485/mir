@@ -48,70 +48,80 @@ package mir.storage.store;
 
 import java.util.HashMap;
 
-import mir.misc.Logfile;
 import mir.misc.StringUtil;
 
 public class StoreContainerType {
 
-	public final static int     STOC_TYPE_UNKNOWN=-1;
-	public final static int     STOC_TYPE_ENTITY=0;
-	public final static int     STOC_TYPE_ENTITYLIST=1;
-  public final static int     STOC_TYPE_MAX=STOC_TYPE_ENTITYLIST;
+  public final static int STOC_TYPE_UNKNOWN = -1;
+  public final static int STOC_TYPE_ENTITY = 0;
+  public final static int STOC_TYPE_ENTITYLIST = 1;
+  public final static int STOC_TYPE_MAX = STOC_TYPE_ENTITYLIST;
 
-	private static HashMap[]    uniqueTypes=new HashMap[STOC_TYPE_MAX+1];
-  private static ObjectStore  o_store=ObjectStore.getInstance();
-	private static Logfile      storeLog;
-	private Class               stocClass=null;
-	private int                 stocType=STOC_TYPE_UNKNOWN;
+  private static HashMap[] uniqueTypes = new HashMap[STOC_TYPE_MAX + 1];
+  private static ObjectStore o_store = ObjectStore.getInstance();
+  private Class stocClass = null;
+  private int stocType = STOC_TYPE_UNKNOWN;
 
   static {
-    uniqueTypes[STOC_TYPE_ENTITY]= new HashMap();
-    uniqueTypes[STOC_TYPE_ENTITYLIST]=new HashMap();
+    uniqueTypes[STOC_TYPE_ENTITY] = new HashMap();
+    uniqueTypes[STOC_TYPE_ENTITYLIST] = new HashMap();
   }
 
-	private StoreContainerType() {}
+  private StoreContainerType() {}
 
-	private StoreContainerType(Class stocClass, int stocType) {
-		this.stocClass=stocClass;
-		this.stocType=stocType;
-	}
+  private StoreContainerType(Class stocClass, int stocType) {
+    this.stocClass = stocClass;
+    this.stocType = stocType;
+  }
 
-	public static StoreContainerType valueOf(Class stoc_class, int stoc_type) {
-		StoreContainerType returnStocType=null;
-    if (stoc_type>=0 && stoc_type <= STOC_TYPE_MAX) {
+  public static StoreContainerType valueOf(Class stoc_class, int stoc_type) {
+    StoreContainerType returnStocType = null;
+    if (stoc_type >= 0 && stoc_type <= STOC_TYPE_MAX) {
       HashMap current = uniqueTypes[stoc_type];
-      if ( current.containsKey(stoc_class) )
-			  returnStocType=(StoreContainerType)current.get(stoc_class);
-		  else {
-			  returnStocType=new StoreContainerType(stoc_class,stoc_type);
-			  current.put(stoc_class,returnStocType);
-		  }
+      if (current.containsKey(stoc_class))
+        returnStocType = (StoreContainerType) current.get(stoc_class);
+      else {
+        returnStocType = new StoreContainerType(stoc_class, stoc_type);
+        current.put(stoc_class, returnStocType);
+      }
     }
-		return returnStocType;
-	}
+    return returnStocType;
+  }
 
-  public int getStocType() { return stocType; }
-  public Class getStocClass() { return stocClass; }
+  public int getStocType() {
+    return stocType;
+  }
+
+  public Class getStocClass() {
+    return stocClass;
+  }
+
   public String getConfPrefix() {
-    return StoreUtil.getPropNameFor(stocClass)+"."+stringForStoreType(stocType);
+    return StoreUtil.getPropNameFor(stocClass) + "." +
+        stringForStoreType(stocType);
   }
+
   public int getDefaultSize() {
-    String confProperty= "StoreContainer."+stringForStoreType(stocType)+".DefaultSize";
+    String confProperty = "StoreContainer." + stringForStoreType(stocType) +
+        ".DefaultSize";
     return
-      StringUtil.parseInt( o_store.getConfProperty(confProperty),10 );
+        StringUtil.parseInt(o_store.getConfProperty(confProperty), 10);
   }
 
-	public String toString() {
-		StringBuffer sb = new StringBuffer(this.stocClass.toString());
-		sb.append("@").append(stringForStoreType(stocType));
-		return sb.toString();
-	}
+  public String toString() {
+    StringBuffer sb = new StringBuffer(this.stocClass.toString());
+    sb.append("@").append(stringForStoreType(stocType));
+    return sb.toString();
+  }
 
-	private static String stringForStoreType(int stocType) {
-		switch(stocType) {
-			case STOC_TYPE_ENTITY: return "Entity";
-			case STOC_TYPE_ENTITYLIST: return "EntityList";
-			default: return "UNKNOWN";
-		}
-	}
+  private static String stringForStoreType(int stocType) {
+    switch (stocType) {
+      case STOC_TYPE_ENTITY:
+        return "Entity";
+      case STOC_TYPE_ENTITYLIST:
+        return "EntityList";
+      default:
+        return "UNKNOWN";
+    }
+  }
 }

@@ -31,6 +31,7 @@
 
 package mircoders.storage;
 
+import mir.log.LoggerWrapper;
 import mir.storage.Database;
 import mir.storage.StorageObject;
 import mir.storage.StorageObjectFailure;
@@ -44,34 +45,31 @@ import freemarker.template.SimpleList;
 
 public class DatabaseUsers extends Database implements StorageObject{
 
-	private static DatabaseUsers instance;
+  private static DatabaseUsers instance;
 
-	// the following *has* to be sychronized cause this static method
-	// could get preemted and we could end up with 2 instances of DatabaseFoo..
-	// see the "Singletons with needles and thread" article at JavaWorld -mh
-	public synchronized static DatabaseUsers getInstance() 
-	  throws StorageObjectFailure {
-		if (instance == null) {
-			instance = new DatabaseUsers();
-			instance.myselfDatabase = instance;
-		}
-		return instance;
-	}
+  // the following *has* to be sychronized cause this static method
+  // could get preemted and we could end up with 2 instances of DatabaseFoo..
+  // see the "Singletons with needles and thread" article at JavaWorld -mh
+  public synchronized static DatabaseUsers getInstance() throws
+      StorageObjectFailure {
+    if (instance == null) {
+      instance = new DatabaseUsers();
+      instance.myselfDatabase = instance;
+    }
+    return instance;
+  }
 
-	private DatabaseUsers() throws StorageObjectFailure
-	{
-		super();
-		this.hasTimestamp = false;
-		this.theTable="webdb_users";
-		try {
-			this.theEntityClass = Class.forName("mircoders.entity.EntityUsers");
-		}
-		catch (Exception e) {
-			throw new StorageObjectFailure(e);
-		}
-	}
+  private DatabaseUsers() throws StorageObjectFailure {
+    super();
 
-	public SimpleList getPopupData() throws StorageObjectFailure {
-		return getPopupData("login",true);
-	}
+    logger = new LoggerWrapper("Database.Users");
+
+    hasTimestamp = false;
+    theTable = "webdb_users";
+    theEntityClass = mircoders.entity.EntityUsers.class;
+  }
+
+  public SimpleList getPopupData() throws StorageObjectFailure {
+    return getPopupData("login", true);
+  }
 }

@@ -31,10 +31,11 @@
 
 package mircoders.storage;
 
+import freemarker.template.SimpleList;
+import mir.log.LoggerWrapper;
 import mir.storage.Database;
 import mir.storage.StorageObject;
 import mir.storage.StorageObjectFailure;
-import freemarker.template.SimpleList;
 
 /**
  * <b>Diese Klasse implementiert die Datenbankverbindung zur MetaObjekt-Tabelle
@@ -49,32 +50,27 @@ public class DatabaseFeature extends Database implements StorageObject{
   // the following *has* to be sychronized cause this static method
   // could get preemted and we could end up with 2 instances of DatabaseFoo..
   // see the "Singletons with needles and thread" article at JavaWorld -mh
-  public synchronized static DatabaseFeature getInstance() 
-    throws StorageObjectFailure {
-      if (instance == null) {
-    instance = new DatabaseFeature();
-    instance.myselfDatabase = instance;
-      }
+  public synchronized static DatabaseFeature getInstance() throws
+      StorageObjectFailure {
+    if (instance == null) {
+      instance = new DatabaseFeature();
+      instance.myselfDatabase = instance;
+    }
     return instance;
   }
 
-  private DatabaseFeature() throws StorageObjectFailure
-  {
+  private DatabaseFeature() throws StorageObjectFailure {
     super();
-    //this.cache = new DatabaseCache(10);
-    this.hasTimestamp = false;
-    this.theTable="feature";
+    logger = new LoggerWrapper("Database.Feature");
 
-    try {
-        this.theEntityClass = Class.forName("mircoders.entity.EntityFeature");
-    }
-    catch (Exception e) {
-        throw new StorageObjectFailure(e);
-    }
+    hasTimestamp = false;
+    theTable = "feature";
+
+    theEntityClass = mircoders.entity.EntityFeature.class;
   }
 
   public SimpleList getPopupData() throws StorageObjectFailure {
-    return getPopupData("title",true);
+    return getPopupData("title", true);
   }
 
 }

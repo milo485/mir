@@ -38,9 +38,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-import mir.misc.MessageMethodModel;
-import mir.util.RewindableIterator;
-
 import org.apache.struts.util.MessageResources;
 
 import freemarker.template.FileTemplateCache;
@@ -53,6 +50,9 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateModelRoot;
 import freemarker.template.TemplateScalarModel;
+
+import mir.misc.MessageMethodModel;
+import mir.util.RewindableIterator;
 
 public class FreemarkerGenerator implements Generator {
   private Template template;
@@ -95,6 +95,7 @@ public class FreemarkerGenerator implements Generator {
   public static TemplateModel makeAdapter(Object anObject) throws TemplateModelException {
     if (anObject == null)
       return null;
+
     if (anObject instanceof TemplateModel)
       return (TemplateModel) anObject;
     else if (anObject instanceof Generator.GeneratorFunction)
@@ -103,6 +104,12 @@ public class FreemarkerGenerator implements Generator {
       return new MessageMethodModel((MessageResources) anObject);
     else if (anObject instanceof Integer)
       return makeStringAdapter(((Integer) anObject).toString());
+    else if (anObject instanceof Boolean) {
+      if (((Boolean) anObject).booleanValue())
+        return makeStringAdapter("1");
+      else
+        return makeStringAdapter("0");
+    }
     else if (anObject instanceof String)
       return makeStringAdapter((String) anObject);
     else if (anObject instanceof Map)

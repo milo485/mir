@@ -266,7 +266,6 @@ public class JobQueue {
 
     protected Object clone() {
       synchronized(this) {
-        System.out.println("  blabla");
         return new Job(data, identifier, status, priority, lastChange);
       }
     }
