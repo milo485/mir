@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+    "-//Hibernate/Hibernate Mapping DTD//EN"
+    "http://hibernate.sourceforge.net/hibernate-mapping-2.0.dtd" >
+    
+<hibernate-mapping>
+
+<!-- 
+    Created by Middlegen Hibernate plugin
+
+    http://boss.bekk.no/boss/middlegen/
+    http://hibernate.sourceforge.net/
+-->
+
+<class 
+    name="mir.core.model.MediaType" 
+    table="media_type"
+>
+    <id
+        name="id"
+        type="int"
+        column="id"
+    >
+        <generator class="sequence" />
+    </id>
+    <property
+        name="name"
+        type="java.lang.String"
+        column="name"
+        not-null="true"
+        length="80"
+    />
+    <property
+        name="mimeType"
+        type="java.lang.String"
+        column="mime_type"
+        not-null="true"
+        length="40"
+    />
+    <property
+        name="classname"
+        type="java.lang.String"
+        column="classname"
+        not-null="true"
+        length="80"
+    />
+    <property
+        name="tablename"
+        type="java.lang.String"
+        column="tablename"
+        not-null="true"
+        length="80"
+    />
+    <property
+        name="dcname"
+        type="java.lang.String"
+        column="dcname"
+        length="20"
+    />
+
+    <!-- associations -->
+    <set name="mediaItems" lazy="true">
+	    <key column="id"/>
+    	<one-to-many class="mir.core.model.Media"/> 
+	</set>
+</class>
+</hibernate-mapping>

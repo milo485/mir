@@ -1,0 +1,40 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-configuration PUBLIC "-//Hibernate/Hibernate Configuration DTD//EN"
+                                         "http://hibernate.sourceforge.net/hibernate-configuration-2.0.dtd">
+
+<hibernate-configuration>
+
+    <session-factory>
+
+        <property name="connection.url">jdbc:postgresql:mir</property>
+        <property name="connection.driver_class">org.postgresql.Driver</property>
+        <property name="connection.username">postgres</property>
+        <property name="connection.password"></property>
+        <property name="connection.pool_size">10</property>
+        <property name="statement_cache.size">100</property>
+        <property name="show_sql">false</property>
+        <property name="use_outer_join">true</property>
+        <property name="dialect">net.sf.hibernate.dialect.PostgreSQLDialect</property>
+        
+        <!-- Mapping files -->
+        <mapping resource="mir/core/model/ArticleType.hbm.xml"/>
+        <mapping resource="mir/core/model/Breaking.hbm.xml"/>
+        <mapping resource="mir/core/model/Comment.hbm.xml"/>
+        <mapping resource="mir/core/model/Content.hbm.xml"/>
+        <mapping resource="mir/core/model/CommentStatus.hbm.xml"/>
+        <mapping resource="mir/core/model/Feature.hbm.xml"/>
+        <mapping resource="mir/core/model/Language.hbm.xml"/>
+        <mapping resource="mir/core/model/Media.hbm.xml"/>
+        <mapping resource="mir/core/model/MediaFolder.hbm.xml"/>
+        <mapping resource="mir/core/model/MediaType.hbm.xml"/>
+        <mapping resource="mir/core/model/Message.hbm.xml"/>
+        <mapping resource="mir/core/model/Rights.hbm.xml"/>
+        <mapping resource="mir/core/model/Topic.hbm.xml"/>
+        <mapping resource="mir/core/model/WebdbUser.hbm.xml"/>
+        <mapping resource="mir/core/model/UploadedMedia.hbm.xml"/>
+        <mapping resource="mir/core/model/Image.hbm.xml"/>
+        <mapping resource="mir/core/model/Audio.hbm.xml"/>
+        <mapping resource="mir/core/model/Video.hbm.xml"/>
+    </session-factory>
+
+</hibernate-configuration>

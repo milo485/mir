@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+    "-//Hibernate/Hibernate Mapping DTD//EN"
+    "http://hibernate.sourceforge.net/hibernate-mapping-2.0.dtd" >
+    
+<hibernate-mapping>
+
+<!-- 
+    Created by Middlegen Hibernate plugin
+
+    http://boss.bekk.no/boss/middlegen/
+    http://hibernate.sourceforge.net/
+-->
+
+<class 
+    name="airline.hibernate.ImgFormat" 
+    table="img_format"
+>
+    <property
+        name="id"
+        type="short"
+        column="id"
+        not-null="true"
+        length="2"
+    />
+    <property
+        name="name"
+        type="java.lang.String"
+        column="name"
+        not-null="true"
+        length="20"
+    />
+    <property
+        name="extension"
+        type="java.lang.String"
+        column="extension"
+        not-null="true"
+        length="10"
+    />
+    <property
+        name="mimetype"
+        type="java.lang.String"
+        column="mimetype"
+        not-null="true"
+        length="40"
+    />
+    <property
+        name="commment"
+        type="java.lang.String"
+        column="commment"
+        length="255"
+    />
+
+    <!-- associations -->
+
+</class>
+</hibernate-mapping>

@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+    "-//Hibernate/Hibernate Mapping DTD//EN"
+    "http://hibernate.sourceforge.net/hibernate-mapping-2.0.dtd" >
+    
+<hibernate-mapping>
+
+<!-- 
+    Created by Middlegen Hibernate plugin
+
+    http://boss.bekk.no/boss/middlegen/
+    http://hibernate.sourceforge.net/
+-->
+
+<class 
+    name="mir.core.model.Message" 
+    table="messages"
+>
+    <id
+        name="id"
+        type="int"
+        column="id"
+    >
+        <generator class="sequence" />
+    </id>
+    <property
+        name="title"
+        type="java.lang.String"
+        column="title"
+        length="30"
+    />
+    <property
+        name="description"
+        type="java.lang.String"
+        column="description"
+        not-null="true"
+        length="255"
+    />
+    <property
+        name="creator"
+        type="java.lang.String"
+        column="creator"
+        not-null="true"
+        length="30"
+    />
+    <property
+        name="webdbCreate"
+        type="java.sql.Timestamp"
+        column="webdb_create"
+        not-null="true"
+        length="8"
+    />
+
+    <!-- associations -->
+
+</class>
+</hibernate-mapping>

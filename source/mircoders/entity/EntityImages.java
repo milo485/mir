@@ -39,6 +39,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import org.postgresql.PGConnection;
 import org.postgresql.largeobject.BlobInputStream;
 import org.postgresql.largeobject.LargeObject;
 import org.postgresql.largeobject.LargeObjectManager;
@@ -54,7 +55,7 @@ import mircoders.media.ImageProcessor;
  * Diese Klasse enth?lt die Daten eines MetaObjekts
  *
  * @author RK, mh, mir-coders
- * @version $Id: EntityImages.java,v 1.21 2003/04/30 00:37:27 zapata Exp $
+ * @version $Id: EntityImages.java,v 1.22 2003/08/16 19:15:57 idfx Exp $
  */
 
 
@@ -98,7 +99,7 @@ public class EntityImages extends EntityUploadedMedia
           "select image_data from images where id="+getId());
       jCon = ((com.codestudio.sql.PoolManConnectionHandle)con)
            .getNativeConnection();
-      lom = ((org.postgresql.Connection)jCon).getLargeObjectAPI();
+      lom = ((PGConnection)jCon).getLargeObjectAPI();
       if(rs!=null) {
         if (rs.next()) {
           LargeObject lob = lom.open(rs.getInt(1));
@@ -153,7 +154,7 @@ public class EntityImages extends EntityUploadedMedia
         java.sql.Connection connection;
         connection = ((com.codestudio.sql.PoolManConnectionHandle)con).getNativeConnection();
 
-        lom = ((org.postgresql.Connection) connection).getLargeObjectAPI();
+        lom = ((PGConnection) connection).getLargeObjectAPI();
 
         int oidImage = lom.create();
         LargeObject lobImage = lom.open(oidImage);
@@ -215,7 +216,7 @@ public class EntityImages extends EntityUploadedMedia
       ResultSet rs = theStorageObject.executeSql(stmt, "select icon_data from images where id="+getId());
       jCon = ((com.codestudio.sql.PoolManConnectionHandle)con)
            .getNativeConnection();
-      lom = ((org.postgresql.Connection)jCon).getLargeObjectAPI();
+      lom = ((PGConnection)jCon).getLargeObjectAPI();
       if(rs!=null) {
         if (rs.next()) {
           LargeObject lob = lom.open(rs.getInt(1));

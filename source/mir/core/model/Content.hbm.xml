@@ -1,0 +1,216 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+    "-//Hibernate/Hibernate Mapping DTD//EN"
+    "http://hibernate.sourceforge.net/hibernate-mapping-2.0.dtd" >
+    
+<hibernate-mapping>
+
+<!-- 
+    Created by Middlegen Hibernate plugin
+
+    http://boss.bekk.no/boss/middlegen/
+    http://hibernate.sourceforge.net/
+-->
+
+<class 
+    name="mir.core.model.Content" 
+    table="content"
+>
+    <id
+        name="id"
+        type="int"
+        column="id"
+    >
+    	<generator class="sequence"/>
+    </id>
+    <property
+        name="title"
+        type="java.lang.String"
+        column="title"
+        not-null="true"
+        length="80"
+    />
+    <property
+        name="subtitle"
+        type="java.lang.String"
+        column="subtitle"
+        length="30"
+    />
+    <property
+        name="edittitle"
+        type="java.lang.String"
+        column="edittitle"
+        length="30"
+    />
+    <property
+        name="date"
+        type="java.lang.String"
+        column="date"
+        not-null="true"
+        length="8"
+    />
+    <property
+        name="creator"
+        type="java.lang.String"
+        column="creator"
+        length="80"
+    />
+    <property
+        name="creatorMainUrl"
+        type="java.lang.String"
+        column="creator_main_url"
+        length="255"
+    />
+    <property
+        name="creatorEmail"
+        type="java.lang.String"
+        column="creator_email"
+        length="80"
+    />
+    <property
+        name="creatorAddress"
+        type="java.lang.String"
+        column="creator_address"
+        length="80"
+    />
+    <property
+        name="creatorPhone"
+        type="java.lang.String"
+        column="creator_phone"
+        length="20"
+    />
+    <property
+        name="description"
+        type="java.lang.String"
+        column="description"
+        length="-1"
+    />
+    <property
+        name="keywords"
+        type="java.lang.String"
+        column="keywords"
+        length="-1"
+    />
+    <property
+        name="comment"
+        type="java.lang.String"
+        column="comment"
+        length="-1"
+    />
+    <property
+        name="source"
+        type="java.lang.String"
+        column="source"
+        length="255"
+    />
+    <property
+        name="publishDate"
+        type="java.sql.Timestamp"
+        column="publish_date"
+        length="8"
+    />
+    <property
+        name="publishServer"
+        type="java.lang.String"
+        column="publish_server"
+        length="255"
+    />
+    <property
+        name="publishPath"
+        type="java.lang.String"
+        column="publish_path"
+        length="255"
+    />
+    <property
+        name="isPublished"
+        type="boolean"
+        column="is_published"
+        not-null="true"
+        length="1"
+    />
+    <property
+        name="isProduced"
+        type="boolean"
+        column="is_produced"
+        not-null="true"
+        length="1"
+    />
+    <property
+        name="webdbCreate"
+        type="java.sql.Timestamp"
+        column="webdb_create"
+        not-null="true"
+        length="8"
+    />
+    <property
+        name="webdbLastchange"
+        type="java.sql.Timestamp"
+        column="webdb_lastchange"
+        length="8"
+    />
+    <property
+    	name="isHtml"
+     	type="boolean"
+     	column="is_html"
+      	not-null="true"
+       	length="1"
+	/>
+    <property
+        name="contentData"
+        type="java.lang.String"
+        column="content_data"
+        length="-1"
+    />
+    <!-- associations -->
+    <many-to-one
+        name="articleType"
+        class="mir.core.model.ArticleType"
+        column="to_article_type"
+    />
+    <many-to-one
+        name="feature"
+        class="mir.core.model.Feature"
+        column="to_feature"
+    />
+    <many-to-one
+        name="publisher"
+        class="mir.core.model.MirUser"
+        column="to_publisher"
+    />
+    <many-to-one
+        name="language"
+        class="mir.core.model.Language"
+        column="to_language"
+    />
+    <many-to-one
+        name="rights"
+        class="mir.core.model.Rights"
+        column="to_rights"
+    /> 
+    <set 
+    	name="childContent"
+    	lazy="true" 
+    	inverse="true" 
+    	cascade="all">
+    	<key 
+    		column="to_content"
+    	/>
+        <one-to-many 
+        	class="mir.core.model.Content"
+        />
+    </set>
+    <many-to-one
+        name="parentContent"
+        class="mir.core.model.Content"
+        column="to_content"
+    />
+    <set name="topics" table="content_x_topic">
+	    <key column="content_id"/>
+	    <many-to-many column="topic_id" class="mir.core.model.Topic"/>
+	</set> 
+    <set name="attachedMedias" table="content_x_media" lazy="true">
+	    <key column="content_id"/>
+	    <many-to-many column="media_id" class="mir.core.model.Media"/>
+	</set>
+</class>
+</hibernate-mapping>
