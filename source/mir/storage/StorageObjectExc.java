@@ -28,44 +28,20 @@
  * to your version of the file, but you are not obligated to do so.  If you do
  * not wish to do so, delete this exception statement from your version.
  */
-/**
- * <b>Exception fuer StorageObject</b><p>
- *
- * @author RK
- * @version	30.6.1999
- *
- *
- */
+package mir.storage;
 
-
-
-package  mir.storage;
-
-import java.lang.*;
+import multex.Exc;
 
 
 /**
- *  Expception Objekt fuer alle Fehler, die in der Speicherzugriffsschicht
- *  (mir.storage) auftauchen
+ * @author idefix
  */
-public class StorageObjectException extends Exception {
+public class StorageObjectExc extends Exc {
+  public StorageObjectExc() {
+    super("Something gone wrong");
+  }
 
-	/**
-	 * Leerer Konstruktor
-	 */
-	public StorageObjectException () {
-		super();
-	}
-
-	/**
-	 * Konstruktor mit Nachricht
-	 * @param   String msg
-	 */
-	public StorageObjectException (String msg) {
-	  super(msg);
+  public StorageObjectExc(String msg) {
+    super(msg);
   }
 }
-
-
-
-

@@ -28,11 +28,10 @@
  * to your version of the file, but you are not obligated to do so.  If you do
  * not wish to do so, delete this exception statement from your version.
  */
-
 package mir.config.exceptions;
 
 public class ConfigInvalidPropertyTypeException extends ConfigFailure {
   public ConfigInvalidPropertyTypeException(String aMessage, String aLocation) {
-    super (aMessage, aLocation);
+    super(aMessage, aLocation);
   }
 }

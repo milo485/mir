@@ -31,15 +31,13 @@
 /*
  * Implementiert DatabaseAdaptor Interface f?r Sybase.
  */
-
-
-
-package  mir.storage;
-
-import java.util.Properties;
+package mir.storage;
 
 import mir.config.MirPropertiesConfiguration;
+
 import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
+
+import java.util.Properties;
 
 
 /**
@@ -49,7 +47,6 @@ import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
  * @version 15.05.2000
  */
 public final class DatabaseAdaptorSybase implements DatabaseAdaptor {
-
   /**
    * Liefert den Namen der Adaptorklasse <code>Adaptor.Sybase.Driver</code>
    * f?r Sybase zur?ck.
@@ -68,9 +65,11 @@ public final class DatabaseAdaptorSybase implements DatabaseAdaptor {
    * @param host host als String
    * @return url als String
    */
-  public String getURL(String user, String pass, String host) throws PropertiesConfigExc {
+  public String getURL(String user, String pass, String host)
+    throws PropertiesConfigExc {
     return MirPropertiesConfiguration.instance().getString("Adaptor.Sybase.URL");
-        /** @todo  hier muesste bessererweise $HOST durch HOST ersetzt, etc. werden */
+
+    /** @todo  hier muesste bessererweise $HOST durch HOST ersetzt, etc. werden */
   }
 
   /**
@@ -101,6 +100,7 @@ public final class DatabaseAdaptorSybase implements DatabaseAdaptor {
     Properties props = new Properties();
     props.put("user", user);
     props.put("password", password);
+
     return props;
   }
 

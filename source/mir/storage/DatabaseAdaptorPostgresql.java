@@ -28,13 +28,14 @@
  * to your version of the file, but you are not obligated to do so.  If you do
  * not wish to do so, delete this exception statement from your version.
  */
-
 package mir.storage;
+
+import mir.config.MirPropertiesConfiguration;
+
+import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
 
 import java.util.Properties;
 
-import mir.config.MirPropertiesConfiguration;
-import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
 
 /**
  * <b>Diese Klasse implementiert die abstrakte Klasse DatabaseAdaptor f?r Postgresql-Datenbanken
@@ -42,14 +43,13 @@ import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
  * @author <RK>
  * @version 30.12.2000
  */
-
-public final class DatabaseAdaptorPostgresql implements DatabaseAdaptor{
-
+public final class DatabaseAdaptorPostgresql implements DatabaseAdaptor {
   public String getDriver() throws PropertiesConfigExc {
     return MirPropertiesConfiguration.instance().getString("Adaptor.PostgreSQL.Driver");
   }
 
-  public String getURL(String user, String pass, String host) throws PropertiesConfigExc {
+  public String getURL(String user, String pass, String host)
+    throws PropertiesConfigExc {
     return MirPropertiesConfiguration.instance().getString("Adaptor.PostgreSQL.URL");
   }
 
@@ -67,7 +67,5 @@ public final class DatabaseAdaptorPostgresql implements DatabaseAdaptor{
 
   public String getLastInsertSQL(Database theDB) {
     return "select currval('" + theDB.getCoreTable() + "_id_seq')";
-    }
+  }
 }
-
-

@@ -33,19 +33,20 @@
  * Bislang gibt es in der Bibliothek nur die M?glichkeit
  * in einer Datenbank zu speichern.
  */
-
 package mir.storage;
+
+import freemarker.template.SimpleHash;
+import freemarker.template.SimpleList;
+
+import mir.entity.Entity;
+import mir.entity.EntityList;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 
-import mir.entity.Entity;
-import mir.entity.EntityList;
-import freemarker.template.SimpleHash;
-import freemarker.template.SimpleList;
+import java.util.ArrayList;
 
 
 /**
@@ -53,10 +54,9 @@ import freemarker.template.SimpleList;
  * Bislang gibt es in der Bibliothek nur die M?glichkeit
  * in einer Datenbank zu speichern.
  * @author RK
- * @version	29.6.1999
+ * @version        29.6.1999
  */
 public interface StorageObject {
-
   /**
    * Dokumentation siehe Database.java
    * @param id
@@ -72,8 +72,8 @@ public interface StorageObject {
    * @return EntityList
    * @exception StorageObjectException
    */
-  abstract public EntityList selectByFieldValue(String aField, String aValue) throws
-      StorageObjectFailure;
+  abstract public EntityList selectByFieldValue(String aField, String aValue)
+    throws StorageObjectFailure;
 
   /**
    * Dokumentation siehe Database.java
@@ -81,8 +81,8 @@ public interface StorageObject {
    * @return EntityList
    * @exception StorageObjectException
    */
-  abstract public EntityList selectByWhereClause(String whereClause) throws
-      StorageObjectFailure;
+  abstract public EntityList selectByWhereClause(String whereClause)
+    throws StorageObjectFailure;
 
   /**
    * Dokumentation siehe Database.java
@@ -91,8 +91,8 @@ public interface StorageObject {
    * @return EntityList
    * @exception StorageObjectException
    */
-  abstract public EntityList selectByWhereClause(String whereClause, int offset) throws
-      StorageObjectFailure;
+  abstract public EntityList selectByWhereClause(String whereClause, int offset)
+    throws StorageObjectFailure;
 
   /**
    * Dokumentation siehe Database.java
@@ -103,9 +103,7 @@ public interface StorageObject {
    * @exception StorageObjectException
    */
   abstract public EntityList selectByWhereClause(String whereClause,
-                                                 String orderBy,
-                                                 int offset) throws
-      StorageObjectFailure;
+    String orderBy, int offset) throws StorageObjectFailure;
 
   /**
    * Dokumentation siehe Database.java
@@ -117,9 +115,7 @@ public interface StorageObject {
    * @exception StorageObjectException
    */
   abstract public EntityList selectByWhereClause(String whereClause,
-                                                 String orderBy,
-                                                 int offset, int limit) throws
-      StorageObjectFailure;
+    String orderBy, int offset, int limit) throws StorageObjectFailure;
 
   /**
    * Dokumentation siehe Database.java
@@ -203,17 +199,16 @@ public interface StorageObject {
    * @return ResultSet
    * @exception StorageObjectException, SQLException
    */
-  abstract public ResultSet executeSql(Statement a, String sql) throws
-      StorageObjectFailure,
-      SQLException;
+  abstract public ResultSet executeSql(Statement a, String sql)
+    throws StorageObjectFailure, SQLException;
 
   /**
    * Dokumentation siehe Database.java
    * @param con
    * @param stmt
    */
-  abstract public void freeConnection(Connection con, Statement stmt) throws
-      StorageObjectFailure;
+  abstract public void freeConnection(Connection con, Statement stmt)
+    throws StorageObjectFailure;
 
   /**
    * Dokumentation siehe Database.java
@@ -221,15 +216,12 @@ public interface StorageObject {
    */
   abstract public SimpleList getPopupData() throws StorageObjectFailure;
 
-  abstract public int executeUpdate(Statement a, String sql) throws
-      StorageObjectFailure, SQLException;
+  abstract public int executeUpdate(Statement a, String sql)
+    throws StorageObjectFailure, SQLException;
 
-  abstract public int executeUpdate(String sql) throws StorageObjectFailure,
-      SQLException;
+  abstract public int executeUpdate(String sql)
+    throws StorageObjectFailure, SQLException;
 
-  abstract public int getSize(String where) throws SQLException,
-      StorageObjectFailure;
+  abstract public int getSize(String where)
+    throws SQLException, StorageObjectFailure;
 }
-
-
-

@@ -55,7 +55,7 @@ import com.codestudio.util.SQLManager;
  * Copyright:    Copyright (c) 2001, 2002
  * Company:      Mir-coders group
  * @author       idfx, the Mir-coders group
- * @version      $Id: AbstractServlet.java,v 1.20 2003/01/25 17:45:19 idfx Exp $
+ * @version      $Id: AbstractServlet.java,v 1.21 2003/01/28 23:37:08 idfx Exp $
  */
 
 public abstract class AbstractServlet extends HttpServlet {
@@ -137,10 +137,9 @@ public abstract class AbstractServlet extends HttpServlet {
   /**
    * @see javax.servlet.Servlet#init(javax.servlet.ServletConfig)
    */
-  public void init(ServletConfig arg0) throws ServletException {
-    super.init(arg0);
-    MirPropertiesConfiguration.setContext(arg0.getServletContext());
-    MirPropertiesConfiguration.setContextPath("/"+arg0.getServletName());
+  public void init(ServletConfig config) throws ServletException {
+    super.init(config);
+    MirPropertiesConfiguration.setContext(config.getServletContext());	   
     try {
       configuration = MirPropertiesConfiguration.instance();
     } catch (PropertiesConfigExc e) {

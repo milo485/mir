@@ -28,11 +28,11 @@
  * to your version of the file, but you are not obligated to do so.  If you do
  * not wish to do so, delete this exception statement from your version.
  */
-
-package  mir.config;
-
+package mir.config;
 
 public interface ConfigNodeBuilder {
   public ConfigNodeBuilder makeSubNode(String aName, String aLocationDescription);
-  public void addProperty(String aName, String aValue, String aValueDescription, String aLocationDescription);
+
+  public void addProperty(String aName, String aValue,
+    String aValueDescription, String aLocationDescription);
 }

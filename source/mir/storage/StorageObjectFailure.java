@@ -28,32 +28,36 @@
  * to your version of the file, but you are not obligated to do so.  If you do
  * not wish to do so, delete this exception statement from your version.
  */
-package mir.config;
+package mir.storage;
+
+import multex.Failure;
 
 
-//import  java.net.*;
-//import  java.io.*;
-//import  java.util.*;
-//import  java.lang.*;
-import mir.config.exceptions.ConfigFailure;
-
-
-public class MirConfiguration {
-  private ConfigNode rootNode;
-
-  public MirConfiguration(ConfigNode aRootNode) {
-    super();
-    rootNode = aRootNode;
+/**
+ * Exception for all occuring failures in the storage-layer
+ * @author idefix
+ */
+public class StorageObjectFailure extends Failure {
+  /**
+   * Constructor StorageObjectException.
+   * @param e
+   */
+  public StorageObjectFailure(Throwable e) {
+    super("", e);
   }
 
-  public MirConfiguration(String aFileName) throws ConfigFailure {
-    super();
-    rootNode = new ConfigSimpleNode();
-
-    (new ConfigReader()).parseFile(aFileName, (ConfigNodeBuilder) rootNode);
+  /**
+   * Standard constructor
+   */
+  public StorageObjectFailure() {
+    super("A failure occured", null);
   }
 
-  public ConfigNode getRootNode() {
-    return rootNode;
+  /**
+   * Construktor with message
+   * @param   String msg
+   */
+  public StorageObjectFailure(String msg, Throwable e) {
+    super(msg, e);
   }
 }

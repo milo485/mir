@@ -69,6 +69,7 @@ public class FreemarkerGenerator implements Generator {
       template.process((TemplateModelRoot) makeMapAdapter(aValues), (PrintWriter) anOutputWriter);
     }
     catch (Throwable t) {
+      t.printStackTrace();
       aLogger.println("Exception occurred: "+t.getMessage());
       t.printStackTrace(aLogger);
       throw new GeneratorFailure( t );

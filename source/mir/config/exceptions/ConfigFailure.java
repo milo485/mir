@@ -28,27 +28,29 @@
  * to your version of the file, but you are not obligated to do so.  If you do
  * not wish to do so, delete this exception statement from your version.
  */
-
 package mir.config.exceptions;
 
 import multex.Failure;
+
 
 public class ConfigFailure extends Failure {
   private String locationDescription;
   private Throwable cause;
 
-  public ConfigFailure (String aMessage, Throwable aCause, String aLocationDescription) {
-    super ("Configuration error at "+aLocationDescription+": "+aMessage, aCause);
+  public ConfigFailure(String aMessage, Throwable aCause,
+    String aLocationDescription) {
+    super("Configuration error at " + aLocationDescription + ": " + aMessage,
+      aCause);
 
     locationDescription = aLocationDescription;
     cause = aCause;
   }
 
-  public ConfigFailure (String aMessage, String aLocationDescription) {
-    this (aMessage, (Throwable) null, aLocationDescription);
+  public ConfigFailure(String aMessage, String aLocationDescription) {
+    this(aMessage, (Throwable) null, aLocationDescription);
   }
 
-  public ConfigFailure (String aMessage) {
-    this (aMessage, (Throwable) null, "?");
+  public ConfigFailure(String aMessage) {
+    this(aMessage, (Throwable) null, "?");
   }
 }

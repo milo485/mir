@@ -28,12 +28,11 @@
  * to your version of the file, but you are not obligated to do so.  If you do
  * not wish to do so, delete this exception statement from your version.
  */
-
-package  mir.storage;
-
-import java.util.Properties;
+package mir.storage;
 
 import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
+
+import java.util.Properties;
 
 
 /**
@@ -43,11 +42,9 @@ import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
  *
  * @author <RK>
  *
- * @version $Id: DatabaseAdaptor.java,v 1.4 2003/01/25 17:45:19 idfx Exp $
+ * @version $Id: DatabaseAdaptor.java,v 1.5 2003/01/28 21:48:30 idfx Exp $
  */
-
-public interface  DatabaseAdaptor{
-
+public interface DatabaseAdaptor {
   /* Liefert den Namen der Adaptorklasse
    * @return Adaptorklasse als String
    */
@@ -63,7 +60,7 @@ public interface  DatabaseAdaptor{
    * @return url als String
    */
   public abstract String getURL(String user, String pass, String host)
-  	throws PropertiesConfigExc;
+    throws PropertiesConfigExc;
 
   /**
    * Gibt zur?ck, ob das SQL der Datenbank den <code>limit</code>-Befehl beherrscht.
@@ -97,4 +94,3 @@ public interface  DatabaseAdaptor{
    */
   public abstract String getLastInsertSQL(Database theDB);
 }
-

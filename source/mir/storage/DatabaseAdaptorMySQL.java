@@ -28,13 +28,14 @@
  * to your version of the file, but you are not obligated to do so.  If you do
  * not wish to do so, delete this exception statement from your version.
  */
-
 package mir.storage;
+
+import mir.config.MirPropertiesConfiguration;
+
+import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
 
 import java.util.Properties;
 
-import mir.config.MirPropertiesConfiguration;
-import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
 
 /**
  * <b>Diese Klasse implementiert die abstrakte Klasse DatabaseAdaptor
@@ -42,14 +43,13 @@ import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
  * @author <RK>
  * @version 27.6.1999
  */
-
-public final class DatabaseAdaptorMySQL implements DatabaseAdaptor{
-
+public final class DatabaseAdaptorMySQL implements DatabaseAdaptor {
   public String getDriver() throws PropertiesConfigExc {
     return MirPropertiesConfiguration.instance().getString("Adaptor.MySQL.Driver");
   }
 
-  public String getURL(String user, String pass, String host) throws PropertiesConfigExc {
+  public String getURL(String user, String pass, String host)
+    throws PropertiesConfigExc {
     return MirPropertiesConfiguration.instance().getString("Adaptor.MySQL.URL");
   }
 
@@ -69,5 +69,3 @@ public final class DatabaseAdaptorMySQL implements DatabaseAdaptor{
     return "select last_insert_id()";
   }
 }
-
-

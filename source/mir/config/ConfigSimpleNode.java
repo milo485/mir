@@ -28,14 +28,14 @@
  * to your version of the file, but you are not obligated to do so.  If you do
  * not wish to do so, delete this exception statement from your version.
  */
+package mir.config;
 
-package  mir.config;
+import mir.config.exceptions.ConfigInvalidPropertyTypeException;
+import mir.config.exceptions.ConfigMissingPropertyException;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import mir.config.exceptions.ConfigInvalidPropertyTypeException;
-import mir.config.exceptions.ConfigMissingPropertyException;
 
 public class ConfigSimpleNode implements ConfigNode, ConfigNodeBuilder {
   private Map properties;
@@ -52,7 +52,7 @@ public class ConfigSimpleNode implements ConfigNode, ConfigNodeBuilder {
   }
 
   public ConfigSimpleNode(String aPath, String aLocationDescription) {
-    super ();
+    super();
 
     path = aPath;
     locationDescription = aLocationDescription;
@@ -60,35 +60,36 @@ public class ConfigSimpleNode implements ConfigNode, ConfigNodeBuilder {
     subNodes = new HashMap();
   }
 
-// ConfigNodeBuilder helpers:
-
+  // ConfigNodeBuilder helpers:
   private String makeSubNodePath(String aSubNode) {
-    if (path!=null && path.length()>0)
-      return path+"/"+aSubNode;
-    else
+    if ((path != null) && (path.length() > 0)) {
+      return path + "/" + aSubNode;
+    } else {
       return aSubNode;
+    }
   }
 
   private String makePropertyPath(String aProperty) {
-    if (path!=null && path.length()>0)
-      return path+"/"+aProperty;
-    else
+    if ((path != null) && (path.length() > 0)) {
+      return path + "/" + aProperty;
+    } else {
       return aProperty;
+    }
   }
 
-  public ConfigNodeBuilder mimicSubNode(String aName, String aLocationDescription) {
-    ConfigNodeBuilder result = new ConfigSimpleNode(makeSubNodePath(aName), aLocationDescription);
+  public ConfigNodeBuilder mimicSubNode(String aName,
+    String aLocationDescription) {
+    ConfigNodeBuilder result =
+      new ConfigSimpleNode(makeSubNodePath(aName), aLocationDescription);
 
     return result;
   }
 
-// ConfigNodeBuilder methods:
-
+  // ConfigNodeBuilder methods:
   public ConfigNodeBuilder makeSubNode(String aName, String aLocationDescription) {
     if (subNodes.containsKey(aName)) {
       return (ConfigNodeBuilder) subNodes.get(aName);
-    }
-    else {
+    } else {
       ConfigNodeBuilder result = mimicSubNode(aName, aLocationDescription);
       subNodes.put(aName, result);
 
@@ -96,12 +97,14 @@ public class ConfigSimpleNode implements ConfigNode, ConfigNodeBuilder {
     }
   }
 
-  public void addProperty(String aName, String aValue, String anUnexpandedValue, String aLocationDescription) {
-    properties.put(aName, new property(aValue, anUnexpandedValue, aLocationDescription, makePropertyPath(aName)));
+  public void addProperty(String aName, String aValue,
+    String anUnexpandedValue, String aLocationDescription) {
+    properties.put(aName,
+      new property(aValue, anUnexpandedValue, aLocationDescription,
+        makePropertyPath(aName)));
   }
 
-// ConfigNode helpers
-
+  // ConfigNode helpers
   public boolean hasProperty(String aPropertyName) {
     return properties.containsKey(aPropertyName);
   }
@@ -110,98 +113,98 @@ public class ConfigSimpleNode implements ConfigNode, ConfigNodeBuilder {
     return (property) properties.get(aPropertyName);
   }
 
-  private property getRequiredProperty(String aPropertyName) throws ConfigMissingPropertyException {
+  private property getRequiredProperty(String aPropertyName)
+    throws ConfigMissingPropertyException {
     if (!hasProperty(aPropertyName)) {
-      throw new ConfigMissingPropertyException("required property \""+aPropertyName+"\" not found", getLocationDescription());
+      throw new ConfigMissingPropertyException("required property \"" +
+        aPropertyName + "\" not found", getLocationDescription());
     }
 
     return getProperty(aPropertyName);
   }
 
-
-// ConfigNode methods:
-
+  // ConfigNode methods:
   public String getLocationDescription() {
-    return getPath()+" ("+locationDescription+")";
-  };
+    return getPath() + " (" + locationDescription + ")";
+  }
 
   public String getPath() {
     return path;
-  };
-
+  }
 
   public ConfigNode getSubNode(String aSubNodeName) {
     if (subNodes.containsKey(aSubNodeName)) {
       return (ConfigNode) subNodes.get(aSubNodeName);
-    }
-    else
-    {
+    } else {
       return (ConfigNode) mimicSubNode(aSubNodeName, locationDescription);
     }
   }
 
-  public Boolean getRequiredBooleanProperty(String aPropertyName) throws ConfigMissingPropertyException, ConfigInvalidPropertyTypeException {
+  public Boolean getRequiredBooleanProperty(String aPropertyName)
+    throws ConfigMissingPropertyException, ConfigInvalidPropertyTypeException {
     return getRequiredProperty(aPropertyName).interpretAsBoolean();
   }
 
-  public Integer getRequiredIntegerProperty(String aPropertyName) throws ConfigMissingPropertyException, ConfigInvalidPropertyTypeException {
+  public Integer getRequiredIntegerProperty(String aPropertyName)
+    throws ConfigMissingPropertyException, ConfigInvalidPropertyTypeException {
     return getRequiredProperty(aPropertyName).interpretAsInteger();
   }
 
-  public String getRequiredStringProperty(String aPropertyName) throws ConfigMissingPropertyException, ConfigInvalidPropertyTypeException {
+  public String getRequiredStringProperty(String aPropertyName)
+    throws ConfigMissingPropertyException, ConfigInvalidPropertyTypeException {
     return getRequiredProperty(aPropertyName).interpretAsString();
   }
 
-  public Double getRequiredDoubleProperty(String aPropertyName) throws ConfigMissingPropertyException, ConfigInvalidPropertyTypeException {
+  public Double getRequiredDoubleProperty(String aPropertyName)
+    throws ConfigMissingPropertyException, ConfigInvalidPropertyTypeException {
     return getRequiredProperty(aPropertyName).interpretAsDouble();
   }
 
-
-  public Boolean getOptionalBooleanProperty(String aPropertyName, Boolean aDefaultValue) throws ConfigInvalidPropertyTypeException {
+  public Boolean getOptionalBooleanProperty(String aPropertyName,
+    Boolean aDefaultValue) throws ConfigInvalidPropertyTypeException {
     if (!hasProperty(aPropertyName)) {
       return aDefaultValue;
-    }
-    else {
+    } else {
       return getProperty(aPropertyName).interpretAsBoolean();
     }
   }
 
-  public Integer getOptionalIntegerProperty(String aPropertyName, Integer aDefaultValue) throws ConfigInvalidPropertyTypeException {
+  public Integer getOptionalIntegerProperty(String aPropertyName,
+    Integer aDefaultValue) throws ConfigInvalidPropertyTypeException {
     if (!hasProperty(aPropertyName)) {
       return aDefaultValue;
-    }
-    else {
+    } else {
       return getProperty(aPropertyName).interpretAsInteger();
     }
   }
 
-  public String getOptionalStringProperty(String aPropertyName, String aDefaultValue) throws ConfigInvalidPropertyTypeException {
+  public String getOptionalStringProperty(String aPropertyName,
+    String aDefaultValue) throws ConfigInvalidPropertyTypeException {
     if (!hasProperty(aPropertyName)) {
       return aDefaultValue;
-    }
-    else {
+    } else {
       return getProperty(aPropertyName).interpretAsString();
     }
   }
 
-  public Double getOptionalDoubleProperty(String aPropertyName, Double aDefaultValue) throws ConfigInvalidPropertyTypeException {
+  public Double getOptionalDoubleProperty(String aPropertyName,
+    Double aDefaultValue) throws ConfigInvalidPropertyTypeException {
     if (!hasProperty(aPropertyName)) {
       return aDefaultValue;
-    }
-    else {
+    } else {
       return getProperty(aPropertyName).interpretAsDouble();
     }
   }
 
-// property helper class
-
+  // property helper class
   private class property {
     private String value;
     private String unexpandedValue;
     private String path;
     private String locationDescription;
 
-    public property( String aValue, String anUnexpandedValue, String aLocationDescription, String aPath ) {
+    public property(String aValue, String anUnexpandedValue,
+      String aLocationDescription, String aPath) {
       value = aValue;
       unexpandedValue = anUnexpandedValue;
       locationDescription = aLocationDescription;
@@ -221,44 +224,46 @@ public class ConfigSimpleNode implements ConfigNode, ConfigNodeBuilder {
     }
 
     public String getLocationDescription() {
-      return getPath()+" ("+locationDescription+")";
+      return getPath() + " (" + locationDescription + ")";
     }
 
     public String getValueDescription() {
-      return "\""+value+"\" (\""+unexpandedValue+"\")";
+      return "\"" + value + "\" (\"" + unexpandedValue + "\")";
     }
 
-    public Boolean interpretAsBoolean() throws ConfigInvalidPropertyTypeException {
-      if (value.equals("1"))
+    public Boolean interpretAsBoolean()
+      throws ConfigInvalidPropertyTypeException {
+      if (value.equals("1")) {
         return Boolean.TRUE;
-      else if (value.equals("0"))
+      } else if (value.equals("0")) {
         return Boolean.FALSE;
-      else
-        throw new ConfigInvalidPropertyTypeException(getValueDescription() + " is not a boolean", getLocationDescription());
+      } else {
+        throw new ConfigInvalidPropertyTypeException(getValueDescription() +
+          " is not a boolean", getLocationDescription());
+      }
     }
 
     public String interpretAsString() throws ConfigInvalidPropertyTypeException {
       return value;
     }
 
-    public Integer interpretAsInteger() throws ConfigInvalidPropertyTypeException {
+    public Integer interpretAsInteger()
+      throws ConfigInvalidPropertyTypeException {
       try {
         return Integer.valueOf(value);
-      }
-      catch (Throwable e) {
-        throw new ConfigInvalidPropertyTypeException("\""+value+"\" (\""+unexpandedValue+"\") is not an integer", getLocationDescription());
+      } catch (Throwable e) {
+        throw new ConfigInvalidPropertyTypeException("\"" + value + "\" (\"" +
+          unexpandedValue + "\") is not an integer", getLocationDescription());
       }
     }
 
     public Double interpretAsDouble() throws ConfigInvalidPropertyTypeException {
       try {
         return Double.valueOf(value);
-      }
-      catch (Throwable e) {
-        throw new ConfigInvalidPropertyTypeException("\""+value+"\" (\""+unexpandedValue+"\") is not a double", getLocationDescription());
+      } catch (Throwable e) {
+        throw new ConfigInvalidPropertyTypeException("\"" + value + "\" (\"" +
+          unexpandedValue + "\") is not a double", getLocationDescription());
       }
     }
   }
 }
-
-

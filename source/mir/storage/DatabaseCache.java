@@ -28,126 +28,136 @@
  * to your version of the file, but you are not obligated to do so.  If you do
  * not wish to do so, delete this exception statement from your version.
  */
-
 package mir.storage;
 
 import java.util.ArrayList;
+
 
 public class DatabaseCache {
   private final ArrayList _cache;
   private int _counter;
   private final int _max;
-  
-  public DatabaseCache(int i_max){
+
+  public DatabaseCache(int i_max) {
     _counter = 0;
     _max = i_max;
     _cache = new ArrayList(_max);
   }
-  
-  public DatabaseCache(){
+
+  public DatabaseCache() {
     _counter = -1;
     _max = 100;
     _cache = new ArrayList(_max);
   }
-  
-  public synchronized void put(String key, Object value){
-    if(_counter >=_max){
+
+  public synchronized void put(String key, Object value) {
+    if (_counter >= _max) {
       _cache.remove(0);
       _cache.trimToSize();
-      _counter --;
+      _counter--;
       System.out.println("put: remove " + _counter);
     }
-    _cache.add(new Entry(key,value));
-    _counter ++;
+
+    _cache.add(new Entry(key, value));
+    _counter++;
     System.out.println("put: put " + _counter);
   }
-  
-  public synchronized void clear(){
+
+  public synchronized void clear() {
     _cache.clear();
   }
-      
-  public int containsKey(String key){
-    for(int i = 0; i<_cache.size(); i++){
-      if( _cache.get(i)!=null && ((Entry)_cache.get(i)).getKey().equals(key) )
+
+  public int containsKey(String key) {
+    for (int i = 0; i < _cache.size(); i++) {
+      if ((_cache.get(i) != null) &&
+          ((Entry) _cache.get(i)).getKey().equals(key)) {
         return i;
-    }
-    return -1;
-  }
-  
-  public int containsValue(Object o){
-    for(int i = 0; i<_cache.size(); i++){
-      if( _cache.get(i)!=null && ((Entry)_cache.get(i)).getValue().equals(o) )
-        return i;
-    }
-    return -1;
-  }
-  
-  public Object get(String key){
-    for(int i = 0; i<_cache.size(); i++){
-      if( _cache.get(i) != null &&
-        ((Entry)_cache.get(i)).getKey(key) != null &&
-        ((Entry)_cache.get(i)).getKey(key).equals(key) ) {
-        System.out.println("test2: "+((Entry)_cache.get(i)).getKey(key));
-        return ((Entry)_cache.get(i)).getValue();
       }
     }
+
+    return -1;
+  }
+
+  public int containsValue(Object o) {
+    for (int i = 0; i < _cache.size(); i++) {
+      if ((_cache.get(i) != null) &&
+          ((Entry) _cache.get(i)).getValue().equals(o)) {
+        return i;
+      }
+    }
+
+    return -1;
+  }
+
+  public Object get(String key) {
+    for (int i = 0; i < _cache.size(); i++) {
+      if ((_cache.get(i) != null) &&
+          (((Entry) _cache.get(i)).getKey(key) != null) &&
+          ((Entry) _cache.get(i)).getKey(key).equals(key)) {
+        System.out.println("test2: " + ((Entry) _cache.get(i)).getKey(key));
+
+        return ((Entry) _cache.get(i)).getValue();
+      }
+    }
+
     return null;
   }
-  
-  public synchronized boolean remove(String key){
+
+  public synchronized boolean remove(String key) {
     int i = containsKey(key);
-    if(i==-1){
+
+    if (i == -1) {
       return false;
     }
+
     _cache.remove(i);
     _cache.trimToSize();
-    _counter --;
+    _counter--;
+
     return true;
   }
-  
-  public int size(){
+
+  public int size() {
     return _counter;
   }
-  
+
   private class Entry {
     private String _key;
     private Object _value;
-    
-    public Entry(String i_key, Object i_value){
+
+    public Entry(String i_key, Object i_value) {
       _key = i_key;
       _value = i_value;
     }
-        
-    public void put(String i_key, Object i_value){
+
+    public void put(String i_key, Object i_value) {
       _key = i_key;
       _value = i_value;
     }
-    
-    public Object getValue(String i_key){
-      if(i_key.equals(_key)){
+
+    public Object getValue(String i_key) {
+      if (i_key.equals(_key)) {
         return _value;
       } else {
         return null;
       }
     }
-    
-    public Object getValue(){
+
+    public Object getValue() {
       return _value;
     }
-    
-    public String getKey(Object i_o){
-      if(i_o.equals(_value)){
+
+    public String getKey(Object i_o) {
+      if (i_o.equals(_value)) {
         return _key;
       } else {
         return null;
       }
     }
 
-    public String getKey(){
-        return _key;
+    public String getKey() {
+      return _key;
     }
-  }//Entry
-
+  }
+   //Entry
 }
-
-

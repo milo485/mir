@@ -28,21 +28,37 @@
  * to your version of the file, but you are not obligated to do so.  If you do
  * not wish to do so, delete this exception statement from your version.
  */
-
-package  mir.config;
+package mir.config;
 
 import mir.config.exceptions.ConfigFailure;
+
 
 public interface ConfigNode {
   public String getLocationDescription();
 
   public ConfigNode getSubNode(String aSubNodeName);
-  public Boolean getRequiredBooleanProperty(String aPropertyName) throws ConfigFailure;
-  public Integer getRequiredIntegerProperty(String aPropertyName) throws ConfigFailure;
-  public String getRequiredStringProperty(String aPropertyName) throws ConfigFailure;
-  public Double getRequiredDoubleProperty(String aPropertyName) throws ConfigFailure;
-  public Boolean getOptionalBooleanProperty(String aPropertyName, Boolean aDefaultValue) throws ConfigFailure;
-  public Integer getOptionalIntegerProperty(String aPropertyName, Integer aDefaultValue) throws ConfigFailure;
-  public String getOptionalStringProperty(String aPropertyName, String aDefaultValue) throws ConfigFailure;
-  public Double getOptionalDoubleProperty(String aPropertyName, Double aDefaultValue) throws ConfigFailure;
+
+  public Boolean getRequiredBooleanProperty(String aPropertyName)
+    throws ConfigFailure;
+
+  public Integer getRequiredIntegerProperty(String aPropertyName)
+    throws ConfigFailure;
+
+  public String getRequiredStringProperty(String aPropertyName)
+    throws ConfigFailure;
+
+  public Double getRequiredDoubleProperty(String aPropertyName)
+    throws ConfigFailure;
+
+  public Boolean getOptionalBooleanProperty(String aPropertyName,
+    Boolean aDefaultValue) throws ConfigFailure;
+
+  public Integer getOptionalIntegerProperty(String aPropertyName,
+    Integer aDefaultValue) throws ConfigFailure;
+
+  public String getOptionalStringProperty(String aPropertyName,
+    String aDefaultValue) throws ConfigFailure;
+
+  public Double getOptionalDoubleProperty(String aPropertyName,
+    Double aDefaultValue) throws ConfigFailure;
 }

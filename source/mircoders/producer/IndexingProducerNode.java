@@ -27,21 +27,24 @@
  * to your version of the file, but you are not obligated to do so.  If you do
  * not wish to do so, delete this exception statement from your version.
  */
-
 package mircoders.producer;
 
-import java.io.PrintWriter;
-import java.util.Map;
-
 import mir.entity.Entity;
+
 import mir.entity.adapter.EntityAdapter;
+
 import mir.log.LoggerToWriterAdapter;
 import mir.log.LoggerWrapper;
+
 import mir.misc.StringUtil;
+
 import mir.producer.ProducerFailure;
 import mir.producer.ProducerNode;
+
 import mir.util.ParameterExpander;
+
 import mircoders.entity.EntityContent;
+
 import mircoders.search.AudioSearchTerm;
 import mircoders.search.ContentSearchTerm;
 import mircoders.search.ImagesSearchTerm;
@@ -53,22 +56,30 @@ import mircoders.search.UnIndexedSearchTerm;
 import mircoders.search.VideoSearchTerm;
 
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
+
 import org.apache.lucene.document.Document;
+
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
+
 import org.apache.lucene.store.FSDirectory;
+
+import java.io.PrintWriter;
+
+import java.util.Map;
+
 
 public class IndexingProducerNode implements ProducerNode {
   private String contentKey;
   private String indexPath;
 
-
   public IndexingProducerNode(String aContentKey, String pathToIndex) {
     contentKey = aContentKey;
-    indexPath=pathToIndex;
+    indexPath = pathToIndex;
   }
 
-  public void produce(Map aValueMap, String aVerb, LoggerWrapper aLogger) throws ProducerFailure {
+  public void produce(Map aValueMap, String aVerb, LoggerWrapper aLogger)
+    throws ProducerFailure {
     IndexWriter indexWriter = null;
     Object data;
     Entity entity;
@@ -78,69 +89,81 @@ public class IndexingProducerNode implements ProducerNode {
 
     startTime = System.currentTimeMillis();
 
-
-
     try {
       index = ParameterExpander.expandExpression(aValueMap, indexPath);
-      data =  ParameterExpander.findValueForKey( aValueMap, contentKey );
-      if (! (data instanceof EntityAdapter)) {
-        throw new ProducerFailure("IndexingProducerNode: value of '"+contentKey+"' is not an EntityAdapter, but an " + data.getClass().getName(), null);
+      data = ParameterExpander.findValueForKey(aValueMap, contentKey);
+
+      if (!(data instanceof EntityAdapter)) {
+        throw new ProducerFailure("IndexingProducerNode: value of '" +
+          contentKey + "' is not an EntityAdapter, but an " +
+          data.getClass().getName(), null);
       }
 
       entity = ((EntityAdapter) data).getEntity();
-      if (! (entity instanceof EntityContent)) {
-        throw new ProducerFailure("IndexingProducerNode: value of '"+contentKey+"' is not a content EntityAdapter, but a " + entity.getClass().getName() + " adapter", null);
+
+      if (!(entity instanceof EntityContent)) {
+        throw new ProducerFailure("IndexingProducerNode: value of '" +
+          contentKey + "' is not a content EntityAdapter, but a " +
+          entity.getClass().getName() + " adapter", null);
       }
-      aLogger.info("Indexing " + (String) entity.getValue("id") + " into " + index);
+
+      aLogger.info("Indexing " + (String) entity.getValue("id") + " into " +
+        index);
 
       // create an index here if one did not already exist
-      if (! (IndexReader.indexExists(index))){
-        aLogger.error("Didn't find existing index, so I'm making one in "+index);
-        IndexWriter indexCreator = new IndexWriter(index,new StandardAnalyzer(),true);
+      if (!(IndexReader.indexExists(index))) {
+        aLogger.error("Didn't find existing index, so I'm making one in " +
+          index);
+
+        IndexWriter indexCreator =
+          new IndexWriter(index, new StandardAnalyzer(), true);
         indexCreator.close();
       }
 
-      IndexUtil.unindexEntity((EntityContent) entity,index);
+      IndexUtil.unindexEntity((EntityContent) entity, index);
 
       indexWriter = new IndexWriter(index, new StandardAnalyzer(), false);
-      Document theDoc =  new Document();
+
+      Document theDoc = new Document();
 
       // Keyword is stored and indexed, but not tokenized
       // Text is tokenized,stored, indexed
       // Unindexed is not tokenized or indexed, only stored
       // Unstored is tokenized and indexed, but not stored
-
       //this initialization should go somewhere global like an xml file....
+      (new KeywordSearchTerm("id", "", "id", "", "id")).index(theDoc, entity);
 
-      (new KeywordSearchTerm("id","","id","","id")).index(theDoc,entity);
+      (new KeywordSearchTerm("webdb_create_formatted", "search_date",
+        "webdb_create_formatted", "webdb_create_formatted",
+        "webdb_create_formatted")).index(theDoc, entity);
 
-      (new KeywordSearchTerm("webdb_create_formatted","search_date","webdb_create_formatted","webdb_create_formatted","webdb_create_formatted")).index(theDoc,entity);
+      (new UnIndexedSearchTerm("", "", "", "where", "where")).indexValue(theDoc,
+        StringUtil.webdbDate2path(entity.getValue("date")) +
+        entity.getValue("id") + ".shtml");
 
-      (new UnIndexedSearchTerm("","","","where","where")).indexValue(theDoc, StringUtil.webdbDate2path(entity.getValue("date"))+entity.getValue("id")+".shtml");
+      (new TextSearchTerm("creator", "search_creator", "creator", "creator",
+        "creator")).index(theDoc, entity);
+      (new TextSearchTerm("title", "search_title", "title", "title", "title")).index(theDoc,
+        entity);
+      (new UnIndexedSearchTerm("description", "search_content", "description",
+        "description", "description")).index(theDoc, entity);
+      (new UnIndexedSearchTerm("webdb_create", "search_irrelevant",
+        "creationDate", "creationDate", "creationDate")).index(theDoc, entity);
 
-      (new TextSearchTerm("creator","search_creator","creator","creator","creator")).index(theDoc,entity);
-      (new TextSearchTerm("title","search_title","title","title","title")).index(theDoc,entity);
-      (new UnIndexedSearchTerm("description","search_content","description","description","description")).index(theDoc,entity);
-      (new UnIndexedSearchTerm("webdb_create","search_irrelevant","creationDate","creationDate","creationDate")).index(theDoc,entity);
+      (new ContentSearchTerm("content_data", "search_content", "content", "", "")).indexValue(theDoc,
+        entity.getValue("content_data") + " " + entity.getValue("description") +
+        " " + entity.getValue("title"));
 
-      (new ContentSearchTerm("content_data","search_content","content","","")).indexValue(theDoc,
-                                                                                     entity.getValue("content_data")+ " "
-                                                                                     + entity.getValue("description")+ " "
-                                                                                     + entity.getValue("title")
-                                                                                     );
+      (new TopicSearchTerm()).index(theDoc, entity);
 
-      (new TopicSearchTerm()).index(theDoc,entity);
+      (new ImagesSearchTerm()).index(theDoc, entity);
 
-      (new ImagesSearchTerm()).index(theDoc,entity);
+      (new AudioSearchTerm()).index(theDoc, entity);
 
-      (new AudioSearchTerm()).index(theDoc,entity);
-
-      (new VideoSearchTerm()).index(theDoc,entity);
-
+      (new VideoSearchTerm()).index(theDoc, entity);
 
       //comments-just aggregate all relevant fields
       //removed until i get a chance to do this right
-
       //String commentsAggregate = "";
       //TemplateModel comments=entity.get("to_comments");
       //if (comments != null){
@@ -152,51 +175,33 @@ public class IndexingProducerNode implements ProducerNode {
       //  }
       //}
       //theDoc.add(Field.UnStored("comments",commentsAggregate));
-
       indexWriter.addDocument(theDoc);
-
-
-    }
-    catch (Throwable t) {
+    } catch (Throwable t) {
       aLogger.error("Error while indexing content: " + t.getMessage());
-      t.printStackTrace(new PrintWriter(new LoggerToWriterAdapter(aLogger, LoggerWrapper.DEBUG_MESSAGE)));
-    }
-    finally {
-      if (indexWriter != null){
-        try{
+      t.printStackTrace(new PrintWriter(
+          new LoggerToWriterAdapter(aLogger, LoggerWrapper.DEBUG_MESSAGE)));
+    } finally {
+      if (indexWriter != null) {
+        try {
           indexWriter.close();
-        }
-        catch (Throwable t) {
+        } catch (Throwable t) {
           aLogger.warn("Error while closing indexWriter: " + t.getMessage());
         }
-
       }
-      try{
-        FSDirectory theIndexDir=FSDirectory.getDirectory(index,false);
-        if (IndexReader.isLocked(theIndexDir)){
+
+      try {
+        FSDirectory theIndexDir = FSDirectory.getDirectory(index, false);
+
+        if (IndexReader.isLocked(theIndexDir)) {
           IndexReader.unlock(theIndexDir);
         }
-      }
-      catch (Throwable t) {
+      } catch (Throwable t) {
         aLogger.warn("Error while unlocking index: " + t.getMessage());
       }
     }
 
-
-
-
     endTime = System.currentTimeMillis();
 
-    aLogger.info("  IndexTime: " + (endTime-startTime) + " ms<br>");
+    aLogger.info("  IndexTime: " + (endTime - startTime) + " ms<br>");
   }
 }
-
-
-
-
-
-
-
-
-
-

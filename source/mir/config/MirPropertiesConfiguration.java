@@ -28,22 +28,22 @@
  * to your version of the file, but you are not obligated to do so.  If you do
  * not wish to do so, delete this exception statement from your version.
  */
- 
 package mir.config;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-
-import javax.servlet.ServletContext;
 
 import multex.Exc;
 import multex.Failure;
 
 import org.apache.commons.configuration.PropertiesConfiguration;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
+import javax.servlet.ServletContext;
 
 
 /**
@@ -54,29 +54,36 @@ public class MirPropertiesConfiguration extends PropertiesConfiguration {
   private static ServletContext context;
   private static String contextPath;
   
-	/**
-	 * Constructor for MirPropertiesConfiguration.
-	 */
-	private MirPropertiesConfiguration(ServletContext ctx, String ctxPath) 
-	                                  throws IOException {
-		super(ctx.getRealPath("/WEB-INF/etc/") + "/config.properties", 
-		      ctx.getRealPath("/WEB-INF/etc/") + "/default.properties");
-    this.addProperty("Home", ctx.getRealPath("/WEB-INF/")+"/");
-    this.addProperty("RootUri", ctxPath);
-	}
+  //if one of these properties is not present a new 
+  //emtpy property is added
+  private String[] needed = {"Producer.DocRoot"};
+
+  /**
+   * Constructor for MirPropertiesConfiguration.
+   */
+  private MirPropertiesConfiguration(ServletContext ctx, String ctxPath)
+    throws IOException {
+    super(ctx.getRealPath("/WEB-INF/etc/") + "/config.properties",
+      ctx.getRealPath("/WEB-INF/etc/") + "/default.properties");
+    addProperty("Home", ctx.getRealPath("/WEB-INF/") + "/");
+    checkMissing();
+  }
 
   public static synchronized MirPropertiesConfiguration instance()
-  	throws PropertiesConfigExc {
-    if(instance == null){
-      if(context == null || contextPath == null || contextPath.length() == 0){
-        throw new MirPropertiesConfiguration.PropertiesConfigExc("Context was not set");
+    throws PropertiesConfigExc {
+    if (instance == null) {
+      if (context == null) {
+        throw new MirPropertiesConfiguration.PropertiesConfigExc(
+          "Context was not set");
       }
+
       try {
-        instance = new MirPropertiesConfiguration(context,contextPath);
+        instance = new MirPropertiesConfiguration(context, contextPath);
       } catch (IOException e) {
         e.printStackTrace();
-      }		  		     
+      }
     }
+
     return instance;
   }
 
@@ -87,25 +94,22 @@ public class MirPropertiesConfiguration extends PropertiesConfiguration {
   public static void setContext(ServletContext context) {
     MirPropertiesConfiguration.context = context;
   }
-  
-  /**
-   * Sets the contextPath.
-   * @param contextPath The contextPath to set
-   */
-  public static void setContextPath(String contextPath) {
-    MirPropertiesConfiguration.contextPath = contextPath;
-  }
-  
-  public Map allSettings(){
-		Iterator iterator = this.getKeys();
-		Map returnMap = new HashMap();
-		while(iterator.hasNext()){
-		  String key = (String)iterator.next();
-			returnMap.put(key,this.getProperty(key));		      	
-		}
+
+  public Map allSettings() {
+    Iterator iterator = this.getKeys();
+    Map returnMap = new HashMap();
+
+    while (iterator.hasNext()) {
+      String key = (String) iterator.next();
+      Object o = this.getString(key);
+      if(o == null){        
+      	o = new Object();
+      }
+      returnMap.put(key, o);
+    }
+
     return returnMap;
   }
-
 
   /**
    * Returns the context.
@@ -114,40 +118,60 @@ public class MirPropertiesConfiguration extends PropertiesConfiguration {
   public static ServletContext getContext() {
     return context;
   }
-    	
-	public String getStringWithHome(String key){
-	  String returnString = getString(key);
-	  if(returnString == null){
-	    returnString = new String();
-	  }
-	  return getString("Home") + returnString;
-	}
-	
-	public File getFile(String key) throws FileNotFoundException{
-	  String path = getStringWithHome(key);
-	  File returnFile = new File(path);
-	  if(returnFile.exists()){
-	    return returnFile; 
-	  } else {
-	    throw new FileNotFoundException();
-	  }
-	}
-	
+
+  public String getStringWithHome(String key) {
+    String returnString = getString(key);
+
+    if (returnString == null) {
+      returnString = new String();
+    }
+
+    return getString("Home") + returnString;
+  }
+
+  private void checkMissing(){
+  	for(int i = 0; i < needed.length; i++){  	  
+  	  if(super.getProperty(needed[i]) == null){
+  	  	addProperty(needed[i],"");
+  	  }
+  	}
+  }
+  
+  public File getFile(String key) throws FileNotFoundException {
+    String path = getStringWithHome(key);
+    File returnFile = new File(path);
+
+    if (returnFile.exists()) {
+      return returnFile;
+    } else {
+      throw new FileNotFoundException();
+    }
+  }
+
   /**
    * @see org.apache.commons.configuration.Configuration#getString(java.lang.String)
    */
   public String getString(String key) {
-    if(super.getString(key) == null){
+    if (super.getString(key) == null) {
       return new String();
     }
     return super.getString(key);
   }
   
   /**
+   * @see org.apache.commons.configuration.Configuration#getString(java.lang.String)
+   */
+  public Object getProperty(String key) {
+    if (super.getProperty(key) == null) {
+      return new String();
+    }
+    return super.getProperty(key);
+  }
+
+  /**
    * @author idefix
    */
   public static class PropertiesConfigExc extends Exc {
-
     /**
      * Constructor for PropertiesConfigExc.
      * @param arg0
@@ -161,14 +185,12 @@ public class MirPropertiesConfiguration extends PropertiesConfiguration {
    * @author idefix
    */
   public static class PropertiesConfigFailure extends Failure {
-
     /**
      * Constructor for PropertiesConfigExc.
      * @param arg0
      */
     public PropertiesConfigFailure(String msg, Throwable cause) {
-      super(msg,cause);
+      super(msg, cause);
     }
   }
-
 }

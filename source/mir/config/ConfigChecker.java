@@ -28,15 +28,15 @@
  * to your version of the file, but you are not obligated to do so.  If you do
  * not wish to do so, delete this exception statement from your version.
  */
+package mir.config;
 
-package  mir.config;
+import mir.config.exceptions.ConfigFailure;
 
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Vector;
 
-import mir.config.exceptions.ConfigFailure;
 
 public class ConfigChecker {
   public final static int STRING = 0;
@@ -44,14 +44,10 @@ public class ConfigChecker {
   public final static int BOOLEAN = 2;
   public final static int DOUBLE = 3;
   public final static int PATH = 4;
-//  public final static int ABSOLUTEPATH = 5;
-//  public final static int ABSOLUTEURL = 6;
 
+  //  public final static int ABSOLUTEPATH = 5;
+  //  public final static int ABSOLUTEURL = 6;
   private Node rootNode;
-
-  public Node getRootNode() {
-    return rootNode;
-  }
 
   public ConfigChecker() {
     super();
@@ -59,12 +55,15 @@ public class ConfigChecker {
     rootNode = new Node();
   }
 
+  public Node getRootNode() {
+    return rootNode;
+  }
+
   public void check(ConfigNode aNode) throws ConfigFailure {
     getRootNode().check(aNode);
   }
 
   public class Node {
-
     private Map subNodes;
     private Vector constraints;
 
@@ -76,7 +75,7 @@ public class ConfigChecker {
     public Node getSubNode(String aName) {
       Node subNode = (Node) subNodes.get(aName);
 
-      if (subNode==null) {
+      if (subNode == null) {
         subNode = new Node();
         subNodes.put(aName, subNode);
       }
@@ -100,28 +99,30 @@ public class ConfigChecker {
     public void check(ConfigNode aNode) throws ConfigFailure {
       Iterator iterator;
 
-      iterator=constraints.iterator();
+      iterator = constraints.iterator();
+
       while (iterator.hasNext()) {
         ((Constraint) iterator.next()).check(aNode);
       }
 
-      iterator=subNodes.keySet().iterator();
+      iterator = subNodes.keySet().iterator();
+
       while (iterator.hasNext()) {
         Map.Entry entry = (Map.Entry) iterator.next();
-        ((Node) entry.getValue()).check(aNode.getSubNode((String) entry.getKey()));
+        ((Node) entry.getValue()).check(aNode.getSubNode(
+            (String) entry.getKey()));
       }
-
     }
 
     private class Constraint {
       protected String propertyName;
 
       Constraint(String aPropertyName) {
-        propertyName=aPropertyName;
+        propertyName = aPropertyName;
       }
 
       public void check(ConfigNode aNode) throws ConfigFailure {
-      };
+      }
     }
 
     private class ExistenceConstraint extends Constraint {
@@ -131,7 +132,7 @@ public class ConfigChecker {
 
       public void check(ConfigNode aNode) throws ConfigFailure {
         aNode.getRequiredStringProperty(propertyName);
-      };
+      }
     }
 
     private class TypeConstraint extends Constraint {
@@ -140,25 +141,34 @@ public class ConfigChecker {
       TypeConstraint(String aPropertyName, int aType) {
         super(aPropertyName);
 
-        type=aType;
+        type = aType;
       }
 
       public void check(ConfigNode aNode) throws ConfigFailure {
-        switch(type) {
-          case INTEGER:
-            aNode.getOptionalIntegerProperty(propertyName, new Integer(0));
-            break;
-          case STRING:
-            aNode.getOptionalStringProperty(propertyName, "");
-            break;
-          case DOUBLE:
-            aNode.getOptionalDoubleProperty(propertyName, new Double(0.0));
-            break;
-          case BOOLEAN:
-            aNode.getOptionalBooleanProperty(propertyName, Boolean.FALSE);
-            break;
-          default:
-            throw new ConfigFailure("Invalid value for type in type constraint: "+new Integer(type).toString());
+        switch (type) {
+        case INTEGER:
+          aNode.getOptionalIntegerProperty(propertyName, new Integer(0));
+
+          break;
+
+        case STRING:
+          aNode.getOptionalStringProperty(propertyName, "");
+
+          break;
+
+        case DOUBLE:
+          aNode.getOptionalDoubleProperty(propertyName, new Double(0.0));
+
+          break;
+
+        case BOOLEAN:
+          aNode.getOptionalBooleanProperty(propertyName, Boolean.FALSE);
+
+          break;
+
+        default:
+          throw new ConfigFailure("Invalid value for type in type constraint: " +
+            new Integer(type).toString());
         }
       }
     }

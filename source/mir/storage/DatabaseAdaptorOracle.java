@@ -31,15 +31,13 @@
 /*
  * put your module comment here
  */
-
-
-
-package  mir.storage;
-
-import java.util.Properties;
+package mir.storage;
 
 import mir.config.MirPropertiesConfiguration;
+
 import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
+
+import java.util.Properties;
 
 
 /**
@@ -48,69 +46,61 @@ import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
  * @author <RK>
  * @version 15.05.2000
  */
-public final class DatabaseAdaptorOracle
-		implements DatabaseAdaptor {
+public final class DatabaseAdaptorOracle implements DatabaseAdaptor {
+  /**
+   * Liefert den Namen der Adaptorklasse <code>Adaptor.Oracle.Driver</code>
+   * f?r Oracle zur?ck.
+   * @return Adaptorklasse als String
+   */
+  public String getDriver() throws PropertiesConfigExc {
+    return MirPropertiesConfiguration.instance().getString("Adaptor.Oracle.Driver");
+  }
 
-	/**
-	 * Liefert den Namen der Adaptorklasse <code>Adaptor.Oracle.Driver</code>
-	 * f?r Oracle zur?ck.
-	 * @return Adaptorklasse als String
-	 */
-    public String getDriver() throws PropertiesConfigExc {
-	    return MirPropertiesConfiguration.instance().getString("Adaptor.Oracle.Driver");
-    }
+  /**
+   * Liefert die URL f?r JDBC zur?ck, in den die Parameter user, pass und host
+   * eingef?gt werden. Die URL wird aus der Konfiguration geholt.
+   *
+   * @param user user als String
+   * @param pass passwort als String
+   * @param host host als String
+   * @return url als String
+   */
+  public String getURL(String user, String pass, String host)
+    throws PropertiesConfigExc {
+    return MirPropertiesConfiguration.instance().getString("Adaptor.Oracle.URL");
 
-	/**
-	 * Liefert die URL f?r JDBC zur?ck, in den die Parameter user, pass und host
-	 * eingef?gt werden. Die URL wird aus der Konfiguration geholt.
-	 *
-	 * @param user user als String
-	 * @param pass passwort als String
-	 * @param host host als String
-	 * @return url als String
-	 */
-    public String getURL(String user, String pass, String host) throws PropertiesConfigExc {
-	    return MirPropertiesConfiguration.instance().getString("Adaptor.Oracle.URL");
-		/** @todo   hier muesste bessererweise $HOST durch HOST ersetzt, etc. werden */
+    /** @todo   hier muesste bessererweise $HOST durch HOST ersetzt, etc. werden */
+  }
 
-    }
+  /**
+   * Gibt zur?ck, ob das SQL der Datenbank den <code>limit</code>-Befehl beherrscht.
+   * @return false
+   */
+  public boolean hasLimit() {
+    return false;
+  }
 
-	/**
-	 * Gibt zur?ck, ob das SQL der Datenbank den <code>limit</code>-Befehl beherrscht.
-	 * @return false
-	 */
-     public  boolean hasLimit() {
-      return false;
-    }
+  /**
+   * Liefert zur?ck, ob der <code>limit</code>-Befehl erst start und dann offset
+   * hat (true), oder umgekehrt. Nur Relevant, wenn hasLimit true zur?ckliefert.
+   *
+   * @return false
+   */
+  public boolean reverseLimit() {
+    return false;
+  }
 
-	/**
-	 * Liefert zur?ck, ob der <code>limit</code>-Befehl erst start und dann offset
-	 * hat (true), oder umgekehrt. Nur Relevant, wenn hasLimit true zur?ckliefert.
-	 *
-	 * @return false
-	 */
-    public boolean reverseLimit() {
-      return false;
-    }
+  /**
+   * Liefert ein Properties-Objekt zurueck mit user und password.
+   * @param user
+   * @param password
+   * @return Properties
+   */
+  public Properties getProperties(String user, String password) {
+    return null;
+  }
 
-	/**
-	 * Liefert ein Properties-Objekt zurueck mit user und password.
-	 * @param user
-	 * @param password
-	 * @return Properties
-	 */
-    public Properties getProperties(String user, String password) {
-      return null;
-    }
-
-
-
-
-
-
-
-
-     public String getLastInsertSQL(Database theDB) {
-           return "select currval('"+theDB.getCoreTable()+"_id_seq')";
-    }
+  public String getLastInsertSQL(Database theDB) {
+    return "select currval('" + theDB.getCoreTable() + "_id_seq')";
+  }
 }
