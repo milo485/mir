@@ -29,7 +29,6 @@
  */
 package mircoders.localizer.basic;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -46,6 +45,8 @@ import mir.session.SessionExc;
 import mir.session.SessionFailure;
 import mir.session.SessionHandler;
 import mir.session.UploadedFile;
+import mir.session.ValidationError;
+import mir.session.ValidationHelper;
 import mir.storage.StorageObject;
 import mir.util.ExceptionFunctions;
 import mircoders.global.MirGlobal;
@@ -258,116 +259,6 @@ public abstract class MirBasicPostingSessionHandler implements SessionHandler {
     }
   }
 
-  /**
-   * Class that represents a validation error
-   *
-   * <p>Title: </p>
-   * <p>Description: </p>
-   * <p>Copyright: Copyright (c) 2003</p>
-   * <p>Company: </p>
-   * @author not attributable
-   * @version 1.0
-   */
-
-  public class ValidationError {
-    private String field;
-    private String message;
-    private List parameters;
-
-    public ValidationError(String aField, String aMessage) {
-      this (aField, aMessage, new String[] {});
-    }
-
-    public ValidationError(String aField, String aMessage, Object aParameter) {
-      this (aField, aMessage, new Object[] {aParameter});
-    }
-
-    public ValidationError(String aField, String aMessage, Object[] aParameters) {
-      field = aField;
-      message = aMessage;
-      parameters = Arrays.asList(aParameters);
-    }
-
-    public String getMessage() {
-      return message;
-    }
-
-    public String getField() {
-      return field;
-    }
-
-    public List getParameters() {
-      return parameters;
-    }
-  }
-
-  /**
-   * Convenience validation method to test wether a field has been filled in
-   *
-   * @param aRequest
-   * @param aFieldName
-   * @param anErrorMessageResource
-   * @param aValidationResults
-   * @return
-   */
-
-  protected boolean testFieldEntered(Request aRequest, String aFieldName, String anErrorMessageResource, List aValidationResults) {
-    Object value = aRequest.getParameter(aFieldName);
-    if (value==null || !(value instanceof String) || ((String) value).trim().length()==0) {
-      aValidationResults.add(new ValidationError(aFieldName, anErrorMessageResource));
-      return false;
-    }
-    else
-      return true;
-  }
-
-  /**
-   * Convenience validation method to test wether a field is numeric
-
-   * @param aRequest
-   * @param aFieldName
-   * @param anErrorMessageResource
-   * @param aValidationResults
-   * @return
-   */
-
-  protected boolean testFieldIsNumeric(Request aRequest, String aFieldName, String anErrorMessageResource, List aValidationResults) {
-    Object value = aRequest.getParameter(aFieldName);
-    if (value!=null) {
-      try {
-        Integer.parseInt((String) value);
-        return true;
-      }
-      catch (Throwable t) {
-        aValidationResults.add(new ValidationError(aFieldName, anErrorMessageResource));
-        return false;
-      }
-    }
-    return true;
-  }
-
-  /**
-   * Convenience validation method to test wether a field is numeric
-
-   * @param aRequest
-   * @param aFieldName
-   * @param anErrorMessageResource
-   * @param aValidationResults
-   * @return
-   */
-
-  protected boolean testFieldLength(Request aRequest, String aFieldName, int aMaxLength, String anErrorMessageResource, List aValidationResults) {
-    String value = aRequest.getParameter(aFieldName);
-
-    if (value!=null) {
-      if (value.length()>aMaxLength) {
-        aValidationResults.add(new ValidationError(aFieldName, anErrorMessageResource));
-        return false;
-      }
-      else return true;
-    }
-    return true;
-  }
 
   /**
    * Method to generate a one-time password

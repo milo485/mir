@@ -47,7 +47,7 @@ import mircoders.entity.EntityUploadedMedia;
  * <b>implements abstract DB connection to the comment_x_media SQL table
  *
  * @author RK, mir-coders group
- * @version $Id: DatabaseCommentToMedia.java,v 1.3 2003/05/03 00:21:22 zapata Exp $
+ * @version $Id: DatabaseCommentToMedia.java,v 1.4 2003/09/03 18:29:05 zapata Exp $
  *
  */
 
@@ -70,33 +70,6 @@ public class DatabaseCommentToMedia extends Database implements StorageObject{
     hasTimestamp = false;
     theTable = "comment_x_media";
     theEntityClass = mir.entity.GenericEntity.class;
-  }
-
-  /**
-   * get all the media-files belonging to a comment entity
-   *
-   */
-  public EntityList getMedia(EntityComment comment) throws StorageObjectFailure {
-    EntityList returnList = null;
-    if (comment != null) {
-      // get all to_topic from media_x_topic
-      String id = comment.getId();
-      String subselect = "id in (select media_id from " + theTable +
-          " where comment_id=" + id + ")";
-
-      try {
-        // media should stay in uploaded order. this is especially important
-        // for photo stories which require a specific chronologic order.
-        // this is why we have the the second parameter "id"
-        returnList = DatabaseMedia.getInstance().selectByWhereClause(subselect,
-            "id", -1);
-      }
-      catch (Throwable e) {
-        logger.debug("-- get media failed " + e.toString());
-        throw new StorageObjectFailure("-- get media failed ", e);
-      }
-    }
-    return returnList;
   }
 
   public boolean hasMedia(EntityComment comment) throws StorageObjectFailure,

@@ -18,19 +18,63 @@
         <input type="hidden" name="do" value="update">
       </if>
     
-      <table border="0">    
+<table width="100%" cellspacing="0" cellpadding="5">
+  <tr>
+    <td align="left" valign="top">
+      <if new=="0">
+        <if comment.to_content>
+          <call showButton(
+            "module=Content&do=edit&id="+comment.to_content.id+"&returnurl="+utility.encodeURI(thisurl),
+            lang("comment.article"))>
+          <call showButton(
+            "module=Comment&do=articlecomments&articleid="+comment.to_content.id+"&returnurl="+utility.encodeURI(thisurl),
+            lang("comment.allcomments"))>
+          <call showAbsoluteLinkButton(
+            comment.publicurl,
+            lang("preview"))>
+        </if>
+
+        <list comment.operations as op>
+          <call showButton(
+            "module=Localizer&do=commentoperation&operation="+op+"&id="+comment.id+"&returnurl="+utility.encodeURI(thisurl), 
+            lang("comment.operation."+op))>
+        </list>
+      </if>
+      
+    </td>
+    <td align="right" valign="top">
+      ${lang("comment.published")} <input type="checkbox" name="is_published" value="1" <if comment.is_published=="1"> checked</if>>
+      <if new=="1">
+        <input type="submit" name="save" value="${lang("insert")}">
+      <else>
+        <input type="submit" name="save" value="${lang("save")}">
+      </if> 
+    </td>
+  </tr>
+</table>
+
+<table width="100%" cellspacing="3" cellpadding="2">
         
-    <tr><td colspan="2" class="table-head">${lang("comment.htmltitle")}</td></tr>
+      <tr><td colspan="2" class="table-head">${lang("comment.htmltitle")}</td></tr>
     
     
-    <tr> 
-          <td align="right" class="table-left">
-            ${lang("comment.date")}
-          </td>
-          <td class="listrow2">
-            ${utility.encodeHTML(utility.encodeHTML(comment.webdb_create))}
-          </td>
-        </tr>
+      <tr>
+        <td align="right" class="table-left">
+          id # :
+        </td>
+        <td class="listrow2">
+          ${comment.id}
+        </td>
+      </tr>
+      
+      <tr> 
+        <td align="right" class="table-left">
+          ${lang("comment.date")}
+        </td>
+        <td class="listrow2">
+          ${utility.encodeHTML(utility.encodeHTML(comment.webdb_create))}
+        </td>
+      </tr>
 
 
     <call PulldownTableRow (lang("comment.status"), "to_comment_status", commentstatuses, "id", "name", comment.to_comment_status, "commentstatus.")>
@@ -49,7 +93,6 @@
         <tr>
           <td colspan="2" align="right" class="table-foot" > 
             <span class="text">
-              ${lang("comment.published")} <input type="checkbox" name="is_published" value="1" <if comment.is_published=="1"> checked</if>>
               <if new=="1">
                 <input type="submit" name="save" value="${lang("insert")}">
               <else>
@@ -65,41 +108,6 @@
 <table width="90%" cellspacing="0" cellpadding="0">
 
 <tr>
-<comment>
-<td align="left" valign="top">
-<table cellspacing="3" cellpadding="2">
-  <tr>
-    <td class="table-head" colspan="2">
-      ${lang("content.family")}
-    </td>
-  </tr>
-    
-  <tr>
-    <td align=right valign=top class="table-left">
-      ${lang("content.parent")}:
-    </td>
-    <td align="left" valign="top" class="listrow2">
-      <if article.parent>
-        <b>${utility.encodeHTML(article.parent.title)}</b><br>
-        <a href="${config.actionRoot}?module=Content&do=edit&id=${article.parent.id}&returnurl=${utility.encodeURI(thisurl)}">${lang("content.viewparent")}</a> |
-        <a href="${config.actionRoot}?module=Content&do=clearparent&id=${article.id}&returnurl=${utility.encodeURI(thisurl)}">${lang("content.clearparent")}</a> |
-      </if>    
-        &nbsp;<a href="${config.actionRoot}?module=Content&do=selectparent&id=${article.id}&returnurl=${utility.encodeURI(thisurl)}">${lang("content.selectparent")}</a>
-    </td>
-  </tr>
-    
-  <tr>
-    <td align=right valign=top class="table-left">
-      ${lang("content.children")}:
-    </td>
-    <td align="left" valign="top" class="listrow2">
-      <a href="${config.actionRoot}?module=Content&do=listchildren&article_id=${article.id}">${lang("content.viewchildren")}</a>
-    </td>
-  </tr>
-</table>
-
-</td>
-</comment>
 <td align="left" valign="top">
 <call showCommentAttachments(comment)>
 </td>

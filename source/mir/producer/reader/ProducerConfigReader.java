@@ -43,7 +43,7 @@ import mir.producer.ProducerFactory;
 import mir.producer.ProducerNode;
 import mir.producer.SimpleProducerVerb;
 import mir.util.XMLReader;
-import mir.util.XMLReaderTool;
+import mir.util.*;
 
 public class ProducerConfigReader {
   private ProducerNodeBuilderLibrary builderLibrary;
@@ -69,11 +69,13 @@ public class ProducerConfigReader {
 
     }
     catch (Throwable e) {
-      if ((e instanceof XMLReader.XMLReaderExc) && ((XMLReader.XMLReaderExc) e).getHasLocation()) {
-        XMLReader.XMLReaderExc f = (XMLReader.XMLReaderExc) e;
+      Throwable root = ExceptionFunctions.traceCauseException(e);
+
+      if ((root instanceof XMLReader.XMLReaderExc) && ((XMLReader.XMLReaderExc) root).getHasLocation()) {
+        XMLReader.XMLReaderExc f = (XMLReader.XMLReaderExc) root;
         throw new ProducerConfigFailure("'" + f.getMessage()+"' in " + f.getFilename()+"(line " + f.getLineNr()+", column " + f.getColumnNr() + ")", e);
       }
-      throw new ProducerConfigFailure( e );
+      throw new ProducerConfigFailure(root);
     }
   }
 
@@ -409,8 +411,7 @@ public class ProducerConfigReader {
           }
         }
         else
-          throw new XMLReader.XMLReaderExc("Unknown producer node tag: '" +
-                                           aTag + "'");
+          throw new XMLReader.XMLReaderExc("Unknown producer node tag: '" + aTag + "'");
       }
       catch (Throwable t) {
         throw new XMLReader.XMLReaderFailure(t);

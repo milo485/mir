@@ -43,7 +43,6 @@ import mir.log.LoggerWrapper;
 import mir.storage.Database;
 import mir.storage.StorageObject;
 import mir.storage.StorageObjectFailure;
-import freemarker.template.SimpleList;
 
 
 public class DatabaseCommentStatus extends Database implements StorageObject{
@@ -63,9 +62,5 @@ public class DatabaseCommentStatus extends Database implements StorageObject{
     hasTimestamp = false;
     theTable = "comment_status";
     logger = new LoggerWrapper("Database.CommentStatus");
-  }
-
-  public SimpleList getPopupData() throws StorageObjectFailure {
-    return getPopupData("name", false);
   }
 }

@@ -1,0 +1,4 @@
+<assign TABLE_HEAD_CLASS          "table-head">
+<assign TABLE_FOOT_CLASS          "table-foot">
+<assign LIST_ROW_CLASS             "listrow1">
+<assign LIST_ROW_CLASS_ALTERNATIVE "listrow2">

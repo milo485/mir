@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with  any library licensed under the Apache Software License, 
- * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
- * (or with modified versions of the above that use the same license as the above), 
- * and distribute linked combinations including the two.  You must obey the 
- * GNU General Public License in all respects for all of the code used other than 
- * the above mentioned libraries.  If you modify this file, you may extend this 
- * exception to your version of the file, but you are not obligated to do so.  
+ * the code of this program with  any library licensed under the Apache Software License,
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library
+ * (or with modified versions of the above that use the same license as the above),
+ * and distribute linked combinations including the two.  You must obey the
+ * GNU General Public License in all respects for all of the code used other than
+ * the above mentioned libraries.  If you modify this file, you may extend this
+ * exception to your version of the file, but you are not obligated to do so.
  * If you do not wish to do so, delete this exception statement from your version.
  */
 
@@ -45,15 +45,12 @@ import mir.storage.StorageObjectFailure;
 import mircoders.storage.DatabaseContent;
 import mircoders.storage.DatabaseContentToMedia;
 import mircoders.storage.DatabaseContentToTopics;
-import freemarker.template.SimpleScalar;
-import freemarker.template.TemplateModel;
-import freemarker.template.TemplateModelException;
 
 /**
  * this class implements mapping of one line of the database table content
  * to a java object
  *
- * @version $Id: EntityContent.java,v 1.19 2003/04/21 12:42:54 idfx Exp $
+ * @version $Id: EntityContent.java,v 1.20 2003/09/03 18:29:04 zapata Exp $
  * @author mir-coders group
  *
  */
@@ -164,87 +161,6 @@ public class EntityContent extends Entity
   }
 
   /**
-   * overridden method getValue to include formatted date into every
-   * entityContent
-   */
-
-  public TemplateModel get(java.lang.String key) throws TemplateModelException
-  {
-    if (key!=null) {
-      if (_entCache.containsKey(key)) {
-        return (TemplateModel)_entCache.get(key);
-      }
-      if (key.equals("to_comments")) {
-        try {
-          _entCache.put(key, getComments());
-          return (TemplateModel)_entCache.get(key);
-        }
-        catch (Exception ex) {
-          logger.warn("EntityContent.getComments: could not fetch data " + ex.toString());
-
-          throw new TemplateModelException(ex.toString());
-        }
-      }
-      if (key.equals("to_media_images")) {
-        try {
-          _entCache.put(key, getImagesForContent());
-          return (TemplateModel)_entCache.get(key);
-        }
-        catch (Exception ex) {
-          logger.warn("EntityContent.getImagesForContent: could not fetch data " + ex.toString());
-          throw new TemplateModelException(ex.toString());
-        }
-      }
-      if (key.equals("to_media_audio")) {
-        try {
-          _entCache.put(key, getAudioForContent());
-          return (TemplateModel)_entCache.get(key);
-        }
-        catch (Exception ex) {
-          logger.warn("EntityContent.getAudioForContent: could not fetch data " + ex.toString());
-          throw new TemplateModelException(ex.toString());
-        }
-      }
-      if (key.equals("to_media_video")) {
-        try {
-          _entCache.put(key, getVideoForContent());
-          return (TemplateModel)_entCache.get(key);
-        }
-        catch (Exception ex) {
-          logger.warn("EntityContent.getVideoForContent: could not fetch data " + ex.toString());
-          throw new TemplateModelException(ex.toString());
-        }
-      }
-      if (key.equals("to_media_other")) {
-        try {
-          _entCache.put(key, getOtherMediaForContent());
-          return (TemplateModel)_entCache.get(key);
-        }
-        catch (Exception ex) {
-          logger.warn("EntityContent.getOtherMediaForContent: could not fetch data " + ex.toString());
-          throw new TemplateModelException(ex.toString());
-        }
-      }
-      else if (key.equals("to_topics")) {
-        try {
-          _entCache.put(key,
-                        DatabaseContentToTopics.getInstance().getTopics(this));
-          return (TemplateModel)_entCache.get(key);
-        }
-        catch (Exception ex) {
-          logger.warn("EntityContent.getTopics: could not fetch data " + ex.toString());
-          throw new TemplateModelException(ex.toString());
-        }
-      }
-      else {
-        return new SimpleScalar(getValue(key));
-      }
-
-    }
-    return null;
-  }
-
-  /**
    * overridden method setValues to patch creator_main_url
    */
   public void setValues(Map theStringValues) {
@@ -261,15 +177,6 @@ public class EntityContent extends Entity
     super.setValues(theStringValues);
   }
 
-  /**
-   * fetches all the comments belonging to an article
-   *
-   * @return freemarker.template.SimpleList
-   */
-  private EntityList getComments() throws StorageObjectFailure {
-    return ((DatabaseContent)theStorageObject).getComments(this);
-  }
-
   private boolean hasMedia() throws StorageObjectFailure
   {
     if (_hasMedia == null) {
@@ -282,43 +189,4 @@ public class EntityContent extends Entity
     }
     return _hasMedia.booleanValue();
   }
-
-  //######## @todo all of the following getBlahForContent should have
-  // and optimized version where LIMIT=1 sql for list view.
-  private EntityList getImagesForContent()
-      throws StorageObjectFailure, TemplateModelException
-  {
-    if (hasMedia())
-      return DatabaseContentToMedia.getInstance().getImages(this);
-    else
-      return null;
-  }
-
-  private EntityList getAudioForContent()
-      throws StorageObjectFailure, TemplateModelException
-  {
-    if (hasMedia())
-      return DatabaseContentToMedia.getInstance().getAudio(this) ;
-    else
-      return null;
-  }
-
-  private EntityList getVideoForContent()
-      throws StorageObjectFailure, TemplateModelException
-  {
-    if (hasMedia())
-      return DatabaseContentToMedia.getInstance().getVideo(this) ;
-    else
-      return null;
-  }
-
-  private EntityList getOtherMediaForContent()
-      throws StorageObjectFailure, TemplateModelException
-  {
-    if (hasMedia())
-      return DatabaseContentToMedia.getInstance().getOther(this);
-    else
-      return null;
-  }
-
 }

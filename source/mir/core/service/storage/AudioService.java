@@ -32,12 +32,14 @@
 package mir.core.service.storage;
 
 import mir.core.model.Audio;
+import net.sf.hibernate.Hibernate;
+import net.sf.hibernate.HibernateException;
 import net.sf.hibernate.SessionFactory;
 
 /**
  * AudioService
  * @author idefix
- * @version $Id: AudioService.java,v 1.1 2003/08/17 19:11:49 idfx Exp $
+ * @version $Id: AudioService.java,v 1.2 2003/09/05 20:23:59 idfx Exp $
  */
 public class AudioService extends StorageService {
 
@@ -47,6 +49,18 @@ public class AudioService extends StorageService {
 	 */
 	public AudioService(SessionFactory factory) {
 		super(Audio.class, factory);
+	}
+
+	/**
+	 * @see mir.core.service.storage.StorageService#initializeLazyCollections(java.lang.Object)
+	 */
+	protected void initializeLazyCollections(Object returnObject)
+		throws HibernateException {
+		if(returnObject instanceof Audio){
+			Audio audio = (Audio)returnObject;
+			Hibernate.initialize(audio.getContent());
+			
+		}
 	}
 
 }

@@ -168,33 +168,33 @@ public class ParameterExpander {
     return result.toString();
   }
 
-  public static boolean evaluateBooleanExpression(Map aMap, String anExpression) throws Exception {
+  public static boolean evaluateBooleanExpression(Object aMap, String anExpression) throws Exception {
     Parser parser = new Parser(anExpression, aMap);
 
     return parser.parseBoolean();
   }
 
-  public static String evaluateStringExpression(Map aMap, String anExpression) throws Exception {
+  public static String evaluateStringExpression(Object aMap, String anExpression) throws Exception {
     Parser parser = new Parser(anExpression, aMap);
 
     return parser.parseString();
   }
 
-  public static int evaluateIntegerExpressionWithDefault(Map aMap, String anExpression, int aDefault) throws Exception {
+  public static int evaluateIntegerExpressionWithDefault(Object aMap, String anExpression, int aDefault) throws Exception {
     if (anExpression == null || anExpression.trim().equals(""))
       return aDefault;
     else
       return evaluateIntegerExpression(aMap, anExpression);
   }
 
-  public static int evaluateIntegerExpression(Map aMap, String anExpression) throws Exception {
+  public static int evaluateIntegerExpression(Object aMap, String anExpression) throws Exception {
     Parser parser = new Parser(anExpression, aMap);
 
     return parser.parseInteger();
   }
 
-  public static Object evaluateExpression(Map aMap, String anExpression) throws Exception {
-    Parser parser = new Parser(anExpression, aMap);
+  public static Object evaluateExpression(Object aRoot, String anExpression) throws Exception {
+    Parser parser = new Parser(anExpression, aRoot);
 
     return parser.parseWhole();
   }
@@ -490,9 +490,9 @@ public class ParameterExpander {
 
   private static class Parser {
     private Scanner scanner;
-    private Map valueMap;
+    private Object valueMap;
 
-    public Parser(String anExpression, Map aValueMap) {
+    public Parser(String anExpression, Object aValueMap) {
       scanner = new Scanner(new Reader(anExpression));
       valueMap = aValueMap;
     }
@@ -559,10 +559,6 @@ public class ParameterExpander {
 
       do {
         expression = parse();
-
-        if (expression==null) {
-          throw new RuntimeException("expression expected");
-        }
 
         result.add(expression);
 
@@ -804,6 +800,8 @@ public class ParameterExpander {
     }
 
     private String interpretAsString(Object aValue) {
+      if (aValue==null)
+        return "";
       if (aValue instanceof String)
         return (String) aValue;
       if (aValue instanceof Integer)

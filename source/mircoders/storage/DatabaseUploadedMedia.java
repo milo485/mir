@@ -30,8 +30,10 @@
 
 package mircoders.storage;
 
+import java.util.Iterator;
+
 import mir.entity.Entity;
-import mir.entity.EntityRelation;
+import mir.entity.EntityBrowser;
 import mir.log.LoggerWrapper;
 import mir.storage.Database;
 import mir.storage.StorageObject;
@@ -39,7 +41,6 @@ import mir.storage.StorageObjectFailure;
 
 public class DatabaseUploadedMedia extends Database implements StorageObject {
   private static DatabaseUploadedMedia  instance;
-  private static EntityRelation         relationMediaType;
 
   public synchronized static DatabaseUploadedMedia getInstance() {
     if (instance == null ) {
@@ -56,7 +57,6 @@ public class DatabaseUploadedMedia extends Database implements StorageObject {
 
     theTable="uploaded_media";
     theCoreTable="media";
-    relationMediaType = new EntityRelation("to_media_type", "id", DatabaseMediaType.getInstance(), EntityRelation.TO_ONE);
     theEntityClass = mircoders.entity.EntityUploadedMedia.class;
   }
 
@@ -68,7 +68,9 @@ public class DatabaseUploadedMedia extends Database implements StorageObject {
   public Entity getMediaType(Entity ent) throws StorageObjectFailure {
     Entity type=null;
     try {
-      type = relationMediaType.getOne(ent);
+      Iterator i = new EntityBrowser(DatabaseMediaType.getInstance(), ent.getValue("to_media_type") + " = id" , "id", 1);
+      if (i.hasNext())
+        type = (Entity) i.next();
     }
     catch (Throwable t) {
       logger.error("DatabaseUploadedMedia :: failed to get media_type: " + t.getMessage());

@@ -50,8 +50,8 @@
       <td align="right">${lang("login.language")}:</td>
       <td align="left">  
         <select name="language">
-        <list data.languages as l>
-          <option value="${l.code}" <if l.code==data.defaultlanguage>selected</if> >${l.name}</option>
+        <list languages as l>
+          <option value="${l.code}" <if l.code==defaultlanguage>selected</if> >${l.name}</option>
         </list>
         </select>
       </td>

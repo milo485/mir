@@ -59,7 +59,7 @@ import mir.util.URLBuilder;
  *  in the config file.
  *
  * @author $Author: zapata $
- * @version $Revision: 1.13 $ $Date: 2003/05/08 02:43:42 $
+ * @version $Revision: 1.14 $ $Date: 2003/09/03 18:29:05 $
  *
  */
 
@@ -137,10 +137,6 @@ public class ServletModuleFileEdit extends ServletModule
     }
 
     dirFilter = new FileFunctions.DirectoryFilter();
-
-    templateListString =configuration.getString("ServletModule.FileEdit.ListTemplate");
-    templateObjektString =configuration.getString("ServletModule.FileEdit.ObjektTemplate");
-    templateConfirmString =configuration.getString("ServletModule.FileEdit.ConfirmTemplate");
   }
 
   public List getEntries() {
@@ -228,7 +224,7 @@ public class ServletModuleFileEdit extends ServletModule
   public void listSubDirectory(FileEditDirectory aDirectory, String aSubDirectory, HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc
   {
     try {
-      Map responseData = ServletHelper.makeGenerationData(aResponse, new Locale[] { getLocale(aRequest), getFallbackLocale(aRequest)});
+      Map responseData = ServletHelper.makeGenerationData(aRequest, aResponse, new Locale[] { getLocale(aRequest), getFallbackLocale(aRequest)});
       File dir = new File(aDirectory.getRootDirectory(), aSubDirectory);
 
       if (!validateDirectory(aDirectory, dir) || !dir.isDirectory()) {
@@ -255,7 +251,7 @@ public class ServletModuleFileEdit extends ServletModule
       responseData.put("subdirectory", aSubDirectory);
       responseData.put("entry", aDirectory.getName());
 
-      ServletHelper.generateResponse(aResponse.getWriter(), responseData, templateListString);
+      ServletHelper.generateResponse(aResponse.getWriter(), responseData, listGenerator);
     }
     catch (Throwable e) {
       throw new ServletModuleFailure(e);
@@ -271,7 +267,7 @@ public class ServletModuleFileEdit extends ServletModule
         listSubDirectory(aDirectory, "", aRequest, aResponse);
       }
       else {
-        Map responseData = ServletHelper.makeGenerationData(aResponse, new Locale[] { getLocale(aRequest), getFallbackLocale(aRequest)});
+        Map responseData = ServletHelper.makeGenerationData(aRequest, aResponse, new Locale[] { getLocale(aRequest), getFallbackLocale(aRequest)});
         URLBuilder urlBuilder = new URLBuilder();
 
         urlBuilder.setValue("module", "FileEdit");
@@ -295,7 +291,7 @@ public class ServletModuleFileEdit extends ServletModule
         responseData.put("subdirectory", aSubDirectory);
         responseData.put("returnurl", urlBuilder.getQuery());
 
-        ServletHelper.generateResponse(aResponse.getWriter(), responseData, templateObjektString);
+        ServletHelper.generateResponse(aResponse.getWriter(), responseData, editGenerator);
       }
     }
     catch (Throwable e) {

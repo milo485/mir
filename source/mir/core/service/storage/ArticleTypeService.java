@@ -37,7 +37,7 @@ import net.sf.hibernate.SessionFactory;
 /**
  * ArticleTypeService
  * @author idefix
- * @version $Id: ArticleTypeService.java,v 1.1 2003/08/17 19:11:49 idfx Exp $
+ * @version $Id: ArticleTypeService.java,v 1.2 2003/09/05 20:23:59 idfx Exp $
  */
 public class ArticleTypeService extends StorageService {
 
@@ -47,6 +47,13 @@ public class ArticleTypeService extends StorageService {
 	 */
 	public ArticleTypeService(SessionFactory factory) {
 		super(ArticleType.class, factory);
+	}
+
+	/**
+	 * @see mir.core.service.storage.StorageService#initializeLazyCollections(java.lang.Object)
+	 */
+	protected void initializeLazyCollections(Object returnObject) {
+		// doonothing;
 	}
 
 }

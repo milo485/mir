@@ -44,10 +44,15 @@ import mir.session.Session;
 import mir.session.SessionExc;
 import mir.session.SessionFailure;
 import mir.session.UploadedFile;
+import mir.session.ValidationError;
+import mir.session.ValidationHelper;
+import mir.util.ExceptionFunctions;
 import mircoders.entity.EntityContent;
 import mircoders.global.MirGlobal;
 import mircoders.media.MediaUploadProcessor;
 import mircoders.module.ModuleContent;
+import mircoders.module.*;
+import mircoders.storage.*;
 import mircoders.storage.DatabaseContent;
 import mircoders.storage.DatabaseContentToMedia;
 import mircoders.storage.DatabaseContentToTopics;
@@ -91,20 +96,33 @@ public class MirBasicArticlePostingHandler extends MirBasicPostingSessionHandler
   public void validate(List aResults, Request aRequest, Session aSession) throws SessionExc, SessionFailure {
     super.validate(aResults, aRequest, aSession);
 
-    testFieldEntered(aRequest, "title", "validationerror.missing", aResults);
-    testFieldEntered(aRequest, "description", "validationerror.missing", aResults);
-    testFieldEntered(aRequest, "creator", "validationerror.missing", aResults);
-    testFieldEntered(aRequest, "content_data", "validationerror.missing", aResults);
+    ValidationHelper.testFieldEntered(aRequest, "title", "validationerror.missing", aResults);
+    ValidationHelper.testFieldEntered(aRequest, "description", "validationerror.missing", aResults);
+    ValidationHelper.testFieldEntered(aRequest, "creator", "validationerror.missing", aResults);
+    ValidationHelper.testFieldEntered(aRequest, "content_data", "validationerror.missing", aResults);
   }
 
   public void finalizeArticle(Request aRequest, Session aSession, EntityContent anArticle) throws SessionExc, SessionFailure {
-    anArticle.setValueForProperty("is_published", "1");
-    anArticle.setValueForProperty("is_produced", "0");
-    anArticle.setValueForProperty("date", StringUtil.date2webdbDate(new GregorianCalendar()));
-    anArticle.setValueForProperty("is_html","0");
-    anArticle.setValueForProperty("publish_path", StringUtil.webdbDate2path(anArticle.getValue("date")));
-    anArticle.setValueForProperty("to_article_type", "1");
-    anArticle.setValueForProperty("to_publisher", "1");
+    try {
+      anArticle.setValueForProperty("is_published", "1");
+      anArticle.setValueForProperty("is_produced", "0");
+      anArticle.setValueForProperty("date",
+                                    StringUtil.date2webdbDate(new GregorianCalendar()));
+      anArticle.setValueForProperty("is_html", "0");
+      anArticle.setValueForProperty("publish_path",
+                                    StringUtil.webdbDate2path(anArticle.
+          getValue("date")));
+      ModuleArticleType module = new ModuleArticleType(DatabaseArticleType.
+          getInstance());
+
+      anArticle.setValueForProperty("to_article_type",
+                                    module.articleTypeIdForName(configuration.
+          getString("Localizer.OpenSession.article.DefaultArticleType")));
+      anArticle.setValueForProperty("to_publisher", "1");
+    }
+    catch (Throwable t) {
+      throw new SessionFailure(t);
+    }
   }
 
   public void setArticleTopics(Request aRequest, Session aSession, EntityContent aContent) throws SessionExc, SessionFailure {
@@ -177,3 +195,4 @@ public class MirBasicArticlePostingHandler extends MirBasicPostingSessionHandler
   };
 
 }
+

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001, 2002 The Mir-coders group
+ * Copyright (C) 2001, 2002, 2003 The Mir-coders group
  *
  * This file is part of Mir.
  *
@@ -27,49 +27,65 @@
  * exception to your version of the file, but you are not obligated to do so.  
  * If you do not wish to do so, delete this exception statement from your version.
  */
-package mircoders.entity;
+package mircoders.search;
+
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
 
 import mir.entity.Entity;
-import mir.storage.StorageObject;
-import mir.storage.StorageObjectExc;
+import mir.entity.EntityList;
 import mir.storage.StorageObjectFailure;
-import mircoders.storage.DatabaseMedia;
-/**
- * Diese Klasse enth?lt die Daten eines MetaObjekts
- *
- * @author RK
- * @version 29.6.1999
- */
+import mircoders.entity.EntityContent;
+import mircoders.storage.DatabaseContentToTopics;
+
+import org.apache.lucene.document.Document;
+import org.apache.lucene.document.Field;
 
 
-public class EntityMedia extends Entity
-{
+public class TopicMatrixSearchTerm extends SearchTerm{
 
-  public EntityMedia(){
-    super();
+
+  public static String matchField       = "topic";
+  public static String paramName        = "search_topicmatrix"; 
+
+  public void index(Document doc, Entity entity) throws StorageObjectFailure{
+    EntityList topics = DatabaseContentToTopics.getInstance().getTopics((EntityContent) entity);
+    if (topics != null && topics.size()>0){
+      for(int k=0;k<topics.size();k++){
+        doc.add(Field.UnStored(matchField,(topics.elementAt(k)).getValue("title")));
+      }
+    }
   }
 
-  public EntityMedia(StorageObject theStorage)
-  {
-    this();
-    setStorage(theStorage);
+  public String makeTerm(HttpServletRequest req){
+    String queryTerm = "";
+    for (int x=0;x<10;x++){
+      String[] values = req.getParameterValues("search_topicmatrix_"+Integer.toString(x));
+      
+      if (values != null && values.length > 0){
+	String subqueryTerm = "(";
+	  for (int i=0;i<values.length;i++){
+	    subqueryTerm = subqueryTerm + " " + matchField + ":" + "\"" + values[i] + "\"";
+	  }
+	subqueryTerm = subqueryTerm + ")";
+	queryTerm = queryTerm + " +" + subqueryTerm;
+      }
+    }
+    if (queryTerm.equals("")){
+      return null;
+    }
+    else {
+      return "( "+queryTerm+ " )";
+    }
+
   }
 
-  /**
-   * fetches the MediaType entry assiciated w/ this media
-   *
-   * @return mir.entity.Entity
-   */
-  public Entity getMediaType() throws StorageObjectFailure {
-    try {
-      return ( (DatabaseMedia) theStorageObject).getMediaType(this);
-    }
-    catch (StorageObjectFailure e) {
-      throw new StorageObjectFailure("getMediaType(): ", e);
-    }
-    catch (StorageObjectExc e) {
-      throw new StorageObjectFailure("getMediaType(): ", e);
-    }
-
+  public void returnMeta(Map result,Document doc){
+    return;
   }
+
+
 }
+
+

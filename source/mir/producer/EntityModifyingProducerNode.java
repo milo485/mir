@@ -30,39 +30,82 @@
 
 package mir.producer;
 
-import java.io.PrintWriter;
-import java.util.Map;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.*;
 
+import mir.entity.Entity;
 import mir.entity.adapter.EntityAdapter;
+import mir.entity.adapter.EntityAdapterModel;
+import mir.log.LoggerWrapper;
 import mir.util.ParameterExpander;
+import mir.util.*;
 
 
-public abstract class EntityModifyingProducerNode implements ProducerNode {
-  String entityExpression;
-  String entityField;
-  String valueExpression;
+public class EntityModifyingProducerNode implements ProducerNode {
+  private String entityExpression;
+  private String definition;
+  private Map fields;
+  private boolean create;
+  private EntityAdapterModel model;
 
-  public EntityModifyingProducerNode(String anEntityExpression, String anEntityField, String aValueExpression) {
+  public EntityModifyingProducerNode(EntityAdapterModel aModel, boolean aCreate, String aDefinition, String anEntityExpression, Map aFieldValues) {
     entityExpression = anEntityExpression;
-    entityField = anEntityField;
-    valueExpression = aValueExpression;
+    definition = aDefinition;
+    create = aCreate;
+    model = aModel;
+    fields = new HashMap();
+    fields.putAll(aFieldValues);
   }
 
-  public void produce(Map aValueMap, String aVerb, PrintWriter aLogger) throws ProducerFailure {
-    Object entity;
+  public void addField(String aField, String aValueExpression) {
+    fields.put(aField, aValueExpression);
+  }
 
+  public void produce(Map aValueMap, String aVerb, LoggerWrapper aLogger) throws ProducerExc, ProducerFailure {
     try {
-      entity = ParameterExpander.findValueForKey( aValueMap, entityExpression );
+      Object entityAdapter;
 
-      if (entity instanceof EntityAdapter) {
-        ((EntityAdapter) entity).getEntity().setValueForProperty(entityField, valueExpression);
-        ((EntityAdapter) entity).getEntity().update();
+      if (create) {
+        entityAdapter = model.createNewEntity(definition);
+        ParameterExpander.setValueForKey(aValueMap, entityExpression, entityAdapter);
+      }
+      else {
+        entityAdapter = ParameterExpander.findValueForKey(aValueMap, entityExpression);
+      }
+
+      if (entityAdapter instanceof EntityAdapter) {
+        Entity entity = ((EntityAdapter) entityAdapter).getEntity();
+        Iterator i = fields.entrySet().iterator();
+        while (i.hasNext()) {
+          Map.Entry entry = (Map.Entry) i.next();
+          String entityField = (String) entry.getKey();
+          String valueExpression = (String) entry.getValue();
+
+          Object value = ParameterExpander.evaluateExpression(aValueMap, valueExpression);
+
+          if (value instanceof String)
+            entity.setValueForProperty(entityField, (String) value);
+          else if (value instanceof EntityAdapter)
+            entity.setValueForProperty(entityField, ((EntityAdapter) value).getEntity().getId());
+          else if (value instanceof Date) {
+            entity.setValueForProperty(entityField, JDBCStringRoutines.formatDate((Date) value));
+          }
+          else
+            aLogger.warn("Can't set value " + value + " for field " + entityField);
+        }
+
+        if (create)
+          entity.insert();
+        else
+          entity.update();
       }
       else
-        throw new Exception( entityExpression + " does not evaluate to an entity");
+        throw new ProducerExc( entityExpression + " does not evaluate to an entity");
     }
     catch (Throwable t) {
-      aLogger.println("Error while performing entity modifying operation: " + t.getMessage());
+      aLogger.error("Error while performing entity modification operation: " + t.getMessage());
+      t.printStackTrace(aLogger.asPrintWriter(aLogger.DEBUG_MESSAGE));
 
       throw new ProducerFailure(t.getMessage(), t);
     }

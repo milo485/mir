@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with  any library licensed under the Apache Software License, 
- * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
- * (or with modified versions of the above that use the same license as the above), 
- * and distribute linked combinations including the two.  You must obey the 
- * GNU General Public License in all respects for all of the code used other than 
- * the above mentioned libraries.  If you modify this file, you may extend this 
- * exception to your version of the file, but you are not obligated to do so.  
+ * the code of this program with  any library licensed under the Apache Software License,
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library
+ * (or with modified versions of the above that use the same license as the above),
+ * and distribute linked combinations including the two.  You must obey the
+ * GNU General Public License in all respects for all of the code used other than
+ * the above mentioned libraries.  If you modify this file, you may extend this
+ * exception to your version of the file, but you are not obligated to do so.
  * If you do not wish to do so, delete this exception statement from your version.
  */
 package mir.producer;
@@ -39,6 +39,21 @@ import mir.entity.adapter.EntityAdapterModel;
 import mir.entity.adapter.EntityIteratorAdapter;
 import mir.log.LoggerWrapper;
 import mir.util.ParameterExpander;
+
+/**
+ * <p>Title: EntityBatchingProducerNode</p>
+ * <p>Description:
+ *     This producer makes it possible to show articles in batches, like on archive
+ *     pages.
+ *
+ *     <emph> The order by clause should lead to a result set in <b>reverse order<b>:
+ *         the first row will be the last entity in the last batch
+ * </p>
+ * <p>Copyright: Copyright (c) 2003</p>
+ * <p>Company: </p>
+ * @author not attributable
+ * @version 1.0
+ */
 
 public class EntityBatchingProducerNode implements ProducerNode {
   private String batchInfoKey;
@@ -109,10 +124,6 @@ public class EntityBatchingProducerNode implements ProducerNode {
     int nrEntitiesToSkip;
     int nrEntitiesPerBatch;
     int minNrEntitiesInFirstBatch;
-
-//  ML: The order by clause should lead to a result set in _reverse order_: the first row will be
-//      the last entity presented on the last page
-
 
     try {
       nrBatchesToProcess = ParameterExpander.evaluateIntegerExpressionWithDefault( aValueMap, nrBatchesToProcessExpression, -1 );

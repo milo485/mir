@@ -122,14 +122,14 @@
         length="255"
     />
     <property
-        name="isPublished"
+        name="published"
         type="boolean"
         column="is_published"
         not-null="true"
         length="1"
     />
     <property
-        name="isProduced"
+        name="produced"
         type="boolean"
         column="is_produced"
         not-null="true"
@@ -149,7 +149,7 @@
         length="8"
     />
     <property
-    	name="isHtml"
+    	name="html"
      	type="boolean"
      	column="is_html"
       	not-null="true"

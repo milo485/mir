@@ -144,6 +144,10 @@ a:hover		{
 	padding-right:8px;
 	border:1px solid #990000;  
 }
+.link-box-div {
+	padding-top:5px;
+	padding-bottom:5px;
+}
 
 .link-help {  
 	background-color:#DDDDDD; 
@@ -178,7 +182,19 @@ a:hover		{
 }  
 
 .small	{font-size: 0.8em;}
-.x-small	{font-size: 0.7em;}
+.x-small	{font-size: 0.8em;}
 
 .lynx	          { display:none; }
 
+.majorbutton {
+}
+
+.minorbutton {
+	background-color:#DDDDDD; 
+	color: #990000;
+	font-size:1em;
+	padding:2px;
+	padding-left:8px;
+	padding-right:8px;
+//	border:1px solid #990000;  
+}

@@ -5,35 +5,21 @@
   </head>
   <body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
   
-  <include "FUNCTIONS.template">
-  
+    <include "FUNCTIONS.template">
     <include "head.template">
-
-    <comment>configure this template here</comment>
-    <assign contentlist = data.contentlist>
-    <assign column_nr = 3>
-    <assign data_keys = ["id","name"]>
-    <assign column_head_texts = [lang("commentstatus.id"), lang("commentstatus.name")]>
-    <assign column_head_CSS = "table_head">
-    <assign listrow1CSS = "listrow1">
-    <assign listrow2CSS = "listrow2">
-    <assign footer_css = "table_foot">
-    <assign module_name = "CommentStatus">
-    <assign module_jumpback = "Admin">
-    <assign do_jumpback = "superusermenu">
-
-    <if data.contentlist>
-    <call AddOrBack(module_name, module_jumpback, do_jumpback)>
-    <call ListTable(contentlist, data_keys, column_head_texts, column_head_CSS, listrow1CSS, listrow2CSS, footer_css, module_name)>   
-    <call PrevNextPage(module_name)>    
-   <else>
-    <P align="center">${lang("no_matches_found")}</p>
-    </if>
     
-  <call AddOrBack(module_name, module_jumpback, do_jumpback)>
+    <call showAddOrBack("1", module, "Admin", "superusermenu")>
+
+    <if entities>
+      <call showPrevNextLinks(prevurl, nexturl, "left")>
+      <call EntityTable(entities, ["id","name"], [lang("commentstatus.id"), lang("commentstatus.name")], from, to, count, "1", "1", module)>
+      <call showPrevNextLinks(prevurl, nexturl, "left")>
+      <call showAddOrBack("1", module, "Admin", "superusermenu")>
+    <else>
+      <P align="center">${lang("no_matches_found")}</p>
+    </if>
 
     <include "foot.template">
-  
   </body>
 </html>
 

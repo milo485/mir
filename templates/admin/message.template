@@ -1,63 +1,43 @@
 <html>
-<head>
-        <title>${config["Mir.Name"]} | ${lang("message.htmltitle")}</title>
-        <link rel="stylesheet" type="text/css" href="${config.docRoot}/style/admin.css">
-<head>
+  <head>
+    <title>${config["Mir.Name"]} | ${lang("message.htmltitle")}</title>
+    <link rel="stylesheet" type="text/css" href="${config.docRoot}/style/admin.css">
+  <head>
 
-<body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
-<include "FUNCTIONS.template">
-<include "head.template">
-
-
-<form action="${config.actionRoot}" method="post">
-  <input type="hidden" name="module" value="Message">
-  <input type="hidden" name="id" value="${data.id}">
-  <if data.new>
-    <input type="hidden" name="do" value="insert">
-  <else>
-    <input type="hidden" name="do" value="update">
-  </if>
+  <body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
+    <include "FUNCTIONS.template">
+    <include "head.template">
   
-<table border="0">
-  
-  <tr>
-    <td align="right" class="table-left">
-  ${lang("message.date")}:</td>
-    <td>
-      ${data.date}
-    </td>
-  </tr>
-
-  
-  <call TextInputTableRow (lang("message.title"), 30, 30, "title", data.title)> 
-  <call TextInputTableRow (lang("message.creator"), 12, 30, "creator", data.creator)> 
-  <call TextAreaTableRow  (lang("message.text"), "", 50, 5, "description", data.description)> 
-  
-
-
-  <tr>
-    <td class="table-foot">
-  ${lang("message.textinfo")}
-  </td>
-  
-  <td align="right" class="table-foot"> 
-  <if new>
-    <input type="submit" name="save" value="${lang("insert")}">
-    <else>
-    <input type="submit" name="save" value="${lang("save")}">
-    </if> 
-    </td>
-  </tr>
-</table>
-
-</form>
-    <p>
+      <if new=="1">
+        <assign method="insert">
+      <else>
+        <assign method="update">
+      </if>
       
-      <a class="link-box" href="${config.actionRoot}?module=Message&do=list">[&lt;] ${lang("back")} </a> &nbsp;
-      <a class="link-box" href="${config.actionRoot}">[&lt;&lt;&lt;] ${lang("head.start")}</a>
-  </p>
+      
+      <call EditStart(["module", "id", "do"], [module, entity.id, method])>
+         
+        <call EditReadonlyTextNormal(lang("message.id"), entity.id)>
+        <call EditReadonlyTextNormal(lang("message.date"), entity.creationdate.format(config["Mir.DefaultDateTimeFormat"]))>
+        <call EditTextNormal(lang("message.title"), 30, 30, "title", entity.title)>
+        <call EditTextNormal(lang("message.creator"), 30, 30, "creator", entity.creator)>
 
+        <call EditTextAreaNormal(lang("message.text"), "", "50", "5", "description", entity.description)>
+      
+        <if new=="1">
+          <call EditSubmitButtonNormal(lang("insert"), "save")>
+        <else>
+          <call EditSubmitButtonNormal(lang("save"), "save")>
+        </if> 
 
-<include "foot.template">
-</body>
+      <call EditEnd()>
+      
+      <if returnurl>
+        <call showBack(returnurl)>
+      <else>
+        <call showBack("module="+module+"&amp;do=list")>
+      </if>
+
+    <include "foot.template">
+  </body>
 </html>

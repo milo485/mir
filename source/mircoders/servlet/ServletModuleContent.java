@@ -36,10 +36,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import mir.entity.adapter.EntityAdapterModel;
 import mir.entity.adapter.EntityIteratorAdapter;
@@ -54,45 +52,31 @@ import mir.util.JDBCStringRoutines;
 import mir.util.SQLQueryBuilder;
 import mir.util.URLBuilder;
 import mircoders.entity.EntityContent;
-import mircoders.entity.EntityUsers;
 import mircoders.global.MirGlobal;
 import mircoders.module.ModuleContent;
-import mircoders.search.IndexUtil;
-import mircoders.storage.DatabaseComment;
 import mircoders.storage.DatabaseContent;
-import mircoders.storage.DatabaseContentToMedia;
 import mircoders.storage.DatabaseContentToTopics;
-
-import org.apache.lucene.index.IndexReader;
-
-import freemarker.template.SimpleHash;
 
 /*
  *  ServletModuleContent -
  *  deliver html for the article admin form.
  *
- * @version $Id: ServletModuleContent.java,v 1.52 2003/05/08 02:43:42 zapata Exp $
+ * @version $Id: ServletModuleContent.java,v 1.53 2003/09/03 18:29:05 zapata Exp $
  * @author rk, mir-coders
  *
  */
 
 public class ServletModuleContent extends ServletModule
 {
-  private String editTemplate = configuration.getString("ServletModule.Content.ObjektTemplate");;
-  private String listTemplate = configuration.getString("ServletModule.Content.ListTemplate");
-
   private static ServletModuleContent instance = new ServletModuleContent();
   public static ServletModule getInstance() { return instance; }
 
   private ServletModuleContent() {
     super();
+
     logger = new LoggerWrapper("ServletModule.Content");
+
     try {
-
-      templateListString = configuration.getString("ServletModule.Content.ListTemplate");
-      templateObjektString = configuration.getString("ServletModule.Content.ObjektTemplate");
-      templateConfirmString = configuration.getString("ServletModule.Content.ConfirmTemplate");
-
       mainModule = new ModuleContent(DatabaseContent.getInstance());
     }
     catch (Throwable e) {
@@ -150,13 +134,13 @@ public class ServletModuleContent extends ServletModule
 
       if (searchOrder.length()>0) {
         if (searchOrder.equals("datedesc"))
-          queryBuilder.appendAscendingOrder("webdb_create");
-        else if (searchOrder.equals("dateasc"))
           queryBuilder.appendDescendingOrder("webdb_create");
+        else if (searchOrder.equals("dateasc"))
+          queryBuilder.appendAscendingOrder("webdb_create");
         else if (searchOrder.equals("title"))
-          queryBuilder.appendDescendingOrder("title");
+          queryBuilder.appendAscendingOrder("title");
         else if (searchOrder.equals("creator"))
-          queryBuilder.appendDescendingOrder("creator");
+          queryBuilder.appendAscendingOrder("creator");
       }
 
       returnArticleList(aRequest, aResponse, queryBuilder.getWhereClause(), queryBuilder.getOrderByClause(), 0, selectArticleUrl);
@@ -166,110 +150,56 @@ public class ServletModuleContent extends ServletModule
     }
   }
 
-  public void add(HttpServletRequest req, HttpServletResponse res) throws ServletModuleExc {
-    _showObject(null, req, res);
+  public void add(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc {
+    _showObject(null, aRequest, aResponse);
   }
 
 
-  public void insert(HttpServletRequest req, HttpServletResponse res) throws ServletModuleExc
+  public void insert(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc
   {
 //theLog.printDebugInfo(":: content :: trying to insert");
     try {
-      EntityUsers   user = _getUser(req);
-      Map withValues = getIntersectingValues(req, DatabaseContent.getInstance());
+      Map withValues = getIntersectingValues(aRequest, DatabaseContent.getInstance());
 
       String now = StringUtil.date2webdbDate(new GregorianCalendar());
       withValues.put("date", now);
       withValues.put("publish_path", StringUtil.webdbDate2path(now));
-      withValues.put("to_publisher", user.getId());
+      withValues.put("to_publisher", ServletHelper.getUser(aRequest).getId());
       withValues.put("is_produced", "0");
       if (!withValues.containsKey("is_published"))
         withValues.put("is_published","0");
       if (!withValues.containsKey("is_html"))
         withValues.put("is_html","0");
 
+      String webdbCreate = (String) withValues.get("webdb_create");
+      if (webdbCreate==null || webdbCreate.trim().length()==0)
+        withValues.remove("webdb_create");
+
       String id = mainModule.add(withValues);
       List topics;
 
-      DatabaseContentToTopics.getInstance().setTopics(id, req.getParameterValues("to_topic"));
+      DatabaseContentToTopics.getInstance().setTopics(id, aRequest.getParameterValues("to_topic"));
 
-      _showObject(id, req, res);
+      _showObject(id, aRequest, aResponse);
     }
     catch (Throwable e) {
       throw new ServletModuleFailure(e);
     }
   }
 
-  public void delete(HttpServletRequest req, HttpServletResponse res) throws ServletModuleExc
+  public void edit(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc
   {
-    if (!configuration.getString("Mir.Localizer.Admin.AllowDeleteArticle", "0").equals("1"))
-      throw new ServletModuleExc("Operation not permitted");
-
-    EntityUsers   user = _getUser(req);
-
-    String idParam = req.getParameter("id");
-    if (idParam == null) throw new ServletModuleExc("Invalid call: id missing");
-
-    String confirmParam = req.getParameter("confirm");
-    String cancelParam = req.getParameter("cancel");
-
-    logger.info("where = " + req.getParameter("where"));
-
-    if (confirmParam == null && cancelParam == null) {
-
-      SimpleHash mergeData = new SimpleHash();
-      mergeData.put("module", "Content");
-      mergeData.put("infoString", "Content: " + idParam);
-      mergeData.put("id", idParam);
-      mergeData.put("where", req.getParameter("where"));
-      mergeData.put("order", req.getParameter("order"));
-      mergeData.put("offset", req.getParameter("offset"));
-      deliver(req, res, mergeData, templateConfirmString);
-    }
-    else {
-      if (confirmParam!= null && !confirmParam.equals("")) {
-        try {
-          mainModule.deleteById(idParam);
-
-          /** @todo the following two should be implied in
-           *  DatabaseContent */
-          DatabaseContentToTopics.getInstance().deleteByContentId(idParam);
-          DatabaseComment.getInstance().deleteByContentId(idParam);
-          DatabaseContentToMedia.getInstance().deleteByContentId(idParam);
-
-
-          //delete from lucene index, if any
-          String index = configuration.getString("IndexPath");
-          if (IndexReader.indexExists(index)){
-            IndexUtil.unindexID(idParam,index);
-          }
-
-        }
-        catch (Throwable e) {
-          throw new ServletModuleFailure(e);
-        }
-        list(req,res);
-      }
-      else {
-        // Datensatz anzeigen
-        _showObject(idParam, req, res);
-      }
-    }
-  }
-
-  public void edit(HttpServletRequest req, HttpServletResponse res) throws ServletModuleExc
-  {
-    String idParam = req.getParameter("id");
+    String idParam = aRequest.getParameter("id");
     if (idParam == null)
       throw new ServletModuleExc("Invalid call: id not supplied ");
-    _showObject(idParam, req, res);
+    _showObject(idParam, aRequest, aResponse);
   }
 
 // methods for attaching media file
-  public void attach(HttpServletRequest req, HttpServletResponse res) throws ServletModuleExc
+  public void attach(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc
   {
-    String  mediaIdParam = req.getParameter("mid");
-    String  articleId = req.getParameter("articleid");
+    String  mediaIdParam = aRequest.getParameter("mid");
+    String  articleId = aRequest.getParameter("articleid");
 
     if (articleId == null || mediaIdParam==null)
       throw new ServletModuleExc("smod content :: attach :: articleid/mid missing");
@@ -282,13 +212,13 @@ public class ServletModuleContent extends ServletModule
       throw new ServletModuleFailure(e);
     }
 
-    _showObject(articleId, req, res);
+    _showObject(articleId, aRequest, aResponse);
   }
 
-  public void dettach(HttpServletRequest req, HttpServletResponse res) throws ServletModuleExc
+  public void dettach(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc
   {
-    String  articleId = req.getParameter("articleid");
-    String  midParam = req.getParameter("mid");
+    String  articleId = aRequest.getParameter("articleid");
+    String  midParam = aRequest.getParameter("mid");
     if (articleId == null)
       throw new ServletModuleExc("smod content :: dettach :: articleid missing");
     if (midParam == null)
@@ -302,7 +232,7 @@ public class ServletModuleContent extends ServletModule
       throw new ServletModuleFailure(e);
     }
 
-    _showObject(articleId, req, res);
+    _showObject(articleId, aRequest, aResponse);
   }
 
   public void update(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc
@@ -326,13 +256,14 @@ public class ServletModuleContent extends ServletModule
       if (!withValues.containsKey("is_html"))
         withValues.put("is_html","0");
 
+      String webdbCreate = (String) withValues.get("webdb_create");
+      if (webdbCreate==null || webdbCreate.trim().length()==0)
+        withValues.remove("webdb_create");
+
       String id = mainModule.set(withValues);
       DatabaseContentToTopics.getInstance().setTopics(aRequest.getParameter("id"), aRequest.getParameterValues("to_topic"));
 
-      String whereParam = aRequest.getParameter("where");
-      String orderParam = aRequest.getParameter("order");
-
-      if (returnUrl!=null){
+      if (returnUrl!=null && !returnUrl.equals("")){
         redirect(aResponse, returnUrl);
       }
       else
@@ -359,7 +290,7 @@ public class ServletModuleContent extends ServletModule
       throws ServletModuleExc {
     try {
       HTTPRequestParser requestParser = new HTTPRequestParser(aRequest);
-      Map responseData = ServletHelper.makeGenerationData(aResponse, new Locale[] { getLocale(aRequest), getFallbackLocale(aRequest)});
+      Map responseData = ServletHelper.makeGenerationData(aRequest, aResponse, new Locale[] { getLocale(aRequest), getFallbackLocale(aRequest)});
       EntityAdapterModel model = MirGlobal.localizer().dataModel().adapterModel();
       Map article;
       URLBuilder urlBuilder = new URLBuilder();
@@ -392,12 +323,10 @@ public class ServletModuleContent extends ServletModule
           new EntityIteratorAdapter("", configuration.getString("Mir.Localizer.Admin.TopicListOrder"),
           20, MirGlobal.localizer().dataModel().adapterModel(), "topic"));
 
-
-
       responseData.put("returnurl", requestParser.getParameter("returnurl"));
       responseData.put("thisurl", urlBuilder.getQuery());
 
-      ServletHelper.generateResponse(aResponse.getWriter(), responseData, editTemplate);
+      ServletHelper.generateResponse(aResponse.getWriter(), responseData, editGenerator);
     }
     catch (Throwable e) {
       throw new ServletModuleFailure(e);
@@ -415,17 +344,16 @@ public class ServletModuleContent extends ServletModule
     HTTPRequestParser requestParser = new HTTPRequestParser(aRequest);
     URLBuilder urlBuilder = new URLBuilder();
     EntityAdapterModel model;
-    int nrArticlesPerPage = 20;
     int count;
 
     try {
-      Map responseData = ServletHelper.makeGenerationData(aResponse, new Locale[] { getLocale(aRequest), getFallbackLocale(aRequest)});
+      Map responseData = ServletHelper.makeGenerationData(aRequest, aResponse, new Locale[] { getLocale(aRequest), getFallbackLocale(aRequest)});
       model = MirGlobal.localizer().dataModel().adapterModel();
 
       Object articleList =
           new CachingRewindableIterator(
-            new EntityIteratorAdapter( aWhereClause, anOrderByClause, nrArticlesPerPage,
-               MirGlobal.localizer().dataModel().adapterModel(), "content", nrArticlesPerPage, anOffset)
+            new EntityIteratorAdapter( aWhereClause, anOrderByClause, nrEntitiesPerListPage,
+               MirGlobal.localizer().dataModel().adapterModel(), "content", nrEntitiesPerListPage, anOffset)
       );
 
       responseData.put("nexturl", null);
@@ -457,13 +385,13 @@ public class ServletModuleContent extends ServletModule
       responseData.put("offset" , new Integer(anOffset).toString());
       responseData.put("thisurl" , urlBuilder.getQuery());
 
-      if (count>=anOffset+nrArticlesPerPage) {
-        urlBuilder.setValue("offset", (anOffset + nrArticlesPerPage));
+      if (count>=anOffset+nrEntitiesPerListPage) {
+        urlBuilder.setValue("offset", (anOffset + nrEntitiesPerListPage));
         responseData.put("nexturl" , urlBuilder.getQuery());
       }
 
       if (anOffset>0) {
-        urlBuilder.setValue("offset", Math.max(anOffset - nrArticlesPerPage, 0));
+        urlBuilder.setValue("offset", Math.max(anOffset - nrEntitiesPerListPage, 0));
         responseData.put("prevurl" , urlBuilder.getQuery());
       }
 
@@ -471,12 +399,12 @@ public class ServletModuleContent extends ServletModule
 
       responseData.put("from" , Integer.toString(anOffset+1));
       responseData.put("count", Integer.toString(count));
-      responseData.put("to", Integer.toString(Math.min(anOffset+nrArticlesPerPage, count)));
+      responseData.put("to", Integer.toString(Math.min(anOffset+nrEntitiesPerListPage, count)));
       responseData.put("offset" , Integer.toString(anOffset));
       responseData.put("order", anOrderByClause);
       responseData.put("where" , aWhereClause);
 
-      ServletHelper.generateResponse(aResponse.getWriter(), responseData, listTemplate);
+      ServletHelper.generateResponse(aResponse.getWriter(), responseData, listGenerator);
     }
     catch (Throwable e) {
       throw new ServletModuleFailure(e);
@@ -558,12 +486,5 @@ public class ServletModuleContent extends ServletModule
     }
 
     redirect(aResponse, returnUrl);
-  }
-
-  private EntityUsers _getUser(HttpServletRequest req)
-  {
-    HttpSession session=req.getSession(false);
-
-    return (EntityUsers)session.getAttribute("login.uid");
   }
 }

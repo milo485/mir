@@ -32,6 +32,7 @@ package mir.servlet;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.sql.Connection;
 import java.util.Locale;
 
 import javax.servlet.ServletConfig;
@@ -41,14 +42,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import mir.config.MirPropertiesConfiguration;
-import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
-import mir.log.LoggerWrapper;
-import mir.storage.DatabaseAdaptor;
-
 import com.codestudio.util.JDBCPool;
 import com.codestudio.util.JDBCPoolMetaData;
 import com.codestudio.util.SQLManager;
+
+import mir.config.MirPropertiesConfiguration;
+import mir.log.LoggerWrapper;
+
+import mircoders.global.MirGlobal;
 
 /**
  * Title:        Mir
@@ -56,7 +57,7 @@ import com.codestudio.util.SQLManager;
  * Copyright:    Copyright (c) 2001, 2002
  * Company:      Mir-coders group
  * @author       idfx, the Mir-coders group
- * @version      $Id: AbstractServlet.java,v 1.30 2003/04/26 00:42:21 zapata Exp $
+ * @version      $Id: AbstractServlet.java,v 1.31 2003/09/03 18:29:03 zapata Exp $
  */
 
 public abstract class AbstractServlet extends HttpServlet {
@@ -69,7 +70,6 @@ public abstract class AbstractServlet extends HttpServlet {
    */
   public AbstractServlet() {
     super();
-    logger = new LoggerWrapper("Servlet");
   }
 
   protected void setNoCaching(HttpServletResponse aResponse) {
@@ -147,34 +147,30 @@ public abstract class AbstractServlet extends HttpServlet {
     try {
       configuration = MirPropertiesConfiguration.instance();
     }
-    catch (PropertiesConfigExc e) {
-      throw new ServletException(e);
+    catch (Throwable t) {
+      throw new ServletException("can't read configuration: " + t.toString());
+    }
+
+    logger = new LoggerWrapper("Servlet");
+
+    try {
+      MirGlobal.localizer();
+    }
+    catch (Throwable t) {
+      logger.fatal("can't get localizer: " + t.toString());
+      throw new ServletException("can't get localizer: " + t.toString());
     }
 
     String dbUser = configuration.getString("Database.Username");
     String dbPassword = configuration.getString("Database.Password");
     String dbHost = configuration.getString("Database.Host");
+    String dbPort = configuration.getString("Database.Port");
     String dbAdapName = configuration.getString("Database.Adaptor");
     String dbName = configuration.getString("Database.Name");
-
-    DatabaseAdaptor adaptor;
-    try {
-      adaptor = (DatabaseAdaptor) Class.forName(dbAdapName).newInstance();
-    }
-    catch (Exception e) {
-      throw new ServletException("Could not load DB adapator: " +
-                                 e.toString());
-    }
-
-    String dbDriver;
-    String dbUrl;
-    try {
-      dbDriver = adaptor.getDriver();
-      dbUrl = adaptor.getURL(dbUser, dbPassword, dbHost);
-    }
-    catch (Exception e) {
-      throw new ServletException(e);
-    }
+    String dbDriver = configuration.getString("Database.Driver");
+    String dbUrl = "jdbc:postgresql://"+dbHost+":"+dbPort+"/"+dbName;
+    int dbMin = configuration.getInteger("Database.poolMin", 1);
+    int dbMax = configuration.getInteger("Database.poolMax", 10);
 
     JDBCPoolMetaData meta = new JDBCPoolMetaData();
     meta.setDbname(dbName);
@@ -183,40 +179,58 @@ public abstract class AbstractServlet extends HttpServlet {
     meta.setUserName(dbUser);
     meta.setPassword(dbPassword);
     meta.setJNDIName("mir");
-    meta.setMaximumSize(10);
-    meta.setMinimumSize(1);
+    meta.setMaximumSize(dbMax);
+    meta.setMinimumSize(dbMin);
     meta.setPoolPreparedStatements(false);
     meta.setCacheEnabled(false);
     meta.setCacheSize(15);
     meta.setDebugging(false);
-//    meta.setLogFile(dblogfile+".pool");
 
     SQLManager manager = SQLManager.getInstance();
+
     JDBCPool pool = null;
     if (manager != null) {
       pool = manager.createPool(meta);
+    }
+
+    Connection connection;
+    try {
+      connection = pool.requestConnection();
+      pool.closeConnection(connection);
+    }
+    catch (Throwable t) {
+      logger.fatal("Can't connect to database: " + t.toString());
+      throw new ServletException("Can't connect to database: " + t.toString());
     }
   }
 
   private void setEncoding(HttpServletRequest request){
     try {
+      logger.info("Request has encoding: " + request.getCharacterEncoding());
+      logger.info("Config stipulates encoding: " + configuration.getString("Mir.DefaultHTMLCharset"));
       Class reqClass = request.getClass();
       Method method = reqClass.getMethod("setCharacterEncoding", new Class[]{String.class});
       String encoding = configuration.getString("Mir.DefaultHTMLCharset");
       method.invoke(request, new Object[]{encoding});
-    } catch (NoSuchMethodException e) {
+      logger.info("Request now has encoding: " + request.getCharacterEncoding());
+    }
+    catch (NoSuchMethodException e) {
       // TODO set the encoding in a zapata-way
 //      logger.warn("set encoding not yet implemented: " + e.getMessage());
-    } catch (SecurityException e) {
+    }
+    catch (SecurityException e) {
       logger.error(e.getMessage());
       e.printStackTrace();
-    } catch (IllegalArgumentException e) {
+    }
+    catch (IllegalArgumentException e) {
       logger.error(e.getMessage());
       e.printStackTrace();
-    } catch (IllegalAccessException e) {
+    }
+    catch (IllegalAccessException e) {
       logger.error(e.getMessage());
       e.printStackTrace();
-    } catch (InvocationTargetException e) {
+    }
+    catch (InvocationTargetException e) {
       logger.error(e.getMessage());
       e.printStackTrace();
     }
@@ -227,8 +241,7 @@ public abstract class AbstractServlet extends HttpServlet {
   }
 
   protected final void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-    if ( (configuration.getString("RootUri") == null) ||
-        configuration.getString("RootUri").equals("")) {
+    if ((configuration.getString("RootUri") == null) || configuration.getString("RootUri").equals("")) {
       configuration.setProperty("RootUri", request.getContextPath());
     }
     setEncoding(request);
@@ -237,4 +250,29 @@ public abstract class AbstractServlet extends HttpServlet {
 
   abstract public void process(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException;
 
+  /**
+   * Selects the language for the response.
+   *
+   * @param session
+   * @param aRequest
+   */
+  protected void checkLanguage(HttpSession aSession, HttpServletRequest aRequest) {
+    String requestLanguage = aRequest.getParameter("language");
+    String sessionLanguage = (String) aSession.getAttribute("language");
+    String acceptLanguage = aRequest.getLocale().getLanguage();
+    String defaultLanguage = configuration.getString("Mir.Login.DefaultLanguage", "en");
+
+    String language = requestLanguage;
+
+    if (language==null)
+      language = sessionLanguage;
+
+    if (language==null)
+      language = acceptLanguage;
+
+    if (language==null)
+      language = defaultLanguage;
+
+    setLanguage(aSession, language);
+  }
 }

@@ -18,30 +18,30 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with  any library licensed under the Apache Software License, 
- * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
- * (or with modified versions of the above that use the same license as the above), 
- * and distribute linked combinations including the two.  You must obey the 
- * GNU General Public License in all respects for all of the code used other than 
- * the above mentioned libraries.  If you modify this file, you may extend this 
- * exception to your version of the file, but you are not obligated to do so.  
+ * the code of this program with  any library licensed under the Apache Software License,
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library
+ * (or with modified versions of the above that use the same license as the above),
+ * and distribute linked combinations including the two.  You must obey the
+ * GNU General Public License in all respects for all of the code used other than
+ * the above mentioned libraries.  If you modify this file, you may extend this
+ * exception to your version of the file, but you are not obligated to do so.
  * If you do not wish to do so, delete this exception statement from your version.
  */
 package  mir.misc;
 
-import gnu.regexp.RE;
-import gnu.regexp.REException;
-
-import java.io.File;
 import java.text.NumberFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.StringTokenizer;
+import java.util.TimeZone;
+
+import gnu.regexp.RE;
+import gnu.regexp.REException;
 
 /**
  * Statische Hilfsmethoden zur Stringbehandlung
  *
- * @version $Id: StringUtil.java,v 1.33 2003/04/21 12:42:52 idfx Exp $
+ * @version $Id: StringUtil.java,v 1.34 2003/09/03 18:29:02 zapata Exp $
  * @author mir-coders group
  *
  */
@@ -57,11 +57,11 @@ public final class StringUtil {
       //precompile regex
       re_newline2br = new RE("(\r?\n){1}");
       re_brbr2p     = new RE("(<br>\r?\n<br>){1,}");
-      re_mail       = new RE("([a-zA-Z0-9_.-]+)@([a-zA-Z0-9_-]+)\\.([a-zA-Z0-9_.-]+)");
+      re_mail       = new RE("\\b([a-zA-Z0-9_.-]+)@([a-zA-Z0-9_-]+)\\.([a-zA-Z0-9_.-]+)\\b");
       re_url        = new RE("((https://)|(http://)|(ftp://)){1}([a-zA-Z0-9_-]+).([a-zA-Z0-9_.:-]+)/?([^ \t\r\n<>\\)\\]]+[^ \t\r\n.,<>\\)\\]])");
       re_tags       = new RE("<[^>]*>",RE.REG_ICASE);
-			re_tables = new RE("<[ \t\r\n/]*(table|td|tr)[ \t\r\n]*>",RE.REG_ICASE);
-			re_forbiddenTags = new RE("<[ \t\r\n/]*(body|head|script)[ \t\r\n]*>",RE.REG_ICASE);
+      re_tables = new RE("<[ \t\r\n/]*(table|td|tr)[ \t\r\n]*>",RE.REG_ICASE);
+      re_forbiddenTags = new RE("<[ \t\r\n/]*(html|meta|body|head|script)[ \t\r\n]*>",RE.REG_ICASE);
     }
     catch (REException e){
       System.err.println("FATAL: StringUtil: could not precompile REGEX: "+e.toString());
@@ -124,7 +124,7 @@ public final class StringUtil {
     webdbDate.append("-");
     webdbDate.append(pad2(theDate.get(Calendar.DATE)));
     webdbDate.append("T");
-    webdbDate.append(pad2(theDate.get(Calendar.HOUR)));
+    webdbDate.append(pad2(theDate.get(Calendar.HOUR_OF_DAY)));
     webdbDate.append(":");
     webdbDate.append(pad2(theDate.get(Calendar.MINUTE)));
     webdbDate.append(":");
@@ -169,10 +169,10 @@ public final class StringUtil {
     return re_forbiddenTags.substituteAll(haystack,"");
   }
 
-	/**
-	 *  deleteHTMLTableTags
-	 *  this method deletes all <table>, <tr> and <td>-tags
-	 */
+  /**
+   *  deleteHTMLTableTags
+   *  this method deletes all <table>, <tr> and <td>-tags
+   */
   public static final String deleteHTMLTableTags(String haystack) {
     return re_tables.substituteAll(haystack,"");
   }
@@ -195,155 +195,6 @@ public final class StringUtil {
   }
 
   /**
-   * converts string from format: yyyy-mm-dd__hh:mm:ss.d
-   * to dd.mm.yyyy hh:mm
-   */
-  public static String dateToReadableDate(String date) {
-    StringBuffer returnDate = new StringBuffer();
-    if (date!=null) {
-
-      returnDate.append(date.substring(8,10)).append('.');
-      returnDate.append(date.substring(5,7)).append('.');
-      returnDate.append(date.substring(0,4)).append(' ');
-      returnDate.append(date.substring(11,16));
-    }
-    return returnDate.toString();
-  }
-
-  /**
-   * converts string from format: yyyy-mm-dd__hh:mm:ss.d
-   * to yyyy
-   */
-  public static String dateToYear (String date) {
-    StringBuffer returnDate = new StringBuffer();
-    if (date!=null) {
-
-      returnDate.append(date.substring(0,4));
-    }
-    return returnDate.toString();
-  }
-
-  /**
-   * converts string from format: yyyy-mm-dd__hh:mm:ss.d
-   * to [m]m
-   */
-  public static String dateToMonth (String date) {
-    StringBuffer returnDate = new StringBuffer();
-    if (date!=null) {
-      if (!date.substring(5,6).equalsIgnoreCase("0")) returnDate.append(date.substring(5,7));
-      else returnDate.append(date.substring(6,7));
-    }
-    return returnDate.toString();
-  }
-
-  /**
-   * converts string from format: yyyy-mm-dd__hh:mm:ss.d
-   * to [d]d
-   */
-  public static String dateToDayOfMonth (String date) {
-    StringBuffer returnDate = new StringBuffer();
-    if (date!=null) {
-      if (!date.substring(8,9).equalsIgnoreCase("0")) returnDate.append(date.substring(8,10));
-      else returnDate.append(date.substring(9,10));
-    }
-    return returnDate.toString();
-  }
-
-  /**
-   * converts string from format: yyyy-mm-dd__hh:mm:ss.d
-   * to hh:mm
-   */
-  public static String dateToTime (String date) {
-    StringBuffer returnDate = new StringBuffer();
-    if (date!=null) {
-      returnDate.append(date.substring(11,16));
-    }
-    return returnDate.toString();
-  }
-
-  /**
-   * Splits the provided CSV text into a list. stolen wholesale from
-   * from Jakarta Turbine StrinUtils.java -mh
-   *
-   * @param text      The CSV list of values to split apart.
-   * @param separator The separator character.
-   * @return          The list of values.
-   */
-  public static String[] split(String text, String separator)
-  {
-    StringTokenizer st = new StringTokenizer(text, separator);
-    String[] values = new String[st.countTokens()];
-    int pos = 0;
-    while (st.hasMoreTokens())
-    {
-      values[pos++] = st.nextToken();
-    }
-    return values;
-  }
-
-  /**
-   * Joins the elements of the provided array into a single string
-   * containing a list of CSV elements. Stolen wholesale from Jakarta
-   * Turbine StringUtils.java. -mh
-   *
-   * @param list      The list of values to join together.
-   * @param separator The separator character.
-   * @return          The CSV text.
-   */
-  public static String join(String[] list, String separator)
-  {
-    StringBuffer csv = new StringBuffer();
-    for (int i = 0; i < list.length; i++)
-    {
-      if (i > 0)
-      {
-      csv.append(separator);
-    }
-    csv.append(list[i]);
-    }
-    return csv.toString();
-  }
-
-  /**
-   * Wandelet String in byte[] um.
-   * @param s
-   * @return byte[] des String
-   */
-
-  public static byte[] stringToBytes(String s) {
-    String crlf = System.getProperty("line.separator");
-    if (!crlf.equals("\n"))
-      s = replace(s, "\n", crlf);
-    // byte[] buf = new byte[s.length()];
-    byte[] buf = s.getBytes();
-    return buf;
-  }
-
-  /**
-   * Ersetzt in String <code>s</code> das <code>pattern</code> durch <code>substitute</code>
-   * @param s
-   * @param pattern
-   * @param substitute
-   * @return String mit den Ersetzungen
-   */
-  public static String replace(String s, String pattern, String substitute) {
-    int i = 0, pLen = pattern.length(), sLen = substitute.length();
-    StringBuffer buf = new StringBuffer(s.length());
-    while (true) {
-      int j = s.indexOf(pattern, i);
-      if (j < 0) {
-        buf.append(s.substring(i));
-        break;
-      } else {
-        buf.append(s.substring(i, j));
-        buf.append(substitute);
-        i = j+pLen;
-      }
-    }
-    return buf.toString();
-  }
-
-  /**
    * Ersetzt in String <code>s</code> das Regexp <code>pattern</code> durch <code>substitute</code>
    * @param s
    * @param pattern
@@ -359,28 +210,6 @@ public final class StringUtil {
     }
   }
 
-
-
-
-  /**
-   * F?gt einen Separator an den Pfad an
-   * @param path
-   * @return Pfad mit Separator am Ende
-   */
-  public static final String addSeparator (String path) {
-    return  path.length() == 0 || path.endsWith(File.separator) ? path : path
-                          + File.separatorChar;
-  }
-
-  /**
-   * F?gt ein <code>/</code> ans ende des Strings and
-   * @param path
-   * @return Pfad mit <code>/</code> am Ende
-   */
-  public static final String addSlash (String path) {
-    return  path.length() == 0 || path.endsWith("/") ? path : path + '/';
-  }
-
   /**
    * L?scht <code>/</code> am Ende des Strings, falls vorhanden
    * @param path
@@ -389,25 +218,6 @@ public final class StringUtil {
   public static final String removeSlash (String path) {
     return  path.length() > 1 && path.endsWith("/") ? path.substring(0, path.length()
         - 1) : path;
-  }
-
-  /**
-   * Checks to see if the path is absolute by looking for a leading file
-   * separater
-   * @param path
-   * @return
-   */
-  public static boolean isAbsolutePath (String path) {
-    return  path.startsWith(File.separator);
-  }
-
-  /**
-   * L?scht Slash am Anfang des Strings
-   * @param path
-   * @return
-   */
-  public static String removeFirstSlash (String path) {
-    return  path.startsWith("/") ? path.substring(1) : path;
   }
 
   /**
@@ -428,80 +238,6 @@ public final class StringUtil {
   }
 
   /**
-   * Konvertiert Unix-Linefeeds in Win-Linefeeds
-   * @param s
-   * @return Konvertierter String
-   */
-  public static String unixLineFeedsToWin(String s) {
-    int i = -1;
-    while (true) {
-      i = s.indexOf('\n', i+1);
-      if (i < 0) break;
-      if ((i == 0 || s.charAt(i-1) != '\r') &&
-          (i == s.length()-1 || s.charAt(i+1) != '\r')) {
-        s = s.substring(0, i)+'\r'+s.substring(i);
-        i++;
-      }
-    }
-    return s;
-  }
-
- /**
-  * schnellere Variante der String.toLowerCase()-Routine
-  *
-  * @return String in Kleinbuchsten
-  */
-  public static String toLowerCase(String s) {
-    int l = s.length();
-    char[] a = new char[l];
-    for (int i = 0; i < l; i++)
-      a[i] = Character.toLowerCase(s.charAt(i));
-    return new String(a);
-  }
-
-  /**
-   * Findet <code>element</code> im String-Array <code>array</code>
-   * @param array
-   * @param element
-   * @return Fundstelle als int oder -1
-   */
-  public static int indexOf(String[] array, String element) {
-    if (array != null)
-      for (int i = 0; i < array.length; i++)
-        if (array[i].equals(element))
-          return i;
-    return -1;
-  }
-
-  /**
-   * Testet auf Vorkommen von <code>element</code> in <code>array</code>
-   * @param array String-Array
-   * @param element
-   * @return true wenn <code>element</code> vorkommt, sonst false
-   */
-  public static boolean contains(String[] array, String element) {
-    return indexOf(array, element) >= 0;
-  }
-
-  /**
-   * Ermittelt CRC-Pr?fsumme von String <code>s</code>
-   * @param s
-   * @return CRC-Pr?fsumme
-   */
-  public static int getCRC(String s) {
-    int h = 0;
-    char val[] = s.toCharArray();
-    int len = val.length;
-
-    for (int i = 0 ; i < len; i++) {
-      h &= 0x7fffffff;
-      h = (((h >> 30) | (h << 1)) ^ (val[i]+i));
-    }
-
-    return (h << 8) | (len & 0xff);
-  }
-
-  /**
    * Liefert Default-Wert def zur?ck, wenn String <code>s</code>
    * kein Integer ist.
    *
@@ -516,55 +252,6 @@ public final class StringUtil {
     } catch (NumberFormatException e) {
       return def;
     }
-  }
-
-  /**
-   * Liefert Defaultwert def zur?ck, wenn s nicht zu einem float geparsed werden kann.
-   * @param s
-   * @param def
-   * @return geparster float oder def
-   */
-  public static float parseFloat(String s, float def) {
-    if (s == null) return def;
-    try {
-      return new Float(s).floatValue();
-    } catch (NumberFormatException e) {
-      return def;
-    }
-  }
-
-  /**
-   * Findet Ende eines Satzes in String <code>text</code>
-   * @param text
-   * @param startIndex
-   * @return index des Satzendes, oder -1
-   */
-  public static int findEndOfSentence(String text, int startIndex) {
-    while (true) {
-      int i = text.indexOf('.', startIndex);
-      if (i < 0) return -1;
-      if (i > 0 && !Character.isDigit(text.charAt(i-1)) &&
-          (i+1 >= text.length()
-          || text.charAt(i+1) == ' '
-          || text.charAt(i+1) == '\n'
-          || text.charAt(i+1) == '\t'))
-        return i+1;
-      startIndex = i+1;
-    }
-  }
-
-  /**
-   * Findet Wortende in String <code>text</code> ab <code>startIndex</code>
-   * @param text
-   * @param startIndex
-   * @return Index des Wortendes, oder -1
-   */
-  public static int findEndOfWord(String text, int startIndex) {
-    int i = text.indexOf(' ', startIndex),
-    j = text.indexOf('\n', startIndex);
-    if (i < 0) i = text.length();
-    if (j < 0) j = text.length();
-    return Math.min(i, j);
   }
 
 
@@ -711,6 +398,41 @@ public final class StringUtil {
     content=createMailLinks(content,producerDocRoot,mailImage);
     content=createURLLinks(content,null,producerDocRoot,extImage,intImage);
     return content;
+  }
+
+  /**
+   * Converts mir's horrible internal date format (yyyy-MM-dd HH:mm:ss+zz) into a java Date
+   *
+   * @param anInternalDate
+   * @return
+   */
+  public static Date convertMirInternalDateToDate(String anInternalDate) {
+    Calendar calendar = new GregorianCalendar();
+
+    int year;
+    int month;
+    int day;
+    int hours;
+    int minutes;
+    int seconds;
+    int timezoneOffset;
+
+    year = Integer.parseInt(anInternalDate.substring(0,4));
+    month = Integer.parseInt(anInternalDate.substring(5,7));
+    day = Integer.parseInt(anInternalDate.substring(8,10));
+    hours = Integer.parseInt(anInternalDate.substring(11,13));
+    minutes = Integer.parseInt(anInternalDate.substring(14,16));
+    seconds = Integer.parseInt(anInternalDate.substring(17,19));
+
+    timezoneOffset = Integer.parseInt(anInternalDate.substring(20,22));
+    if (anInternalDate.charAt(19) == '-')
+      timezoneOffset = -timezoneOffset;
+
+    calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
+    calendar.set(year, month-1, day, hours, minutes, seconds);
+    calendar.add(Calendar.HOUR, -timezoneOffset);
+
+    return calendar.getTime();
   }
 
 }

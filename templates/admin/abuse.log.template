@@ -23,7 +23,7 @@
       <assign grey="0">      
       <list log as l>
         <if grey=="1"><assign grey="0"><tr class="listrow1"><else><tr class="listrow2"><assign grey="1"> </if>
-          <td>${l.timestamp["yyyy-MM-dd  HH:mm"]}</td>
+          <td>${l.timestamp.format(config["Mir.DefaultDateTimeFormat"])}</td>
           <td>${l.ip}</td>
           <td>
             <if l.type=="content">

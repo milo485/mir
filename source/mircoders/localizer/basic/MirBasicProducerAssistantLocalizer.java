@@ -39,19 +39,23 @@ import mir.entity.adapter.EntityAdapter;
 import mir.entity.adapter.EntityIteratorAdapter;
 import mir.log.LoggerWrapper;
 import mir.misc.StringUtil;
-import mir.util.DateToMapAdapter;
+import mir.util.GeneratorDateTimeFunctions;
 import mir.util.GeneratorExpressionFunctions;
+import mir.util.GeneratorFormatAdapters;
 import mir.util.GeneratorHTMLFunctions;
 import mir.util.GeneratorIntegerFunctions;
 import mir.util.GeneratorListFunctions;
+import mir.util.GeneratorRegularExpressionFunctions;
 import mir.util.GeneratorStringFunctions;
 import mircoders.global.MirGlobal;
+import mircoders.localizer.MirLocalizerExc;
+import mircoders.localizer.MirLocalizerFailure;
 import mircoders.localizer.MirProducerAssistantLocalizer;
 
 public class MirBasicProducerAssistantLocalizer implements MirProducerAssistantLocalizer {
   protected LoggerWrapper logger;
 
-  public void initializeGenerationValueSet(Map aValueSet) {
+  public void initializeGenerationValueSet(Map aValueSet) throws MirLocalizerExc, MirLocalizerFailure  {
     try {
       Iterator i;
 
@@ -67,7 +71,7 @@ public class MirBasicProducerAssistantLocalizer implements MirProducerAssistantL
       configMap.put("openAction", MirGlobal.config().getString("Producer.OpenAction"));
       configMap.put("docRoot", MirGlobal.config().getString("RootUri"));
       configMap.put("actionRoot", MirGlobal.config().getString("RootUri") + "/servlet/Mir");
-      configMap.put("now", new DateToMapAdapter( (new GregorianCalendar()).getTime()));
+      configMap.put("now", new GeneratorFormatAdapters.DateFormatAdapter(new GregorianCalendar().getTime(), MirGlobal.config().getString("Mir.DefaultTimezone")));
       configMap.put("videoHost", MirGlobal.config().getString("Producer.Video.Host"));
       configMap.put("audioHost", MirGlobal.config().getString("Producer.Audio.Host"));
       configMap.put("imageHost", MirGlobal.config().getString("Producer.Image.Host"));
@@ -87,6 +91,11 @@ public class MirBasicProducerAssistantLocalizer implements MirProducerAssistantL
       utilityMap.put("isOdd", new GeneratorIntegerFunctions.isOddFunction());
       utilityMap.put("increment", new GeneratorIntegerFunctions.incrementFunction());
       utilityMap.put("evaluate", new GeneratorExpressionFunctions.evaluateExpressionFunction());
+      utilityMap.put("constructString", new GeneratorStringFunctions.constructStructuredStringFunction());
+      utilityMap.put("escapeJDBCString", new GeneratorStringFunctions.jdbcStringEscapeFunction());
+      utilityMap.put("regexpreplace", new GeneratorRegularExpressionFunctions.regularExpressionReplaceFunction());
+      utilityMap.put("datetime", new GeneratorDateTimeFunctions.DateTimeFunctions(
+          MirPropertiesConfiguration.instance().getString("Mir.DefaultTimezone")));
 
       aValueSet.put("config", configMap);
       aValueSet.put("utility", utilityMap);
@@ -129,13 +138,25 @@ public class MirBasicProducerAssistantLocalizer implements MirProducerAssistantL
   };
 
   public String filterNonHTMLText(String aText) {
-    return StringUtil.createHTML(
-        StringUtil.removeHTMLTags(aText),
-        MirGlobal.config().getString("Producer.ImageRoot"),
-        MirGlobal.config().getString("Producer.MailLinkName"),
-        MirGlobal.config().getString("Producer.ExtLinkName"),
-        MirGlobal.config().getString("Producer.IntLinkName")
-    );
+
+    logger.debug("about to filter non HTML Text of length " + aText.length());
+    try {
+      String result =
+          StringUtil.createHTML(
+          StringUtil.removeHTMLTags(aText),
+          MirGlobal.config().getString("Producer.ImageRoot"),
+          MirGlobal.config().getString("Producer.MailLinkName"),
+          MirGlobal.config().getString("Producer.ExtLinkName"),
+          MirGlobal.config().getString("Producer.IntLinkName")
+          );
+      logger.debug("done filtering non-HTML text ");
+      return result;
+    }
+    catch (Throwable t) {
+      logger.error("error while filtering non-HTML text: " + t.toString());
+
+      throw new RuntimeException(t.toString());
+    }
   }
 
   public String filterHTMLText(String aText) {

@@ -71,14 +71,9 @@ public interface MirAdminInterfaceLocalizer {
 
   /**
    *
-   * @param aName
    * @return
    */
-  public MirSimpleEntityOperation simpleCommentOperationForName(String aName);
-
-
   public List simpleArticleOperations();
-  public MirSimpleEntityOperation simpleArticleOperationForName(String aName);
 
   public interface MirSimpleEntityOperation {
     public String getName();

@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with  any library licensed under the Apache Software License, 
- * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
- * (or with modified versions of the above that use the same license as the above), 
- * and distribute linked combinations including the two.  You must obey the 
- * GNU General Public License in all respects for all of the code used other than 
- * the above mentioned libraries.  If you modify this file, you may extend this 
- * exception to your version of the file, but you are not obligated to do so.  
+ * the code of this program with  any library licensed under the Apache Software License,
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library
+ * (or with modified versions of the above that use the same license as the above),
+ * and distribute linked combinations including the two.  You must obey the
+ * GNU General Public License in all respects for all of the code used other than
+ * the above mentioned libraries.  If you modify this file, you may extend this
+ * exception to your version of the file, but you are not obligated to do so.
  * If you do not wish to do so, delete this exception statement from your version.
  */
 package  mir.entity;
@@ -40,21 +40,18 @@ import mir.storage.store.StorableObject;
 import mir.storage.store.StoreContainerType;
 import mir.storage.store.StoreIdentifier;
 import mir.storage.store.StoreUtil;
-import freemarker.template.TemplateListModel;
-import freemarker.template.TemplateModel;
 
 /**
  *
  * Container class for lists of Entities.
- * Now implements freemarker.template.TemplateListModel
- * and @see mir.storage.store.StorableObject.
+ * Now implements @see mir.storage.store.StorableObject.
  *
  * @author <RK>
  * first version	27.6.1999
  *
- *  @version 1.0 (freemarker compliant & and storable in ObjectStore)
+ * @version 1.1 (cleaned up)
  */
-public class EntityList implements TemplateListModel, StorableObject {
+public class EntityList implements StorableObject {
   protected static MirPropertiesConfiguration configuration;
   protected LoggerWrapper logger;
   private ArrayList           theEntityArrayList = new ArrayList();
@@ -62,8 +59,6 @@ public class EntityList implements TemplateListModel, StorableObject {
   private StorageObject       theStorage;
   private int                 count, offset, limit;
   private int                 offsetnext = -1, offsetprev = -1;
-  private int                 freemarkerListPointer=-1;
-
 
   static {
     try {
@@ -252,42 +247,6 @@ public class EntityList implements TemplateListModel, StorableObject {
     return (Entity)theEntityArrayList.get(i);
   }
 
-
-// The following methods have to be implemented
-// for this class to be an implementation of the
-// TemplateListModel of the Freemarker packages
-
-  public TemplateModel get(int i) { return elementAt(i); }
-  public boolean isRewound() { return (freemarkerListPointer==-1) ? true : false; }
-  public void rewind() { freemarkerListPointer=-1; }
-
-  public TemplateModel next() {
-    if (hasNext()) {
-    freemarkerListPointer++;return get(freemarkerListPointer); }
-    else return null;
-  }
-
-
-  /**
-   * Returns whether there is a next element
-   * @return true if there is a next element, else false
-   */
-
-  public boolean hasNext() {
-    return theEntityArrayList.size()>0 && freemarkerListPointer+2<=theEntityArrayList.size();
-  }
-
-
-  /**
-   * Returns whether EntityList is empty or not
-   * @return true in case of empty list, false otherwise
-   */
-
-  public boolean isEmpty() {
-    if (theEntityArrayList!=null)
-      return theEntityArrayList.size()<1 ;
-    else return false;
-  }
 
 
 // Methods to implement StorableObject

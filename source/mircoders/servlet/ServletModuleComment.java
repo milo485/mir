@@ -62,12 +62,12 @@ import mircoders.storage.DatabaseContent;
  *  ServletModuleComment - controls navigation for Comments
  *
  *
- *  @author RK
+ *  @author the mir-coders
  */
 
 public class ServletModuleComment extends ServletModule
 {
-  private ModuleContent     moduleContent;
+  private ModuleContent  moduleContent;
 
   private static ServletModuleComment instance = new ServletModuleComment();
   public static ServletModule getInstance() { return instance; }
@@ -75,11 +75,6 @@ public class ServletModuleComment extends ServletModule
   private ServletModuleComment() {
     logger = new LoggerWrapper("ServletModule.Comment");
     try {
-      configuration = MirPropertiesConfiguration.instance();
-      templateListString = configuration.getString("ServletModule.Comment.ListTemplate");
-      templateObjektString = configuration.getString("ServletModule.Comment.ObjektTemplate");
-      templateConfirmString = configuration.getString("ServletModule.Comment.ConfirmTemplate");
-
       mainModule = new ModuleComment(DatabaseComment.getInstance());
       moduleContent = new ModuleContent(DatabaseContent.getInstance());
     }
@@ -88,27 +83,31 @@ public class ServletModuleComment extends ServletModule
     }
   }
 
-  public void delete(HttpServletRequest req, HttpServletResponse res) throws ServletModuleExc, ServletModuleUserExc, ServletModuleFailure {
-    if (!configuration.getString("Mir.Localizer.Admin.AllowDeleteArticle", "0").equals("1"))
-      throw new ServletModuleExc("Operation not permitted");
+  public void delete(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc, ServletModuleUserExc, ServletModuleFailure {
+    try {
+      MirGlobal.accessControl().general().assertMayDeleteComments(ServletHelper.getUser(aRequest));
 
-    super.delete(req, res);
+      super.delete(aRequest, aResponse);
+    }
+    catch (Throwable t) {
+      throw new ServletModuleFailure(t);
+    }
   }
 
-  public void edit(HttpServletRequest req, HttpServletResponse res) throws ServletModuleExc
+  public void edit(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc
   {
-    String idParam = req.getParameter("id");
+    String idParam = aRequest.getParameter("id");
 
     if (idParam == null)
       throw new ServletModuleExc("Invalid call: id not supplied ");
 
-    showComment(idParam, req, res);
+    showComment(idParam, aRequest, aResponse);
   }
 
   public void showComment(String anId, HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc {
     try {
       HTTPRequestParser requestParser = new HTTPRequestParser(aRequest);
-      Map responseData = ServletHelper.makeGenerationData(aResponse, new Locale[] {getLocale(aRequest), getFallbackLocale(aRequest)});
+      Map responseData = ServletHelper.makeGenerationData(aRequest, aResponse, new Locale[] {getLocale(aRequest), getFallbackLocale(aRequest)});
       EntityAdapterModel model = MirGlobal.localizer().dataModel().adapterModel();
       Map comment;
       URLBuilder urlBuilder = new URLBuilder();
@@ -130,25 +129,23 @@ public class ServletModuleComment extends ServletModule
         while (i.hasNext()) {
           comment.put(i.next(), null);
         }
-
-//        MirGlobal.localizer().adminInterface().initializeArticle(article);
       }
       responseData.put("comment", comment);
 
       responseData.put("returnurl", requestParser.getParameter("returnurl"));
       responseData.put("thisurl", urlBuilder.getQuery());
 
-      ServletHelper.generateResponse(aResponse.getWriter(), responseData, templateObjektString);
+      ServletHelper.generateResponse(aResponse.getWriter(), responseData, editGenerator);
     }
     catch (Throwable e) {
       throw new ServletModuleFailure(e);
     }
   }
 
-  public void attach(HttpServletRequest req, HttpServletResponse res) throws ServletModuleExc
+  public void attach(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc
   {
-    String  mediaIdParam = req.getParameter("mid");
-    String  commentId = req.getParameter("commentid");
+    String  mediaIdParam = aRequest.getParameter("mid");
+    String  commentId = aRequest.getParameter("commentid");
 
     if (commentId == null || mediaIdParam==null) throw new ServletModuleExc("smod comment :: attach :: commentid/mid missing");
 
@@ -160,13 +157,13 @@ public class ServletModuleComment extends ServletModule
       throw new ServletModuleFailure(e);
     }
 
-    showComment(commentId, req, res);
+    showComment(commentId, aRequest, aResponse);
   }
 
-  public void dettach(HttpServletRequest req, HttpServletResponse res) throws ServletModuleExc
+  public void dettach(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc
   {
-    String  commentId = req.getParameter("commentid");
-    String  midParam = req.getParameter("mid");
+    String  commentId = aRequest.getParameter("commentid");
+    String  midParam = aRequest.getParameter("mid");
     if (commentId == null)
       throw new ServletModuleExc("smod comment :: dettach :: commentid missing");
     if (midParam == null)
@@ -180,7 +177,7 @@ public class ServletModuleComment extends ServletModule
       throw new ServletModuleFailure(e);
     }
 
-    showComment(commentId, req, res);
+    showComment(commentId, aRequest, aResponse);
   }
 
 
@@ -238,15 +235,15 @@ public class ServletModuleComment extends ServletModule
     returnCommentList(aRequest, aResponse, queryBuilder.getWhereClause(), queryBuilder.getOrderByClause(), 0);
   }
 
-  public void articlecomments(HttpServletRequest req, HttpServletResponse res) throws ServletModuleExc
+  public void articlecomments(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc
   {
-    String articleIdString = req.getParameter("articleid");
+    String articleIdString = aRequest.getParameter("articleid");
     int articleId;
 
     try {
       articleId  = Integer.parseInt(articleIdString);
 
-      returnCommentList( req, res, "to_media="+articleId, "webdb_create desc", 0);
+      returnCommentList( aRequest, aResponse, "to_media="+articleId, "webdb_create desc", 0);
     }
     catch (Throwable e) {
       throw new ServletModuleFailure(e);
@@ -259,17 +256,16 @@ public class ServletModuleComment extends ServletModule
     HTTPRequestParser requestParser = new HTTPRequestParser(aRequest);
     URLBuilder urlBuilder = new URLBuilder();
     EntityAdapterModel model;
-    int nrCommentsPerPage = 20;
     int count;
 
     try {
-      Map responseData = ServletHelper.makeGenerationData(aResponse, new Locale[] { getLocale(aRequest), getFallbackLocale(aRequest)});
+      Map responseData = ServletHelper.makeGenerationData(aRequest, aResponse, new Locale[] { getLocale(aRequest), getFallbackLocale(aRequest)});
       model = MirGlobal.localizer().dataModel().adapterModel();
 
       Object commentList =
           new CachingRewindableIterator(
-            new EntityIteratorAdapter( aWhereClause, anOrderByClause, nrCommentsPerPage,
-              MirGlobal.localizer().dataModel().adapterModel(), "comment", nrCommentsPerPage, anOffset)
+            new EntityIteratorAdapter( aWhereClause, anOrderByClause, nrEntitiesPerListPage,
+              MirGlobal.localizer().dataModel().adapterModel(), "comment", nrEntitiesPerListPage, anOffset)
       );
 
       responseData.put("nexturl", null);
@@ -298,26 +294,62 @@ public class ServletModuleComment extends ServletModule
       responseData.put("offset" , new Integer(anOffset).toString());
       responseData.put("thisurl" , urlBuilder.getQuery());
 
-      if (count>=anOffset+nrCommentsPerPage) {
-        urlBuilder.setValue("offset", anOffset + nrCommentsPerPage);
+      if (count>=anOffset+nrEntitiesPerListPage) {
+        urlBuilder.setValue("offset", anOffset + nrEntitiesPerListPage);
         responseData.put("nexturl" , urlBuilder.getQuery());
       }
 
       if (anOffset>0) {
-        urlBuilder.setValue("offset", Math.max(anOffset - nrCommentsPerPage, 0));
+        urlBuilder.setValue("offset", Math.max(anOffset - nrEntitiesPerListPage, 0));
         responseData.put("prevurl" , urlBuilder.getQuery());
       }
 
       responseData.put("comments", commentList);
       responseData.put("from" , Integer.toString(anOffset+1));
       responseData.put("count", Integer.toString(count));
-      responseData.put("to", Integer.toString(Math.min(anOffset+nrCommentsPerPage, count)));
+      responseData.put("to", Integer.toString(Math.min(anOffset+nrEntitiesPerListPage, count)));
 
-      ServletHelper.generateResponse(aResponse.getWriter(), responseData, "commentlist.template");
+      ServletHelper.generateResponse(aResponse.getWriter(), responseData, listGenerator);
+    }
+    catch (Throwable e) {
+      throw new ServletModuleFailure(e);
+    }
+  }
+
+  public void update(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc
+  {
+    try {
+      HTTPRequestParser requestParser = new HTTPRequestParser(aRequest);
+
+      String returnUrl = requestParser.getParameter("returnurl");
+
+      String idParam = aRequest.getParameter("id");
+      if (idParam == null)
+        throw new ServletModuleExc("Wrong call: (id) is missing");
+
+      Map withValues = getIntersectingValues(aRequest, DatabaseComment.getInstance());
+
+      String content_id = aRequest.getParameter("id");
+
+      if (!withValues.containsKey("is_published"))
+        withValues.put("is_published","0");
+      if (!withValues.containsKey("is_html"))
+        withValues.put("is_html","0");
+
+      String webdbCreate = (String) withValues.get("webdb_create");
+      if (webdbCreate==null || webdbCreate.trim().length()==0)
+        withValues.remove("webdb_create");
+
+      String id = mainModule.set(withValues);
+
+      if (returnUrl!=null){
+        redirect(aResponse, returnUrl);
+      }
+      else
+        showComment(idParam, aRequest, aResponse);
     }
     catch (Throwable e) {
       throw new ServletModuleFailure(e);
     }
   }
 }
-

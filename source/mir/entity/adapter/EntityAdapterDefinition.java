@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with  any library licensed under the Apache Software License, 
- * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
- * (or with modified versions of the above that use the same license as the above), 
- * and distribute linked combinations including the two.  You must obey the 
- * GNU General Public License in all respects for all of the code used other than 
- * the above mentioned libraries.  If you modify this file, you may extend this 
- * exception to your version of the file, but you are not obligated to do so.  
+ * the code of this program with  any library licensed under the Apache Software License,
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library
+ * (or with modified versions of the above that use the same license as the above),
+ * and distribute linked combinations including the two.  You must obey the
+ * GNU General Public License in all respects for all of the code used other than
+ * the above mentioned libraries.  If you modify this file, you may extend this
+ * exception to your version of the file, but you are not obligated to do so.
  * If you do not wish to do so, delete this exception statement from your version.
  */
 package mir.entity.adapter;
@@ -34,12 +34,14 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TimeZone;
 
 import mir.entity.Entity;
-import mir.util.DateToMapAdapter;
+import mir.misc.StringUtil;
+import mir.util.GeneratorFormatAdapters;
 
 public class EntityAdapterDefinition {
-  Map calculatedFields;
+  private Map calculatedFields;
 
   public EntityAdapterDefinition() {
     calculatedFields = new HashMap();
@@ -61,12 +63,12 @@ public class EntityAdapterDefinition {
     calculatedFields.put(aFieldName, aField);
   }
 
-  public void addMirDateField(String aDestinationFieldName, String aSourceFieldName) {
-    addCalculatedField(aDestinationFieldName, new MirDateField(aSourceFieldName));
+  public void addMirDateField(String aDestinationFieldName, String aSourceFieldName, String aDefaultTimezone) {
+    addCalculatedField(aDestinationFieldName, new MirDateField(aSourceFieldName, aDefaultTimezone));
   }
 
-  public void addDBDateField(String aDestinationFieldName, String aSourceFieldName) {
-    addCalculatedField(aDestinationFieldName, new DBDateField(aSourceFieldName));
+  public void addDBDateField(String aDestinationFieldName, String aSourceFieldName, String aDefaultTimezone) {
+    addCalculatedField(aDestinationFieldName, new DBDateField(aSourceFieldName, aDefaultTimezone));
   }
 
   public interface CalculatedField {
@@ -75,80 +77,62 @@ public class EntityAdapterDefinition {
 
   private class MirDateField implements CalculatedField {
     private String fieldName;
+    private String defaultTimezone;
 
-    public MirDateField(String aFieldName) {
+    public MirDateField(String aFieldName, String aDefaultTimezone) {
       fieldName = aFieldName;
+      defaultTimezone = aDefaultTimezone;
     }
 
     public Object getValue(EntityAdapter anEntityAdapter) {
 
-      Map result = new HashMap();
-      String textValue = anEntityAdapter.getEntity().getValue(fieldName);
-      Calendar calendar = GregorianCalendar.getInstance();
-      int year;
-      int month;
-      int day;
-      Date date;
+         Object result = null;
+         String textValue = anEntityAdapter.getEntity().getValue(fieldName);
+         Calendar calendar = GregorianCalendar.getInstance();
+         int year;
+         int month;
+         int day;
+         Date date;
 
-      if (textValue!=null) {
-        try {
-          year = Integer.parseInt(textValue.substring(0,4));
-          month = Integer.parseInt(textValue.substring(4,6));
-          day = Integer.parseInt(textValue.substring(6,8));
+         if (textValue!=null) {
+           try {
+             year = Integer.parseInt(textValue.substring(0,4));
+             month = Integer.parseInt(textValue.substring(4,6));
+             day = Integer.parseInt(textValue.substring(6,8));
 
-          calendar.set(year, month-1, day);
-          date = calendar.getTime();
-          ;
+             calendar.setTimeZone(TimeZone.getTimeZone(defaultTimezone));
+             calendar.set(year, month-1, day);
 
-          result.put("date", date);
-          result.put("formatted", new DateToMapAdapter(date));
+             date = calendar.getTime();
 
-        }
-        catch (Throwable t) {
-          result=null;
-        }
-      }
-      return result;
-    }
+             result = new GeneratorFormatAdapters.DateFormatAdapter(date, defaultTimezone);
+           }
+           catch (Throwable t) {
+             result=null;
+           }
+         }
+         return result;
+       }
   }
 
   private class DBDateField implements CalculatedField {
     private String fieldName;
+    private String defaultTimezone;
 
-    public DBDateField(String aFieldName) {
+    public DBDateField(String aFieldName, String aDefaultTimezone) {
       fieldName = aFieldName;
+      defaultTimezone = aDefaultTimezone;
     }
 
     public Object getValue(EntityAdapter anEntityAdapter) {
+      Object result = null;
+      String text = anEntityAdapter.getEntity().getValue(fieldName);
 
-      Map result = new HashMap();
-      String textValue = anEntityAdapter.getEntity().getValue(fieldName);
-      Calendar calendar = GregorianCalendar.getInstance();
-      int year;
-      int month;
-      int day;
-      int hours;
-      int minutes;
-
-      Date date;
-
-      if (textValue!=null) {
+      if (text!=null) {
         try {
-          year = Integer.parseInt(textValue.substring(0,4));
-          month = Integer.parseInt(textValue.substring(5,7));
-          day = Integer.parseInt(textValue.substring(8,10));
-          hours = Integer.parseInt(textValue.substring(11,13));
-          minutes = Integer.parseInt(textValue.substring(14,16));
-
-          calendar.set(year, month-1, day, hours, minutes);
-          date = calendar.getTime();
-
-          result.put("date", date);
-          result.put("formatted", new DateToMapAdapter(date));
-          result.put("raw", textValue);
+          result = new GeneratorFormatAdapters.DateFormatAdapter(StringUtil.convertMirInternalDateToDate(text), defaultTimezone);
         }
         catch (Throwable t) {
-          result=null;
         }
       }
 

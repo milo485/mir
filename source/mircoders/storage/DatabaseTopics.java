@@ -30,25 +30,32 @@
 
 package mircoders.storage;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Vector;
+
+import mir.entity.Entity;
+import mir.entity.EntityBrowser;
 import mir.log.LoggerWrapper;
 import mir.storage.Database;
 import mir.storage.StorageObject;
 import mir.storage.StorageObjectFailure;
-import freemarker.template.SimpleList;
 
 /**
- * <b>Diese Klasse implementiert die Datenbankverbindung zur MetaObjekt-Tabelle
  *
- *
+ * <p>Title: </p>
+ * <p>Description: </p>
+ * <p>Copyright: Copyright (c) 2003</p>
+ * <p>Company: </p>
+ * @author not attributable
+ * @version 1.0
  */
 
 public class DatabaseTopics extends Database implements StorageObject{
-
   private static DatabaseTopics instance;
 
-  // the following *has* to be sychronized cause this static method
-  // could get preemted and we could end up with 2 instances of DatabaseFoo..
-  // see the "Singletons with needles and thread" article at JavaWorld -mh
   public synchronized static DatabaseTopics getInstance() {
     if (instance == null) {
       instance = new DatabaseTopics();
@@ -66,7 +73,19 @@ public class DatabaseTopics extends Database implements StorageObject{
     theEntityClass = mircoders.entity.EntityTopics.class;
   }
 
-  public SimpleList getPopupData() throws StorageObjectFailure {
-    return getPopupData("title", true);
+  public List getPopupData() throws StorageObjectFailure {
+    List result = new Vector();
+    Iterator i = new EntityBrowser(this, "", "title", 100, -1, 0);
+
+    while (i.hasNext()) {
+      Entity e = (Entity) i.next();
+      Map entry = new HashMap();
+      entry.put("key", e.getId());
+      entry.put("value", e.getValue("title"));
+
+      result.add(entry);
+    }
+
+    return result;
   }
 }

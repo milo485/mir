@@ -18,23 +18,32 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with  any library licensed under the Apache Software License, 
- * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
- * (or with modified versions of the above that use the same license as the above), 
- * and distribute linked combinations including the two.  You must obey the 
- * GNU General Public License in all respects for all of the code used other than 
- * the above mentioned libraries.  If you modify this file, you may extend this 
- * exception to your version of the file, but you are not obligated to do so.  
+ * the code of this program with  any library licensed under the Apache Software License,
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library
+ * (or with modified versions of the above that use the same license as the above),
+ * and distribute linked combinations including the two.  You must obey the
+ * GNU General Public License in all respects for all of the code used other than
+ * the above mentioned libraries.  If you modify this file, you may extend this
+ * exception to your version of the file, but you are not obligated to do so.
  * If you do not wish to do so, delete this exception statement from your version.
  */
 package mircoders.servlet;
 
-import mir.config.MirPropertiesConfiguration;
 import mir.log.LoggerWrapper;
 import mir.servlet.ServletModule;
+import mircoders.global.MirGlobal;
 import mircoders.module.ModuleArticleType;
 import mircoders.storage.DatabaseArticleType;
 
+/**
+ *
+ * <p>Title: </p>
+ * <p>Description: </p>
+ * <p>Copyright: Copyright (c) 2003</p>
+ * <p>Company: </p>
+ * @author not attributable
+ * @version 1.0
+ */
 public class ServletModuleArticleType extends ServletModule
 {
   private static ServletModuleArticleType instance = new ServletModuleArticleType();
@@ -42,11 +51,10 @@ public class ServletModuleArticleType extends ServletModule
 
   private ServletModuleArticleType() {
     logger = new LoggerWrapper("ServletModule.ArticleType");
+
     try {
-      configuration = MirPropertiesConfiguration.instance();
-      templateListString = configuration.getString("ServletModule.ArticleType.ListTemplate");
-      templateObjektString = configuration.getString("ServletModule.ArticleType.EditTemplate");
-      templateConfirmString = configuration.getString("ServletModule.ArticleType.ConfirmTemplate");
+      model = MirGlobal.localizer().dataModel().adapterModel();
+      definition = "articleType";
       mainModule = new ModuleArticleType(DatabaseArticleType.getInstance());
     }
     catch (Exception e) {

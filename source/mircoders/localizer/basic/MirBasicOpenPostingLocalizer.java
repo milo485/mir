@@ -29,7 +29,7 @@
  */
 package mircoders.localizer.basic;
 
-import java.util.List;
+import java.util.*;
 import java.util.Random;
 
 import mir.config.MirPropertiesConfiguration;
@@ -41,13 +41,15 @@ import mircoders.entity.EntityComment;
 import mircoders.entity.EntityContent;
 import mircoders.global.MirGlobal;
 import mircoders.global.ProducerEngine;
-import mircoders.localizer.MirLocalizerExc;
+import mircoders.localizer.*;
 import mircoders.localizer.MirLocalizerFailure;
 import mircoders.localizer.MirOpenPostingLocalizer;
 
 public class MirBasicOpenPostingLocalizer implements MirOpenPostingLocalizer {
   private List afterContentProducerTasks;
   private List afterCommentProducerTasks;
+  private List filterTypes;
+  private Map filterTypesMap;
   protected LoggerWrapper logger;
   protected MirPropertiesConfiguration configuration;
 
@@ -73,6 +75,12 @@ public class MirBasicOpenPostingLocalizer implements MirOpenPostingLocalizer {
 
       throw new MirLocalizerFailure(t);
     }
+
+    filterTypes = new Vector();
+    filterTypesMap = new HashMap();
+
+    addSimpleAntiAbuseFilterType(new MirBasicAntiAbuseFilterTypes.RegularExpressionFilter("regexp"));
+    addSimpleAntiAbuseFilterType(new MirBasicAntiAbuseFilterTypes.IPFilter("ip"));
   }
 
   public SessionHandler getOpenSessionHandler(String aSessionType) {
@@ -122,4 +130,18 @@ public class MirBasicOpenPostingLocalizer implements MirOpenPostingLocalizer {
     return returnString.substring(5);
   }
 
+  public List getAntiAbuseFilterTypes() {
+    return filterTypes;
+  }
+
+  public void removeSimpleAntiAbuseFilterType(String aName) {
+    filterTypes.remove(filterTypesMap.get(aName));
+    filterTypesMap.remove(aName);
+  }
+
+  public void addSimpleAntiAbuseFilterType(MirAntiAbuseFilterType aFilterType) {
+    removeSimpleAntiAbuseFilterType(aFilterType.getName());
+    filterTypesMap.put(aFilterType.getName(), aFilterType);
+    filterTypes.add(aFilterType);
+  }
 }

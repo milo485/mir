@@ -1,0 +1,100 @@
+<html>
+  <head>
+    <title>${config["Mir.Name"]}<comment> | ${lang("image.htmltitle")}</comment></title>
+    <link rel="stylesheet" type="text/css" href="${config.docRoot}/style/admin.css">
+  <head>
+  <body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
+
+    <include "FUNCTIONS.template">
+    <include "head.template">
+
+    <if new=="1">
+      <form action="${config.actionRoot}?module=${module}&do=add" method="post">
+
+        <input type="hidden" name="returnurl" value="${returnurl}">
+      <if articleid>
+          <input type="hidden" name="articleid" value="${articleid}">
+      </if>
+      <if commentid>
+          <input type="hidden" name="commentid" value="${commentid}">
+      </if>
+        <table border="0">
+          <tr>
+            <td align="right" class="table-left">
+              <b>${lang("media.nr_of_media")} :</b><br>
+            </td>
+            <td class="listrow2">
+              <input type="text" size="3" name="nrmedia" value="${nrmedia}">&nbsp;&nbsp;<input type="submit" value="${lang("media.nr_of_media.submit")}">
+            </td>
+          </tr>
+        </table>
+      </form>
+    </if>
+
+
+    <form enctype="multipart/form-data" method="post" action="${config.actionRoot}?module=${module}&do=<if new=="1">insert<else>update</if>&id=${uploadedmedia.id}">
+      <if articleid>
+        <input type="hidden" name="articleid" value="${articleid}">
+      </if>
+      <if commentid>
+        <input type="hidden" name="commentid" value="${commentid}">
+      </if>
+      <input type="hidden" name="returnurl" value="${returnurl}">
+      <input type="hidden" name="id" value="${uploadedmedia.id}">
+    
+      <table border="0">
+    
+        <include edittemplate>
+      
+        <tr><td colspan="2" class="x-small">&nbsp;</td></tr>
+      
+        <if new=="1">
+          <tr>
+            <td align="right" class="table-left">
+              ${lang("media.is_published")} : 
+            </td>
+            <td class="listrow2" style='border: 1px solid #FF0000;'>
+              <input type="checkbox" name="is_published" value="1"<if uploadedmedia.is_published!="0" && uploadedmedia.is_published!=""> checked</if>>  
+            </td>
+          </tr>
+          
+          <tr><td colspan="2" class="x-small">&nbsp;</td></tr>
+          
+          <list mediafields as m>
+              <tr>
+                <td align="right" class="table-left">
+                  <B>${lang("media.title")}:<B>
+                 </td>
+                <td class="listrow2">
+                  <input type="text" name="media_title${m}" size="40" maxlength="80" value="">
+                </td>
+              </tr>
+              <tr>
+                <td align="right">
+                  &nbsp;
+                </td>
+                <td class="listrow2">
+                  <input type="file" name="media${m}"><br>
+                </td>
+              </tr>
+          </list>
+        </if>
+        
+        <tr>
+          <td colspan="2" align="right" class="table-foot">
+            <if new=="1">
+              <input type="submit" name="save" value="${lang("insert")}">
+            <else>
+              ${lang("media.is_published")} <input type="checkbox" name="is_published" value="1"<if uploadedmedia.is_published!="0" && uploadedmedia.is_published!=""> checked</if>>
+              &nbsp;&nbsp;<input type="submit" name="save" value="${lang("save")}">
+            </if> 
+          </td>
+        </tr>
+      </table>
+    </form>
+    
+    <p><a class="link-box" href="${config.actionRoot}?module=${module}&do=list">[&lt;] ${lang("list")} </a> &nbsp;</p>
+
+    <include "foot.template">
+  </body>
+</html>

@@ -9,30 +9,16 @@
     <include "FUNCTIONS.template">
     <include "head.template">
     
-    <assign contentlist = data.contentlist>
-    <assign column_nr = 3>
-    
-    <assign column_head_texts = [lang("user.login"), lang("user.admin")]>   
-    <assign data_keys = ["login","is_admin"]>
-    <assign column_head_CSS = "table_head">
-    <assign listrow1CSS = "listrow1">
-    <assign listrow2CSS = "listrow2">
-    <assign footer_css = "table_foot">
-    <assign module_name = "Users">
-    <assign module_jumpback = "Admin">
-    <assign do_jumpback = "superusermenu">
-  
+    <call showAddOrBack(mayAddUsers, "Users", "Admin", "superusermenu")>
 
-  
-  <call AddOrBack(module_name, module_jumpback, do_jumpback)>
-
-    <if data.contentlist>
-    <call ListTable(contentlist, data_keys, column_head_texts, column_head_CSS, listrow1CSS, listrow2CSS, footer_css, module_name)>
-    <call AddOrBack(module_name, module_jumpback, do_jumpback)>
-  <else>
+    <if users>
+      <call showPrevNextLinks(prevurl, nexturl, "left")>
+      <call EntityTable(users, ["login","is_admin"], [lang("user.login"), lang("user.admin")], from, to, count, mayDeleteUsers, mayEditUsers, "Users")>
+      <call showPrevNextLinks(prevurl, nexturl, "left")>
+      <call showAddOrBack(mayAddUsers, "Users", "Admin", "superusermenu")>
+    <else>
       <P align="center">${lang("no_matches_found")}</p>
     </if>
-    
 
     <include "foot.template">
   </body>

@@ -236,6 +236,33 @@ public class MirBasicAdminInterfaceLocalizer implements MirAdminInterfaceLocaliz
     }
   }
 
+  protected static class SetCommentFieldsOperation extends CommentModifyingOperation {
+    private Map values;
+
+    public SetCommentFieldsOperation(String aName, String aFields[], String aValues[]) throws MirLocalizerExc {
+      super(aName);
+
+      values = new HashMap();
+
+      for (int i=0; i<aFields.length; i++)
+        values.put(aFields[i], aValues[i]);
+    }
+
+    protected boolean isAvailable(EntityComment aComment) {
+      return true;
+    }
+
+    protected void performModification(EntityAdapter aUser, EntityComment aComment) throws StorageObjectFailure {
+      Iterator i = values.entrySet().iterator();
+
+      while (i.hasNext()) {
+        Map.Entry entry = (Map.Entry) i.next();
+        aComment.setValueForProperty((String) entry.getKey(), (String) entry.getValue());
+      }
+    }
+  }
+
+
   protected static class ModifyCommentFieldOperation extends CommentModifyingOperation {
     private String field;
     private String value;

@@ -31,29 +31,16 @@
 package mircoders.storage;
 
 /**
- * Title:        Mir
- * Description:  Ihre Beschreibung
- * Copyright:    Copyright (c) 1999
- * Company:
- * @author
- * @version
+ *
  */
 
 import mir.log.LoggerWrapper;
 import mir.storage.Database;
 import mir.storage.StorageObject;
-import mir.storage.StorageObjectFailure;
-import freemarker.template.SimpleList;
-
-
 
 public class DatabaseMediafolder extends Database implements StorageObject{
-
   private static DatabaseMediafolder instance;
 
-  // the following *has* to be sychronized cause this static method
-  // could get preemted and we could end up with 2 instances of DatabaseFoo..
-  // see the "Singletons with needles and thread" article at JavaWorld -mh
   public synchronized static DatabaseMediafolder getInstance() {
     if (instance == null) {
       instance = new DatabaseMediafolder();
@@ -69,9 +56,4 @@ public class DatabaseMediafolder extends Database implements StorageObject{
     hasTimestamp = false;
     theTable="media_folder";
   }
-
-  public SimpleList getPopupData() throws StorageObjectFailure {
-    return getPopupData("name",true);
-  }
-
 }

@@ -1,0 +1,126 @@
+<include "SETTINGS.template">
+
+<function EditStart(aHiddenFields, aHiddenValues)>
+    <form action="${config.actionRoot}" method="post">
+        <assign index="0">
+        <list aHiddenFields as i>
+          <input type="hidden" name="${i}" value="${utility.encodeHTML(aHiddenValues[index])}">
+          <assign index=utility.increment(index)>
+        </list>
+      <table border="0">
+</function>
+
+<function EditEnd()>
+      </table>
+    </form>
+</function>
+
+<function EditFieldStart(aLabel, aHint, aLabelClass, aValueClass)>
+  <tr>
+    <td align="right" class="${aLabelClass}">
+      <b>${aLabel}:</b>
+      <if aHint>
+        <br>
+        <span class="small">${aHint}</span>      
+      </if>
+    </td>
+    
+    <td class="${aValueClass}">
+</function>
+
+<function EditFieldEnd()>
+    </td>
+  </tr>
+</function>  
+
+<function EditSubmitButtonNormal(aLabel, aFieldName)>
+  <tr>
+    <td class="${TABLE_FOOT_CLASS}" colspan="2" align="right"> 
+      <input type="submit" name="${aFieldName}" value="${aLabel}">
+    </td>
+  </tr>
+</function>  
+
+
+<function EditReadonlyTextNormal(label, fieldcontent)>
+  <call EditFieldStart(label, "", "table-left", "listrow2")>
+      ${utility.encodeHTML(fieldcontent)}
+  <call EditFieldEnd()>
+</function>
+
+
+<function EditText(label, size, maxlength, fieldname, fieldcontent, aLabelClass, aValueClass)>
+  <call EditFieldStart(label, "", aLabelClass, aValueClass)>
+      <input type="text" size="${size}" maxlength="${maxlength}" name="${fieldname}" value="${utility.encodeHTML(fieldcontent)}">
+  <call EditFieldEnd()>
+</function>
+<function EditTextNormal(label, size, maxlength, fieldname, fieldcontent)>
+  <call EditText(label, size, maxlength, fieldname, fieldcontent, "table-left", "listrow2")>
+</function>
+<function EditTextHighlighted(label, size, maxlength, fieldname, fieldcontent)>
+  <call EditText(label, size, maxlength, fieldname, fieldcontent, "table-left-light", "listrow1")>
+</function>
+
+
+<function EditPassword(label, size, maxlength, fieldname, fieldcontent, aLabelClass, aValueClass)>
+  <call EditFieldStart(label, "", aLabelClass, aValueClass)>
+      <input type="password" size="${size}" maxlength="${maxlength}" name="${fieldname}" value="${utility.encodeHTML(fieldcontent)}">
+  <call EditFieldEnd()>
+</function>
+
+<function EditPasswordNormal(label, size, maxlength, fieldname, fieldcontent)>
+  <call EditPassword(label, size, maxlength, fieldname, fieldcontent, "table-left", "listrow2")>
+</function>
+<function EditPasswordHighlighted(label, size, maxlength, fieldname, fieldcontent)>
+  <call EditPassword(label, size, maxlength, fieldname, fieldcontent, "table-left-light", "listrow1")>
+</function>
+
+
+<function EditCheckbox(label, fieldname, fieldcontent, aLabelClass, aValueClass)>
+  <call EditFieldStart(label, "", aLabelClass, aValueClass)>
+      <input type="checkbox" name="${fieldname}" value="1"<if fieldcontent=="1"> checked</if>>&nbsp;&nbsp;
+  <call EditFieldEnd()>
+</function> 
+
+<function EditCheckboxNormal(label, fieldname, fieldcontent)>
+  <call EditCheckbox(label, fieldname, fieldcontent, "table-left", "listrow2")>
+</function>
+<function EditCheckboxHighlighted(label, fieldname, fieldcontent)>
+  <call EditCheckbox(label, fieldname, fieldcontent, "table-left-light", "listrow1")>
+</function>
+
+
+<function EditTextArea(label, aHint, cols, rows, fieldname, fieldcontent, aLabelClass, aValueClass)>
+  <call EditFieldStart(label, aHint, aLabelClass, aValueClass)>
+      <textarea cols="${cols}" rows="${rows}" name="${fieldname}" wrap="virtual">${utility.encodeHTML(fieldcontent)}</textarea>
+  <call EditFieldEnd()>
+</function>
+
+<function EditTextAreaNormal(label, aHint, cols, rows, fieldname, fieldcontent)>
+  <call EditTextArea(label, aHint, cols, rows, fieldname, fieldcontent, "table-left", "listrow2")>
+</function>
+<function EditTextAreaHighlighted(label, size, maxlength, fieldname, fieldcontent)>
+  <call EditTextArea(label, aHint, cols, rows, fieldname, fieldcontent, "table-left-light", "listrow1")>
+</function>
+
+
+
+
+<function EditPullDown (label, fieldname, entrieslist, keyfield, valuefield, value, langprefix, aLabelClass, aValueClass)>
+  <call EditFieldStart(label, "", aLabelClass, aValueClass)>
+       <select name="${fieldname}">
+         <list entrieslist as a>
+           <option value="${a[keyfield]}" <if (a[keyfield] == value)>selected</if>><if langprefix>${lang(langprefix+a[valuefield])}<else>${a[valuefield]}</if></option>
+         </list>
+       </select>
+  <call EditFieldEnd()>
+</function>   
+
+<function EditPullDownNormal(label, fieldname, entrieslist, keyfield, valuefield, value, langprefix)>
+  <call EditPullDown(label, fieldname, entrieslist, keyfield, valuefield, value, langprefix, "table-left", "listrow2")>
+</function>
+<function EditPullDownHighlighted(label, fieldname, entrieslist, keyfield, valuefield, value, langprefix)>
+  <call EditPullDown(label, fieldname, entrieslist, keyfield, valuefield, value, langprefix, "table-left-light", "listrow1")>
+</function>
+
+

@@ -30,7 +30,7 @@
 
 package mircoders.storage;
 
-import java.util.GregorianCalendar;
+import java.util.*;
 
 import mir.entity.Entity;
 import mir.log.LoggerWrapper;
@@ -38,18 +38,20 @@ import mir.misc.StringUtil;
 import mir.storage.Database;
 import mir.storage.StorageObject;
 import mir.storage.StorageObjectFailure;
-import freemarker.template.SimpleList;
 
 /**
- * <b>Diese Klasse implementiert die Datenbankverbindung zur MetaObjekt-Tabelle
  *
- *
+ * <p>Title: </p>
+ * <p>Description: </p>
+ * <p>Copyright: Copyright (c) 2003</p>
+ * <p>Company: </p>
+ * @author not attributable
+ * @version 1.0
  */
 
 public class DatabaseVideo extends Database implements StorageObject{
 
   private static DatabaseVideo instance;
-  private static SimpleList publisherPopupData;
 
   // the following *has* to be sychronized cause this static method
   // could get preemted and we could end up with 2 instances of DatabaseFoo..
@@ -70,10 +72,6 @@ public class DatabaseVideo extends Database implements StorageObject{
     theTable = "video";
     theCoreTable = "media";
     theEntityClass = mircoders.entity.EntityVideo.class;
-  }
-
-  public SimpleList getPopupData() throws StorageObjectFailure {
-    return getPopupData("title", true);
   }
 
   public void update(Entity theEntity) throws StorageObjectFailure {

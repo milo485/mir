@@ -1,5 +1,8 @@
 <html>
-<head><title>${lang("comment.htmltitle")}</title></head>
+<head>
+  <title>${lang("comment.htmltitle")}</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=${config["Mir.DefaultHTMLCharset"]}">
+</head>
 <body bgcolor="white" text="black" link="#006600" vlink="#009900" alink="red">
 
 <form action="${config["Producer.OpenAction"]}" method=post>

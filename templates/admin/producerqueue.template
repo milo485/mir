@@ -48,24 +48,26 @@
 
 <td valign="top" align="right">
 
-<p class="box" align="left"><b>${lang("producer.jobqueue.title")}</b></p>
+<p class="box" align="left"><b>${lang("producer.jobqueue.title")}</b> <a class="link-box"  href="${config.actionRoot}?${thisurl}">${lang("producer.jobqueue.refresh")}</a></p>
 
+<form method="post" action="${config.actionRoot}">
+      <input type="hidden" name="module" value="Producer">
+      <input type="hidden" name="do" value="cancel">
+      
 <table border="0" cellspacing="3" cellpadding="2">
   <tr >
-    <td class="bg-neutral" colspan="2"><b>${lang("producer.job.name")}</b></td>
-    <td class="bg-neutral" ><b>${lang("producer.job.status")}</b></td>
-    <td class="bg-neutral small" ><b>${lang("producer.job.date")}</b></td>
-    <comment>    
-    <td class="box-head" >&nbsp;</td>
-    </comment>    
+    <td class="bg-neutral"><b>${lang("producer.job.name")}</b></td>
+    <td class="bg-neutral"><b>${lang("producer.job.status")}</b></td>
+    <td class="bg-neutral small"><b>${lang("producer.job.date")}</b></td>
+    <td class="bg-neutral small"><b>${lang("producer.job.runningtime")}</b></td>
+    <td class="bg-neutral">&nbsp;</td>
   </tr>
 
   <if queue>
     <assign grey="1">
     <list queue as q>
       <tr <if grey=="1">class="listrow1"<else>class="listrow2"</if>>
-        <td class="small">${q.factory}</td>
-        <td class="small">(${q.verb})</td>
+        <td class="small">${q.description}</td>
         
         <if q.status=="pending">
           <td class="text-alert small">${q.status}</td>
@@ -73,10 +75,15 @@
           <td class="small">${q.status}</td>
         </if>
         
-        <td class="small">${q.lastchange["HH:mm:ss"]}</td>
-        <comment> ML: needs to be implemented       
-          <td><a href="${config.actionRoot}?module=Producer&do=abort">${lang("producer.job.cancel")}</a></td>
-        </comment>        
+        <td class="small">${q.lastchange.format("HH:mm:ss")}</td>
+        <td class="small">${q.runningtime.format("####.#")}s</td>
+        <td class="small">
+          <if q.finished!="1">
+            <input type="checkbox" name="jobid" value="${q.identifier}">
+          <else>
+            &nbsp;
+          </if>  
+        </td>
       </tr>
       <if grey=="1"><assign grey="0"><else><assign grey="1"></if>
     </list>
@@ -86,12 +93,13 @@
     </tr>
   </if>
   <tr>
-    <td colspan="5" class="table-foot">
+    <td colspan="5" class="table-foot" align="left">
       <br>
-      <a class="link-box"  href="${config.actionRoot}?${thisurl}">${lang("producer.jobqueue.refresh")}</a>
+      <input class="minorbutton" type="submit" value="${lang("producer.jobqueue.canceljobs")}">
     </td>
   </tr>
 </table>
+</form>
 
 </td></tr></table>
 

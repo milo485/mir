@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with  any library licensed under the Apache Software License, 
- * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
- * (or with modified versions of the above that use the same license as the above), 
- * and distribute linked combinations including the two.  You must obey the 
- * GNU General Public License in all respects for all of the code used other than 
- * the above mentioned libraries.  If you modify this file, you may extend this 
- * exception to your version of the file, but you are not obligated to do so.  
+ * the code of this program with  any library licensed under the Apache Software License,
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library
+ * (or with modified versions of the above that use the same license as the above),
+ * and distribute linked combinations including the two.  You must obey the
+ * GNU General Public License in all respects for all of the code used other than
+ * the above mentioned libraries.  If you modify this file, you may extend this
+ * exception to your version of the file, but you are not obligated to do so.
  * If you do not wish to do so, delete this exception statement from your version.
  */
 package mir.entity.adapter;
@@ -33,30 +33,35 @@ import java.util.AbstractList;
 import java.util.List;
 import java.util.Vector;
 
+import mir.entity.Entity;
 import mir.entity.EntityBrowser;
 
 public class EntityListAdapter extends AbstractList {
   private int skip;
   private int maximumLength;
   private EntityBrowser browser;
+  private EntityAdapterModel model;
+  private String definition;
   private boolean exhausted = false;
   private boolean skipped = false;
 
   private List cache;
 
-  protected EntityListAdapter(EntityBrowser aBrowser, int aSkip, int aMaximumLength) {
+  protected EntityListAdapter(EntityAdapterModel aModel, String aDefinition, EntityBrowser aBrowser, int aSkip, int aMaximumLength) {
+    model = aModel;
+    definition = aDefinition;
     browser = aBrowser;
     skip = aSkip;
     maximumLength = aMaximumLength;
     cache = new Vector();
   }
 
-  protected EntityListAdapter(EntityBrowser aBrowser, int aMaximumLength) {
-    this(aBrowser, 0, aMaximumLength);
+  protected EntityListAdapter(EntityAdapterModel aModel, String aDefinition, EntityBrowser aBrowser, int aMaximumLength) {
+    this(aModel, aDefinition, aBrowser, 0, aMaximumLength);
   }
 
-  protected EntityListAdapter(EntityBrowser aBrowser) {
-    this(aBrowser, 0, -1);
+  protected EntityListAdapter(EntityAdapterModel aModel, String  aDefinition, EntityBrowser aBrowser) {
+    this(aModel, aDefinition, aBrowser, 0, -1);
   }
 
   private void skip() {
@@ -79,7 +84,7 @@ public class EntityListAdapter extends AbstractList {
     try {
       if (!exhausted) {
         if (browser.hasNext())
-          cache.add(browser.next());
+          cache.add(model.makeEntityAdapter(definition, (Entity) browser.next()));
 
         exhausted = !browser.hasNext() || (maximumLength>0 && cache.size()>=maximumLength) ;
       }

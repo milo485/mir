@@ -40,7 +40,8 @@ import mir.log.LoggerToWriterAdapter;
 import mir.log.LoggerWrapper;
 import mir.producer.Producer;
 import mir.producer.ProducerFactory;
-import mir.util.DateToMapAdapter;
+import mir.util.*;
+import mir.config.*;
 import mir.util.StringRoutines;
 import multex.Exc;
 import multex.Failure;
@@ -48,21 +49,21 @@ import multex.Failure;
 public class ProducerEngine {
 //  private Map producers;
   private JobQueue producerJobQueue;
-  private Thread queueThread;
   private LoggerWrapper logger;
 
 
   protected ProducerEngine() {
-    producerJobQueue = new JobQueue();
     logger = new LoggerWrapper("Producer");
-
-    queueThread = new Thread(new ProducerJobQueueThread());
-    queueThread.start();
+    producerJobQueue = new JobQueue(new LoggerWrapper("Producer.Queue"));
   }
 
   public void addJob(String aProducerFactory, String aVerb) {
-    producerJobQueue.appendJob(new ProducerJob(aProducerFactory, aVerb));
+    producerJobQueue.appendJob(new ProducerJob(aProducerFactory, aVerb), aProducerFactory+"."+aVerb);
   }
+
+  public void cancelJobs(List aJobs) {
+    producerJobQueue.cancelJobs(aJobs);
+  };
 
   public void addTask(ProducerTask aTask) {
     addJob(aTask.getProducer(), aTask.getVerb());
@@ -76,56 +77,61 @@ public class ProducerEngine {
     }
   }
 
-  private String convertStatus(JobQueue.Job aJob) {
-    if (aJob.hasBeenProcessed())
-      return "processed";
-    if (aJob.isProcessing())
-      return "processing";
-    if (aJob.isPending())
-      return "pending";
-    if (aJob.isCancelled())
-      return "cancelled";
-    if (aJob.hasBeenAborted())
-      return "aborted";
-
+  private String convertStatus(JobQueue.JobInfo aJob) {
+    switch (aJob.getStatus()) {
+      case JobQueue.STATUS_ABORTED:
+        return "aborted";
+      case JobQueue.STATUS_CANCELLED:
+        return "cancelled";
+      case JobQueue.STATUS_CREATED:
+        return "created";
+      case JobQueue.STATUS_PENDING:
+        return "pending";
+      case JobQueue.STATUS_PROCESSED:
+        return "processed";
+      case JobQueue.STATUS_PROCESSING:
+        return "processing";
+    }
     return "unknown";
   }
 
-  private Map convertJob(JobQueue.Job aJob) {
-    Map result = new HashMap();
-    ProducerJob producerJob = (ProducerJob) aJob.getData();
+  private Map convertJob(JobQueue.JobInfo aJob) {
+    try {
+      Map result = new HashMap();
+      result.put("identifier", aJob.getIdentifier());
+      result.put("description", aJob.getDescription());
+      result.put("priority", new Integer(aJob.getPriority()));
+      result.put("runningtime", new Double( (double) aJob.getRunningTime() / 1000));
+      result.put("status", convertStatus(aJob));
+      result.put("lastchange", new GeneratorFormatAdapters.DateFormatAdapter(aJob.getLastChange(), MirPropertiesConfiguration.instance().getString("Mir.DefaultTimezone")));
+      result.put("finished", new Boolean(
+          aJob.getStatus() == JobQueue.STATUS_PROCESSED ||
+          aJob.getStatus() == JobQueue.STATUS_CANCELLED ||
+          aJob.getStatus() == JobQueue.STATUS_ABORTED));
 
-    result.put("identifier", aJob.getIdentifier());
-    result.put("factory", producerJob.getFactoryName());
-    result.put("verb", producerJob.getVerb());
-    result.put("priority", new Integer(aJob.getPriority()));
-    result.put("status", convertStatus(aJob));
-    result.put("lastchange", new DateToMapAdapter(aJob.getLastChange()));
-
-    return result;
+      return result;
+    }
+    catch (Throwable t) {
+      throw new RuntimeException(t.toString());
+    }
   }
 
-  private void convertJobList(List aSourceJobList, List aDestination) {
-    Iterator i = aSourceJobList.iterator();
+  private List convertJobInfoList(List aJobInfoList) {
+    List result = new Vector();
+
+    Iterator i = aJobInfoList.iterator();
 
     while (i.hasNext())
-      aDestination.add(convertJob((JobQueue.Job) i.next()));
+      result.add(convertJob((JobQueue.JobInfo) i.next()));
+
+    return result;
   }
 
   public List getQueueStatus() {
-    List result = new Vector();
-    List pendingJobs = new Vector();
-    List finishedJobs = new Vector();
-
-    producerJobQueue.makeJobListSnapshots(pendingJobs, finishedJobs);
-
-    convertJobList(pendingJobs, result);
-    convertJobList(finishedJobs, result);
-
-    return result;
+    return convertJobInfoList(producerJobQueue.getJobsInfo());
   }
 
-private class ProducerJob {
+  private class ProducerJob implements JobQueue.Job {
     private String factoryName;
     private String verb;
     private Producer producer;
@@ -150,10 +156,11 @@ private class ProducerJob {
       }
     }
 
-    public void execute() {
+    public boolean run() {
       ProducerFactory factory;
       long startTime;
       long endTime;
+      boolean result = false;
       Map startingMap = new HashMap();
 
       startTime = System.currentTimeMillis();
@@ -169,7 +176,7 @@ private class ProducerJob {
             producer = factory.makeProducer(verb, startingMap);
           }
           if (producer!=null) {
-            producer.produce(logger);
+            result = producer.produce(logger);
           }
         }
       }
@@ -179,35 +186,12 @@ private class ProducerJob {
       }
       endTime = System.currentTimeMillis();
       logger.info("Done producing job: " + factoryName + "." + verb + ", time elapsed:" + (endTime-startTime) + " ms");
+
+      return result;
     }
 
     boolean isAborted() {
       return false;
-    }
-  }
-
-  private class ProducerJobQueueThread implements Runnable {
-    public void run() {
-      logger.debug("starting ProducerJobQueueThread");
-
-      while (true) {
-        ProducerJob job = (ProducerJob) producerJobQueue.acquirePendingJob();
-        if (job!=null) {
-          job.execute();
-          if (job.isAborted())
-            producerJobQueue.jobAborted(job);
-          else
-            producerJobQueue.jobProcessed(job);
-        }
-        else
-        {
-          try {
-            Thread.sleep(1500);
-          }
-          catch (InterruptedException e) {
-          }
-        }
-      }
     }
   }
 

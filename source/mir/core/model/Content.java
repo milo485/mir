@@ -40,7 +40,7 @@ import org.apache.commons.lang.builder.ToStringBuilder;
  * 
  * Content
  * @author idefix
- * @version $Id: Content.java,v 1.3 2003/08/19 00:41:54 idfx Exp $
+ * @version $Id: Content.java,v 1.4 2003/09/05 20:23:59 idfx Exp $
  */
 public class Content extends Media implements Serializable, IContent {
 
@@ -69,11 +69,11 @@ public class Content extends Media implements Serializable, IContent {
     public Content() {
     }
 
-    public boolean isIsHtml() {
+    public boolean isHtml() {
         return this.isHtml;
     }
 
-    public void setIsHtml(boolean isHtml) {
+    public void setHtml(boolean isHtml) {
         this.isHtml = isHtml;
     }
 

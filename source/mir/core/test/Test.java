@@ -34,13 +34,9 @@ package mir.core.test;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.log4j.BasicConfigurator;
-
 import mir.core.model.Audio;
 import mir.core.model.Content;
-import mir.core.model.IContent;
 import mir.core.model.IImage;
-import mir.core.model.Image;
 import mir.core.model.Media;
 import mir.core.model.Topic;
 import mir.core.model.UploadedMedia;
@@ -56,7 +52,7 @@ import net.sf.hibernate.cfg.Configuration;
 
 /**
  * Test
- * @version $Id: Test.java,v 1.5 2003/08/19 00:43:02 idfx Exp $
+ * @version $Id: Test.java,v 1.7 2003/09/07 16:55:00 idfx Exp $
  * @author idefix
  */
 public class Test {
@@ -107,12 +103,12 @@ public class Test {
 			transaction.commit();
 			session.close();
 			ImageService imageService = new ImageService(factory);
-			list = imageService.list(0,10);
+			//list = imageService.list(0,10);
 			System.out.println("****** image media");
-			for(Iterator iterator = list.iterator(); iterator.hasNext();){
-				Image media = (Image)iterator.next();
-				System.out.println(media.toString() + media.getIconPath());
-			}
+			//for(Iterator iterator = list.iterator(); iterator.hasNext();){
+			//	Image media = (Image)iterator.next();
+			//	System.out.println(media.toString() + media.getIconPath());
+			//}
 			IImage image = (IImage)imageService.load(new Integer(18));
 			System.out.println(image);
 			session = factory.openSession();

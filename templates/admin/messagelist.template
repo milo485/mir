@@ -6,63 +6,24 @@
 
 <body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
 
-<include "head.template">
-
-<p>
-  <a class="link-box" href="${config.actionRoot}?module=Message&do=add">[+] ${lang("add")}</a> &nbsp;
-  <a class="link-box" href="${config.actionRoot}">[&lt;&lt;&lt;] ${lang("head.start")}</a>
-</p>
-
-<if data.contentlist>
-
-<table border="0" cellpadding="2" cellspacing="1" width="70%">
-  <tr>
-    <td class="table-head">
-    ${lang("message.date")}</td>
-    <td class="table-head">
-    ${lang("message.title")} /<br>${lang("message.creator")}</td>
-    <td colspan="2" class="table-head">
-    ${lang("message.text")}</td>
-  </tr>
-
-  <list data.contentlist as entry>
-  <tr
-    <if grey=="1">
-      <assign grey="0">class="listrow1"
-    <else>class="listrow2"
-      <assign grey="1"> 
-    </if> >
-  <td class="x-small" valign="top">${entry.webdb_create}&nbsp;</td>
-  <td valign="top"><span class="small"><b>${entry.title}</b></span><br>
-     <span class="x-small">${lang("by")}: ${entry.creator}</span></td>
-  <td>${entry.description}&nbsp;</td>
-  <td valign="top">
-      <a class="listcommand" href="${config.actionRoot}?module=Message&do=delete&id=${entry.id}">[&nbsp;${lang("delete")}&nbsp;]</a><br>
-    <a class="listcommand" href="${config.actionRoot}?module=Message&do=edit&id=${entry.id}">[&nbsp;${lang("edit")}&nbsp;]</a>
-  </td>
-  </tr>
-  </list>
-  
-  <tr>
-    <td colspan="4" class="table-foot">${data.count} ${lang("records")} /
-        ${lang("show_from_to", data.from, data.to)}</td>
+    <include "FUNCTIONS.template">
+    <include "head.template">
     
-  </tr>
+    <call showAddOrBack("1", module, "Admin", "start")>
 
-</table>
+    <if entities>
+      <call showPrevNextLinks(prevurl, nexturl, "left")>
+      <call EntityTable(entities, [
+           "id", "title", "creator", "description"], 
+           [ lang("message.id"), lang("message.title"), lang("message.creator"), lang("message.text")], 
+          from, to, count, "1", "1", module)>
+      <call showPrevNextLinks(prevurl, nexturl, "left")>
+      <call showAddOrBack("1", module, "Admin", "start")>
+    <else>
+      <P align="center">${lang("no_matches_found")}</p>
+    </if>
 
-<P>
-  <if data.prev>
-    <a class="majorcommand" href="${config.actionRoot}?module=Message&do=list&where=${data.where}&offset=${data.prev}">[&nbsp;${lang("list.previous")}&nbsp;]</a>&nbsp;
-  </if>
-  <if data.next>
-    <a class="majorcommand" href="${config.actionRoot}?module=Message&do=list&where=${data.where}&offset=${data.next}">[&nbsp;${lang("list.next")}&nbsp;]</a>
-  </if>
+    <include "foot.template">
 
-<else>
-  <P align="center">${lang("no_matches_found")}</p>
-</if>
-
-<include "foot.template">
 </body>
 </html>

@@ -32,12 +32,14 @@
 package mir.core.service.storage;
 
 import mir.core.model.Topic;
+import net.sf.hibernate.Hibernate;
+import net.sf.hibernate.HibernateException;
 import net.sf.hibernate.SessionFactory;
 
 /**
  * TopicService
  * @author idefix
- * @version $Id: TopicService.java,v 1.1 2003/08/17 19:11:49 idfx Exp $
+ * @version $Id: TopicService.java,v 1.2 2003/09/05 20:23:59 idfx Exp $
  */
 public class TopicService extends StorageService {
 
@@ -47,6 +49,16 @@ public class TopicService extends StorageService {
 	 */
 	public TopicService(SessionFactory factory) {
 		super(Topic.class, factory);
+	}
+
+	/**
+	 * @see mir.core.service.storage.StorageService#initializeLazyCollections(java.lang.Object)
+	 */
+	protected void initializeLazyCollections(Object returnObject) throws HibernateException {
+		if(returnObject instanceof Topic){
+			Topic topic = (Topic)returnObject;
+			Hibernate.initialize(topic.getContent());
+		}
 	}
 
 }

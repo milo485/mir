@@ -32,12 +32,13 @@
 package mir.core.service.storage;
 
 import mir.core.model.Comment;
+import net.sf.hibernate.HibernateException;
 import net.sf.hibernate.SessionFactory;
 
 /**
  * CommentService
  * @author idefix
- * @version $Id: CommentService.java,v 1.1 2003/08/17 19:11:49 idfx Exp $
+ * @version $Id: CommentService.java,v 1.3 2003/09/07 16:55:00 idfx Exp $
  */
 public class CommentService extends StorageService {
 
@@ -47,6 +48,15 @@ public class CommentService extends StorageService {
 	 */
 	public CommentService(SessionFactory factory) {
 		super(Comment.class, factory);
+	}
+
+	/**
+	 * @see mir.core.service.storage.StorageService#initializeLazyCollections(java.lang.Object)
+	 */
+	protected void initializeLazyCollections(Object returnObject) throws HibernateException {
+		if(returnObject instanceof Comment){
+			Comment comment = (Comment)returnObject;
+		}
 	}
 
 }

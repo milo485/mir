@@ -31,14 +31,16 @@ package mircoders.servlet;
 
 import java.util.Locale;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import mir.entity.adapter.EntityIteratorAdapter;
 import mir.log.LoggerWrapper;
 import mir.servlet.ServletModule;
 import mir.servlet.ServletModuleFailure;
+import mir.util.CachingRewindableIterator;
 import mir.util.URLBuilder;
+import mircoders.global.MirGlobal;
 
 public class ServletModuleAdmin extends ServletModule
 {
@@ -47,7 +49,7 @@ public class ServletModuleAdmin extends ServletModule
 
   private ServletModuleAdmin() {
     logger = new LoggerWrapper("ServletModule.Admin");
-    defaultAction = "showSuperUserMenu";
+    defaultAction = "start";
   }
 
   public void superusermenu(HttpServletRequest aRequest, HttpServletResponse aResponse) {
@@ -55,7 +57,7 @@ public class ServletModuleAdmin extends ServletModule
     int count;
 
     try {
-      Map responseData = ServletHelper.makeGenerationData(aResponse, new Locale[] { getLocale(aRequest), getFallbackLocale(aRequest)});
+      Map responseData = ServletHelper.makeGenerationData(aRequest, aResponse, new Locale[] { getLocale(aRequest), getFallbackLocale(aRequest)});
       urlBuilder.setValue("module", "Admin");
       urlBuilder.setValue("do", "superusermenu");
 
@@ -67,4 +69,34 @@ public class ServletModuleAdmin extends ServletModule
       throw new ServletModuleFailure(e);
     }
   }
+
+  public void start(HttpServletRequest aRequest, HttpServletResponse aResponse) {
+    String startTemplate = configuration.getString("Mir.StartTemplate");
+    String sessionUrl = aResponse.encodeURL("");
+
+    try {
+      Map mergeData = ServletHelper.makeGenerationData(aRequest, aResponse, new Locale[] {getLocale(aRequest), getFallbackLocale(aRequest)}
+          , "bundles.admin", "bundles.adminlocal");
+      mergeData.put("messages",
+                    new CachingRewindableIterator(
+          new EntityIteratorAdapter("", "webdb_create desc", 10,
+                                    MirGlobal.localizer().dataModel().adapterModel(), "internalMessage", 10, 0)));
+
+      mergeData.put("fileeditentries", ( (ServletModuleFileEdit) ServletModuleFileEdit.getInstance()).getEntries());
+      mergeData.put("administeroperations", ( (ServletModuleLocalizer) ServletModuleLocalizer.getInstance()).getAdministerOperations());
+
+      mergeData.put("searchvalue", null);
+      mergeData.put("searchfield", null);
+      mergeData.put("searchispublished", null);
+      mergeData.put("searcharticletype", null);
+      mergeData.put("searchorder", null);
+      mergeData.put("selectarticleurl", null);
+
+      ServletHelper.generateResponse(aResponse.getWriter(), mergeData, startTemplate);
+    }
+    catch (Exception e) {
+      throw new ServletModuleFailure(e);
+    }
+  }
+
 }

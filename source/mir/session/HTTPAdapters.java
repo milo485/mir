@@ -48,6 +48,9 @@ public class HTTPAdapters {
     }
 
     public String getHeader(String aHeaderName) {
+      if (aHeaderName.equals("ip"))
+        return request.getRemoteAddr();
+
       return request.getHeader(aHeaderName);
     };
 
@@ -76,6 +79,9 @@ public class HTTPAdapters {
     }
 
     public String getHeader(String aHeaderName) {
+      if (aHeaderName.equals("ip"))
+        return request.getRequest().getRemoteAddr();
+
       return request.getHeader(aHeaderName);
     };
 
@@ -118,10 +124,21 @@ public class HTTPAdapters {
     }
 
     public void setAttribute(String aName, Object aNewValue) {
-      if (aNewValue==null)
-        deleteAttribute(aName);
-      else
-        session.setAttribute(aName, aNewValue);
+      if (aName.equals("$httpsessiontimeout")) {
+        if (aNewValue instanceof Number) {
+          try {
+            session.setMaxInactiveInterval( ( (Number) aNewValue).intValue());
+          }
+          catch (Throwable t) {
+          }
+        }
+      }
+      else {
+        if (aNewValue == null)
+          deleteAttribute(aName);
+        else
+          session.setAttribute(aName, aNewValue);
+      }
     }
 
     public void terminate() {

@@ -1,0 +1,46 @@
+<html>
+<head>
+  <title>${lang("abuse.filter.htmltitle")}</title>
+  <link rel="stylesheet" type="text/css" href="${config.docRoot}/style/admin.css"
+</head>
+
+<body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
+
+<include "FUNCTIONS.template">
+<include "EDITFUNCTIONS.template">
+
+<include "head.template">
+
+<body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
+
+  <if errormessage>
+     <p class="text-alert"> ${lang("abuse.filtererror."+errormessage)}
+     </p>
+  </if>
+
+
+  <call EditStart( 
+        ["module", "id", "do"], 
+        ["Abuse", id, "updatefilter"])>
+
+        <call EditPullDownNormal(lang("abuse.filter.type"), "type", filtertypes, "identifier", "resource", type, "abuse.filtertype.")>
+        <call EditTextNormal (lang("abuse.filter.expression"), 40, 255, "expression", expression)>
+        <call EditPullDownNormal(lang("abuse.filter.articleaction"), "articleaction", articleactions, "identifier", "resource", articleaction, "content.operation.")>
+        <call EditPullDownNormal(lang("abuse.filter.commentaction"), "commentaction", commentactions, "identifier", "resource", commentaction, "comment.operation.")>
+        <call EditTextAreaNormal (lang("abuse.filter.comments"), "", 40, 3, "comments", comments)>
+        
+        <tr>
+          <td class="table-foot" colspan="2" align="right"> 
+          <if id>
+            <input type="submit" name="save" value="${lang("save")}">
+          <else>
+            <input type="submit" name="save" value="${lang("insert")}">
+          </if> 
+          </td>
+        </tr>
+        
+  <call EditEnd()>
+  <p><a class="link-box" href="${config.actionRoot}?module=Abuse&do=showfilters">[&lt;] ${lang("back")} </a> &nbsp;</p>
+    <include "foot.template">
+  </body>
+</html>

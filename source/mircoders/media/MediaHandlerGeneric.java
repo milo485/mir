@@ -32,6 +32,8 @@ package  mircoders.media;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.util.List;
+import java.util.Vector;
 import javax.servlet.ServletContext;
 
 import freemarker.template.SimpleList;
@@ -64,7 +66,7 @@ import mir.misc.StringUtil;
  *
  * @see mir.media.MirMedia
  * @author mh <mh@nadir.org>
- * @version $Id: MediaHandlerGeneric.java,v 1.21 2003/06/15 22:59:21 idfx Exp $
+ * @version $Id: MediaHandlerGeneric.java,v 1.22 2003/09/03 18:29:04 zapata Exp $
  */
 
 public class MediaHandlerGeneric implements MirMedia
@@ -79,7 +81,7 @@ public class MediaHandlerGeneric implements MirMedia
       try {
         configuration = MirPropertiesConfiguration.instance();
       }
-      catch (PropertiesConfigExc e) {
+      catch (MirPropertiesConfiguration.PropertiesConfigExc e) {
       }
       imageHost = configuration.getString("Producer.Image.Host");
       imageRoot = configuration.getString("Producer.ImageRoot");
@@ -178,9 +180,9 @@ public class MediaHandlerGeneric implements MirMedia
         return "Generic media";
     }
 
-    public SimpleList getURL(Entity ent, Entity mediaTypeEnt)
+    public List getURL(Entity ent, Entity mediaTypeEnt)
     {
-      SimpleList theList = new SimpleList();
+      List theList = new Vector();
       theList.add(ent);
       return theList;
     }

@@ -29,6 +29,10 @@
  */
 package mircoders.producer;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.Date;
 import java.util.Map;
 
 import mir.entity.Entity;
@@ -120,9 +124,38 @@ public class IndexingProducerNode implements ProducerNode {
       //this initialization should go somewhere global like an xml file....
       (new KeywordSearchTerm("id", "", "id", "", "id")).index(theDoc, entity);
 
+      String textValue = entity.getValue("webdb_create");
+      Calendar calendar = GregorianCalendar.getInstance();
+      int year;
+      int month;
+      int day;
+      int hours;
+      int minutes;
+      Date date;
+      String formattedDate="";
+
+      if (textValue!=null) {
+        try {
+          year = Integer.parseInt(textValue.substring(0,4));
+          month = Integer.parseInt(textValue.substring(5,7));
+          day = Integer.parseInt(textValue.substring(8,10));
+	  hours = Integer.parseInt(textValue.substring(11,13));
+          minutes = Integer.parseInt(textValue.substring(14,16));
+
+          calendar.set(year, month-1, day, hours, minutes);
+          date = calendar.getTime();
+	  SimpleDateFormat formatter = new SimpleDateFormat ("yyyy.MM.dd hh:mm");
+	  formattedDate=formatter.format(date);
+        }
+	catch (Throwable t){
+	  aLogger.error("Error while generating content date to index: " + t.getMessage());
+	  t.printStackTrace(aLogger.asPrintWriter(LoggerWrapper.DEBUG_MESSAGE));
+	}
+      }
       (new KeywordSearchTerm("webdb_create_formatted", "search_date",
         "webdb_create_formatted", "webdb_create_formatted",
-        "webdb_create_formatted")).index(theDoc, entity);
+        "webdb_create_formatted")).indexValue(theDoc,formattedDate);
+     
 
       (new UnIndexedSearchTerm("", "", "", "where", "where")).indexValue(theDoc,
         StringUtil.webdbDate2path(entity.getValue("date")) +

@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with  any library licensed under the Apache Software License, 
- * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
- * (or with modified versions of the above that use the same license as the above), 
- * and distribute linked combinations including the two.  You must obey the 
- * GNU General Public License in all respects for all of the code used other than 
- * the above mentioned libraries.  If you modify this file, you may extend this 
- * exception to your version of the file, but you are not obligated to do so.  
+ * the code of this program with  any library licensed under the Apache Software License,
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library
+ * (or with modified versions of the above that use the same license as the above),
+ * and distribute linked combinations including the two.  You must obey the
+ * GNU General Public License in all respects for all of the code used other than
+ * the above mentioned libraries.  If you modify this file, you may extend this
+ * exception to your version of the file, but you are not obligated to do so.
  * If you do not wish to do so, delete this exception statement from your version.
  */
 package mircoders.servlet;
@@ -34,6 +34,7 @@ import mir.log.LoggerWrapper;
 import mir.servlet.ServletModule;
 import mircoders.module.ModuleUploadedMedia;
 import mircoders.storage.DatabaseAudio;
+import mircoders.global.*;
 
 /*
  *
@@ -42,10 +43,6 @@ import mircoders.storage.DatabaseAudio;
  */
 
 public class ServletModuleAudio extends ServletModuleUploadedMedia {
-
-  //private static DatabaseRights dbRights;
-
-  // Singelton / Contructor
   private static ServletModuleAudio instance = new ServletModuleAudio();
 
   public static ServletModule getInstance() {
@@ -54,15 +51,15 @@ public class ServletModuleAudio extends ServletModuleUploadedMedia {
 
   private ServletModuleAudio() {
     logger = new LoggerWrapper("ServletModule.Audio");
+
+    moduleName = "Audio";
+
     try {
-      configuration = MirPropertiesConfiguration.instance();
-      templateListString = configuration.getString("ServletModule.Audio.ListTemplate");
-      templateObjektString = configuration.getString("ServletModule.Audio.ObjektTemplate");
-      templateConfirmString = configuration.getString("ServletModule.Audio.ConfirmTemplate");
+      model = MirGlobal.localizer().dataModel().adapterModel();
+      definition = "audio";
       mainModule = new ModuleUploadedMedia(DatabaseAudio.getInstance());
-      //dbRights = DatabaseRights.getInstance();
     }
-    catch (Exception e) {
+    catch (Throwable e) {
       logger.error("servletmodule audio could not be initialized: " + e.getMessage());
     }
   }

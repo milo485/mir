@@ -33,19 +33,20 @@ import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.struts.util.MessageResources;
 
-
-import mir.entity.adapter.EntityIteratorAdapter;
+import mir.config.MirPropertiesConfiguration;
+import mir.entity.adapter.*;
 import mir.generator.Generator;
 import mir.log.LoggerWrapper;
 import mir.servlet.ServletModuleExc;
 import mir.servlet.ServletModuleFailure;
 import mir.util.CachingRewindableIterator;
 import mir.util.ResourceBundleGeneratorFunction;
+import mircoders.entity.EntityUsers;
 import mircoders.global.MirGlobal;
 
 
@@ -53,15 +54,15 @@ public class ServletHelper {
   static LoggerWrapper logger = new LoggerWrapper("ServletModule.Helper");
 
 
-  public static Map makeGenerationData(HttpServletResponse aResponse, Locale[] aLocales) throws ServletModuleExc {
-    return makeGenerationData(aResponse, aLocales, "bundles.adminlocal", "bundles.admin");
+  public static Map makeGenerationData(HttpServletRequest aRequest, HttpServletResponse aResponse, Locale[] aLocales) throws ServletModuleExc {
+    return makeGenerationData(aRequest, aResponse, aLocales, "bundles.adminlocal", "bundles.admin");
   }
 
-  public static Map makeGenerationData(HttpServletResponse aResponse, Locale[] aLocales, String aBundle) throws ServletModuleExc {
-    return makeGenerationData(aResponse, aLocales, aBundle, aBundle);
+  public static Map makeGenerationData(HttpServletRequest aRequest, HttpServletResponse aResponse, Locale[] aLocales, String aBundle) throws ServletModuleExc {
+    return makeGenerationData(aRequest, aResponse, aLocales, aBundle, aBundle);
   }
 
-  public static Map makeGenerationData(HttpServletResponse aResponse, Locale[] aLocales, String aBundle, String aDefaultBundle) throws ServletModuleExc {
+  public static Map makeGenerationData(HttpServletRequest aRequest, HttpServletResponse aResponse, Locale[] aLocales, String aBundle, String aDefaultBundle) throws ServletModuleExc {
 
     try {
       Map result = new HashMap();
@@ -73,11 +74,13 @@ public class ServletHelper {
              aResponse.encodeURL(MirGlobal.config().getString("RootUri") + "/servlet/Mir"));
 
       result.put("returnurl", null);
+      result.put("login_user", getUserAdapter(aRequest));
 
       Object languages =
           new CachingRewindableIterator(
             new EntityIteratorAdapter( "", "id", 30,
                MirGlobal.localizer().dataModel().adapterModel(), "language"));
+
       Object topics =
           new CachingRewindableIterator(
             new EntityIteratorAdapter("", "id", 30,
@@ -101,7 +104,7 @@ public class ServletHelper {
       result.put( "lang",
           new ResourceBundleGeneratorFunction( aLocales,
              new MessageResources[] { MessageResources.getMessageResources(aBundle),
-                                   MessageResources.getMessageResources(aDefaultBundle)}));
+                MessageResources.getMessageResources(aDefaultBundle)}));
 
       return result;
     }
@@ -111,6 +114,8 @@ public class ServletHelper {
   }
 
   public static void generateResponse(PrintWriter aWriter, Map aGenerationData, String aGenerator) throws ServletModuleExc {
+    logger.debug("generator used: " + aGenerator);
+
     Generator generator;
 
     try {
@@ -134,5 +139,47 @@ public class ServletHelper {
     catch (Throwable t) {
       throw new ServletModuleFailure(t);
     }
+  }
+
+  public static void redirect(HttpServletResponse aResponse, String aQuery) throws ServletModuleExc, ServletModuleFailure {
+    try {
+      aResponse.sendRedirect(aResponse.encodeRedirectURL(MirPropertiesConfiguration.instance().getString("RootUri") + "/servlet/Mir?"+aQuery));
+    }
+    catch (Throwable t) {
+      throw new ServletModuleFailure("ServletModule.redirect: " +t.getMessage(), t);
+    }
+  }
+
+  public static void redirect(HttpServletResponse aResponse, String aModule, String aMethod) throws ServletModuleExc, ServletModuleFailure {
+    redirect(aResponse, "module="+aModule+"&do="+aMethod);
+  }
+
+  public static void setUser(HttpServletRequest aRequest, EntityUsers aUser) {
+    if (aUser!=null)
+      aRequest.getSession().setAttribute("login.uid", aUser);
+    else
+      aRequest.getSession().removeAttribute("login.uid");
+  }
+
+  public static EntityUsers getUser(HttpServletRequest aRequest) {
+    return (EntityUsers) aRequest.getSession().getAttribute("login.uid");
+  }
+
+  public static EntityAdapter getUserAdapter(HttpServletRequest aRequest) {
+    try {
+      return MirGlobal.localizer().dataModel().adapterModel().makeEntityAdapter( "user", (EntityUsers) aRequest.getSession().getAttribute("login.uid"));
+    }
+    catch (Throwable t) {
+      throw new ServletModuleFailure (t);
+    }
+  }
+
+  public static String getUserName(HttpServletRequest aRequest) {
+    EntityUsers user = getUser(aRequest);
+
+    if (user!=null)
+      return user.getValue("login");
+    else
+      return "nobody";
   }
 }

@@ -38,7 +38,6 @@ import mir.log.LoggerWrapper;
 import mir.storage.Database;
 import mir.storage.StorageObject;
 import mir.storage.StorageObjectFailure;
-import freemarker.template.SimpleList;
 
 /**
  * <b>This class implements the access to the comment-table for the
@@ -65,10 +64,6 @@ public class DatabaseComment extends Database implements StorageObject{
     logger = new LoggerWrapper("Database.Comment");
 
     this.theEntityClass = mircoders.entity.EntityComment.class;
-  }
-
-  public SimpleList getPopupData() throws StorageObjectFailure {
-    return getPopupData("title", true);
   }
 
   public boolean deleteByContentId(String id) throws StorageObjectFailure {

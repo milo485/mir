@@ -30,42 +30,42 @@
 
 package mircoders.global;
 
-import gnu.regexp.RE;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Vector;
-
 import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.collections.ExtendedProperties;
+import mir.config.MirPropertiesConfiguration;
 import mir.entity.Entity;
 import mir.log.LoggerWrapper;
-import mir.session.HTTPAdapters;
 import mir.session.Request;
-import mir.util.DateToMapAdapter;
-import mir.util.InternetFunctions;
+import mir.util.GeneratorFormatAdapters;
 import mir.util.StringRoutines;
 import mircoders.entity.EntityComment;
 import mircoders.entity.EntityContent;
+import mircoders.entity.EntityUsers;
 import mircoders.localizer.MirAdminInterfaceLocalizer;
-
-import org.apache.commons.collections.ExtendedProperties;
+import mircoders.localizer.MirAntiAbuseFilterType;
 
 
 public class Abuse {
-  private List filters;
+  private List filterRules;
+  private Map filterTypes;
+  private List filterTypeIds;
   private int maxIdentifier;
   private LoggerWrapper logger;
+  private LoggerWrapper adminUsageLogger;
   private int logSize;
   private boolean logEnabled;
   private boolean openPostingDisabled;
@@ -76,17 +76,24 @@ public class Abuse {
   private List log;
   private String configFile = MirGlobal.config().getStringWithHome("Abuse.Config");
 
+  private MirPropertiesConfiguration configuration;
 
-  private static final String IP_FILTER_TYPE="ip";
-  private static final String REGEXP_FILTER_TYPE="regexp";
   private static String cookieName=MirGlobal.config().getString("Abuse.CookieName");
   private static int cookieMaxAge = 60*60*MirGlobal.config().getInt("Abuse.CookieMaxAge");
 
   public Abuse() {
     logger = new LoggerWrapper("Global.Abuse");
-    filters = new Vector();
+    adminUsageLogger = new LoggerWrapper("AdminUsage");
+    filterRules = new Vector();
     maxIdentifier = 0;
     log = new Vector();
+
+    try {
+      configuration = MirPropertiesConfiguration.instance();
+    }
+    catch (Throwable e) {
+      throw new RuntimeException("Can't get configuration: " + e.getMessage());
+    }
 
     logSize = 100;
     logEnabled = false;
@@ -96,61 +103,23 @@ public class Abuse {
     openPostingDisabled = false;
     cookieOnBlock = false;
 
+    try {
+      filterTypes = new HashMap();
+      filterTypeIds = new Vector();
+
+      Iterator i = MirGlobal.localizer().openPostings().getAntiAbuseFilterTypes().iterator();
+
+      while (i.hasNext()) {
+        MirAntiAbuseFilterType filterType = (MirAntiAbuseFilterType) i.next();
+        filterTypes.put(filterType.getName(), filterType);
+        filterTypeIds.add(filterType.getName());
+      }
+    }
+    catch (Throwable t) {
+      throw new RuntimeException("Can't get filter types: " + t.getMessage());
+    }
+
     load();
-  }
-
-  public boolean checkIpFilter(String anIpAddress) {
-    synchronized (filters) {
-      Iterator i = filters.iterator();
-
-      while (i.hasNext()) {
-        Filter filter = (Filter) i.next();
-
-        try {
-          if ( (filter.getType().equals(IP_FILTER_TYPE)) &&
-              InternetFunctions.isIpAddressInNetwork(anIpAddress, filter.getExpression())) {
-            logger.debug("ip match on " + filter.getExpression());
-            return true;
-          }
-        }
-        catch (Throwable t) {
-          logger.warn("error while checking ip address " + anIpAddress + " over network " + filter.expression + ": " + t.getMessage());
-        }
-      }
-
-      return false;
-    }
-  }
-
-  private boolean checkRegExpFilter(Entity anEntity) {
-    synchronized (filters) {
-      Iterator i = filters.iterator();
-
-      while (i.hasNext()) {
-        Filter filter = (Filter) i.next();
-
-        if (filter.getType().equals(REGEXP_FILTER_TYPE)) {
-          try {
-            RE regularExpression = new RE(filter.getExpression(), RE.REG_ICASE);
-
-            Iterator j = anEntity.getFields().iterator();
-            while (j.hasNext()) {
-              String field = anEntity.getValue( (String) j.next());
-
-              if (field != null && regularExpression.isMatch(field.toLowerCase())) {
-                logger.debug("regexp match on " + filter.getExpression());
-                return true;
-              }
-            }
-          }
-          catch (Throwable t) {
-            logger.warn("error while checking entity with regexp " + filter.getExpression() + ": " + t.getMessage());
-          }
-        }
-      }
-
-      return false;
-    }
   }
 
   private void setCookie(HttpServletResponse aResponse) {
@@ -181,69 +150,63 @@ public class Abuse {
     return false;
   }
 
-  public boolean checkRequest(Request aRequest, HttpServletResponse aResponse, String anId, boolean anIsComment) {
-    String address = "0.0.0.0";
-    String browser = "unknown";
-    List cookies = null;
+  FilterRule findMatchingFilter(Entity anEntity, Request aRequest) {
+    Iterator iterator = filterRules.iterator();
 
-    HttpServletRequest request = null;
+    while (iterator.hasNext()) {
+      FilterRule rule = (FilterRule) iterator.next();
 
-    if (aRequest instanceof HTTPAdapters.HTTPParsedRequestAdapter) {
-      request = ((HTTPAdapters.HTTPParsedRequestAdapter) aRequest).getRequest();
-    }
-    else if (aRequest instanceof HTTPAdapters.HTTPRequestAdapter) {
-      request = ((HTTPAdapters.HTTPRequestAdapter) aRequest).getRequest();
-    }
-    if (request!=null) {
-      browser = (String) request.getHeader("User-Agent");
-      address = request.getRemoteAddr();
-      cookies = Arrays.asList(request.getCookies());
+      if (rule.test(anEntity, aRequest))
+        return rule;
     }
 
-    if (anIsComment)
-      logComment(address, anId , new Date(), browser);
-    else
-      logArticle(address, anId , new Date(), browser);
-
-    return checkCookie(cookies) || checkIpFilter(address);
+    return null;
   }
 
   public void checkComment(EntityComment aComment, Request aRequest, HttpServletResponse aResponse) {
+    logComment(aComment, aRequest);
+
     try {
       long time = System.currentTimeMillis();
 
-      MirAdminInterfaceLocalizer.MirSimpleEntityOperation operation = MirGlobal.localizer().adminInterface().simpleCommentOperationForName(commentBlockAction);
+      FilterRule filterRule = findMatchingFilter(aComment, aRequest);
 
-      if (checkRequest(aRequest, aResponse, aComment.getId(), true) || checkRegExpFilter(aComment)) {
-        logger.debug("performing operation " + operation.getName());
-        operation.perform(null, MirGlobal.localizer().dataModel().adapterModel().makeEntityAdapter("comment", aComment));
+      if (filterRule!=null) {
+        logger.debug("Match for " + filterRule.getType()+" rule '"+ filterRule.getExpression()+"'");
+        filterRule.setLastHit(new GregorianCalendar().getTime());
+        MirGlobal.performCommentOperation(null, aComment, filterRule.getCommentAction());
         setCookie(aResponse);
+        save();
       }
 
       logger.info("checkComment: " + (System.currentTimeMillis()-time) + "ms");
     }
     catch (Throwable t) {
-      t.printStackTrace(logger.asPrintWriter(LoggerWrapper.DEBUG_MESSAGE));
+      t.printStackTrace(logger.asPrintWriter(logger.DEBUG_MESSAGE));
       logger.error("Abuse.checkComment: " + t.toString());
     }
   }
 
   public void checkArticle(EntityContent anArticle, Request aRequest, HttpServletResponse aResponse) {
+    logArticle(anArticle, aRequest);
+
     try {
       long time = System.currentTimeMillis();
 
-      MirAdminInterfaceLocalizer.MirSimpleEntityOperation operation = MirGlobal.localizer().adminInterface().simpleArticleOperationForName(articleBlockAction);
+      FilterRule filterRule = findMatchingFilter(anArticle, aRequest);
 
-      if (checkRequest(aRequest, aResponse, anArticle.getId(), false) || checkRegExpFilter(anArticle)) {
-        logger.debug("performing operation " + operation.getName());
-        operation.perform(null, MirGlobal.localizer().dataModel().adapterModel().makeEntityAdapter("content", anArticle));
+      if (filterRule!=null) {
+        logger.debug("Match for " + filterRule.getType() + " rule '" + filterRule.getExpression()+"'");
+        filterRule.setLastHit(new GregorianCalendar().getTime());
+        MirGlobal.performArticleOperation(null, anArticle, filterRule.getArticleAction());
         setCookie(aResponse);
+        save();
       }
 
       logger.info("checkArticle: " + (System.currentTimeMillis()-time) + "ms");
     }
     catch (Throwable t) {
-      t.printStackTrace(logger.asPrintWriter(LoggerWrapper.DEBUG_MESSAGE));
+      t.printStackTrace(logger.asPrintWriter(logger.DEBUG_MESSAGE));
       logger.error("Abuse.checkArticle: " + t.toString());
     }
   }
@@ -253,7 +216,8 @@ public class Abuse {
   }
 
   public void setLogEnabled(boolean anEnabled) {
-    logEnabled = anEnabled;
+    if (!configuration.getString("Abuse.DisallowIPLogging", "0").equals("1"))
+      logEnabled = anEnabled;
     truncateLog();
   }
 
@@ -306,30 +270,50 @@ public class Abuse {
     commentBlockAction = anAction;
   }
 
-
   public List getLog() {
     synchronized(log) {
-      List result = new Vector();
+      try {
+        List result = new Vector();
 
-      Iterator i = log.iterator();
-      while (i.hasNext()) {
-        LogEntry logEntry = (LogEntry) i.next();
-        Map entry = new HashMap();
+        Iterator i = log.iterator();
+        while (i.hasNext()) {
+          LogEntry logEntry = (LogEntry) i.next();
+          Map entry = new HashMap();
 
-        entry.put("ip", logEntry.getIpNumber());
-        entry.put("id", logEntry.getId());
-        entry.put("timestamp", new DateToMapAdapter(logEntry.getTimeStamp()));
-        if (logEntry.getIsArticle())
-          entry.put("type", "content");
-        else
-          entry.put("type", "comment");
-        entry.put("browser", logEntry.getBrowserString());
+          entry.put("ip", logEntry.getIpNumber());
+          entry.put("id", logEntry.getId());
+          entry.put("timestamp", new GeneratorFormatAdapters.DateFormatAdapter(logEntry.getTimeStamp(), MirPropertiesConfiguration.instance().getString("Mir.DefaultTimezone")));
+          if (logEntry.getIsArticle())
+            entry.put("type", "content");
+          else
+            entry.put("type", "comment");
+          entry.put("browser", logEntry.getBrowserString());
 
-        result.add(entry);
+          result.add(entry);
+        }
+
+        return result;
       }
-
-      return result;
+      catch (Throwable t) {
+        throw new RuntimeException(t.toString());
+      }
     }
+  }
+
+  public void logComment(Entity aComment, Request aRequest) {
+    String ipAddress = aRequest.getHeader("ip");
+    String id = aComment.getId();
+    String browser = aRequest.getHeader("User-Agent");
+
+    logComment(ipAddress, id, new Date(), browser);
+  }
+
+  public void logArticle(Entity anArticle, Request aRequest) {
+    String ipAddress = aRequest.getHeader("ip");
+    String id = anArticle.getId();
+    String browser = aRequest.getHeader("User-Agent");
+
+    logArticle(ipAddress, id, new Date(), browser);
   }
 
   public void logComment(String anIp, String anId, Date aTimeStamp, String aBrowser) {
@@ -341,64 +325,75 @@ public class Abuse {
   }
 
   public void load() {
-    try {
-      ExtendedProperties configuration = new ExtendedProperties();
-
+    synchronized (filterRules) {
       try {
-        configuration = new ExtendedProperties(configFile);
-      }
-      catch (FileNotFoundException e) {
-      }
+        ExtendedProperties configuration = new ExtendedProperties();
 
-      getFilterConfig(filters, "abuse.filter", configuration);
+        try {
+          configuration = new ExtendedProperties(configFile);
+        }
+        catch (FileNotFoundException e) {
+        }
 
-      setOpenPostingDisabled(configuration.getString("abuse.openPostingDisabled", "0").equals("1"));
-      setOpenPostingPassword(configuration.getString("abuse.openPostingPassword", "0").equals("1"));
-      setCookieOnBlock(configuration.getString("abuse.cookieOnBlock", "0").equals("1"));
-      setLogEnabled(configuration.getString("abuse.logEnabled", "0").equals("1"));
-      setLogSize(configuration.getInt("abuse.logSize", 10));
-      setArticleBlockAction(configuration.getString("abuse.articleBlockAction", ""));
-      setCommentBlockAction(configuration.getString("abuse.commentBlockAction", ""));
-    }
-    catch (Throwable t) {
-      throw new RuntimeException(t.toString());
+        getFilterConfig(filterRules, "abuse.filter", configuration);
+
+        setOpenPostingDisabled(configuration.getString("abuse.openPostingDisabled", "0").equals("1"));
+        setOpenPostingPassword(configuration.getString("abuse.openPostingPassword", "0").equals("1"));
+        setCookieOnBlock(configuration.getString("abuse.cookieOnBlock", "0").equals("1"));
+        setLogEnabled(configuration.getString("abuse.logEnabled", "0").equals("1"));
+        setLogSize(configuration.getInt("abuse.logSize", 10));
+        setArticleBlockAction(configuration.getString("abuse.articleBlockAction", ""));
+        setCommentBlockAction(configuration.getString("abuse.commentBlockAction", ""));
+      }
+      catch (Throwable t) {
+        throw new RuntimeException(t.toString());
+      }
     }
   }
+
   public void save() {
-    try {
-      ExtendedProperties configuration = new ExtendedProperties();
+    synchronized (filterRules) {
+      try {
+        ExtendedProperties configuration = new ExtendedProperties();
 
-      setFilterConfig(filters, "abuse.filter", configuration);
+        setFilterConfig(filterRules, "abuse.filter", configuration);
 
-      configuration.addProperty("abuse.openPostingDisabled", getOpenPostingDisabled()?"1":"0");
-      configuration.addProperty("abuse.openPostingPassword", getOpenPostingPassword()?"1":"0");
-      configuration.addProperty("abuse.cookieOnBlock", getCookieOnBlock()?"1":"0");
-      configuration.addProperty("abuse.logEnabled", getLogEnabled()?"1":"0");
-      configuration.addProperty("abuse.logSize", Integer.toString(getLogSize()));
-      configuration.addProperty("abuse.articleBlockAction", getArticleBlockAction());
-      configuration.addProperty("abuse.commentBlockAction", getCommentBlockAction());
+        configuration.addProperty("abuse.openPostingDisabled", getOpenPostingDisabled() ? "1" : "0");
+        configuration.addProperty("abuse.openPostingPassword", getOpenPostingPassword() ? "1" : "0");
+        configuration.addProperty("abuse.cookieOnBlock", getCookieOnBlock() ? "1" : "0");
+        configuration.addProperty("abuse.logEnabled", getLogEnabled() ? "1" : "0");
+        configuration.addProperty("abuse.logSize", Integer.toString(getLogSize()));
+        configuration.addProperty("abuse.articleBlockAction", getArticleBlockAction());
+        configuration.addProperty("abuse.commentBlockAction", getCommentBlockAction());
 
-      configuration.save(new FileOutputStream(new File(configFile)), "Anti abuse configuration");
-    }
-    catch (Throwable t) {
-      throw new RuntimeException(t.toString());
+        configuration.save(new FileOutputStream(new File(configFile)), "Anti abuse configuration");
+      }
+      catch (Throwable t) {
+        throw new RuntimeException(t.toString());
+      }
     }
   }
 
   public List getFilterTypes() {
-    List result = new Vector();
+    try {
+      List result = new Vector();
 
-    Map entry = new HashMap();
-    entry.put("resource", "ip");
-    entry.put("id", IP_FILTER_TYPE);
-    result.add(entry);
+      Iterator i = filterTypeIds.iterator();
+      while (i.hasNext()) {
+        String id = (String) i.next();
 
-    entry = new HashMap();
-    entry.put("resource", "regexp");
-    entry.put("id", REGEXP_FILTER_TYPE);
-    result.add(entry);
+        Map action = new HashMap();
+        action.put("resource", id);
+        action.put("identifier", id);
 
-    return result;
+        result.add(action);
+      }
+
+      return result;
+    }
+    catch (Throwable t) {
+      throw new RuntimeException("can't get article actions");
+    }
   }
 
   public List getArticleActions() {
@@ -448,71 +443,101 @@ public class Abuse {
   }
 
   public List getFilters() {
-    return getFiltersAsMaps(filters);
-  }
+    List result = new Vector();
 
-  public void addFilter(String aType, String anExpression) {
-    addFilter(filters, aType, anExpression);
-  }
-
-  public void setFilter(String anIdentifier, String aType, String anExpression) {
-    setFilter(filters, anIdentifier, aType, anExpression);
-  }
-
-  public void deleteFilter(String anIdentifier) {
-    deleteFilter(filters, anIdentifier);
-  }
-
-  public void validateIpFilter(String anIdentifier, String anArticleAction, String aCommentAction) throws Exception {
-  }
-
-  private List getFiltersAsMaps(List aFilters) {
-    synchronized(aFilters) {
-      List result = new Vector();
-
-      Iterator i = aFilters.iterator();
+    synchronized(filterRules) {
+      Iterator i = filterRules.iterator();
       while (i.hasNext()) {
-        Filter filter = (Filter) i.next();
-        Map map = new HashMap();
-
-        map.put("id", filter.getId());
-        map.put("expression", filter.getExpression());
-        map.put("type", filter.getType());
-
-        result.add(map);
+        FilterRule filter = (FilterRule) i.next();
+        result.add(filter.clone());
       }
       return result;
     }
   }
 
-  private void addFilter(List aFilters, String aType, String anExpression) {
-    Filter filter = new Filter();
+  public String addFilter(String aType, String anExpression, String aComments, String aCommentAction, String anArticleAction) {
+    return addFilter(aType, anExpression, aComments, aCommentAction, anArticleAction, null);
+  }
+
+  public String addFilter(String aType, String anExpression, String aComments, String aCommentAction, String anArticleAction, Date aListHit) {
+    return addFilter(filterRules, aType, anExpression, aComments, aCommentAction, anArticleAction, aListHit);
+  }
+
+  public FilterRule getFilter(String anId) {
+    synchronized (filterRules) {
+      FilterRule result = (FilterRule) findFilter(filterRules, anId);
+      if (result==null)
+        return result;
+      else
+        return (FilterRule) result.clone();
+    }
+  }
+
+  public String setFilter(String anIdentifier, String aType, String anExpression, String aComments, String aCommentAction, String anArticleAction) {
+    return setFilter(filterRules, anIdentifier, aType, anExpression, aComments, aCommentAction, anArticleAction);
+  }
+
+  public void deleteFilter(String anIdentifier) {
+    deleteFilter(filterRules, anIdentifier);
+  }
+
+  private String addFilter(List aFilters, String aType, String anExpression, String aComments, String aCommentAction, String anArticleAction, Date aLastHit) {
+    MirAntiAbuseFilterType type = (MirAntiAbuseFilterType) filterTypes.get(aType);
+
+    if (type==null)
+      return "invalidtype";
+
+    if (!type.validate(anExpression)) {
+      return "invalidexpression";
+    }
+
+    FilterRule filter = new FilterRule();
 
     filter.setId(generateId());
     filter.setExpression(anExpression);
     filter.setType(aType);
+    filter.setComments(aComments);
+    filter.setArticleAction(anArticleAction);
+    filter.setCommentAction(aCommentAction);
+    filter.setLastHit(aLastHit);
 
     synchronized (aFilters) {
       aFilters.add(filter);
     }
+
+    return null;
   }
 
-  private void setFilter(List aFilters, String anIdentifier, String aType, String anExpression) {
+  private String setFilter(List aFilters, String anIdentifier, String aType, String anExpression, String aComments, String aCommentAction, String anArticleAction) {
+    MirAntiAbuseFilterType type = (MirAntiAbuseFilterType) filterTypes.get(aType);
+
+    if (type==null)
+      return "invalidtype";
+
+    if (!type.validate(anExpression)) {
+      return "invalidexpression";
+    }
+
     synchronized (aFilters) {
-      Filter filter = findFilter(aFilters, anIdentifier);
+      FilterRule filter = findFilter(aFilters, anIdentifier);
 
       if (filter!=null) {
         filter.setExpression(anExpression);
         filter.setType(aType);
+        filter.setCommentAction(aCommentAction);
+        filter.setArticleAction(anArticleAction);
+        filter.setComments(aComments);
       }
+
+      return null;
     }
   }
 
-  private Filter findFilter(List aFilters, String anIdentifier) {
+  private FilterRule findFilter(List aFilters, String anIdentifier) {
     synchronized (aFilters) {
       Iterator i = aFilters.iterator();
       while (i.hasNext()) {
-        Filter filter = (Filter) i.next();
+        FilterRule filter = (FilterRule) i.next();
 
         if (filter.getId().equals(anIdentifier)) {
           return filter;
@@ -525,7 +550,7 @@ public class Abuse {
 
   private void deleteFilter(List aFilters, String anIdentifier) {
     synchronized (aFilters) {
-      Filter filter = findFilter(aFilters, anIdentifier);
+      FilterRule filter = findFilter(aFilters, anIdentifier);
 
       if (filter!=null) {
         aFilters.remove(filter);
@@ -541,15 +566,31 @@ public class Abuse {
     }
   }
 
-  private static class Filter {
+  public class FilterRule {
     private String identifier;
     private String expression;
     private String type;
+    private String comments;
+    private String articleAction;
+    private String commentAction;
+    private Date lastHit;
 
-    public Filter() {
-      expression="";
-      type="";
-      identifier="";
+    public FilterRule() {
+      expression = "";
+      type = "";
+      identifier = "";
+      comments = "";
+      articleAction = articleBlockAction;
+      commentAction = commentBlockAction;
+      lastHit = null;
+    }
+
+    public Date getLastHit() {
+      return lastHit;
+    }
+
+    public void setLastHit(Date aDate) {
+      lastHit = aDate;
     }
 
     public String getId() {
@@ -575,6 +616,56 @@ public class Abuse {
     public void setType(String aType) {
       type = aType;
     }
+
+    public void setComments(String aComments) {
+      comments = aComments;
+    }
+
+    public String getComments() {
+      return comments;
+    }
+
+    public String getArticleAction() {
+      return articleAction;
+    }
+
+    public void setArticleAction(String anArticleAction) {
+      articleAction = anArticleAction;
+    }
+
+    public String getCommentAction() {
+      return commentAction;
+    }
+
+    public void setCommentAction(String aCommentAction) {
+      commentAction = aCommentAction;
+    }
+
+    public boolean test(Entity anEntity, Request aRequest) {
+      MirAntiAbuseFilterType filterType = (MirAntiAbuseFilterType) filterTypes.get(type);
+      try {
+        if (filterType != null)
+          return filterType.test(expression, anEntity, aRequest);
+      }
+      catch (Throwable t) {
+        logger.error("error while testing "+type+"-filter '"+expression+"'");
+      }
+
+      return false;
+    };
+
+    public Object clone() {
+      FilterRule result = new FilterRule();
+      result.setComments(getComments());
+      result.setExpression(getExpression());
+      result.setId(getId());
+      result.setType(getType());
+      result.setArticleAction(getArticleAction());
+      result.setCommentAction(getCommentAction());
+      result.setLastHit(getLastHit());
+
+      return result;
+    }
   }
 
   private void setFilterConfig(List aFilters, String aConfigKey, ExtendedProperties aConfiguration) {
@@ -582,9 +673,19 @@ public class Abuse {
       Iterator i = aFilters.iterator();
 
       while (i.hasNext()) {
-        Filter filter = (Filter) i.next();
+        FilterRule filter = (FilterRule) i.next();
 
-        aConfiguration.addProperty(aConfigKey, filter.getType()+":"+filter.getExpression());
+        String filterconfig =
+            StringRoutines.replaceStringCharacters(filter.getType(), new char[] { '\\', ':'}, new String[] { "\\\\", "\\:"} ) + ":" +
+            StringRoutines.replaceStringCharacters(filter.getExpression(), new char[] { '\\', ':'}, new String[] { "\\\\", "\\:"} ) + ":" +
+            StringRoutines.replaceStringCharacters(filter.getArticleAction(), new char[] { '\\', ':'}, new String[] { "\\\\", "\\:"} ) + ":" +
+            StringRoutines.replaceStringCharacters(filter.getCommentAction(), new char[] { '\\', ':'}, new String[] { "\\\\", "\\:"} ) + ":" +
+            StringRoutines.replaceStringCharacters(filter.getComments(), new char[] { '\\', ':'}, new String[] { "\\\\", "\\:"})  + ":";
+
+        if (filter.getLastHit()!=null)
+          filterconfig = filterconfig + filter.getLastHit().getTime();
+
+        aConfiguration.addProperty(aConfigKey, filterconfig);
       }
     }
   }
@@ -593,14 +694,36 @@ public class Abuse {
     synchronized(aFilters) {
       aFilters.clear();
 
-      Iterator i = Arrays.asList(aConfiguration.getStringArray(aConfigKey)).iterator();
+      if (aConfiguration.getStringArray(aConfigKey)!=null) {
 
-      while (i.hasNext()) {
-        String filter = (String) i.next();
-        List parts = StringRoutines.separateString(filter, ":");
+        Iterator i = Arrays.asList(aConfiguration.getStringArray(aConfigKey)).
+            iterator();
 
-        if (parts.size()==2) {
-          addFilter( (String) parts.get(0), (String) parts.get(1));
+        while (i.hasNext()) {
+          String filter = (String) i.next();
+          List parts = StringRoutines.splitStringWithEscape(filter, ':', '\\');
+          if (parts.size() == 2) {
+            parts.add(articleBlockAction);
+            parts.add(commentBlockAction);
+            parts.add("");
+            parts.add("");
+          }
+
+          if (parts.size() >= 5) {
+            Date lastHit = null;
+
+            if (parts.size()>=6) {
+              String lastHitString = (String) parts.get(5);
+
+              try {
+                lastHit = new Date(Long.parseLong(lastHitString));
+              }
+              catch (Throwable t) {
+              }
+            }
+
+            addFilter( (String) parts.get(0), (String) parts.get(1), (String) parts.get(4), (String) parts.get(3), (String) parts.get(2), lastHit);
+          }
         }
       }
     }
@@ -663,4 +786,15 @@ public class Abuse {
     }
   }
 
+  public void logAdminUsage(EntityUsers aUser, String aDescription) {
+    try {
+      String user = "unknown (" + aUser.toString() +")";
+      if (user!=null)
+        user = aUser.getValue("login");
+      adminUsageLogger.info(user + ": " + aDescription);
+    }
+    catch (Throwable t) {
+      logger.error("Error while logging admin usage ("+aUser.toString()+", "+aDescription+"): " +t.toString());
+    }
+  }
 }

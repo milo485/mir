@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with  any library licensed under the Apache Software License, 
- * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
- * (or with modified versions of the above that use the same license as the above), 
- * and distribute linked combinations including the two.  You must obey the 
- * GNU General Public License in all respects for all of the code used other than 
- * the above mentioned libraries.  If you modify this file, you may extend this 
- * exception to your version of the file, but you are not obligated to do so.  
+ * the code of this program with  any library licensed under the Apache Software License,
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library
+ * (or with modified versions of the above that use the same license as the above),
+ * and distribute linked combinations including the two.  You must obey the
+ * GNU General Public License in all respects for all of the code used other than
+ * the above mentioned libraries.  If you modify this file, you may extend this
+ * exception to your version of the file, but you are not obligated to do so.
  * If you do not wish to do so, delete this exception statement from your version.
  */
 
@@ -33,9 +33,9 @@ package mircoders.producer;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
-import mir.entity.Entity;
+import mir.entity.*;
 import mir.entity.EntityList;
 import mir.entity.adapter.EntityAdapter;
 import mir.log.LoggerToWriterAdapter;
@@ -48,10 +48,7 @@ import mir.util.HTMLRoutines;
 import mir.util.ParameterExpander;
 import mircoders.entity.EntityContent;
 import mircoders.entity.EntityImages;
-import mircoders.storage.DatabaseContentToMedia;
-
-//because images are returned as a template model!(maybe not needed after all!)
-//import freemarker.template.*;
+import mircoders.storage.*;
 
 
 public class PDFPreFormattingProducerNode implements ProducerNode {
@@ -105,8 +102,11 @@ public class PDFPreFormattingProducerNode implements ProducerNode {
 
       ArrayList brokenUpContent = new ArrayList();
 
+      Iterator images = new EntityBrowser(
+         DatabaseImages.getInstance(),
+          "exists (select * from content_x_media where content_id=" + entity.getId() + " and media_id=id)",
+          "id desc", 30, -1, 0);
 
-      EntityList images=DatabaseContentToMedia.getInstance().getImages((EntityContent)entity);
       String theContent = ((EntityContent) entity).getValue("content_data");
       //remove pesky characters
       theContent = HTMLRoutines.encodeXML(theContent);

@@ -30,9 +30,11 @@
 package mircoders.module;
 
 import mir.log.LoggerWrapper;
-import mir.module.*;
-import mir.util.*;
+import mir.module.AbstractModule;
+import mir.module.ModuleExc;
+import mir.module.ModuleFailure;
 import mir.storage.StorageObject;
+import mir.util.JDBCStringRoutines;
 
 public class ModuleArticleType extends AbstractModule {
   static LoggerWrapper logger = new LoggerWrapper("Module.ArticleType");

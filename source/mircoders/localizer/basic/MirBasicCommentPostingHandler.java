@@ -41,6 +41,9 @@ import mir.session.Session;
 import mir.session.SessionExc;
 import mir.session.SessionFailure;
 import mir.session.UploadedFile;
+import mir.session.ValidationError;
+import mir.session.ValidationHelper;
+import mir.util.ExceptionFunctions;
 import mircoders.entity.EntityComment;
 import mircoders.global.MirGlobal;
 import mircoders.media.MediaUploadProcessor;
@@ -87,9 +90,9 @@ public class MirBasicCommentPostingHandler extends MirBasicPostingSessionHandler
   public void validate(List aResults, Request aRequest, Session aSession) throws SessionExc, SessionFailure {
     super.validate(aResults, aRequest, aSession);
 
-    testFieldEntered(aRequest, "title", "validationerror.missing", aResults);
-    testFieldEntered(aRequest, "description", "validationerror.missing", aResults);
-    testFieldEntered(aRequest, "creator", "validationerror.missing", aResults);
+    ValidationHelper.testFieldEntered(aRequest, "title", "validationerror.missing", aResults);
+    ValidationHelper.testFieldEntered(aRequest, "description", "validationerror.missing", aResults);
+    ValidationHelper.testFieldEntered(aRequest, "creator", "validationerror.missing", aResults);
   }
 
   protected void initializeSession(Request aRequest, Session aSession) throws SessionExc, SessionFailure {

@@ -76,7 +76,7 @@
         length="8"
     />
     <property
-        name="isPublished"
+        name="published"
         type="boolean"
         column="is_published"
         not-null="true"
@@ -109,7 +109,7 @@
         length="4"
     />
     <property
-        name="isHtml"
+        name="html"
         type="boolean"
         column="is_html"
         not-null="true"

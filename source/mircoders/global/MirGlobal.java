@@ -18,23 +18,28 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with  any library licensed under the Apache Software License, 
- * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
- * (or with modified versions of the above that use the same license as the above), 
- * and distribute linked combinations including the two.  You must obey the 
- * GNU General Public License in all respects for all of the code used other than 
- * the above mentioned libraries.  If you modify this file, you may extend this 
- * exception to your version of the file, but you are not obligated to do so.  
+ * the code of this program with  any library licensed under the Apache Software License,
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library
+ * (or with modified versions of the above that use the same license as the above),
+ * and distribute linked combinations including the two.  You must obey the
+ * GNU General Public License in all respects for all of the code used other than
+ * the above mentioned libraries.  If you modify this file, you may extend this
+ * exception to your version of the file, but you are not obligated to do so.
  * If you do not wish to do so, delete this exception statement from your version.
  */
 
 package mircoders.global;
 
+import java.util.*;
+
 import mir.config.MirPropertiesConfiguration;
 import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
 import mir.misc.ConfigException;
 import mircoders.localizer.MirCachingLocalizerDecorator;
-import mircoders.localizer.MirLocalizer;
+import mircoders.localizer.*;
+import mircoders.accesscontrol.*;
+import mircoders.entity.*;
+import mir.entity.adapter.*;
 
 public class MirGlobal {
   static private MirPropertiesConfiguration configuration;
@@ -42,33 +47,32 @@ public class MirGlobal {
   static private ProducerEngine producerEngine;
   static private Abuse abuse;
   static private MRUCache mruCache;
+  static private AccessControl accessControl;
+  static private Map articleOperations;
+  static private Map commentOperations;
 
-  public static MirLocalizer localizer() {
+  public synchronized static MirLocalizer localizer() {
     String localizerClassName;
     Class localizerClass;
 
     if (localizer == null ) {
-      synchronized(MirGlobal.class) {
-        if (localizer == null ) {
-          localizerClassName = config().getString("Mir.Localizer", "mirlocal.localizer.basic.MirBasicLocalizer");
+      localizerClassName = config().getString("Mir.Localizer", "mirlocal.localizer.basic.MirBasicLocalizer");
 
-          try {
-            localizerClass = Class.forName(localizerClassName);
-          }
-          catch (Throwable t) {
-            throw new ConfigException("localizer class '" + localizerClassName + "' not found: " + t.toString());
-          }
+      try {
+        localizerClass = Class.forName(localizerClassName);
+      }
+      catch (Throwable t) {
+        throw new ConfigException("localizer class '" + localizerClassName + "' not found: " + t.toString());
+      }
 
-          if (!(MirLocalizer.class.isAssignableFrom(localizerClass)))
-            throw new ConfigException("localizer class '" + localizerClassName + "' is not assignable from MirLocalizer");
+      if (!(MirLocalizer.class.isAssignableFrom(localizerClass)))
+        throw new ConfigException("localizer class '" + localizerClassName + "' is not assignable from MirLocalizer");
 
-          try {
-            localizer = new MirCachingLocalizerDecorator((MirLocalizer) localizerClass.newInstance());
-          }
-          catch (Throwable t) {
-            throw new ConfigException("localizer class '" + localizerClassName + "' cannot be instantiated: " + t.toString());
-          }
-        }
+      try {
+        localizer = new MirCachingLocalizerDecorator((MirLocalizer) localizerClass.newInstance());
+      }
+      catch (Throwable t) {
+        throw new ConfigException("localizer class '" + localizerClassName + "' cannot be instantiated: " + t.toString());
       }
     }
 
@@ -106,11 +110,84 @@ public class MirGlobal {
   public static MRUCache mruCache() {
     synchronized(MirGlobal.class) {
       if (mruCache == null) {
-	mruCache = new MRUCache();
+        mruCache = new MRUCache();
       }
       return mruCache;
     }
   }
+
+  public static synchronized AccessControl accessControl() {
+    if (accessControl == null) {
+      accessControl=new AccessControl();
+    }
+
+    return accessControl;
+  }
+
+  public static void performArticleOperation(EntityUsers aUser, EntityContent  anArticle, String anOperation) {
+    MirAdminInterfaceLocalizer.MirSimpleEntityOperation operation = getArticleOperationForName(anOperation);
+
+    try {
+      if (operation!=null)
+        operation.perform(
+            localizer().dataModel().adapterModel().makeEntityAdapter("user", aUser),
+            localizer().dataModel().adapterModel().makeEntityAdapter("content", anArticle));
+    }
+    catch (Throwable t) {
+      throw new RuntimeException(t.toString());
+    }
+  }
+
+  public static void performCommentOperation(EntityUsers aUser, EntityComment  aComment, String anOperation) {
+    MirAdminInterfaceLocalizer.MirSimpleEntityOperation operation = getCommentOperationForName(anOperation);
+
+    try {
+      if (operation!=null)
+        operation.perform(
+            localizer().dataModel().adapterModel().makeEntityAdapter("user", aUser),
+            localizer().dataModel().adapterModel().makeEntityAdapter("comment", aComment));
+    }
+    catch (Throwable t) {
+      throw new RuntimeException(t.toString());
+    }
+  }
+
+  private synchronized static MirAdminInterfaceLocalizer.MirSimpleEntityOperation getArticleOperationForName(String aName) {
+    try {
+      if (articleOperations == null) {
+        articleOperations = new HashMap();
+        Iterator i = localizer().adminInterface().simpleArticleOperations().iterator();
+        while (i.hasNext()) {
+          MirAdminInterfaceLocalizer.MirSimpleEntityOperation operation = (MirAdminInterfaceLocalizer.MirSimpleEntityOperation) i.next();
+          articleOperations.put(operation.getName(), operation);
+        }
+      }
+
+      return (MirAdminInterfaceLocalizer.MirSimpleEntityOperation) articleOperations.get(aName);
+    }
+    catch (Throwable t) {
+      throw new RuntimeException(t.toString());
+    }
+  }
+
+  private synchronized static MirAdminInterfaceLocalizer.MirSimpleEntityOperation getCommentOperationForName(String aName) {
+    try {
+      if (commentOperations == null) {
+        commentOperations = new HashMap();
+        Iterator i = localizer().adminInterface().simpleCommentOperations().iterator();
+        while (i.hasNext()) {
+          MirAdminInterfaceLocalizer.MirSimpleEntityOperation operation = (MirAdminInterfaceLocalizer.MirSimpleEntityOperation) i.next();
+          commentOperations.put(operation.getName(), operation);
+        }
+      }
+
+      return (MirAdminInterfaceLocalizer.MirSimpleEntityOperation) commentOperations.get(aName);
+    }
+    catch (Throwable t) {
+      throw new RuntimeException(t.toString());
+    }
+  }
+
 }
 
- 
+

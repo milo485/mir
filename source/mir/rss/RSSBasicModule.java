@@ -58,16 +58,22 @@ public class RSSBasicModule implements RSSModule {
   }
 
   public void addProperty(String aName, int aType) {
-    properties.put(aName, new RSSBasicModuleProperty(aName, aType));
+    properties.put(aName, new RSSBasicModuleProperty(aName, aType, false));
+  }
+
+  public void addMultiValuedProperty(String aName, int aType) {
+    properties.put(aName, new RSSBasicModuleProperty(aName, aType, true));
   }
 
   private class RSSBasicModuleProperty implements RSSModuleProperty {
     private String name;
     private int type;
+    private boolean multivalued;
 
-    public RSSBasicModuleProperty(String aName, int aType) {
+    public RSSBasicModuleProperty(String aName, int aType, boolean aMultiValued) {
       name = aName;
       type = aType;
+      multivalued = aMultiValued;
     }
 
     public String getName() {
@@ -77,5 +83,10 @@ public class RSSBasicModule implements RSSModule {
     public int getType() {
       return type;
     }
+
+    public boolean getIsMultiValued() {
+      return multivalued;
+    }
+
   }
 }

@@ -11,29 +11,36 @@
 
 <form action="${config.actionRoot}" method="post">
   <input type="hidden" name="module" value="Users">
-  <input type="hidden" name="id" value="${data.id}">
-  <if data.new>
-    <input type="hidden" name="do" value="insert">
+  <input type="hidden" name="id" value="${user.id}">
+  <if passwordonly=="1">
+      <input type="hidden" name="do" value="updatepassword">
   <else>
-    <input type="hidden" name="do" value="update">
+    <if new=="1">
+      <input type="hidden" name="do" value="insert">
+    <else>
+      <input type="hidden" name="do" value="update">
+    </if>
   </if>
 
   <table border="0">
-    <call TextInputTableRow (lang("user.login"), 40, 40, "login", data.login)>
+    <if passwordonly=="1">
+      <call ReadonlyTextTableRow(lang("user.login"), user.login)>
+      <call PasswordTextInputTableRow (lang("user.oldpassword"), 40, 40, "oldpassword", "")>
+    <else>
+      <call TextInputTableRow (lang("user.login"), 40, 40, "login", user.login)>
+      <call PasswordTextInputTableRow (lang("user.ownpassword"), 40, 40, "oldpassword", "")>
+    </if>
     <call PasswordTextInputTableRow (lang("user.password"), 40, 40, "newpassword", "")>
     <call PasswordTextInputTableRow (lang("user.password2"), 40, 40, "newpassword2", "")>
-    <tr>
-      <td align="right" class="table-left">
-        <b>${lang("user.admin")}:</b>
-      </td>
-      <td class="listrow2">
-        <input type="checkbox" name="is_admin" value="1"<if data.is_admin=="1"> checked</if>>
-      </td>
-    </tr>
+    <if passwordonly=="1">
+      <call ReadonlyTextTableRow(lang("user.admin"), user.is_admin)>
+    <else>
+      <call CheckboxTableRow(lang("user.admin"), "is_admin", user.is_admin)>
+    </if>
     <tr>
     <td colspan="2" align="right" class="table-foot"> 
       <span class="witetext">
-      <if data.new>
+      <if new=="1">
         <input type="submit" name="save" value="${lang("insert")}">
       <else>
         <input type="submit" name="save" value="${lang("save")}">
@@ -43,9 +50,12 @@
     </tr>
   </table>
 </form>
-  
-  <p><a class="link-box" href="${config.actionRoot}?module=Users&do=list">[&lt;] ${lang("back")} </a> &nbsp;</p>
-  
+  <if passwordonly>
+    <call showBack("")>
+  <else>
+    <call showBack("module=Users&amp;do=list")>
+  </if>
+
   <include "foot.template">
 
 </body>

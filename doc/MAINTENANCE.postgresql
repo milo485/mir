@@ -23,22 +23,5 @@ these can be used as a basis to write your own custom scripts.
 
 USER MANAGMENT IN POSTGRESQL
 
--- set owner of datbase
-select * from pg_database;
-select * from pg_user;
-update pg_database set datdba=ID_FROM_PG_USER where datname=DATABASENAME
-
--- find all tables to grant privs / select is just building sql
--- to be exectued
-
-select 'grant all on '||relname||' to "de_indy";'
-from pg_class
-where relname not like 'pg%'
-order by relname;
-
--- alter table owner / select is just building sql
--- to be exectued
-select 'alter table '||relname||' owner to "de_indy";'
-from pg_class
-where relname not like 'pg%'
-order by relname;
+If you want to change the db user of a mir db, there's a script for 
+that in mir/dbscripts/extra.

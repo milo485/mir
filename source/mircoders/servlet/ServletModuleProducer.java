@@ -36,19 +36,19 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Vector;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.apache.struts.util.MessageResources;
 
 import mir.generator.Generator;
 import mir.log.LoggerWrapper;
 import mir.producer.ProducerFactory;
 import mir.servlet.ServletModule;
 import mir.servlet.ServletModuleFailure;
+import mir.util.HTTPRequestParser;
 import mir.util.ResourceBundleGeneratorFunction;
 import mircoders.global.MirGlobal;
-
-import org.apache.struts.util.MessageResources;
 
 public class ServletModuleProducer extends ServletModule
 {
@@ -79,14 +79,15 @@ public class ServletModuleProducer extends ServletModule
     defaultAction="showProducerQueueStatus";
   }
 
-  public void showMessage(PrintWriter aWriter, Locale aLocale, String aMessage, String anArgument1, String anArgument2) {
+  public void showMessage(HttpServletRequest aRequest, HttpServletResponse aResponse, String aMessage, String anArgument1, String anArgument2) {
     Map responseData;
     try {
-      responseData = new HashMap();
+      responseData = ServletHelper.makeGenerationData(aRequest, aResponse, new Locale[] { getLocale(aRequest), getFallbackLocale(aRequest)});
       responseData.put("message", aMessage);
       responseData.put("argument1", anArgument1);
       responseData.put("argument2", anArgument2);
-      generateResponse("infomessage.template", aWriter, responseData, aLocale);
+
+      ServletHelper.generateResponse(aResponse.getWriter(), responseData, "infomessage.template");
     }
     catch (Throwable t) {
       throw new ServletModuleFailure(t);
@@ -104,7 +105,7 @@ public class ServletModuleProducer extends ServletModule
     try {
       generator = MirGlobal.localizer().generators().makeAdminGeneratorLibrary().makeGenerator("producerqueue.template");
 
-      generationData = ServletHelper.makeGenerationData(aResponse, new Locale[] { getLocale(aRequest), getFallbackLocale(aRequest)});
+      generationData = ServletHelper.makeGenerationData(aRequest, aResponse, new Locale[] { getLocale(aRequest), getFallbackLocale(aRequest)});
       generationData.put( "thisurl", "module=Producer&do=showProducerQueueStatus");
 
       producersData = new Vector();
@@ -139,7 +140,7 @@ public class ServletModuleProducer extends ServletModule
     }
   }
 
-  public void produce(HttpServletRequest req, HttpServletResponse res) {
+  public void produce(HttpServletRequest aRequest, HttpServletResponse aResponse) {
     /*
      * This method will only be called by external scripts (e.g. from cron jobs).
      * The output therefore is very simple.
@@ -147,11 +148,11 @@ public class ServletModuleProducer extends ServletModule
      */
 
     try {
-      PrintWriter out = res.getWriter();
+      PrintWriter out = aResponse.getWriter();
 
-      if (req.getParameter("producer")!=null) {
-        String producerParam = req.getParameter("producer");
-        String verbParam = req.getParameter("verb");
+      if (aRequest.getParameter("producer")!=null) {
+        String producerParam = aRequest.getParameter("producer");
+        String verbParam = aRequest.getParameter("verb");
 
         MirGlobal.producerEngine().addJob(producerParam, verbParam);
         out.println("job added");
@@ -165,7 +166,7 @@ public class ServletModuleProducer extends ServletModule
   public void produceAllNew(HttpServletRequest aRequest, HttpServletResponse aResponse) {
     try {
       MirGlobal.localizer().producers().produceAllNew();
-      showMessage(aResponse.getWriter(), getLocale(aRequest), "produceAllNewAddedToQueue", "", "");
+      showMessage(aRequest, aResponse, "produceAllNewAddedToQueue", "", "");
     }
     catch (Throwable t) {
       throw new ServletModuleFailure(t);
@@ -180,7 +181,7 @@ public class ServletModuleProducer extends ServletModule
 
         MirGlobal.producerEngine().addJob(producerParam, verbParam);
 
-        showProducerQueueStatus(aRequest, aResponse);
+        ServletHelper.redirect(aResponse, "Producer", "showProducerQueueStatus");
       }
     }
     catch (Throwable t) {
@@ -188,7 +189,16 @@ public class ServletModuleProducer extends ServletModule
     }
   }
 
-  public void cancelAbortJob(HttpServletRequest aRequest, HttpServletResponse aResponse)  {
-    // ML: to be coded
+  public void cancel(HttpServletRequest aRequest, HttpServletResponse aResponse)  {
+    try {
+      HTTPRequestParser requestParser = new HTTPRequestParser(aRequest);
+      List jobs = new Vector(requestParser.getParameterList("jobid"));
+
+      MirGlobal.producerEngine().cancelJobs(jobs);
+      ServletHelper.redirect(aResponse, "Producer", "showProducerQueueStatus");
+    }
+    catch (Throwable t) {
+      throw new ServletModuleFailure(t);
+    }
   }
 }

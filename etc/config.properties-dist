@@ -46,8 +46,16 @@ Mir.Tech-email.name=mir-coders mailinglist
 Mir.Public-email.address=mir-coders@lists.indymedia.org
 Mir.Public-email.name=mir-coders mailinglist
 
-Mir.Version=1.1beta
+Mir.Version=pre 1.2
 DirectOpenposting=yes
+
+# Default timezone to display times in in admin, producers
+#
+# Leave empty to use the system's default
+Mir.DefaultTimezone=
+
+# Default date/time format
+Mir.DefaultDateTimeFormat = yyyy-MM-dd HH:mm
 
 #where to put the lucene index
 IndexPath=/tmp/index
@@ -60,7 +68,6 @@ Log.log4j.ConfigurationFile = etc/log4j.properties
 Log.Home = log
 
 Mir.Localizer=mircoders.localizer.basic.MirBasicLocalizer
-Mir.Localizer.Logfile=log/localizer.log
 
 # The location of the producer specifiations
 Mir.Localizer.ProducerConfigFile=etc/producer/producers.xml
@@ -110,13 +117,6 @@ Mir.Localizer.OpenPosting.CommentProducers= articles.changed;synchronization.run
 
 # Which producers need to be called after the "produce all new" link is clicked from admin
 Mir.Localizer.Producer.AllNewProducers= media.new;articles.changed;startpage.run;synchronization.run
-
-
-#note that you can't make pdf's without making fo's
-#this is actually now set in producers.xml
-#but these summarize what is said in there for the benefit of OpenMir 
-GenerateFO=yes
-GeneratePDF=yes
 
 #use rsync to mirror the website to a remote-host
 Rsync=no
@@ -281,7 +281,6 @@ Database.Name=Mir
 # this sets the adaptor to be used
 
 Database.Adaptor=mir.storage.DatabaseAdaptorPostgresql
-Database.Logfile=log/dbentity.log
 
 #
 # configuration for adaptor postgres

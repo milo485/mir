@@ -38,12 +38,15 @@ import mir.misc.StringUtil;
 import mir.storage.Database;
 import mir.storage.StorageObject;
 import mir.storage.StorageObjectFailure;
-import freemarker.template.SimpleList;
 
 /**
- * <b>Diese Klasse implementiert die Datenbankverbindung zur MetaObjekt-Tabelle
  *
- *
+ * <p>Title: </p>
+ * <p>Description: </p>
+ * <p>Copyright: Copyright (c) 2003</p>
+ * <p>Company: </p>
+ * @author not attributable
+ * @version 1.0
  */
 
 public class DatabaseOther extends Database implements StorageObject{
@@ -68,10 +71,6 @@ public class DatabaseOther extends Database implements StorageObject{
     theTable = "other_media";
     theCoreTable = "media";
     theEntityClass = mircoders.entity.EntityOther.class;
-  }
-
-  public SimpleList getPopupData() throws StorageObjectFailure {
-    return getPopupData("title", true);
   }
 
   public void update(Entity theEntity) throws StorageObjectFailure {

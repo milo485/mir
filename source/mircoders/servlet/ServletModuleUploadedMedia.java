@@ -31,22 +31,23 @@
 package mircoders.servlet;
 
 import java.io.InputStream;
-import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Vector;
-
 import javax.servlet.ServletContext;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
+import org.apache.commons.fileupload.FileItem;
 import mir.config.MirPropertiesConfiguration;
 import mir.entity.Entity;
-import mir.entity.EntityList;
+import mir.entity.adapter.EntityAdapter;
+import mir.entity.adapter.EntityAdapterModel;
+import mir.entity.adapter.EntityIteratorAdapter;
 import mir.log.LoggerWrapper;
 import mir.media.MediaHelper;
 import mir.media.MirMedia;
@@ -55,35 +56,34 @@ import mir.servlet.ServletModuleExc;
 import mir.servlet.ServletModuleFailure;
 import mir.servlet.ServletModuleUserExc;
 import mir.session.UploadedFile;
+import mir.util.CachingRewindableIterator;
 import mir.util.ExceptionFunctions;
 import mir.util.HTTPParsedRequest;
+import mir.util.HTTPRequestParser;
+import mir.util.JDBCStringRoutines;
+import mir.util.SQLQueryBuilder;
+import mir.util.URLBuilder;
 import mircoders.entity.EntityComment;
 import mircoders.entity.EntityContent;
 import mircoders.entity.EntityUploadedMedia;
-import mircoders.entity.EntityUsers;
+import mircoders.global.MirGlobal;
 import mircoders.media.MediaUploadProcessor;
-import mircoders.module.*;
+import mircoders.module.ModuleMediaType;
 import mircoders.storage.DatabaseComment;
 import mircoders.storage.DatabaseContent;
-import mircoders.storage.DatabaseMediafolder;
 
-import org.apache.commons.fileupload.FileItem;
-
-import freemarker.template.SimpleHash;
-import freemarker.template.SimpleList;
-
-/*
- *  ServletModuleBilder -
- *  liefert HTML fuer Bilder
+/**
  *
- * @version $Id: ServletModuleUploadedMedia.java,v 1.28 2003/04/29 02:36:51 zapata Exp $
- * @author RK, the mir-coders group
+ * <p>Title: </p>
+ * <p>Description: </p>
+ * <p>Copyright: Copyright (c) 2003</p>
+ * <p>Company: </p>
+ * @author the mir coders
+ * @version 1.0
  */
 
-public abstract class ServletModuleUploadedMedia
-        extends mir.servlet.ServletModule {
-
-  //private static DatabaseRights dbRights;
+public abstract class ServletModuleUploadedMedia extends ServletModule {
+  protected String moduleName = "UploadedMedia";
 
   public static ServletModule getInstance() {
     return null;
@@ -91,21 +91,28 @@ public abstract class ServletModuleUploadedMedia
 
   public ServletModuleUploadedMedia() {
     super();
+
+    definition = "uploadedMedia";
     logger = new LoggerWrapper("ServletModule.UploadedMedia");
+    try {
+      model = MirGlobal.localizer().dataModel().adapterModel();
+    }
+    catch (Throwable t) {
+      throw new ServletModuleFailure(t);
+    }
   }
 
-  public void insert(HttpServletRequest req, HttpServletResponse res)
+  public void insert(HttpServletRequest aRequest, HttpServletResponse aResponse)
           throws ServletModuleExc, ServletModuleUserExc {
     try {
-      HTTPParsedRequest parsedRequest = new HTTPParsedRequest(req,
+      HTTPParsedRequest parsedRequest = new HTTPParsedRequest(aRequest,
           configuration.getString("Mir.DefaultEncoding"),
           configuration.getInt("MaxMediaUploadSize")*1024,
           configuration.getString("TempDir"));
 
-      EntityUsers user = _getUser(req);
       Map mediaValues = new HashMap();
 
-      mediaValues.put("to_publisher", _getUser(req).getId());
+      mediaValues.put("to_publisher", ServletHelper.getUser(aRequest).getId());
 
       Iterator i = mainModule.getStorageObject().getFields().iterator();
       while (i.hasNext()) {
@@ -139,7 +146,7 @@ public abstract class ServletModuleUploadedMedia
           entContent.attach(((EntityUploadedMedia) i.next()).getId());
         }
 
-        ((ServletModuleContent) ServletModuleContent.getInstance())._showObject(articleid, req, res);
+        ((ServletModuleContent) ServletModuleContent.getInstance())._showObject(articleid, aRequest, aResponse);
 
         return;
       }
@@ -153,23 +160,12 @@ public abstract class ServletModuleUploadedMedia
           comment.attach( ( (EntityUploadedMedia) i.next()).getId());
         }
 
-        ((ServletModuleComment) ServletModuleComment.getInstance()).showComment(commentid, req, res);
+        ((ServletModuleComment) ServletModuleComment.getInstance()).showComment(commentid, aRequest, aResponse);
 
         return;
       }
 
-      SimpleHash mergeData = new SimpleHash();
-      SimpleHash popups = new SimpleHash();
-      mergeData.put("contentlist", mir.generator.FreemarkerGenerator.makeAdapter(mediaList));
-
-      mergeData.put("count", Integer.toString(mediaList.size()));
-      mergeData.put("from", "1");
-      mergeData.put("to", Integer.toString(mediaList.size()));
-
-      //fetch the popups
-      popups.put("mediafolderPopupData", DatabaseMediafolder.getInstance().getPopupData());
-      // raus damit
-      deliver(req, res, mergeData, popups, templateListString);
+      returnUploadedMediaList(aRequest, aResponse, mediaList, 1, mediaList.size(), mediaList.size(), "", null, null);
     }
     catch (Throwable t) {
       Throwable cause = ExceptionFunctions.traceCauseException(t);
@@ -181,14 +177,13 @@ public abstract class ServletModuleUploadedMedia
     }
   }
 
-  public void update(HttpServletRequest req, HttpServletResponse res) throws ServletModuleExc {
+  public void update(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc {
 
     try {
-      HTTPParsedRequest parsedRequest = new HTTPParsedRequest(req,
+      HTTPParsedRequest parsedRequest = new HTTPParsedRequest(aRequest,
           configuration.getString("Mir.DefaultEncoding"),
           configuration.getInt("MaxMediaUploadSize")*1024,
           configuration.getString("TempDir"));
-      EntityUsers user = _getUser(req);
       Map mediaValues = new HashMap();
 
       Iterator i = mainModule.getStorageObject().getFields().iterator();
@@ -199,14 +194,15 @@ public abstract class ServletModuleUploadedMedia
           mediaValues.put(field, value);
       }
 
-      mediaValues.put("to_publisher", user.getId());
+      mediaValues.put("to_publisher", ServletHelper.getUser(aRequest).getId());
       mediaValues.put("is_produced", "0");
       if (!mediaValues.containsKey("is_published"))
         mediaValues.put("is_published", "0");
 
       String id = mainModule.set(mediaValues);
       logger.debug("update: media ID = " + id);
-      _edit(id, req, res);
+
+      editUploadedMediaObject(id, aRequest, aResponse);
     }
     catch (Throwable e) {
       throw new ServletModuleFailure("upload -- exception " + e.toString(), e);
@@ -214,146 +210,223 @@ public abstract class ServletModuleUploadedMedia
 
   }
 
+  public void returnUploadedMediaList(HttpServletRequest aRequest, HttpServletResponse aResponse,
+                                      Object aList, int aFrom, int aTo, int aCount,
+                                      String aThisUrl, String aNextUrl, String aPreviousUrl) throws ServletModuleExc {
 
-  public void list(HttpServletRequest req, HttpServletResponse res) throws ServletModuleExc {
-    // Parameter auswerten
-    SimpleHash mergeData = new SimpleHash();
-    SimpleHash popups = new SimpleHash();
-
-    String query_text = req.getParameter("query_text");
-    mergeData.put("query_text", query_text);
-    if (query_text != null) mergeData.put("query_text_encoded", URLEncoder.encode(query_text));
-    String query_field = req.getParameter("query_field");
-    mergeData.put("query_field", query_field);
-    String query_is_published = req.getParameter("query_is_published");
-    mergeData.put("query_is_published", query_is_published);
-    String query_media_folder = req.getParameter("query_media_folder");
-    mergeData.put("query_media_folder", query_media_folder);
-    String offset = req.getParameter("offset");
-    if (offset == null || offset.equals("")) offset = "0";
-    mergeData.put("offset", offset);
-
-    String order = req.getParameter("order");
-    if (order == null || order.equals("")) order = "webdb_lastchange desc";
-
-    // if in connection mode to content
-    mergeData.put("articleid", req.getParameter("articleid"));
-    mergeData.put("commentid", req.getParameter("commentid"));
-
-
-    // sql basteln
-    String whereClause = "";
-    boolean isFirst = true;
-    if (query_text != null && !query_text.equalsIgnoreCase("")) {
-      whereClause += "lower(" + query_field + ") like lower('%" + query_text + "%')";
-      isFirst = false;
-    }
-    if (query_is_published != null && !query_is_published.equals("")) {
-      if (isFirst == false) whereClause += " and ";
-      whereClause += "is_published='" + query_is_published + "'";
-      isFirst = false;
-    }
-    if (query_media_folder != null && !query_media_folder.equals("")) {
-      if (isFirst == false) whereClause += " and ";
-      whereClause += "to_media_folder='" + query_media_folder + "'";
-    }
-    //theLog.printDebugInfo("sql-whereclause: " + whereClause + " order: " + order + " offset: " + offset);
-
-    // fetch and deliver
     try {
-      if (query_text != null || query_is_published != null || query_media_folder != null) {
-        EntityList theList = mainModule.getByWhereClause(whereClause, order, (new Integer(offset)).intValue(), 10);
-        if (theList != null) {
-          mergeData.put("contentlist", theList);
-          if (theList.getOrder() != null) {
-            mergeData.put("order", theList.getOrder());
-            mergeData.put("order_encoded", URLEncoder.encode(theList.getOrder()));
-          }
-          mergeData.put("count", (new Integer(theList.getCount())).toString());
-          mergeData.put("from", (new Integer(theList.getFrom())).toString());
-          mergeData.put("to", (new Integer(theList.getTo())).toString());
-          if (theList.hasNextBatch())
-            mergeData.put("next", (new Integer(theList.getNextBatch())).toString());
-          if (theList.hasPrevBatch())
-            mergeData.put("prev", (new Integer(theList.getPrevBatch())).toString());
-        }
-      }
-      popups.put("mediafolderPopupData", DatabaseMediafolder.getInstance().getPopupData());
+      HTTPRequestParser requestParser = new HTTPRequestParser(aRequest);
+      Map responseData = ServletHelper.makeGenerationData(aRequest, aResponse, new Locale[] {getLocale(aRequest), getFallbackLocale(aRequest)});
 
-      deliver(req, res, mergeData, popups, templateListString);
+      responseData.put("searchfield", requestParser.getParameterWithDefault("searchfield", ""));
+      responseData.put("searchtext", requestParser.getParameterWithDefault("searchtext", ""));
+      responseData.put("searchispublished", requestParser.getParameterWithDefault("searchispublished", ""));
+      responseData.put("searchmediafolder", requestParser.getParameterWithDefault("searchmediafolder", ""));
+      responseData.put("articleid", requestParser.getParameter("articleid"));
+      responseData.put("commentid", requestParser.getParameter("commentid"));
+
+      responseData.put("thisurl", aThisUrl);
+      responseData.put("nexturl", aNextUrl);
+      responseData.put("prevurl", aPreviousUrl);
+
+      responseData.put("from", Integer.toString(aFrom));
+      responseData.put("count", Integer.toString(aCount));
+      responseData.put("to", Integer.toString(aTo));
+
+      responseData.put("medialist", aList);
+
+      addExtraData(responseData);
+      ServletHelper.generateResponse(aResponse.getWriter(), responseData, listGenerator);
+    }
+    catch (Throwable t) {
+      throw new ServletModuleFailure(t);
+    }
+  }
+
+  public void returnUploadedMediaList(HttpServletRequest aRequest, HttpServletResponse aResponse,
+                                      String aWhereClause, String anOrderByClause, int anOffset) throws ServletModuleExc {
+
+    HTTPRequestParser requestParser = new HTTPRequestParser(aRequest);
+    URLBuilder urlBuilder = new URLBuilder();
+    EntityAdapterModel model;
+    String nextPageUrl = null;
+    String previousPageUrl = null;
+    String thisUrl = null;
+
+    int count;
+
+    try {
+      model = MirGlobal.localizer().dataModel().adapterModel();
+
+      Object mediaList =
+          new CachingRewindableIterator(
+          new EntityIteratorAdapter(aWhereClause, anOrderByClause, nrEntitiesPerListPage,
+                   model, definition, nrEntitiesPerListPage, anOffset)
+          );
+
+      count = mainModule.getSize(aWhereClause);
+
+      urlBuilder.setValue("module", moduleName);
+      urlBuilder.setValue("do", "list");
+      urlBuilder.setValue("where", aWhereClause);
+      urlBuilder.setValue("order", anOrderByClause);
+
+      urlBuilder.setValue("articleid", requestParser.getParameter("articleid"));
+      urlBuilder.setValue("commentid", requestParser.getParameter("commentid"));
+      urlBuilder.setValue("searchfield", requestParser.getParameter("searchfield"));
+      urlBuilder.setValue("searchtext", requestParser.getParameter("searchtext"));
+      urlBuilder.setValue("searchispublished", requestParser.getParameter("searchispublished"));
+      urlBuilder.setValue("searchmediafolder", requestParser.getParameter("searchmediafolder"));
+      urlBuilder.setValue("where", aWhereClause);
+      urlBuilder.setValue("order", anOrderByClause);
+
+      urlBuilder.setValue("offset", anOffset);
+      thisUrl = urlBuilder.getQuery();
+
+      if (count >= anOffset + nrEntitiesPerListPage) {
+        urlBuilder.setValue("offset", anOffset + nrEntitiesPerListPage);
+        nextPageUrl = urlBuilder.getQuery();
+      }
+
+      if (anOffset > 0) {
+        urlBuilder.setValue("offset", Math.max(anOffset - nrEntitiesPerListPage, 0));
+        previousPageUrl = urlBuilder.getQuery();
+      }
+
+      returnUploadedMediaList(aRequest, aResponse, mediaList,
+              anOffset+1, anOffset+nrEntitiesPerListPage, count, thisUrl,
+              nextPageUrl, previousPageUrl);
     }
     catch (Throwable e) {
       throw new ServletModuleFailure(e);
     }
   }
 
+  public void search(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc {
+    HTTPRequestParser requestParser = new HTTPRequestParser(aRequest);
 
-  public void add(HttpServletRequest req, HttpServletResponse res) throws ServletModuleExc {
+    SQLQueryBuilder queryBuilder = new SQLQueryBuilder();
+
+    String queryField = "";
+    String searchField = requestParser.getParameter("searchfield");
+    String searchText = requestParser.getParameter("searchtext");
+    String searchIsPublished = requestParser.getParameter("searchispublished");
+    String searchMediaFolder = requestParser.getParameter("searchmediafolder");
+
+    queryBuilder.appendDescendingOrder("webdb_create");
+
+    if (searchIsPublished!=null)
+      if (searchIsPublished.equals("0")) {
+        queryBuilder.appendAndCondition("is_published='f'");
+      }
+      else if (searchIsPublished.equals("1")) {
+        queryBuilder.appendAndCondition("is_published='t'");
+      }
+
+    if (searchField!=null && searchText!=null && searchText.length()>0) {
+        queryBuilder.appendAndCondition(
+          "lower(" + searchField + ") like " +
+          "'%" + JDBCStringRoutines.escapeStringLiteral(searchText.toLowerCase()) + "%'");
+    }
+
+    if (searchMediaFolder!=null && searchMediaFolder.length()>0) {
+      queryBuilder.appendAndCondition("to_media_folder="+Integer.parseInt(searchMediaFolder));
+    }
+
+    returnUploadedMediaList(aRequest, aResponse,
+            queryBuilder.getWhereClause(), queryBuilder.getOrderByClause(), requestParser.getIntegerWithDefault("offset", 0));
+  }
+
+  public void list(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc {
+    HTTPRequestParser requestParser = new HTTPRequestParser(aRequest);
+
+    returnUploadedMediaList(aRequest, aResponse,
+       requestParser.getParameterWithDefault("where", ""),
+       requestParser.getParameterWithDefault("order", "webdb_create desc"),
+       requestParser.getIntegerWithDefault("offset", 0));
+  }
+
+
+  public void add(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc {
     try {
-      SimpleHash mergeData = new SimpleHash();
-      SimpleHash popups = new SimpleHash();
-      String maxMedia = MirPropertiesConfiguration.instance().getString("ServletModule.OpenIndy.MaxMediaUploadItems");
-      String numOfMedia = req.getParameter("medianum");
+      HTTPRequestParser requestParser = new HTTPRequestParser(aRequest);
+      Map responseData = ServletHelper.makeGenerationData(aRequest, aResponse, new Locale[] {getLocale(aRequest), getFallbackLocale(aRequest)});
 
-      mergeData.put("new", "1");
-      mergeData.put("articleid", req.getParameter("articleid"));
-      mergeData.put("commentid", req.getParameter("commentid"));
+      int nrMedia = requestParser.getIntegerWithDefault("nrmedia", 1);
+      int maxNrMedia=configuration.getInt("ServletModule.OpenIndy.MaxMediaUploadItems", 20);
 
-      popups.put("mediafolderPopupData", DatabaseMediafolder.getInstance().getPopupData());
-
-      if (numOfMedia==null || numOfMedia.equals("")) {
-        numOfMedia="1";
+      List fields = mainModule.getStorageObject().getFields();
+      Map media = new HashMap();
+      Iterator i = fields.iterator();
+      while (i.hasNext()) {
+        media.put(i.next(), null);
       }
-      else if(Integer.parseInt(numOfMedia) > Integer.parseInt(maxMedia)) {
-        numOfMedia = maxMedia;
-      }
+      media.put("to_media_folder", new Integer(7));
+      responseData.put("uploadedmedia", media);
 
-      int mediaNum = Integer.parseInt(numOfMedia);
-      SimpleList mediaFields = new SimpleList();
-      for(int i =0; i<mediaNum;i++){
-        Integer mNum = new Integer(i+1);
-        mediaFields.add(mNum.toString());
-      }
-      mergeData.put("medianum",numOfMedia);
-      mergeData.put("mediafields",mediaFields);
-      deliver(req, res, mergeData, popups, templateObjektString);
+      responseData.put("new", Boolean.TRUE);
+      responseData.put("articleid", requestParser.getParameter("articleid"));
+      responseData.put("commentid", requestParser.getParameter("commentid"));
+      responseData.put("returnurl", null);
+
+      if (nrMedia<=0)
+        nrMedia=1;
+      if (nrMedia>maxNrMedia)
+        nrMedia=maxNrMedia;
+
+      List mediaFields = new Vector();
+      for (int j=0; j<nrMedia; j++)
+        mediaFields.add(new Integer(j));
+
+      responseData.put("nrmedia", new Integer(nrMedia));
+      responseData.put("mediafields", mediaFields);
+
+      responseData.put("edittemplate", editGenerator);
+      responseData.put("module", moduleName);
+
+      addExtraData(responseData);
+
+      ServletHelper.generateResponse(aResponse.getWriter(), responseData, "uploadedmedia.template");
     }
     catch (Exception e) {
       throw new ServletModuleFailure(e);
     }
   }
 
-  public void edit(HttpServletRequest req, HttpServletResponse res) throws ServletModuleExc {
-    String idParam = req.getParameter("id");
-    _edit(idParam, req, res);
+  public void edit(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc {
+    editUploadedMediaObject(aRequest.getParameter("id"), aRequest, aResponse);
   }
 
-  private void _edit(String idParam, HttpServletRequest req, HttpServletResponse res) throws ServletModuleExc {
+  private void editUploadedMediaObject(String idParam, HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc {
     if (idParam != null && !idParam.equals("")) {
       try {
-        SimpleHash popups = new SimpleHash();
-        popups.put("mediafolderPopupData", DatabaseMediafolder.getInstance().getPopupData());
-        deliver(req, res, mainModule.getById(idParam), popups,
-                templateObjektString);
+        Map responseData = ServletHelper.makeGenerationData(aRequest, aResponse, new Locale[] {getLocale(aRequest), getFallbackLocale(aRequest)});
+        EntityAdapter object =
+            model.makeEntityAdapter(definition, mainModule.getById(idParam));
+        responseData.put("uploadedmedia", object);
+        responseData.put("new", Boolean.FALSE);
+        responseData.put("articleid", null);
+        responseData.put("commentid", null);
+        responseData.put("returnurl", null);
+
+        responseData.put("edittemplate", editGenerator);
+        responseData.put("module", moduleName);
+
+        addExtraData(responseData);
+
+        ServletHelper.generateResponse(aResponse.getWriter(), responseData, "uploadedmedia.template");
       }
       catch (Throwable e) {
         throw new ServletModuleFailure(e);
       }
     }
     else {
-      throw new ServletModuleExc("ServletmoduleUploadedMedia :: _edit without id");
+      throw new ServletModuleExc("ServletmoduleUploadedMedia :: editUploadedMediaObject without id");
     }
   }
 
-
-  /** @todo should be in ServletModule.java */
-  private EntityUsers _getUser(HttpServletRequest req) {
-    HttpSession session = req.getSession(false);
-    return (EntityUsers) session.getAttribute("login.uid");
-  }
-
-  public void getMedia(HttpServletRequest req, HttpServletResponse res) throws ServletModuleExc {
-    String idParam = req.getParameter("id");
+  public void getMedia(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc {
+    String idParam = aRequest.getParameter("id");
     if (idParam!=null && !idParam.equals("")) {
       try {
         EntityUploadedMedia ent = (EntityUploadedMedia)mainModule.getById(idParam);
@@ -366,9 +439,9 @@ public abstract class ServletModuleUploadedMedia
         mediaHandler = MediaHelper.getHandler(mediaType);
         InputStream in = mediaHandler.getMedia(ent, mediaType);
 
-        res.setContentType(ctx.getMimeType(fName));
-        //important that before calling this res.getWriter was not called first
-        ServletOutputStream out = res.getOutputStream();
+        aResponse.setContentType(ctx.getMimeType(fName));
+        //important that before calling this aResponse.getWriter was not called first
+        ServletOutputStream out = aResponse.getOutputStream();
 
         int read ;
         byte[] buf = new byte[8 * 1024];
@@ -386,9 +459,9 @@ public abstract class ServletModuleUploadedMedia
     // no exception allowed
   }
 
-  public void getIcon(HttpServletRequest req, HttpServletResponse res) throws ServletModuleExc
+  public void getIcon(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc
   {
-    String idParam = req.getParameter("id");
+    String idParam = aRequest.getParameter("id");
     if (idParam!=null && !idParam.equals("")) {
       try {
         EntityUploadedMedia ent = (EntityUploadedMedia) mainModule.getById(idParam);
@@ -401,9 +474,9 @@ public abstract class ServletModuleUploadedMedia
         if (in==null)
           throw new ServletModuleExc("no icon available");
 
-        res.setContentType(mediaHandler.getIconMimeType(ent, mediaType));
-        //important that before calling this res.getWriter was not called first
-        ServletOutputStream out = res.getOutputStream();
+        aResponse.setContentType(mediaHandler.getIconMimeType(ent, mediaType));
+        //important that before calling this aResponse.getWriter was not called first
+        ServletOutputStream out = aResponse.getOutputStream();
 
         int read ;
         byte[] buf = new byte[8 * 1024];
@@ -415,13 +488,20 @@ public abstract class ServletModuleUploadedMedia
       }
 
       catch (Throwable e) {
-        throw new ServletModuleFailure(e);
+        logger.error("getIcon: " + e.toString());
       }
     }
     else logger.error("getIcon: id not specified.");
     // no exception allowed
   }
 
+  protected void addExtraData(Map aTarget) throws ServletModuleExc, ServletModuleFailure {
+    try {
+      aTarget.put("mediafolders",
+                  new EntityIteratorAdapter("", "", 20, MirGlobal.localizer().dataModel().adapterModel(), "mediaFolder"));
+    }
+    catch (Throwable t) {
+      throw new ServletModuleFailure(t);
+    }
+  }
 }
-
-

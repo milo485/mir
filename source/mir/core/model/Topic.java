@@ -42,93 +42,16 @@ import org.apache.commons.lang.builder.ToStringBuilder;
  * 
  * Topic
  * @author idefix
- * @version $Id: Topic.java,v 1.2 2003/08/17 19:13:19 idfx Exp $
+ * @version $Id: Topic.java,v 1.3 2003/09/05 20:23:59 idfx Exp $
  */
-public class Topic implements Serializable {
-
-    /** identifier field */
-    private Integer id;
-
-    /** persistent field */
-    private String title;
-
-    /** nullable persistent field */
-    private String description;
-
-    /** persistent field */
-    private String filename;
-
-    /** nullable persistent field */
-    private String mainUrl;
-
-    /** nullable persistent field */
-    private String archivUrl;
-
-    /** nullable persistent field */
-    private mir.core.model.Topic parentTopic;
+public class Topic extends TopicStub implements Serializable {
     
     private Set content;
 
     /** default constructor */
     public Topic() {
+			super();
     }
-
-    public java.lang.Integer getId() {
-        return this.id;
-    }
-
-    public void setId(java.lang.Integer id) {
-        this.id = id;
-    }
-
-    public java.lang.String getTitle() {
-        return this.title;
-    }
-
-    public void setTitle(java.lang.String title) {
-        this.title = title;
-    }
-
-    public java.lang.String getDescription() {
-        return this.description;
-    }
-
-    public void setDescription(java.lang.String description) {
-        this.description = description;
-    }
-
-    public java.lang.String getFilename() {
-        return this.filename;
-    }
-
-    public void setFilename(java.lang.String filename) {
-        this.filename = filename;
-    }
-
-    public java.lang.String getMainUrl() {
-        return this.mainUrl;
-    }
-
-    public void setMainUrl(java.lang.String mainUrl) {
-        this.mainUrl = mainUrl;
-    }
-
-    public java.lang.String getArchivUrl() {
-        return this.archivUrl;
-    }
-
-    public void setArchivUrl(java.lang.String archivUrl) {
-        this.archivUrl = archivUrl;
-    }
-
-    public mir.core.model.Topic getParentTopic() {
-        return this.parentTopic;
-    }
-
-    public void setParentTopic(mir.core.model.Topic parentTopic) {
-        this.parentTopic = parentTopic;
-    }
-
 		/**
 		 * @return
 		 */

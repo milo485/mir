@@ -18,18 +18,22 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with  any library licensed under the Apache Software License, 
- * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
- * (or with modified versions of the above that use the same license as the above), 
- * and distribute linked combinations including the two.  You must obey the 
- * GNU General Public License in all respects for all of the code used other than 
- * the above mentioned libraries.  If you modify this file, you may extend this 
- * exception to your version of the file, but you are not obligated to do so.  
+ * the code of this program with  any library licensed under the Apache Software License,
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library
+ * (or with modified versions of the above that use the same license as the above),
+ * and distribute linked combinations including the two.  You must obey the
+ * GNU General Public License in all respects for all of the code used other than
+ * the above mentioned libraries.  If you modify this file, you may extend this
+ * exception to your version of the file, but you are not obligated to do so.
  * If you do not wish to do so, delete this exception statement from your version.
  */
 package  mircoders.media;
 
 import java.io.StringReader;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Vector;
 
 import mir.entity.Entity;
 import mir.log.LoggerWrapper;
@@ -38,8 +42,6 @@ import mir.media.MediaFailure;
 import mir.media.MirMedia;
 import mir.misc.FileUtil;
 import mir.misc.StringUtil;
-import freemarker.template.SimpleHash;
-import freemarker.template.SimpleList;
 
 
 
@@ -51,7 +53,7 @@ import freemarker.template.SimpleList;
  * @see mir.media.MediaHandlerGeneric
  * @see mir.media.MirMedia
  * @author john <john@manifestor.org>, mh <heckmann@hbe.ca>
- * @version $Id: MediaHandlerRealAudio.java,v 1.19 2003/04/21 12:42:48 idfx Exp $
+ * @version $Id: MediaHandlerRealAudio.java,v 1.20 2003/09/03 18:29:04 zapata Exp $
  */
 
 
@@ -85,9 +87,9 @@ public class MediaHandlerRealAudio extends MediaHandlerAudio implements MirMedia
     }
   }
 
-  public SimpleList getURL(Entity ent, Entity mediaTypeEnt)
+  public List getURL(Entity ent, Entity mediaTypeEnt)
   {
-    SimpleList theList = new SimpleList();
+    List theList = new Vector();
 
     //String stringSize = ent.getValue("size");
     //int size = Integer.parseInt(stringSize, 10)/1024;
@@ -98,7 +100,7 @@ public class MediaHandlerRealAudio extends MediaHandlerAudio implements MirMedia
 
     // @todo the texts ("title") below urgently need to be sanely localizaeble
     // somehow
-    SimpleHash ramHash = new SimpleHash();
+    Map ramHash = new HashMap();
     ramHash.put("publish_path", basePath+".ram");
     ramHash.put("publish_server", configuration.getString("Producer.Media.Host"));
     ramHash.put("title", "stream URL");

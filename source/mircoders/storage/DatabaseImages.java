@@ -31,6 +31,7 @@
 package mircoders.storage;
 
 import java.util.GregorianCalendar;
+import java.util.List;
 
 import mir.entity.Entity;
 import mir.log.LoggerWrapper;
@@ -38,7 +39,6 @@ import mir.misc.StringUtil;
 import mir.storage.Database;
 import mir.storage.StorageObject;
 import mir.storage.StorageObjectFailure;
-import freemarker.template.SimpleList;
 
 /**
  * <b>Diese Klasse implementiert die Datenbankverbindung zur MetaObjekt-Tabelle
@@ -49,11 +49,7 @@ import freemarker.template.SimpleList;
 public class DatabaseImages extends Database implements StorageObject{
 
   private static DatabaseImages instance;
-  private static SimpleList publisherPopupData;
 
-  // the following *has* to be sychronized cause this static method
-  // could get preemted and we could end up with 2 instances of DatabaseFoo..
-  // see the "Singletons with needles and thread" article at JavaWorld -mh
   public synchronized static DatabaseImages getInstance() {
     if (instance == null) {
       instance = new DatabaseImages();
@@ -70,10 +66,6 @@ public class DatabaseImages extends Database implements StorageObject{
     theTable = "images";
     theCoreTable = "media";
     theEntityClass = mircoders.entity.EntityImages.class;
-  }
-
-  public SimpleList getPopupData() throws StorageObjectFailure {
-    return getPopupData("title", true);
   }
 
   public void update(Entity theEntity) throws StorageObjectFailure {
@@ -96,7 +88,4 @@ public class DatabaseImages extends Database implements StorageObject{
 
     return super.insert(theEntity);
   }
-
-  // initialisierungen aus den statischen Tabellen
-
 }

@@ -6,36 +6,42 @@
 
   <body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
     <include "FUNCTIONS.template">
+    <include "head.template">
   
-  <include "head.template">
-
-    <form action="${config.actionRoot}" method="post">
-      <input type=hidden name=module value=Topics>
-      <input type="hidden" name="id" value="${data.id}">
-      <if data.new>
-        <input type="hidden" name="do" value="insert">
+      <if new=="1">
+        <assign method="insert">
       <else>
-        <input type="hidden" name="do" value="update">
+        <assign method="update">
+      </if>
+      
+      <call EditStart(
+         ["module", "id", "do"],
+         [module, entity.id, method])>
+         
+        <call EditReadonlyTextNormal(lang("topic.id"), entity.id)>
+         
+        <call EditTextNormal(lang("topic.title"), 40, 255, "title", entity.title)>
+        <call EditTextAreaNormal(lang("topic.description"), "", 40, 3, "description", entity.description)>
+        <call EditTextNormal(lang("topic.filename"), 20, 255, "filename", entity.filename)>
+        <call EditTextNormal(lang("topic.main_url"), 40, 255, "main_url", entity.main_url)>
+        <call EditTextNormal(lang("topic.archive_url"), 40, 255, "archiv_url", entity.archiv_url)>
+        
+        
+      
+        <if new=="1">
+          <call EditSubmitButtonNormal(lang("insert"), "save")>
+        <else>
+          <call EditSubmitButtonNormal(lang("save"), "save")>
+        </if> 
+
+      <call EditEnd()>
+      
+      <if returnurl>
+        <call showBack(returnurl)>
+      <else>
+        <call showBack("module=Topics&do=list")>
       </if>
 
-      <table border="0">
-    <call TextInputTableRow (lang("topic.title"), 40, 255, "title", data.title)>
-    <call TextAreaTableRow (lang("topic.description"), "", 40, 3, "description", data.description)>
-    <call TextInputTableRow (lang("topic.filename"), 20, 255, "filename", data.filename)>
-    <call TextInputTableRow (lang("topic.main_url"), 40, 255, "main_url", data.main_url)>
-    <call TextInputTableRow (lang("topic.archive_url"), 40, 255, "archiv_url", data.archiv_url)>
-
-          <td class="table-foot" colspan="2" align="right"> 
-          <if data.new>
-            <input type="submit" name="save" value="${lang("insert")}">
-          <else>
-            <input type="submit" name="save" value="${lang("save")}">
-          </if> 
-          </td>
-        </tr>
-      </table>    
-    </form>
-  <p><a class="link-box" href="${config.actionRoot}?module=Topics&do=list">[&lt;] ${lang("back")} </a> &nbsp;</p>
     <include "foot.template">
   </body>
 </html>

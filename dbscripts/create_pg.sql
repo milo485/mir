@@ -77,14 +77,13 @@ CREATE SEQUENCE "webdb_users_id_seq" start 1 increment 1 maxvalue 2147483647 min
 CREATE TABLE "webdb_users" (
 	"id" integer DEFAULT nextval('webdb_users_id_seq'::text) NOT NULL,
 	"login" character varying(16) NOT NULL,
-	"password" character varying(16) NOT NULL,
+	"password" character varying(255) NOT NULL,
 	"is_admin" boolean DEFAULT '0' NOT NULL,
+	"comment" text,
 	Constraint "webdb_users_pkey" Primary Key ("id")
 );
 
 CREATE  INDEX "idx_webdb_user_log_pas_is_admin" on "webdb_users" using btree ( "login" "varchar_ops", "password" "varchar_ops", "is_admin" "bool_ops" );
-
-CREATE  INDEX "idx_webdb_user_log_pas" on "webdb_users" using btree ( "login" "varchar_ops", "password" "varchar_ops" );
 
 --
 -- article type
@@ -314,6 +313,9 @@ CREATE UNIQUE INDEX "idx_video_id" on "video" using btree ( "id" "int4_ops" );
 CREATE TABLE "other_media" (
 )
 INHERITS ("uploaded_media");
+
+CREATE        INDEX "idx_othermedia_is_published_produced" on "other_media" using btree ( "is_published" "bool_ops", "is_produced" "bool_ops" );
+CREATE UNIQUE INDEX "idx_othermedia_id" on "other_media" using btree ( "id" "int4_ops" );
 
 --
 -- content

@@ -44,7 +44,7 @@ import org.apache.commons.lang.builder.ToStringBuilder;
  * 
  * Media
  * @author idefix
- * @version $Id: Media.java,v 1.4 2003/08/19 00:41:54 idfx Exp $
+ * @version $Id: Media.java,v 1.5 2003/09/05 20:23:59 idfx Exp $
  */
 public class Media implements Serializable, IMedia {
 
@@ -264,22 +264,6 @@ public class Media implements Serializable, IMedia {
 
     public void setPublishPath(java.lang.String publishPath) {
         this.publishPath = publishPath;
-    }
-
-    public boolean isIsPublished() {
-        return this.isPublished;
-    }
-
-    public void setIsPublished(boolean isPublished) {
-        this.isPublished = isPublished;
-    }
-
-    public boolean isIsProduced() {
-        return this.isProduced;
-    }
-
-    public void setIsProduced(boolean isProduced) {
-        this.isProduced = isProduced;
     }
 
     public java.util.Date getWebdbCreate() {

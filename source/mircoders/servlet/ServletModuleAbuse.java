@@ -32,46 +32,109 @@ package mircoders.servlet;
 
 import java.util.Locale;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import mir.log.LoggerWrapper;
 import mir.servlet.ServletModule;
+import mir.servlet.ServletModuleExc;
 import mir.servlet.ServletModuleFailure;
 import mir.util.HTTPRequestParser;
 import mir.util.URLBuilder;
+import mircoders.global.Abuse;
 import mircoders.global.MirGlobal;
 
 public class ServletModuleAbuse extends ServletModule {
   private static ServletModuleAbuse instance = new ServletModuleAbuse();
+  private String editFilterTemplate;
+  private String listFiltersTemplate;
+  private String mainTemplate;
+  private String viewLogTemplate;
+
   public static ServletModule getInstance() { return instance; }
 
   private ServletModuleAbuse() {
     logger = new LoggerWrapper("ServletModule.Abuse");
     defaultAction = "showsettings";
+
+    editFilterTemplate = configuration.getString("ServletModule.Abuse.EditFilter.Template");
+    listFiltersTemplate = configuration.getString("ServletModule.Abuse.ListFilters.Template");
+    viewLogTemplate = configuration.getString("ServletModule.Abuse.ViewLog.Template");
+    mainTemplate = configuration.getString("ServletModule.Abuse.Main.Template");
   }
 
-  public void editfilter(HttpServletRequest aRequest, HttpServletResponse aResponse) {
+  public void edit(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc {
+    HTTPRequestParser requestParser = new HTTPRequestParser(aRequest);
+    String id=requestParser.getParameterWithDefault("id", "");
+
+    if (id.equals("")) {
+      editfilter(aRequest, aResponse, "", "", "", "", "", "", "");
+    }
+    else {
+      Abuse.FilterRule filter = MirGlobal.abuse().getFilter(id);
+      if (filter==null)
+        throw new ServletModuleExc("Filter not found");
+
+      editfilter(aRequest, aResponse, filter.getId(), filter.getType(), filter.getExpression(), filter.getComments(), filter.getCommentAction(), filter.getArticleAction(), "");
+    }
+  }
+
+  public void editfilter(HttpServletRequest aRequest, HttpServletResponse aResponse,
+        String anId, String aType, String anExpression, String aComments,
+        String aCommentAction, String anArticleAction, String anErrorMessage) throws ServletModuleExc {
+    try {
+      Map responseData = ServletHelper.makeGenerationData(aRequest, aResponse, new Locale[] { getLocale(aRequest), getFallbackLocale(aRequest)});
+
+      responseData.put("id", anId);
+      responseData.put("type", aType);
+      responseData.put("expression", anExpression);
+      responseData.put("comments", aComments);
+      responseData.put("articleaction", anArticleAction);
+      responseData.put("commentaction", aCommentAction);
+      responseData.put("errormessage", anErrorMessage);
+
+      responseData.put("articleactions", MirGlobal.abuse().getArticleActions());
+      responseData.put("commentactions", MirGlobal.abuse().getCommentActions());
+      responseData.put("filtertypes", MirGlobal.abuse().getFilterTypes());
+
+      ServletHelper.generateResponse(aResponse.getWriter(), responseData, editFilterTemplate);
+    }
+    catch (Throwable e) {
+      throw new ServletModuleFailure(e);
+    }
+  }
+
+  public void updatefilter(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc {
     HTTPRequestParser requestParser = new HTTPRequestParser(aRequest);
 
     String type=requestParser.getParameterWithDefault("type", "");
     String id=requestParser.getParameterWithDefault("id", "");
     String expression=requestParser.getParameterWithDefault("expression", "");
+    String commentaction=requestParser.getParameterWithDefault("commentaction", "");
+    String articleaction=requestParser.getParameterWithDefault("articleaction", "");
+    String comments=requestParser.getParameterWithDefault("comments", "");
+
+    String errorMessage;
+
+    String userName = ServletHelper.getUserName(aRequest);
 
     if (id.equals("")) {
-      MirGlobal.abuse().addFilter(type, expression);
+      errorMessage = MirGlobal.abuse().addFilter(type, expression,comments, commentaction, articleaction);
     }
     else {
-      MirGlobal.abuse().setFilter(id, type, expression);
+      errorMessage = MirGlobal.abuse().setFilter(id, type, expression, comments, commentaction, articleaction);
     }
 
-    MirGlobal.abuse().save();
-
-    showfilters(aRequest, aResponse);
+    if (errorMessage!=null) {
+      editfilter(aRequest, aResponse, id, type, expression, comments, commentaction, articleaction, errorMessage);
+    }
+    else {
+      MirGlobal.abuse().save();
+      showfilters(aRequest, aResponse);
+    }
   }
 
-  public void deletefilter(HttpServletRequest aRequest, HttpServletResponse aResponse) {
+  public void delete(HttpServletRequest aRequest, HttpServletResponse aResponse) {
     HTTPRequestParser requestParser = new HTTPRequestParser(aRequest);
 
     String id=requestParser.getParameterWithDefault("id", "");
@@ -82,32 +145,33 @@ public class ServletModuleAbuse extends ServletModule {
     showfilters(aRequest, aResponse);
   }
 
+  public void add(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc {
+    editfilter(aRequest, aResponse, "", "", "", "", "", "", "");
+  }
   public void showfilters(HttpServletRequest aRequest, HttpServletResponse aResponse) {
     URLBuilder urlBuilder = new URLBuilder();
 
     try {
-      Map responseData = ServletHelper.makeGenerationData(aResponse, new Locale[] { getLocale(aRequest), getFallbackLocale(aRequest)});
+      Map responseData = ServletHelper.makeGenerationData(aRequest, aResponse, new Locale[] { getLocale(aRequest), getFallbackLocale(aRequest)});
 
       urlBuilder.setValue("module", "Abuse");
       urlBuilder.setValue("do", "showfilters");
       responseData.put("thisurl", urlBuilder.getQuery());
 
       responseData.put("filters", MirGlobal.abuse().getFilters());
-      responseData.put("filtertypes", MirGlobal.abuse().getFilterTypes());
 
-      ServletHelper.generateResponse(aResponse.getWriter(), responseData, "abuse.filters.template");
+      ServletHelper.generateResponse(aResponse.getWriter(), responseData, listFiltersTemplate);
     }
     catch (Throwable e) {
       throw new ServletModuleFailure(e);
     }
   }
 
-
   public void showsettings(HttpServletRequest aRequest, HttpServletResponse aResponse) {
     URLBuilder urlBuilder = new URLBuilder();
 
     try {
-      Map responseData = ServletHelper.makeGenerationData(aResponse, new Locale[] { getLocale(aRequest), getFallbackLocale(aRequest)});
+      Map responseData = ServletHelper.makeGenerationData(aRequest, aResponse, new Locale[] { getLocale(aRequest), getFallbackLocale(aRequest)});
 
       urlBuilder.setValue("module", "Abuse");
       urlBuilder.setValue("do", "showsettings");
@@ -125,7 +189,7 @@ public class ServletModuleAbuse extends ServletModule {
       responseData.put("articleaction", MirGlobal.abuse().getArticleBlockAction());
       responseData.put("commentaction", MirGlobal.abuse().getCommentBlockAction());
 
-      ServletHelper.generateResponse(aResponse.getWriter(), responseData, "abuse.template");
+      ServletHelper.generateResponse(aResponse.getWriter(), responseData, mainTemplate);
     }
     catch (Throwable e) {
       throw new ServletModuleFailure(e);
@@ -165,14 +229,14 @@ public class ServletModuleAbuse extends ServletModule {
     int count;
 
     try {
-      Map responseData = ServletHelper.makeGenerationData(aResponse, new Locale[] { getLocale(aRequest), getFallbackLocale(aRequest)});
+      Map responseData = ServletHelper.makeGenerationData(aRequest, aResponse, new Locale[] { getLocale(aRequest), getFallbackLocale(aRequest)});
       urlBuilder.setValue("module", "Abuse");
       urlBuilder.setValue("do", "showlog");
       responseData.put("thisurl", urlBuilder.getQuery());
 
       responseData.put("log", MirGlobal.abuse().getLog());
 
-      ServletHelper.generateResponse(aResponse.getWriter(), responseData, "abuse.log.template");
+      ServletHelper.generateResponse(aResponse.getWriter(), responseData, viewLogTemplate);
     }
     catch (Throwable e) {
       throw new ServletModuleFailure(e);

@@ -18,18 +18,19 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with  any library licensed under the Apache Software License, 
- * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
- * (or with modified versions of the above that use the same license as the above), 
- * and distribute linked combinations including the two.  You must obey the 
- * GNU General Public License in all respects for all of the code used other than 
- * the above mentioned libraries.  If you modify this file, you may extend this 
- * exception to your version of the file, but you are not obligated to do so.  
+ * the code of this program with  any library licensed under the Apache Software License,
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library
+ * (or with modified versions of the above that use the same license as the above),
+ * and distribute linked combinations including the two.  You must obey the
+ * GNU General Public License in all respects for all of the code used other than
+ * the above mentioned libraries.  If you modify this file, you may extend this
+ * exception to your version of the file, but you are not obligated to do so.
  * If you do not wish to do so, delete this exception statement from your version.
  */
 package mircoders.entity;
 
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Map;
 
 import mir.entity.Entity;
@@ -40,15 +41,11 @@ import mir.misc.NumberUtils;
 import mir.storage.StorageObject;
 import mir.storage.StorageObjectFailure;
 import mircoders.storage.DatabaseUploadedMedia;
-import freemarker.template.SimpleList;
-import freemarker.template.SimpleScalar;
-import freemarker.template.TemplateModel;
-import freemarker.template.TemplateModelException;
 
 /**
  *
  * @author mh, mir-coders group
- * @version $Id: EntityUploadedMedia.java,v 1.26 2003/04/21 12:42:53 idfx Exp $
+ * @version $Id: EntityUploadedMedia.java,v 1.27 2003/09/03 18:29:04 zapata Exp $
  */
 
 
@@ -124,12 +121,6 @@ public class EntityUploadedMedia extends Entity {
     return returnValue;
   }
 
-  public TemplateModel get(java.lang.String key) throws TemplateModelException {
-    if (key.equals("url"))
-      return getUrl();
-    return new SimpleScalar(getValue(key));
-  }
-
   // @todo  all these methods should be merged into 1
   // and the MediaHandler should be cached somehow.
   private String getMediaTypeString() {
@@ -170,7 +161,7 @@ public class EntityUploadedMedia extends Entity {
     return null;
   }
 
-  private SimpleList getUrl() {
+  private List getUrl() {
     MirMedia mediaHandler = null;
     Entity mediaType = null;
 

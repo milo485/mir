@@ -40,6 +40,7 @@ public class FreeQueryProducerNode implements ProducerNode {
   public static final int QUERY_TYPE_SET = 1;
   public static final int QUERY_TYPE_ROW = 2;
   public static final int QUERY_TYPE_VALUE = 3;
+  public static final int QUERY_TYPE_UPDATE = 4;
 
   private Database database = new Database();
   private String key;
@@ -59,6 +60,9 @@ public class FreeQueryProducerNode implements ProducerNode {
 
     try {
       switch (type) {
+        case QUERY_TYPE_UPDATE:
+          result = new Integer(database.executeUpdate(ParameterExpander.expandExpression(aValueMap, query)));
+          break;
         case QUERY_TYPE_VALUE:
           result = database.executeFreeSingleValueSql(ParameterExpander.expandExpression(aValueMap, query));
           break;

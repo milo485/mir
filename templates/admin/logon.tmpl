@@ -1,0 +1,77 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+  <head>
+    <title>${config["Mir.Name"]} | ${lang("login.htmltitle")}</title>
+    <link rel="stylesheet" type="text/css" href="${config.docRoot}/style/admin.css">
+    <script language="JavaScript">
+      function placeFocus() {
+        document.forms[0].elements[1].focus();
+      }
+    </script>
+  </head>
+  <body onLoad="placeFocus()" marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
+    
+  <include "head_nonavi.template">
+
+<center>
+      <p>
+          ${lang("login.info", 
+                 "<a href=\"mailto:" + config["Mir.Contact-email.address"] +
+                 "\">" + 
+                 config["Mir.Contact-email.name"] + 
+                 "</a>"
+                 )
+           }
+      </p>
+      
+    <hr>
+<div style="width:300px;">
+
+  <div class="box-head"><b>${lang("login.title")}</b></div>
+  
+  <div class="box">
+    
+    
+      <form method="post" action="${utility.encodeLink("logon.do")}">
+        
+    <input type="hidden" name="module" value="login">
+
+    <table cellpadding="4">
+    <tbody>
+      <tr>
+      <td align="right">${lang("login.name")}:</td>
+      <td align="left"><input type="text" name="login" size="15"></td>
+      </tr>
+      <tr>
+      <td align="right">${lang("login.password")}:</td>
+      <td align="left"><input type="password" name="password" size="15"></td>
+      </tr>
+      <tr>
+      <td align="right">${lang("login.language")}:</td>
+      <td align="left">  
+        <select name="language">
+        <list application.languages as l>
+          <option value="${l.code}" <if l.code==application.defaultlanguage>selected</if> >${l.name}</option>
+        </list>
+        </select>
+      </td>
+      </tr>  
+    <tr>
+      <td colspan="2" align="right">
+        <input type="submit" value="${lang("login.submit")}">
+      </td>
+    </tr>
+    </tbody>
+    </table>                
+
+      </form>
+  </div>
+</div>
+<br>
+</center>
+    
+    <include "foot.template">
+  
+  </body>
+</html>
+

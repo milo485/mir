@@ -1,0 +1,21 @@
+<a name="top"></a>
+
+<table class="table-head" width="100%" cellspacing="0" cellpadding="0">
+  <tr>
+    <td><img src="${config.docRoot}/img/logo_small.gif" border="0" align="left"></td>
+    <td>
+      ${config["Mir.Name"]} &nbsp; | &nbsp; ${config.now.format(config["Mir.DefaultDateTimeFormat"])} 
+    </td>
+    <td class="table-head" align="right">
+      <a href="${utility.encodeLink(config.docRoot+"/admin/changePassword.do?id="+session.user.id+"&amp;returnurl=")}"><span class="table-head">${lang("head.changepassword")}</span></a> &nbsp; | &nbsp;
+      <if request.returnurl>
+        <a href="${utility.encodeLink(config.docRoot+request.returnurl)}"><span class="table-head">[ &lt; ] ${lang("back")}</span></a> &nbsp; | &nbsp;
+      </if> 
+      <a href="${utility.encodeLink(config.docRoot+"/admin/index.do")}"><span class="table-head">${lang("head.start")}</span></a> &nbsp; | &nbsp;
+      <a href="${utility.encodeLink(config.docRoot+"/admin/logoff.do")}"><span class="table-head">${lang("head.logout")}
+      <if session.user> <i>${session.user.login}</i> </if>
+      </span></a>
+    </td>
+  </tr>
+</table>
+<hr>

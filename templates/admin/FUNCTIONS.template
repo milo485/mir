@@ -1,72 +1,84 @@
-<comment>creates a full table incl. edit/delete entry.id</comment>
-<function ListTable(contentlist, data_keys, column_head_texts, column_head_CSS, listrow1CSS, listrow2CSS, footer_css, module_name)>
+<include "EDITFUNCTIONS.template">
 
-<table cellspacing="2" border="0">
-  
-  <tr>
-    <list column_head_texts as indexVariable>
-      <td class="${column_head_CSS}">
-        <b>${indexVariable}</b> 
-      </td>
-    </list>
-      <td class="${column_head_CSS}">
-        &nbsp;
-      </td> 
-  </tr>
+<function showAbsoluteLinkButton(anUrl, aLabel)>
+    <span class="link-box-div">
+  <a class="link-box" href="${utility.encodeHTML(anUrl)}">${aLabel}</a>
+    </span>
+</function>
+<function showButton(anUrl, aLabel)>
+  <call showAbsoluteLinkButton(config.actionRoot+"?"+anUrl, aLabel)>
+</function>
 
-  
-<list contentlist as entry>
-  <if grey=="1">
-    <assign grey="0">
-    <tr class="${listrow1CSS}">
-  <else>
-    <assign grey="1"> 
-    <tr class="${listrow2CSS}">
-  </if>
-    
-  <list data_keys as indexVariable>   
-      <td>
-        ${entry[indexVariable]}
-      </td>
+
+<assign TABLE_HEAD_CLASS          "table-head">
+<assign TABLE_FOOT_CLASS          "table-foot">
+<assign LIST_ROW_CLASS             "listrow1">
+<assign LIST_ROW_CLASS_ALTERNATIVE "listrow2">
+
+<function EntityTable(anEntityList, aDataKeys, aHeaders, aFrom, aTo, aCount, aShowDelete, aShowEdit, aModuleName)>
+  <assign nrColumns="0">
+  <list aHeaders as h>
+    <assign nrColumns=utility.increment(nrColumns)>
   </list>
-    <td>
-      <a class="listcommand" href="${config.actionRoot}?module=${module_name}&do=delete&id=${entry.id}">${lang("delete")}</a>
-      | <a class="listcommand" href="${config.actionRoot}?module=${module_name}&do=edit&id=${entry.id}">${lang("edit")}</a>
-    </td>
-  </tr>
-</list>
-  
-  
-  <tr>    
-    <td colspan="${column_nr}" class="table-foot">
-      ${data.count} ${lang("records")} / ${lang("show_from_to", data.from, data.to)}
-    </td>
-  </tr>
+  <if aShowDelete == "1" || aShowEdit == "1" >
+    <assign nrColumns=utility.increment(nrColumns)>
+  </if>
 
-</table>
-</function>
-
-<comment>creates browse links, only called if necessary</comment>
-<function PrevNextPage(module_name)>
-  <p>
-      <if (data.prev || data.next)>
-        <form method="post" action="${config.actionRoot}">
-          <input type="hidden" name="module" value="${module_name}">
-          <input type="hidden" name="where" value="${data.where}">
-          <if data.prev>
-            <input type="hidden" name="do" value="list">
-            <input type="hidden" name="prevoffset" value="${data.prev}">
-            <input type="submit" name="prev" value="${lang("list.previous")}">
-          </if>
-          <if data.next>
-            <input type="hidden" name="do" value="list">
-            <input type="hidden" name="nextoffset" value="${data.next}">
-            <input type="submit" name="next" value="${lang("list.next")}">
-          </if>
-        </form>
+  <table cellspacing="2" border="0">
+    <tr>
+      <list aHeaders as i>
+        <td class="${TABLE_HEAD_CLASS}">
+          <b>${i}</b> 
+        </td>
+      </list>
+      <if aShowDelete == "1" || aShowEdit == "1">
+        <td class="${TABLE_HEAD_CLASS}">
+          &nbsp;
+        </td> 
       </if>
-  </p>
+    </tr>
+    <assign alternative="0">
+    
+    <list anEntityList as entry>
+      <if alternative=="0">
+        <assign alternative="1">
+        <tr class="${LIST_ROW_CLASS}">
+      <else>
+        <assign alternative="0">
+        <tr class="${LIST_ROW_CLASS_ALTERNATIVE}">
+      </if>
+        
+        <list aDataKeys as i>   
+            <td>
+              ${entry[i]}
+            </td>
+        </list>
+        <if aShowDelete == "1" || aShowEdit == "1" >
+          <td>
+            <if aShowDelete>
+            <a class="listcommand" href="${config.actionRoot}?module=${aModuleName}&do=delete&id=${entry.id}">${lang("delete")}</a>
+            </if>
+            <if aShowDelete == "1" && aShowEdit == "1">
+            | 
+            </if>
+            <if aShowEdit == "1">
+              <a class="listcommand" href="${config.actionRoot}?module=${aModuleName}&do=edit&id=${entry.id}">${lang("edit")}</a>
+            </if>
+          </td>
+        </if>
+      </tr>
+    </list>
+    
+    
+    <tr>    
+      <td colspan="${nrColumns}" class="${TABLE_FOOT_CLASS}">
+        ${aCount} ${lang("records")} / ${lang("show_from_to", aFrom, aTo)}
+      </td>
+    </tr>
+  
+  </table>
 </function>
+
 
 <comment>extra navigation</comment>
 <function AddOrBack(module_name, module_jumpback, do_jumpback)>
@@ -77,8 +89,19 @@
   </p>
 </function>
 
+<function showAddOrBack(anAllowAdd, anAddModule, aBackModule, aBackMethod, )>
+    <p>
+      <if anAllowAdd == "1">
+        <a class="link-box" href="${config.actionRoot}?module=${anAddModule}&do=add">[+] ${lang("add")}</a> &nbsp;
+      </if>
+      <a class="link-box" href="${config.actionRoot}?module=${aBackModule}&do=${aBackMethod}">[&lt;] ${lang("back")} </a> &nbsp;
+<comment>      <a class="link-box" href="${config.actionRoot}">[&lt;&lt;&lt;] ${lang("head.start")}</a></comment>
+  </p>
+</function>
 
-
+<function showBack(aBackUrl)>
+  <p><a class="link-box" href="${config.actionRoot}?${aBackUrl}">[&lt;] ${lang("back")} </a> &nbsp;</p>
+</function>
 
 <function PulldownTableRow (label, fieldname, entrieslist, keyfield, valuefield, value, langprefix)>
   <tr>
@@ -96,7 +119,13 @@
 </function>   
 
 
-<comment>4 functions to create Table rows with input-fields</comment>
+
+
+
+
+
+
+
 <function TextInputTableRow (label, size, maxlength, fieldname, fieldcontent)>
   <tr>
     <td align="right" class="table-left">
@@ -105,6 +134,18 @@
     
     <td class="listrow2">
       <input type="text" size="${size}" maxlength="${maxlength}" name="${fieldname}" value="${utility.encodeHTML(fieldcontent)}">
+    </td>
+  </tr>
+</function>
+
+<function ReadonlyTextTableRow (label, fieldcontent)>
+  <tr>
+    <td align="right" class="table-left">
+      <b>${label}:</b>
+    </td>
+    
+    <td class="listrow2">
+      ${utility.encodeHTML(fieldcontent)}
     </td>
   </tr>
 </function>
@@ -134,6 +175,8 @@
 </function>
 
 <function CheckboxTableRow (label, fieldname, fieldcontent )>
+  <call EditCheckboxNormal(label, fieldname, fieldcontent)>
+<comment>
   <tr>
     <td align="right" valign="top" class="table-left">
       <b>${label}:</b>
@@ -143,6 +186,7 @@
       <input type="checkbox" name="${fieldname}" value="1"<if fieldcontent=="1"> checked</if>>&nbsp;&nbsp;
     </td>
   </tr>
+</comment>  
 </function> 
 
 <function TextAreaTableRow (label, hint, cols, rows, fieldname, fieldcontent )>
@@ -202,6 +246,8 @@
                   <option value="title"<if searchfield=="title"> selected</if>>${lang("contentsearch.field.title")}</option>
                   <option value="creator"<if searchfield=="creator"> selected</if>>${lang("contentsearch.field.creator")}</option>
                   <option value="contents"<if searchfield=="content"> selected</if>>${lang("contentsearch.field.contents")}</option>
+                  <option value="creator_main_url"<if searchfield=="creator_main_url"> selected</if>>${lang("contentsearch.field.creator_main_url")}</option>
+                  <option value="creator_email"<if searchfield=="creator_email"> selected</if>>${lang("contentsearch.field.creator_email")}</option>
                 </select>
             </td>
             <td <if layout>class="listrow2"</if>>

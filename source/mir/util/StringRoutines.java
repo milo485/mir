@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with  any library licensed under the Apache Software License, 
- * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
- * (or with modified versions of the above that use the same license as the above), 
- * and distribute linked combinations including the two.  You must obey the 
- * GNU General Public License in all respects for all of the code used other than 
- * the above mentioned libraries.  If you modify this file, you may extend this 
- * exception to your version of the file, but you are not obligated to do so.  
+ * the code of this program with  any library licensed under the Apache Software License,
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library
+ * (or with modified versions of the above that use the same license as the above),
+ * and distribute linked combinations including the two.  You must obey the
+ * GNU General Public License in all respects for all of the code used other than
+ * the above mentioned libraries.  If you modify this file, you may extend this
+ * exception to your version of the file, but you are not obligated to do so.
  * If you do not wish to do so, delete this exception statement from your version.
  */
 package mir.util;
@@ -40,7 +40,7 @@ public class StringRoutines {
   private StringRoutines() {
   }
 
-  static int indexOfCharacters(String aString, char[] aCharacters, int aFrom) {
+  public static int indexOfCharacters(String aString, char[] aCharacters, int aFrom) {
     int i;
     int result=-1;
     int position;
@@ -56,7 +56,7 @@ public class StringRoutines {
     return result;
   }
 
-  static String replaceStringCharacters(String aText, char[] aCharactersToReplace, String[] aStringsToSubstitute) {
+  public static String replaceStringCharacters(String aText, char[] aCharactersToReplace, String[] aStringsToSubstitute) {
     if (aText==null)
       return null;
 
@@ -197,7 +197,6 @@ public class StringRoutines {
     List result= new Vector();
     int previousPosition = 0;
     int position;
-    int endOfNamePosition;
 
     if((position = aString.indexOf(aSeparator, previousPosition))>=0) {
       result.add(aString.substring(previousPosition, position));
@@ -207,5 +206,87 @@ public class StringRoutines {
     result.add(aString.substring(previousPosition, aString.length()));
 
     return result;
+  }
+
+  public static List splitStringWithEscape(String aString, char aSeparator, char anEscape) {
+    List result= new Vector();
+    int previousPosition = 0;
+    int position;
+    int endOfNamePosition;
+    StringBuffer currentItem = new StringBuffer();
+
+    if (aString!=null) {
+      while ((position = indexOfCharacters(aString, new char[] {aSeparator, anEscape}, previousPosition))>=0) {
+        currentItem.append(aString.substring(previousPosition, position));
+
+        if (aString.charAt(position)==aSeparator) {
+          result.add(currentItem.toString());
+          currentItem.delete(0, currentItem.length());
+        }
+        else {
+          if (aString.length()>position+1) {
+            position=position+1;
+            currentItem.append(aString.charAt(position));
+          }
+        }
+        previousPosition = position + 1;
+      }
+      currentItem.append(aString.substring(previousPosition, aString.length()));
+      result.add(currentItem.toString());
+    }
+
+    return result;
+  }
+
+  public static String replicateString(String aString, int aCount) {
+    StringBuffer result = new StringBuffer();
+
+    for (int i=0; i<aCount; i++)
+      result.append(aString);
+
+    return result.toString();
+  }
+
+  public static String replicateChar(char aCharacter, int aCount) {
+    char result[] = new char[aCount];
+
+    for (int i=0; i<aCount; i++)
+      result[i]= aCharacter;
+
+    return new String(result);
+  }
+
+  public static String padStringLeft(String aString, int aLength, char aPadCharacter) {
+    if (aString.length()<aLength)
+      return replicateChar(aPadCharacter, aLength-aString.length()) + aString;
+    else
+      return aString;
+  }
+
+  private static final char HEX_CHARACTERS[] = {
+      '0', '1', '2', '3', '4', '5', '6', '7',
+      '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'
+  };
+
+  public static String convertToHex(long aData, int aNumberOfDigits) {
+    StringBuffer result = new StringBuffer();
+
+    for (int digit = aNumberOfDigits-1; digit>=0; digit--) {
+      int value = (int) (aData >> (digit*4)) & 0xf;
+      result.append(HEX_CHARACTERS[value]);
+    }
+
+    return result.toString();
+  }
+
+  public static String convertToHex(byte[] aData) {
+    StringBuffer result = new StringBuffer();
+
+    for (int i = 0; i<aData.length; i++) {
+      result.append(convertToHex(aData[i], 2));
+
+    }
+
+    return result.toString();
   }
 }

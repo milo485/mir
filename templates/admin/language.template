@@ -1,33 +1,41 @@
 <html>
-<head>
-        <title>${config["Mir.Name"]} | ${lang("language.htmltitle")}</title>
-        <link rel="stylesheet" type="text/css" href="${config.docRoot}/style/admin.css">
-<head>
+  <head>
+    <title>${config["Mir.Name"]} | ${lang("language.htmltitle")}</title>
+    <link rel="stylesheet" type="text/css" href="${config.docRoot}/style/admin.css">
+  <head>
+  <body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
 
-<body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
-<include "FUNCTIONS.template">
-<include "head.template">
+    <include "FUNCTIONS.template">
+    <include "head.template">
+  
+      <if new=="1">
+        <assign method="insert">
+      <else>
+        <assign method="update">
+      </if>
+      
+      <call EditStart(
+         ["module", "id", "do"],
+         [module, entity.id, method])>
+         
+        <call EditReadonlyTextNormal(lang("language.id"), entity.id)>
+        <call EditTextNormal(lang("language.name"), 40, 255, "name", entity.name)>
+        <call EditTextNormal(lang("language.code"), 2, 2, "code", entity.code)>
+      
+        <if new=="1">
+          <call EditSubmitButtonNormal(lang("insert"), "save")>
+        <else>
+          <call EditSubmitButtonNormal(lang("save"), "save")>
+        </if> 
 
-<form action="${config.actionRoot}" method="post">
-  <input type="hidden" name="module" value="Language">
-  <input type="hidden" name="id" value="${data.id}">
-  <if data.new><input type="hidden" name="do" value="insert">
-  <else><input type="hidden" name="do" value="update"></if>
-<table border="0">
-    <call TextInputTableRow (lang("language.name"), 30, 255, "name", data.name)>
-    <call TextInputTableRow (lang("language.code"), 2, 2,"code", data.code)>
-  <tr>
-    <td class="table-foot" colspan="2" align="right"> 
-  <if data.new>
-      <input type="submit" name="save" value="${lang("insert")}">
-    <else>
-      <input type="submit" name="save" value="${lang("save")}">
-    </if>
-  </td>
-  </tr>
-</table>
-</form>
-<p><a class="link-box" href="${config.actionRoot}?module=Language&do=list">[&lt;] ${lang("back")} </a> &nbsp;</p>
-<include "foot.template">
-</body>
+      <call EditEnd()>
+      
+      <if returnurl>
+        <call showBack(returnurl)>
+      <else>
+        <call showBack("module="+module+"&amp;do=list")>
+      </if>
+
+    <include "foot.template">
+  </body>
 </html>

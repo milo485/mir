@@ -35,6 +35,8 @@
         <option value="title"<if searchfield=="title"> selected</if>>${lang("commentsearch.field.title")}</option>
         <option value="creator"<if searchfield=="creator"> selected</if>>${lang("commentsearch.field.creator")}</option>
         <option value="description"<if searchfield=="description"> selected</if>>${lang("commentsearch.field.description")}</option>
+        <option value="main_url"<if searchfield=="main_url"> selected</if>>${lang("commentsearch.field.main_url")}</option>
+        <option value="email"<if searchfield=="email"> selected</if>>${lang("commentsearch.field.email")}</option>
       </select>
     </td>
     <td class="listrow2">
@@ -96,7 +98,7 @@
   <list comments as entry>
     <tr <if grey=="1"><assign grey="0">class="listrow1"<else><assign grey="1">class="listrow2"</if>>
       <td valign="top" class="small">
-        ${entry.creationdate.formatted["dd.MM.yyyy HH:mm"]}<br>
+        ${entry.creationdate.format(config["Mir.DefaultDateTimeFormat"])}<br>
         <if entry.is_published=="0"><b>${lang("commentlist.hidden")}</b><else>-</if><br>
         <br>
         ${lang("comment.status")}: <br>
@@ -115,7 +117,7 @@
             <div class="small">
             ${lang("comment.article")}:
             <a href="${config.actionRoot}?module=Content&do=edit&id=${entry.to_content.id}">
-              ${utility.encodeHTML(entry.to_content.title)}
+              ${utility.encodeHTML(entry.to_content.title)} (${entry.to_content.id})
             </a>
               (${lang("articletypes."+entry.to_content.article_type.name)}) 
   
@@ -134,7 +136,7 @@
             </if>
   
         
-        <b>${entry.title}</b> &nbsp;
+        <b>${entry.title}</b> (${entry.id})&nbsp;
         <if entry.creator>
           ${lang("by")}: ${entry.creator}
         </if>
@@ -170,7 +172,7 @@
       <td valign="top">
         &nbsp;
         <if config["Mir.Localizer.Admin.AllowDeleteComment"]=="1">
-          <a class="small" href="${config.actionRoot}?module=Comment&do=delete&id=${entry.id}&searchtext=${utility.encodeHTML(searchtext)}&searchfield=${utility.encodeHTML(searchfield)}&searchispublished=${searchispublished}&searchorder=${searchorder}&offset=${offset}">[${lang("delete")}]</a>
+          <a class="small" href="${config.actionRoot}?module=Comment&do=delete&id=${entry.id}&okurl=${utility.encodeURI(thisurl)}&cancelurl=${utility.encodeURI(thisurl)}">[${lang("delete")}]</a>
         </if>
       </td>    
     </tr>

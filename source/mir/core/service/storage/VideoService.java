@@ -32,12 +32,14 @@
 package mir.core.service.storage;
 
 import mir.core.model.Video;
+import net.sf.hibernate.Hibernate;
+import net.sf.hibernate.HibernateException;
 import net.sf.hibernate.SessionFactory;
 
 /**
  * VideoService
  * @author idefix
- * @version $Id: VideoService.java,v 1.1 2003/08/17 19:11:49 idfx Exp $
+ * @version $Id: VideoService.java,v 1.2 2003/09/05 20:23:59 idfx Exp $
  */
 public class VideoService extends StorageService {
 
@@ -47,6 +49,16 @@ public class VideoService extends StorageService {
 	 */
 	public VideoService(SessionFactory factory) {
 		super(Video.class, factory);
+	}
+
+	/**
+	 * @see mir.core.service.storage.StorageService#initializeLazyCollections(java.lang.Object)
+	 */
+	protected void initializeLazyCollections(Object returnObject) throws HibernateException {
+		if(returnObject instanceof Video){
+			Video video = (Video)returnObject;
+			Hibernate.initialize(video.getContent());
+		}	
 	}
 
 }

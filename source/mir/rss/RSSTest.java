@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001, 2002  The Mir-coders group
+ * Copyright (C) 2001, 2002 The Mir-coders group
  *
  * This file is part of Mir.
  *
@@ -18,42 +18,55 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with the com.oreilly.servlet library, any library
- * licensed under the Apache Software License, The Sun (tm) Java Advanced
- * Imaging library (JAI), The Sun JIMI library (or with modified versions of
- * the above that use the same license as the above), and distribute linked
- * combinations including the two.  You must obey the GNU General Public
- * License in all respects for all of the code used other than the above
- * mentioned libraries.  If you modify this file, you may extend this exception
- * to your version of the file, but you are not obligated to do so.  If you do
- * not wish to do so, delete this exception statement from your version.
+ * the code of this program with  any library licensed under the Apache Software License,
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library
+ * (or with modified versions of the above that use the same license as the above),
+ * and distribute linked combinations including the two.  You must obey the
+ * GNU General Public License in all respects for all of the code used other than
+ * the above mentioned libraries.  If you modify this file, you may extend this
+ * exception to your version of the file, but you are not obligated to do so.
+ * If you do not wish to do so, delete this exception statement from your version.
  */
 
 package mir.rss;
 
 import java.util.*;
+import mir.util.*;
+import gnu.regexp.RE;
+
 
 public class RSSTest {
 
   public static void main(String[] args) {
-    System.out.println("Testing...");
 
     RSSReader reader = new RSSReader();
+//..    RSS091Reader reader2 = new RSS091Reader();
     try {
-      RSSData wvl = reader.parseUrl("http://wvl.indymedia.org/features.rdf");
-      RSSData be = reader.parseUrl("http://belgium.indymedia.org/features.rdf");
+//      RE test = new RE(".*\\bLB\\b.*", RE.REG_ICASE);
+//      System.out.println(" LB II : " + test.isMatch("LB II"));
+//      System.out.println(" revised LB: " + test.isMatch("revised LB"));
+//      System.out.println(" revised LB II : " + test.isMatch("revised LB II"));
+//      System.out.println(" buLB: " + test.isMatch("buLB"));
 
-      RSSAggregator agg = new RSSAggregator(10, "dc:date", true, null, null);
+      RSSData nl = reader.parseUrl("http://biotechdev.mir.dnsalias.net/test.rss");
+//      RSSData it = reader.parseUrl("http://g8.mir.dnsalias.net/italynewswire.rss");
+//      Object result = StructuredContentParser.parse(" { a = 'b' 'as a' = [ 'asd' asd 'asdas asd as''asd' ] }") ;
+//      System.out.println("" + wvl.get("rss:item"));
+//      RSSData fr = reader2.parseUrl("http://paris.indymedia.org/backendg8.php3");
+//      RSSData be = reader.parseUrl("http://belgium.indymedia.org/features.rdf");
 
-      agg.appendItems(wvl.getResourcesForRdfClass("rss:item"));
-      agg.appendItems(be.getResourcesForRdfClass("rss:item"));
+//      RSSAggregator agg = new RSSAggregator(10, "dc:date", true, null, null);
 
-      Iterator i = agg.getItems().iterator();
+//      agg.appendItems(wvl.getResourcesForRdfClass("rss:item"));
+//      agg.appendItems(be.getResourcesForRdfClass("rss:item"));
 
-      while (i.hasNext())
-        System.out.println(i.next().toString());
+//      System.out.println(fr);
 
-      System.out.println(agg.getItems());
+//      Iterator i = fr.getResourcesForRdfClass("rss:item").iterator();
+//      while (i.hasNext())
+//        System.out.println(ParameterExpander.evaluateExpression((RDFResource) i.next(), "['dc:date']"));
+
+//      System.out.println(agg.getItems());
     }
     catch (Throwable t) {
       System.out.println("Exception: " + t.toString());

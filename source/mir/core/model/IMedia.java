@@ -31,13 +31,12 @@
  */
 package mir.core.model;
 
-import java.util.Date;
 import java.util.Set;
 
 /**
  * IMedia
  * @author idefix
- * @version $Id: IMedia.java,v 1.1 2003/08/19 00:41:54 idfx Exp $
+ * @version $Id: IMedia.java,v 1.3 2003/09/07 16:55:00 idfx Exp $
  */
 public interface IMedia {
 	public abstract java.lang.Integer getId();
@@ -74,10 +73,6 @@ public interface IMedia {
 	public abstract void setPublishServer(java.lang.String publishServer);
 	public abstract java.lang.String getPublishPath();
 	public abstract void setPublishPath(java.lang.String publishPath);
-	public abstract boolean isIsPublished();
-	public abstract void setIsPublished(boolean isPublished);
-	public abstract boolean isIsProduced();
-	public abstract void setIsProduced(boolean isProduced);
 	public abstract java.util.Date getWebdbCreate();
 	public abstract void setWebdbCreate(java.util.Date webdbCreate);
 	public abstract java.util.Date getWebdbLastchange();

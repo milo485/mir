@@ -88,8 +88,6 @@ public class XMLReader {
       Throwable t = ExceptionFunctions.traceCauseException(e);
 
       if (t instanceof XMLReaderExc) {
-        if (locator!=null && filename!=null)
-          ((XMLReaderExc) t).setLocation(filename, locator.getLineNumber(), locator.getColumnNumber());
         throw (XMLReaderExc) t;
       }
 
@@ -125,11 +123,33 @@ public class XMLReader {
         inputSource = new InputSource(anInputStream);
         parser.parse(inputSource, this);
       }
-      catch (ParserConfigurationException e) {
-        throw new XMLReaderExc("Internal exception: "+e.getMessage());
-      }
       catch (Throwable e) {
-        throw new XMLReaderFailure(e);
+        Throwable t = ExceptionFunctions.traceCauseException(e);
+
+        if (t instanceof XMLReaderExc) {
+          if (locator!=null && filename!=null)
+            ((XMLReaderExc) t).setLocation(filename, locator.getLineNumber(), locator.getColumnNumber());
+          throw (XMLReaderExc) t;
+        }
+
+        if (t instanceof SAXParseException) {
+          XMLReaderExc r = new XMLReaderExc(t.getMessage());
+
+          if (locator!=null && filename!=null)
+            r.setLocation(filename, locator.getLineNumber(), locator.getColumnNumber());
+
+          throw r;
+        }
+
+        if (t instanceof XMLReaderFailure) {
+          throw (XMLReaderFailure) t;
+        }
+
+        if (t instanceof ParserConfigurationException) {
+          throw new XMLReaderFailure("Internal exception: "+t.toString(), t);
+        }
+
+        throw new XMLReaderFailure(t);
       }
     }
 

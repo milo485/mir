@@ -36,9 +36,6 @@ import java.sql.Statement;
 import java.util.List;
 import java.util.Map;
 
-import freemarker.template.SimpleHash;
-import freemarker.template.SimpleList;
-
 import mir.entity.Entity;
 import mir.entity.EntityList;
 
@@ -120,6 +117,15 @@ public interface StorageObject {
   abstract public boolean delete(String id) throws StorageObjectFailure;
 
   /**
+   * Deletes entities based on a where clause
+   *
+   * @param aWhereClause
+   * @return
+   * @throws StorageObjectFailure
+   */
+  public int deleteByWhereClause(String aWhereClause) throws StorageObjectFailure;
+
+  /**
    * Dokumentation siehe Database.java
    * @return ArrayList
    * @exception StorageObjectException
@@ -175,12 +181,6 @@ public interface StorageObject {
 
   /**
    * Dokumentation siehe Database.java
-   * @return SimpleHash
-   */
-  abstract public SimpleHash getHashData();
-
-  /**
-   * Dokumentation siehe Database.java
    * @return Connection
    * @exception StorageObjectException
    */
@@ -229,25 +229,14 @@ public interface StorageObject {
   abstract public String executeFreeSingleValueSql(String sql) throws StorageObjectFailure, StorageObjectExc ;
 
   /**
-   * Dokumentation siehe Database.java
    * @param con
    * @param stmt
    */
-  abstract public void freeConnection(Connection con, Statement stmt)
-    throws StorageObjectFailure;
+  abstract public void freeConnection(Connection con, Statement stmt) throws StorageObjectFailure;
 
-  /**
-   * Dokumentation siehe Database.java
-   * @return
-   */
-  abstract public SimpleList getPopupData() throws StorageObjectFailure;
+  abstract public int executeUpdate(Statement a, String sql) throws StorageObjectFailure, SQLException;
 
-  abstract public int executeUpdate(Statement a, String sql)
-    throws StorageObjectFailure, SQLException;
+  abstract public int executeUpdate(String sql) throws StorageObjectFailure, SQLException;
 
-  abstract public int executeUpdate(String sql)
-    throws StorageObjectFailure, SQLException;
-
-  abstract public int getSize(String where)
-    throws SQLException, StorageObjectFailure;
+  abstract public int getSize(String where) throws SQLException, StorageObjectFailure;
 }

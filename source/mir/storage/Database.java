@@ -44,21 +44,19 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
-import java.util.*;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
+import java.util.Vector;
 
 import com.codestudio.util.SQLManager;
-
-import freemarker.template.SimpleHash;
-import freemarker.template.SimpleList;
-
 import mir.config.MirPropertiesConfiguration;
 import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
 import mir.entity.Entity;
 import mir.entity.EntityList;
 import mir.entity.StorableObjectEntity;
 import mir.log.LoggerWrapper;
-import mir.misc.HTMLTemplateProcessor;
 import mir.misc.StringUtil;
 import mir.storage.store.ObjectStore;
 import mir.storage.store.StorableObject;
@@ -76,7 +74,7 @@ import mir.util.JDBCStringRoutines;
  * Treiber, Host, User und Passwort, ueber den der Zugriff auf die
  * Datenbank erfolgt.
  *
- * @version $Id: Database.java,v 1.45 2003/06/24 21:49:22 idfx Exp $
+ * @version $Id: Database.java,v 1.46 2003/09/03 18:29:03 zapata Exp $
  * @author rk
  *
  */
@@ -85,7 +83,7 @@ public class Database implements StorageObject {
   private static Class STORABLE_OBJECT_ENTITY_CLASS = mir.entity.StorableObjectEntity.class;
 
 
-  private static SimpleHash POPUP_EMPTYLINE = new SimpleHash();
+  private static Map POPUP_EMPTYLINE = new HashMap();
   protected static final ObjectStore o_store = ObjectStore.getInstance();
   private static final int _millisPerHour = 60 * 60 * 1000;
   private static final int _millisPerMinute = 60 * 1000;
@@ -109,19 +107,23 @@ public class Database implements StorageObject {
   protected ArrayList metadataNotNullFields;
   protected int[] metadataTypes;
   protected Class theEntityClass;
-  protected SimpleList popupCache = null;
+  protected List popupCache = null;
   protected boolean hasPopupCache = false;
-  protected SimpleHash hashCache = null;
+  protected Map hashCache = null;
   protected boolean hasTimestamp = true;
   private String database_driver;
   private String database_url;
   private int defaultLimit;
-  protected DatabaseAdaptor theAdaptor;
-  private SimpleDateFormat _dateFormatterOut =
-    new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-  private SimpleDateFormat _dateFormatterIn =
-    new SimpleDateFormat("yyyy-MM-dd HH:mm");
-  private Calendar _cal = new GregorianCalendar();
+
+  TimeZone timezone;
+  SimpleDateFormat internalDateFormat;
+  SimpleDateFormat userInputDateFormat;
+/*
+  private SimpleDateFormat _dateFormatterOut;
+  private SimpleDateFormat _dateFormatterIn;
+  _dateFormatterOut = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+  _dateFormatterIn = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+*/
 
   /**
    * Kontruktor bekommt den Filenamen des Konfigurationsfiles ?bergeben.
@@ -141,13 +143,19 @@ public class Database implements StorageObject {
       throw new StorageObjectFailure(e);
     }
     logger = new LoggerWrapper("Database");
+    timezone = TimeZone.getTimeZone(configuration.getString("Mir.DefaultTimezone"));
+    internalDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    internalDateFormat.setTimeZone(timezone);
+
+    userInputDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+    userInputDateFormat.setTimeZone(timezone);
+
 
     String theAdaptorName = configuration.getString("Database.Adaptor");
     defaultLimit = Integer.parseInt(configuration.getString("Database.Limit"));
 
     try {
       theEntityClass = GENERIC_ENTITY_CLASS;
-      theAdaptor = (DatabaseAdaptor) Class.forName(theAdaptorName).newInstance();
     }
     catch (Throwable e) {
       logger.error("Error in Database() constructor with " + theAdaptorName + " -- " + e.getMessage());
@@ -349,14 +357,20 @@ public class Database implements StorageObject {
 
             if (!rs.wasNull()) {
               java.util.Date date = new java.util.Date(timestamp.getTime());
-              outValue = _dateFormatterOut.format(date);
-              _cal.setTime(date);
 
-              int offset =
-                  _cal.get(Calendar.ZONE_OFFSET) + _cal.get(Calendar.DST_OFFSET);
-              String tzOffset =
-                  StringUtil.zeroPaddingNumber(offset / _millisPerHour, 2, 2);
-              outValue = outValue + "+" + tzOffset;
+              Calendar calendar = new GregorianCalendar();
+              calendar.setTime(date);
+              calendar.setTimeZone(timezone);
+              outValue = internalDateFormat.format(date);
+
+              int offset = calendar.get(Calendar.ZONE_OFFSET) + calendar.get(Calendar.DST_OFFSET);
+              String tzOffset = StringUtil.zeroPaddingNumber(Math.abs(offset) / _millisPerHour, 2, 2);
+
+              if (offset<0)
+                outValue = outValue + "-";
+              else
+                outValue = outValue + "+";
+              outValue = outValue + tzOffset;
             }
 
             break;
@@ -578,10 +592,8 @@ public class Database implements StorageObject {
       selectSql.append(" order by ").append(anOrderByClause);
     }
 
-    if (theAdaptor.hasLimit()) {
-      if ((limit > -1) && (offset > -1)) {
-        selectSql.append(" LIMIT ").append(limit).append(" OFFSET ").append(offset);
-      }
+    if ((limit > -1) && (offset > -1)) {
+      selectSql.append(" LIMIT ").append(limit).append(" OFFSET ").append(offset);
     }
 
     // execute sql
@@ -611,9 +623,7 @@ public class Database implements StorageObject {
       }
 
       // making entitylist infos
-      if (!(theAdaptor.hasLimit())) {
-        count = offsetCount;
-      }
+      count = offsetCount;
 
       if (theReturnList != null) {
         // now we decide if we have to know an overall count...
@@ -725,8 +735,8 @@ public class Database implements StorageObject {
 
       if (theEntityClass != null) {
         returnEntity = (Entity) theEntityClass.newInstance();
-        returnEntity.setValues(theResultHash);
         returnEntity.setStorage(this);
+        returnEntity.setValues(theResultHash);
 
         if (returnEntity instanceof StorableObject) {
           logger.debug("CACHE: ( in) " + returnEntity.getId() + " :" + theTable);
@@ -792,19 +802,20 @@ public class Database implements StorageObject {
           aValue = null;
 
           // exceptions
-          if (aField.equals("webdb_create") ||
-              aField.equals("webdb_lastchange")) {
+          if (!theEntity.hasValueForField(aField) && (
+              aField.equals("webdb_create") ||
+              aField.equals("webdb_lastchange"))) {
             aValue = "NOW()";
           }
           else {
             if ((streamedInput != null) && streamedInput.contains(aField)) {
               aValue = "?";
-            } else {
+            }
+            else {
               if (theEntity.hasValueForField(aField)) {
                 aValue =
                   "'" +
-                  JDBCStringRoutines.escapeStringLiteral((String) theEntity.getValue(
-                      aField)) + "'";
+                   JDBCStringRoutines.escapeStringLiteral((String) theEntity.getValue(aField)) + "'";
               }
             }
           }
@@ -852,7 +863,7 @@ public class Database implements StorageObject {
         return null;
       }
 
-      pstmt = con.prepareStatement(theAdaptor.getLastInsertSQL(this));
+      pstmt = con.prepareStatement("select currval('" + getCoreTable() + "_id_seq')");
 
       ResultSet rs = pstmt.executeQuery();
       rs.next();
@@ -860,7 +871,6 @@ public class Database implements StorageObject {
       theEntity.setId(returnId);
     }
     catch (SQLException sqe) {
-			sqe.printStackTrace(logger.asPrintWriter(LoggerWrapper.DEBUG_MESSAGE));    	
       throwSQLException(sqe, "insert");
     }
     finally {
@@ -868,7 +878,6 @@ public class Database implements StorageObject {
         con.setAutoCommit(true);
       }
       catch (Exception e) {
-				e.printStackTrace(logger.asPrintWriter(LoggerWrapper.DEBUG_MESSAGE));
       }
 
       freeConnection(con, pstmt);
@@ -959,10 +968,11 @@ public class Database implements StorageObject {
 
         // TimeStamp stuff
         try {
-          java.util.Date d = _dateFormatterIn.parse(dateString);
-          Timestamp tStamp = new Timestamp(d.getTime());
-          sql.append(",webdb_create='" + tStamp.toString() + "'");
-        } catch (ParseException e) {
+          java.util.Date d = userInputDateFormat.parse(dateString);
+//          Timestamp tStamp = new Timestamp(d.getTime());
+          sql.append(",webdb_create='" + JDBCStringRoutines.formatDate(d) + "'");
+        }
+        catch (ParseException e) {
           throw new StorageObjectFailure(e);
         }
       }
@@ -1052,6 +1062,42 @@ public class Database implements StorageObject {
     return (res > 0) ? true : false;
   }
 
+  /**
+   * Deletes entities based on a where clause
+   *
+   * @param aWhereClause
+   * @return
+   * @throws StorageObjectFailure
+   */
+  public int deleteByWhereClause(String aWhereClause) throws StorageObjectFailure {
+    invalidatePopupCache();
+    if (StoreUtil.implementsStorableObject(theEntityClass)) {
+      StoreContainerType stoc_type = StoreContainerType.valueOf(theEntityClass, StoreContainerType.STOC_TYPE_ENTITYLIST);
+      o_store.invalidate(stoc_type);
+    }
+
+    Statement stmt = null;
+    Connection con = null;
+    int res = 0;
+    String sql =
+      "delete from " + theTable + " where " + aWhereClause;
+
+    //theLog.printInfo("DELETE " + sql);
+    try {
+      con = getPooledCon();
+      stmt = con.createStatement();
+      res = stmt.executeUpdate(sql);
+    }
+    catch (SQLException sqe) {
+      throwSQLException(sqe, "delete");
+    }
+    finally {
+      freeConnection(con, stmt);
+    }
+
+    return res;
+  }
+
   /* noch nicht implementiert.
   * @return immer false
    */
@@ -1059,146 +1105,6 @@ public class Database implements StorageObject {
     invalidatePopupCache();
 
     return false;
-  }
-
-  /**
-   * Diese Methode sollte ueberschrieben werden, wenn fuer die abgeleitete Database-Klasse
-   * eine SimpleList mit Standard-Popupdaten erzeugt werden koennen soll.
-   * @return null
-   */
-  public SimpleList getPopupData() throws StorageObjectFailure {
-    return null;
-  }
-
-  /**
-   *  Holt Daten fuer Popups.
-   *  @param name  Name des Feldes.
-   *  @param hasNullValue  Wenn true wird eine leerer  Eintrag fuer die Popups erzeugt.
-   *  @return SimpleList Gibt freemarker.template.SimpleList zurueck.
-   */
-  public SimpleList getPopupData(String name, boolean hasNullValue)
-    throws StorageObjectFailure {
-    return getPopupData(name, hasNullValue, null);
-  }
-
-  /**
-   *  Holt Daten fuer Popups.
-   *  @param name  Name des Feldes.
-   *  @param hasNullValue  Wenn true wird eine leerer  Eintrag fuer die Popups erzeugt.
-   *  @param where  Schraenkt die Selektion der Datensaetze ein.
-   *  @return SimpleList Gibt freemarker.template.SimpleList zurueck.
-   */
-  public SimpleList getPopupData(String name, boolean hasNullValue, String where)
-    throws StorageObjectFailure {
-    return getPopupData(name, hasNullValue, where, null);
-  }
-
-  /**
-   *  Holt Daten fuer Popups.
-   *  @param name  Name des Feldes.
-   *  @param hasNullValue  Wenn true wird eine leerer  Eintrag fuer die Popups erzeugt.
-   *  @param where  Schraenkt die Selektion der Datensaetze ein.
-   *  @param order  Gibt ein Feld als Sortierkriterium an.
-   *  @return SimpleList Gibt freemarker.template.SimpleList zurueck.
-   */
-  public SimpleList getPopupData(String name, boolean hasNullValue,
-    String where, String order) throws StorageObjectFailure {
-    // caching
-    if (hasPopupCache && (popupCache != null)) {
-      return popupCache;
-    }
-
-    SimpleList simpleList = null;
-    Connection con = null;
-    Statement stmt = null;
-
-    // build sql
-    StringBuffer sql =
-      new StringBuffer("select ").append(thePKeyName).append(",").append(name)
-                                 .append(" from ").append(theTable);
-
-    if ((where != null) && !(where.length() == 0)) {
-      sql.append(" where ").append(where);
-    }
-
-    sql.append(" order by ");
-
-    if ((order != null) && !(order.length() == 0)) {
-      sql.append(order);
-    } else {
-      sql.append(name);
-    }
-
-    // execute sql
-    try {
-      con = getPooledCon();
-    } catch (Exception e) {
-      throw new StorageObjectFailure(e);
-    }
-
-    try {
-      stmt = con.createStatement();
-
-      ResultSet rs = executeSql(stmt, sql.toString());
-
-      if (rs != null) {
-        if (!evaluatedMetaData) {
-          get_meta_data();
-        }
-
-        simpleList = new SimpleList();
-
-        // if popup has null-selector
-        if (hasNullValue) {
-          simpleList.add(POPUP_EMPTYLINE);
-        }
-
-        SimpleHash popupDict;
-
-        while (rs.next()) {
-          popupDict = new SimpleHash();
-          popupDict.put("key", getValueAsString(rs, 1, thePKeyType));
-          popupDict.put("value", rs.getString(2));
-          simpleList.add(popupDict);
-        }
-
-        rs.close();
-      }
-    }
-    catch (Exception e) {
-      logger.error("getPopupData: " + e.getMessage());
-      throw new StorageObjectFailure(e);
-    } finally {
-      freeConnection(con, stmt);
-    }
-
-    if (hasPopupCache) {
-      popupCache = simpleList;
-    }
-
-    return simpleList;
-  }
-
-  /**
-   * Liefert alle Daten der Tabelle als SimpleHash zurueck. Dies wird verwandt,
-   * wenn in den Templates ein Lookup-Table benoetigt wird. Sollte nur bei kleinen
-   * Tabellen Verwendung finden.
-   * @return SimpleHash mit den Tabellezeilen.
-   */
-  public SimpleHash getHashData() {
-    /** @todo dangerous! this should have a flag to be enabled, otherwise
-     *  very big Hashes could be returned */
-    if (hashCache == null) {
-      try {
-        hashCache =
-          HTMLTemplateProcessor.makeSimpleHash(selectByWhereClause("", -1));
-      }
-      catch (StorageObjectFailure e) {
-        logger.debug(e.getMessage());
-      }
-    }
-
-    return hashCache;
   }
 
   /* invalidates the popupCache

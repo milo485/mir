@@ -2,6 +2,8 @@
 <html>
   <head>
     <title>${lang("comment.htmltitle")}</title> 
+    <meta http-equiv="Content-Type" content="text/html; charset=${config["Mir.DefaultHTMLCharset"]}">
+    
   </head>
   
   <body marginwidth="0" marginheight="0" leftmargin="0" topmargin="0" bgcolor="#dddddd">

@@ -30,9 +30,9 @@
 package  mir.media;
 
 import java.io.InputStream;
+import java.util.List;
 
 import mir.entity.Entity;
-import freemarker.template.SimpleList;
 
 /**
  * Interface for Media handling in Mir. All media handlers
@@ -79,7 +79,7 @@ import freemarker.template.SimpleList;
  * ) and just override the things that need to be specific. see MediaHandlerAudio
  *
  * @author <mh@nadir.org>, the Mir-coders group
- * @version $Id: MirMedia.java,v 1.18 2003/04/29 02:36:50 zapata Exp $
+ * @version $Id: MirMedia.java,v 1.19 2003/09/03 18:29:01 zapata Exp $
  */
 
 public interface  MirMedia{
@@ -144,7 +144,7 @@ public interface  MirMedia{
    * @see mir.entity.Entity
    * @see mir.misc.StringUtil
    */
-  public abstract SimpleList getURL (Entity ent, Entity mediaTypeEnt) throws MediaExc, MediaFailure;
+  public abstract List getURL (Entity ent, Entity mediaTypeEnt) throws MediaExc, MediaFailure;
 
         /**
    * Returns the absolute filesystem path to where the media

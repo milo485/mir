@@ -40,20 +40,31 @@ import mir.util.ParameterExpander;
 public class RSSProducerNode implements ProducerNode {
   private String key;
   private String url;
+  private String version;
 
-  public RSSProducerNode(String aKey, String anURL) {
+  public RSSProducerNode(String aKey, String anURL, String aVersion) {
     key = aKey;
     url = anURL;
+    version = aVersion;
   }
 
   public void produce(Map aValueMap, String aVerb, LoggerWrapper aLogger) throws ProducerFailure {
     try {
+      RSSData rssData = null;
       String expandedKey = ParameterExpander.expandExpression( aValueMap, key );
       String expandedUrl = ParameterExpander.expandExpression( aValueMap, url );
+      String expandedVersion = ParameterExpander.expandExpression( aValueMap, version );
 
       ParameterExpander.setValueForKey(aValueMap, expandedKey, null);
-      RSSReader reader = new RSSReader();
-      RSSData rssData = reader.parseUrl(expandedUrl);
+
+      if (version.equals("1.0")) {
+        RSSReader reader = new RSSReader();
+        rssData = reader.parseUrl(expandedUrl);
+      }
+      else if (version.equals("0.91")) {
+        RSS091Reader reader = new RSS091Reader();
+        rssData = reader.parseUrl(expandedUrl);
+      }
       ParameterExpander.setValueForKey(aValueMap, expandedKey, rssData);
     }
     catch (Throwable t) {

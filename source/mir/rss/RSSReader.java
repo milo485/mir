@@ -31,13 +31,13 @@ package mir.rss;
 
 import java.io.InputStream;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.List;
-import java.util.*;
+import java.util.Map;
 import java.util.Vector;
-import java.text.*;
 
+import mir.util.DateTimeFunctions;
 import mir.util.XMLReader;
-import mir.util.*;
 
 /**
  *
@@ -50,11 +50,17 @@ import mir.util.*;
  */
 
 public class RSSReader {
-  private static final String RDF_NAMESPACE_URI = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
-  private static final String RSS_1_0_NAMESPACE_URI = "http://purl.org/rss/1.0/";
-  private static final String DUBLINCORE_NAMESPACE_URI = "http://purl.org/dc/elements/1.1/";
-  private static final String EVENT_NAMESPACE_URI = "http://purl.org/rss/1.0/modules/event/";
-  private static final String TAXONOMY_NAMESPACE_URI = "http://web.resource.org/rss/1.0/modules/taxonomy/";
+  public static final String RDF_NAMESPACE_URI = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
+  public static final String RSS_1_0_NAMESPACE_URI = "http://purl.org/rss/1.0/";
+  public static final String RSS_0_9_NAMESPACE_URI = "http://my.netscape.com/rdf/simple/0.9/";
+  public static final String DUBLINCORE_NAMESPACE_URI = "http://purl.org/dc/elements/1.1/";
+  public static final String EVENT_NAMESPACE_URI = "http://purl.org/rss/1.0/modules/event/";
+  public static final String TAXONOMY_NAMESPACE_URI = "http://web.resource.org/rss/1.0/modules/taxonomy/";
+  public static final String DUBLINCORE_TERMS_NAMESPACE_URI = "http://purl.org/dc/terms/";
+  public static final String CONTENT_NAMESPACE_URI = "http://purl.org/rss/1.0/modules/content/";
+
+  // ML: to be localized:
+  public static final String V2V_NAMESPACE_URI = "http://v2v.indymedia.de/rss/";
 
   private static final XMLReader.XMLName RDF_ABOUT_PARAMETER = new XMLReader.XMLName(RDF_NAMESPACE_URI, "about");
   private static final XMLReader.XMLName RDF_SEQUENCE_TAG = new XMLReader.XMLName(RDF_NAMESPACE_URI, "Seq");
@@ -67,7 +73,6 @@ public class RSSReader {
   private List modules;
   private Map namespaceURItoModule;
   private Map moduleToPrefix;
-  private RSSModule rdfModule;
 
   public RSSReader() {
     modules = new Vector();
@@ -76,13 +81,30 @@ public class RSSReader {
 
     registerModule(new RSSBasicModule(RDF_NAMESPACE_URI, "RDF module"), "rdf");
     registerModule(new RSSBasicModule(RSS_1_0_NAMESPACE_URI, "RSS 1.0 module"), "rss");
+    registerModule(new RSSBasicModule(RSS_0_9_NAMESPACE_URI, "RSS 0.9 module"), "rss");
 
-    RSSBasicModule dcModule = new RSSBasicModule(DUBLINCORE_NAMESPACE_URI, "Dublin Core RSS module 1.1");
-    dcModule.addProperty("date", RSSBasicModule.W3CDTF_PROPERTY_TYPE);
+    RSSBasicModule dcModule = new RSSBasicModule(DUBLINCORE_NAMESPACE_URI, "RSS Dublin Core 1.1");
+    dcModule.addProperty("date", RSSModule.W3CDTF_PROPERTY_TYPE);
     registerModule(dcModule, "dc");
+
+    RSSBasicModule dcTermsModule = new RSSBasicModule(DUBLINCORE_TERMS_NAMESPACE_URI, "RSS Qualified Dublin core");
+    dcTermsModule.addProperty("created", RSSModule.W3CDTF_PROPERTY_TYPE);
+    dcTermsModule.addProperty("issued", RSSModule.W3CDTF_PROPERTY_TYPE);
+    dcTermsModule.addProperty("modified", RSSModule.W3CDTF_PROPERTY_TYPE);
+    dcTermsModule.addProperty("dateAccepted", RSSModule.W3CDTF_PROPERTY_TYPE);
+    dcTermsModule.addProperty("dateCopyrighted", RSSModule.W3CDTF_PROPERTY_TYPE);
+    dcTermsModule.addProperty("dateSubmitted", RSSModule.W3CDTF_PROPERTY_TYPE);
+    registerModule(dcTermsModule, "dcterms");
+
+    RSSBasicModule v2vTermsModule = new RSSBasicModule(V2V_NAMESPACE_URI, "indymedia v2v RSS module");
+    v2vTermsModule.addMultiValuedProperty("topic", RSSModule.PCDATA_PROPERTY_TYPE);
+    v2vTermsModule.addMultiValuedProperty("genre", RSSModule.PCDATA_PROPERTY_TYPE);
+    v2vTermsModule.addMultiValuedProperty("link", RSSModule.PCDATA_PROPERTY_TYPE);
+    registerModule(v2vTermsModule, "v2v");
 
     registerModule(new RSSBasicModule(EVENT_NAMESPACE_URI, "Event RSS module"), "ev");
     registerModule(new RSSBasicModule(TAXONOMY_NAMESPACE_URI, "Taxonomy RSS module"), "taxo");
+    registerModule(new RSSBasicModule(CONTENT_NAMESPACE_URI  , "Content RSS module"), "content");
   }
 
   public void registerModule(RSSModule aModule, String aPrefix) {
@@ -178,10 +200,6 @@ public class RSSReader {
   private XMLReader.SectionHandler makePropertyValueSectionHandler(XMLReader.XMLName aTag, Map anAttributes) {
     RSSModule module = (RSSModule) namespaceURItoModule.get(aTag.getNamespaceURI());
 
-    if (aTag.getLocalName().equals("date"))
-      aTag = aTag;
-
-
     if (module!=null) {
       RSSModule.RSSModuleProperty property = module.getPropertyForName(aTag.getLocalName());
 
@@ -201,10 +219,32 @@ public class RSSReader {
               return new DateSectionHandler();
         }
       }
-
     }
 
     return new FlexiblePropertyValueSectionHandler();
+  }
+
+  private void usePropertyValueSectionHandler(RDFResource aResource, PropertyValueSectionHandler aHandler, XMLReader.XMLName aTag) {
+    RSSModule module = (RSSModule) namespaceURItoModule.get(aTag.getNamespaceURI());
+
+    if (module!=null) {
+      RSSModule.RSSModuleProperty property = module.getPropertyForName(aTag.getLocalName());
+
+      if (property!=null && property.getIsMultiValued()) {
+        List value = (List) aResource.get(makeQualifiedName(aTag));
+
+        if (value==null) {
+          value = new Vector();
+          aResource.set(makeQualifiedName(aTag), value);
+        }
+
+        value.add(aHandler.getValue());
+
+        return;
+      }
+    }
+
+    aResource.set(makeQualifiedName(aTag), aHandler.getValue());
   }
 
   private String makeQualifiedName(XMLReader.XMLName aName) {
@@ -237,7 +277,8 @@ public class RSSReader {
 
     public void endElement(XMLReader.SectionHandler aHandler) throws XMLReader.XMLReaderExc {
       if (aHandler instanceof PropertyValueSectionHandler) {
-        resource.set(makeQualifiedName(currentTag), ( (PropertyValueSectionHandler) aHandler).getValue());
+        usePropertyValueSectionHandler(resource, (PropertyValueSectionHandler) aHandler, currentTag);
+//        resource.set(makeQualifiedName(currentTag), ( (PropertyValueSectionHandler) aHandler).getValue());
       }
     };
 
@@ -250,6 +291,10 @@ public class RSSReader {
     };
 
     public RDFResource getResource() {
+      if (resource.getIdentifier()==null || resource.getIdentifier().length()==0) {
+        resource.setIdentifier(resource.get("rss:link").toString());
+      }
+
       return resource;
     }
   }
@@ -394,35 +439,11 @@ public class RSSReader {
     public Object getValue() {
       try {
         String expression = data.toString().trim();
-        SimpleParser parser = new SimpleParser(expression);
 
-        String year="";
-        String month="";
-        String day="";
-        String hour="";
-        String minutes="";
-
-          year = parser.parse(NUMBER);
-          parser.skip("-");
-          month = parser.parse(NUMBER);
-          parser.skip("-");
-          day = parser.parse(NUMBER);
-          parser.skip("T");
-          hour = parser.parse(NUMBER);
-          parser.skip(":");
-          minutes = parser.parse(NUMBER);
-
-          SimpleDateFormat d = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-          d.setLenient(true);
-          expression = year + "-" + month + "-" + day + " " + hour + ":" + minutes;
-
-        System.out.println(expression);
-
-        Date result = d.parse(expression);
-
-        return result;
+        return DateTimeFunctions.parseW3CDTFString(expression);
       }
       catch (Throwable t) {
+
         return null;
       }
     }

@@ -33,13 +33,10 @@ package mircoders.storage;
 import java.sql.Connection;
 import java.sql.Statement;
 
-import mir.entity.EntityList;
-import mir.entity.EntityRelation;
 import mir.log.LoggerWrapper;
 import mir.storage.Database;
 import mir.storage.StorageObject;
 import mir.storage.StorageObjectFailure;
-import mircoders.entity.EntityContent;
 
 /**
  * <b>this class implements the access to the content-table</b>
@@ -50,7 +47,6 @@ import mircoders.entity.EntityContent;
 public class DatabaseContent extends Database implements StorageObject {
 
   private static DatabaseContent      instance;
-  private static EntityRelation       relationComments;
 
   // Contructors / Singleton
 
@@ -72,8 +68,6 @@ public class DatabaseContent extends Database implements StorageObject {
     theCoreTable="media";
     logger = new LoggerWrapper("Database.Content");
 
-    relationComments =
-        new EntityRelation("id", "to_media", DatabaseComment.getInstance(), EntityRelation.TO_MANY);
     theEntityClass = mircoders.entity.EntityContent.class;
   }
 
@@ -102,14 +96,6 @@ public class DatabaseContent extends Database implements StorageObject {
   }
 
   /**
-   * returns the comments that belong to the article (via entityrelation)
-   * where db-flag is_published is true
-   */
-  public EntityList getComments(EntityContent entC) throws StorageObjectFailure {
-    return relationComments.getMany(entC,"webdb_create","is_published='1'");
-  }
-
-  /**
    *
    * @param id
    * @return
@@ -119,8 +105,10 @@ public class DatabaseContent extends Database implements StorageObject {
   public boolean delete(String id) throws StorageObjectFailure
   {
     DatabaseComment.getInstance().deleteByContentId(id);
-    super.delete(id);
-    return true;
+    DatabaseContentToTopics.getInstance().deleteByContentId(id);
+    DatabaseContentToMedia.getInstance().deleteByContentId(id);
+
+    return super.delete(id);
   }
 
 }

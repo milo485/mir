@@ -31,13 +31,16 @@
  */
 package mir.core.service.storage;
 
+import mir.core.model.IUploadedMedia;
 import mir.core.model.UploadedMedia;
+import net.sf.hibernate.Hibernate;
+import net.sf.hibernate.HibernateException;
 import net.sf.hibernate.SessionFactory;
 
 /**
  * UploadedMediaService
  * @author idefix
- * @version $Id: UploadedMediaService.java,v 1.1 2003/08/17 19:11:49 idfx Exp $
+ * @version $Id: UploadedMediaService.java,v 1.2 2003/09/05 20:23:59 idfx Exp $
  */
 public class UploadedMediaService extends StorageService {
 
@@ -47,6 +50,16 @@ public class UploadedMediaService extends StorageService {
 	 */
 	public UploadedMediaService(SessionFactory factory) {
 		super(UploadedMedia.class, factory);
+	}
+
+	/**
+	 * @see mir.core.service.storage.StorageService#initializeLazyCollections(java.lang.Object)
+	 */
+	protected void initializeLazyCollections(Object returnObject) throws HibernateException {
+		if(returnObject instanceof IUploadedMedia){
+			IUploadedMedia media = (IUploadedMedia)returnObject;
+			Hibernate.initialize(media.getContent());
+		}
 	}
 
 }

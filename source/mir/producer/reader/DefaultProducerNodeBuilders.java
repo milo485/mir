@@ -43,17 +43,22 @@ import mir.log.LoggerWrapper;
 import mir.producer.ConditionalProducerNode;
 import mir.producer.DirCopyingProducerNode;
 import mir.producer.EntityBatchingProducerNode;
+import mir.producer.EntityDeletingProducerNode;
 import mir.producer.EntityEnumeratingProducerNode;
 import mir.producer.EntityListProducerNode;
+import mir.producer.EntityModifyingProducerNode;
 import mir.producer.EvaluatedAssignmentProducerNode;
 import mir.producer.ExpandedAssignmentProducerNode;
 import mir.producer.FileDateSettingProducerNode;
 import mir.producer.FileDeletingProducerNode;
+import mir.producer.FreeQueryProducerNode;
 import mir.producer.GeneratingProducerNode;
+import mir.producer.ListEnumeratingProducerNode;
 import mir.producer.LoggingProducerNode;
 import mir.producer.LoopProducerNode;
 import mir.producer.ProducerNode;
-import mir.producer.*;
+import mir.producer.RDFAggregatorProducerNode;
+import mir.producer.RSSProducerNode;
 import mir.producer.ResourceBundleProducerNode;
 import mir.producer.ScriptCallingProducerNode;
 import mir.util.XMLReader;
@@ -85,6 +90,10 @@ public class DefaultProducerNodeBuilders {
     aBuilderLibrary.registerFactory("Enumerate", new EnumeratingProducerNodeBuilder.factory(aModel));
     aBuilderLibrary.registerFactory("List", new ListProducerNodeBuilder.factory(aModel));
     aBuilderLibrary.registerFactory("Batch", new BatchingProducerNodeBuilder.factory(aModel));
+
+    aBuilderLibrary.registerFactory("UpdateEntity", new UpdateEntityProducerNodeBuilder.factory(aModel));
+    aBuilderLibrary.registerFactory("CreateEntity", new CreateEntityProducerNodeBuilder.factory(aModel));
+    aBuilderLibrary.registerFactory("DeleteEntity", new DeleteEntityProducerNodeBuilder.factory(aModel));
 
     aBuilderLibrary.registerFactory("Generate",
         new GeneratingProducerNodeBuilder.factory(aGeneratorLibrary, aWriterEngine));
@@ -184,17 +193,21 @@ public class DefaultProducerNodeBuilders {
   public static class EnumeratingProducerNodeBuilder extends AbstractProducerNodeBuilder {
     private final static String   ENUMERATION_KEY_ATTRIBUTE = KEY_ATTRIBUTE;
     private final static String   ENUMERATION_DEFINITION_ATTRIBUTE = DEFINITION_ATTRIBUTE;
+    private final static String   ENUMERATION_LIST_ATTRIBUTE = "list";
     private final static String   ENUMERATION_SELECTION_ATTRIBUTE = SELECTION_ATTRIBUTE;
     private final static String   ENUMERATION_ORDER_ATTRIBUTE = ORDER_ATTRIBUTE;
     private final static String   ENUMERATION_DEFAULT_SUBNODE = "default";
     private final static String   ENUMERATION_LIMIT_ATTRIBUTE = LIMIT_ATTRIBUTE;
     private final static String   ENUMERATION_SKIP_ATTRIBUTE = SKIP_ATTRIBUTE;
-    private final static String[] ENUMERATION_REQUIRED_ATTRIBUTES = { ENUMERATION_KEY_ATTRIBUTE, ENUMERATION_DEFINITION_ATTRIBUTE };
-    private final static String[] ENUMERATION_OPTIONAL_ATTRIBUTES = { ENUMERATION_SELECTION_ATTRIBUTE, ENUMERATION_ORDER_ATTRIBUTE, ENUMERATION_LIMIT_ATTRIBUTE, ENUMERATION_SKIP_ATTRIBUTE};
+    private final static String[] ENUMERATION_LIST_REQUIRED_ATTRIBUTES = { ENUMERATION_LIST_ATTRIBUTE, ENUMERATION_KEY_ATTRIBUTE };
+    private final static String[] ENUMERATION_LIST_OPTIONAL_ATTRIBUTES = { };
+    private final static String[] ENUMERATION_QUERY_REQUIRED_ATTRIBUTES = { ENUMERATION_DEFINITION_ATTRIBUTE, ENUMERATION_KEY_ATTRIBUTE };
+    private final static String[] ENUMERATION_QUERY_OPTIONAL_ATTRIBUTES = { ENUMERATION_SELECTION_ATTRIBUTE, ENUMERATION_ORDER_ATTRIBUTE, ENUMERATION_LIMIT_ATTRIBUTE, ENUMERATION_SKIP_ATTRIBUTE};
     private final static String[] ENUMERATION_SUBNODES = {ENUMERATION_DEFAULT_SUBNODE};
 
     private String key;
     private String definition;
+    private String list;
     private String selection;
     private String order;
     private String limit;
@@ -208,10 +221,20 @@ public class DefaultProducerNodeBuilders {
     }
 
     public void setAttributes(Map anAttributes) throws ProducerConfigExc, XMLReader.XMLReaderExc  {
-      XMLReaderTool.checkAttributes(anAttributes, ENUMERATION_REQUIRED_ATTRIBUTES, ENUMERATION_OPTIONAL_ATTRIBUTES);
+      definition = (String) anAttributes.get(ENUMERATION_DEFINITION_ATTRIBUTE);
+      list = (String) anAttributes.get(ENUMERATION_LIST_ATTRIBUTE);
+
+      if ((list==null && definition==null) || (list!=null && definition!=null))
+        throw new ProducerConfigExc("Exactly one of "+ENUMERATION_DEFINITION_ATTRIBUTE+" and "+ENUMERATION_LIST_ATTRIBUTE+" must be set");
+
+
+      if (list!=null)
+        XMLReaderTool.checkAttributes(anAttributes, ENUMERATION_LIST_REQUIRED_ATTRIBUTES, ENUMERATION_LIST_OPTIONAL_ATTRIBUTES);
+      if (definition!=null)
+        XMLReaderTool.checkAttributes(anAttributes, ENUMERATION_QUERY_REQUIRED_ATTRIBUTES, ENUMERATION_QUERY_OPTIONAL_ATTRIBUTES);
+
 
       key = (String) anAttributes.get(ENUMERATION_KEY_ATTRIBUTE);
-      definition = (String) anAttributes.get(ENUMERATION_DEFINITION_ATTRIBUTE);
       selection = (String) XMLReaderTool.getStringAttributeWithDefault(anAttributes, ENUMERATION_SELECTION_ATTRIBUTE, "");
       order = (String) XMLReaderTool.getStringAttributeWithDefault(anAttributes, ENUMERATION_ORDER_ATTRIBUTE, "");
       limit = (String) anAttributes.get(ENUMERATION_LIMIT_ATTRIBUTE);
@@ -219,7 +242,10 @@ public class DefaultProducerNodeBuilders {
     };
 
     public ProducerNode constructNode() {
-      return new EntityEnumeratingProducerNode(key, model, definition, selection, order, limit, skip, getSubNode(ENUMERATION_DEFAULT_SUBNODE ));
+      if (definition!=null)
+        return new EntityEnumeratingProducerNode(key, model, definition, selection, order, limit, skip, getSubNode(ENUMERATION_DEFAULT_SUBNODE ));
+      else
+        return new ListEnumeratingProducerNode(key, list, getSubNode(ENUMERATION_DEFAULT_SUBNODE ));
     };
 
     public static class factory implements ProducerNodeBuilderFactory {
@@ -231,6 +257,106 @@ public class DefaultProducerNodeBuilders {
 
       public ProducerNodeBuilder makeBuilder() {
         return new EnumeratingProducerNodeBuilder(model);
+      }
+    }
+  }
+
+////////////////////////////////////////////////////////////////////////////////
+
+  public static class UpdateEntityProducerNodeBuilder extends AbstractProducerNodeBuilder {
+    private final static String   UPDATE_KEY_ATTRIBUTE = KEY_ATTRIBUTE;
+    private final static String   UPDATE_DEFINITION_ATTRIBUTE = DEFINITION_ATTRIBUTE;
+    private final static String[] UPDATE_SUBNODES = {};
+
+    private String key;
+    private String definition;
+    private Map fieldValues;
+
+    private EntityAdapterModel model;
+
+    public UpdateEntityProducerNodeBuilder(EntityAdapterModel aModel) {
+      super(UPDATE_SUBNODES);
+
+      model = aModel;
+      fieldValues = new HashMap();
+    }
+
+    public void setAttributes(Map anAttributes) throws ProducerConfigExc, XMLReader.XMLReaderExc  {
+      key = (String) anAttributes.get(UPDATE_KEY_ATTRIBUTE);
+
+      if (key == null)
+        throw new XMLReader.XMLReaderExc("missing required attribute '" + UPDATE_KEY_ATTRIBUTE + "'" );
+      definition = (String) anAttributes.get(UPDATE_DEFINITION_ATTRIBUTE);
+
+      fieldValues.putAll(anAttributes);
+      fieldValues.remove(UPDATE_KEY_ATTRIBUTE);
+      fieldValues.remove(UPDATE_DEFINITION_ATTRIBUTE);
+    };
+
+    public ProducerNode constructNode() {
+      return new EntityModifyingProducerNode(model, false, definition, key, fieldValues);
+    };
+
+    public static class factory implements ProducerNodeBuilderFactory {
+      private EntityAdapterModel model;
+
+      public factory(EntityAdapterModel aModel) {
+        model = aModel;
+      }
+
+      public ProducerNodeBuilder makeBuilder() {
+        return new UpdateEntityProducerNodeBuilder(model);
+      }
+    }
+  }
+
+////////////////////////////////////////////////////////////////////////////////
+
+  public static class CreateEntityProducerNodeBuilder extends AbstractProducerNodeBuilder {
+    private final static String   CREATEENTITY_KEY_ATTRIBUTE = KEY_ATTRIBUTE;
+    private final static String   CREATEENTITY_DEFINITION_ATTRIBUTE = DEFINITION_ATTRIBUTE;
+    private final static String[] CREATEENTITY_SUBNODES = {};
+
+    private String key;
+    private String definition;
+    private Map fieldValues;
+
+    private EntityAdapterModel model;
+
+    public CreateEntityProducerNodeBuilder(EntityAdapterModel aModel) {
+      super(CREATEENTITY_SUBNODES);
+
+      model = aModel;
+      fieldValues = new HashMap();
+    }
+
+    public void setAttributes(Map anAttributes) throws ProducerConfigExc, XMLReader.XMLReaderExc  {
+      key = (String) anAttributes.get(CREATEENTITY_KEY_ATTRIBUTE);
+      definition = (String) anAttributes.get(CREATEENTITY_DEFINITION_ATTRIBUTE);
+
+      if (key == null)
+        throw new XMLReader.XMLReaderExc("missing required attribute '" + CREATEENTITY_KEY_ATTRIBUTE + "'" );
+      if (definition == null)
+        throw new XMLReader.XMLReaderExc("missing required attribute '" + CREATEENTITY_DEFINITION_ATTRIBUTE + "'" );
+
+      fieldValues.putAll(anAttributes);
+      fieldValues.remove(CREATEENTITY_KEY_ATTRIBUTE);
+      fieldValues.remove(CREATEENTITY_DEFINITION_ATTRIBUTE);
+    };
+
+    public ProducerNode constructNode() {
+      return new EntityModifyingProducerNode(model, true, definition, key, fieldValues);
+    };
+
+    public static class factory implements ProducerNodeBuilderFactory {
+      private EntityAdapterModel model;
+
+      public factory(EntityAdapterModel aModel) {
+        model = aModel;
+      }
+
+      public ProducerNodeBuilder makeBuilder() {
+        return new CreateEntityProducerNodeBuilder(model);
       }
     }
   }
@@ -322,6 +448,50 @@ public class DefaultProducerNodeBuilders {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+  public static class DeleteEntityProducerNodeBuilder extends AbstractProducerNodeBuilder {
+    private final static String   DELETEENTITY_DEFINITION_ATTRIBUTE = DEFINITION_ATTRIBUTE;
+    private final static String   DELETEENTITY_SELECTION_ATTRIBUTE = SELECTION_ATTRIBUTE;
+    private final static String[] DELETEENTITY_REQUIRED_ATTRIBUTES = { DELETEENTITY_SELECTION_ATTRIBUTE, DELETEENTITY_DEFINITION_ATTRIBUTE };
+    private final static String[] DELETEENTITY_OPTIONAL_ATTRIBUTES = { };
+    private final static String[] DELETEENTITY_SUBNODES = {};
+
+    private String definition;
+    private String selection;
+
+    private EntityAdapterModel model;
+
+    public DeleteEntityProducerNodeBuilder(EntityAdapterModel aModel) {
+      super(DELETEENTITY_SUBNODES);
+
+      model = aModel;
+    }
+
+    public void setAttributes(Map anAttributes) throws ProducerConfigExc, XMLReader.XMLReaderExc {
+      XMLReaderTool.checkAttributes(anAttributes, DELETEENTITY_REQUIRED_ATTRIBUTES, DELETEENTITY_OPTIONAL_ATTRIBUTES);
+
+      definition = (String) anAttributes.get(DELETEENTITY_DEFINITION_ATTRIBUTE);
+      selection = (String) XMLReaderTool.getStringAttributeWithDefault(anAttributes, DELETEENTITY_SELECTION_ATTRIBUTE, "");
+    };
+
+    public ProducerNode constructNode() {
+      return new EntityDeletingProducerNode(model, definition, selection);
+    };
+
+    public static class factory implements ProducerNodeBuilderFactory {
+      private EntityAdapterModel model;
+
+      public factory(EntityAdapterModel aModel) {
+        model = aModel;
+      }
+
+      public ProducerNodeBuilder makeBuilder() {
+        return new DeleteEntityProducerNodeBuilder(model);
+      }
+    }
+  }
+
+////////////////////////////////////////////////////////////////////////////////
+
   public static class LoggingProducerNodeBuilder extends AbstractProducerNodeBuilder {
     private final static String   LOG_MESSAGE_ATTRIBUTE = "message";
     private final static String   LOG_TYPE_ATTRIBUTE = "type";
@@ -405,6 +575,8 @@ public class DefaultProducerNodeBuilders {
           type = FreeQueryProducerNode.QUERY_TYPE_ROW;
         else if (typeString.toLowerCase().equals("value"))
           type = FreeQueryProducerNode.QUERY_TYPE_VALUE;
+        else if (typeString.toLowerCase().equals("update"))
+          type = FreeQueryProducerNode.QUERY_TYPE_UPDATE;
         else
           throw new ProducerConfigExc("unknown query type: " + typeString + " (allowed are set, row and value)");
       }
@@ -646,8 +818,6 @@ public class DefaultProducerNodeBuilders {
     private final static String[] BATCHER_OPTIONAL_ATTRIBUTES = { BATCHER_SELECTION_ATTRIBUTE, BATCHER_ORDER_ATTRIBUTE, BATCHER_MINBATCHSIZE_ATTRIBUTE, BATCHER_SKIP_ATTRIBUTE, BATCHER_PROCESS_ATTRIBUTE };
     private final static String[] BATCHER_SUBNODES = { BATCHER_BATCH_SUBNODE, BATCHER_BATCHLIST_SUBNODE };
 
-    // ML: batchSize, minBatchSize, skip should be expressions!
-
     private EntityAdapterModel model;
     private String batchDataKey;
     private String batchInfoKey;
@@ -748,13 +918,15 @@ public class DefaultProducerNodeBuilders {
   public static class RSSProducerNodeBuilder extends AbstractProducerNodeBuilder {
     private final static String   RSS_KEY_ATTRIBUTE = KEY_ATTRIBUTE;
     private final static String   RSS_URL_ATTRIBUTE = URL_ATTRIBUTE;
+    private final static String   RSS_VERSION_ATTRIBUTE = "version";
 
     private final static String[] RSS_REQUIRED_ATTRIBUTES = { RSS_KEY_ATTRIBUTE, RSS_URL_ATTRIBUTE };
-    private final static String[] RSS_OPTIONAL_ATTRIBUTES = {  };
+    private final static String[] RSS_OPTIONAL_ATTRIBUTES = { RSS_VERSION_ATTRIBUTE };
     private final static String[] RSS_SUBNODES = {  };
 
     private String key;
     private String url;
+    private String version;
 
     public RSSProducerNodeBuilder() {
       super(RSS_SUBNODES);
@@ -765,10 +937,11 @@ public class DefaultProducerNodeBuilders {
 
       key = (String) anAttributes.get( RSS_KEY_ATTRIBUTE );
       url = (String) anAttributes.get( RSS_URL_ATTRIBUTE );
+      version = XMLReaderTool.getStringAttributeWithDefault(anAttributes, RSS_VERSION_ATTRIBUTE, "1.0");
     };
 
     public ProducerNode constructNode() {
-      return new RSSProducerNode(key, url);
+      return new RSSProducerNode(key, url, version);
     };
   }
 

@@ -31,6 +31,7 @@ package mircoders.media;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.*;
 
 import mir.config.MirPropertiesConfiguration;
 import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
@@ -42,7 +43,6 @@ import mir.media.MirMedia;
 import mir.misc.FileUtil;
 import mir.misc.StringUtil;
 import mircoders.entity.EntityImages;
-import freemarker.template.SimpleList;
 
 /**
  * This class handles saving, fetching creating representations
@@ -58,7 +58,7 @@ import freemarker.template.SimpleList;
  *
  * @see mir.media.MirMedia
  * @author mh
- * @version $Id: MediaHandlerImages.java,v 1.23 2003/04/30 00:37:27 zapata Exp $
+ * @version $Id: MediaHandlerImages.java,v 1.24 2003/09/03 18:29:04 zapata Exp $
  */
 
 
@@ -161,8 +161,8 @@ public abstract class MediaHandlerImages implements MirMedia
     return in;
   }
 
-  public SimpleList getURL(Entity ent, Entity mediaTypeEnt) {
-    SimpleList theList = new SimpleList();
+  public List getURL(Entity ent, Entity mediaTypeEnt) {
+    List theList = new Vector();
     theList.add(ent);
     return theList;
   }

@@ -32,12 +32,13 @@
 package mir.core.service.storage;
 
 import mir.core.model.Language;
+import net.sf.hibernate.HibernateException;
 import net.sf.hibernate.SessionFactory;
 
 /**
  * LanguageService
  * @author idefix
- * @version $Id: LanguageService.java,v 1.1 2003/08/17 19:11:49 idfx Exp $
+ * @version $Id: LanguageService.java,v 1.2 2003/09/05 20:23:59 idfx Exp $
  */
 public class LanguageService extends StorageService {
 
@@ -47,6 +48,13 @@ public class LanguageService extends StorageService {
 	 */
 	public LanguageService(SessionFactory factory) {
 		super(Language.class, factory);
+	}
+
+	/**
+	 * @see mir.core.service.storage.StorageService#initializeLazyCollections(java.lang.Object)
+	 */
+	protected void initializeLazyCollections(Object returnObject) throws HibernateException {
+		// do nothing
 	}
 
 }

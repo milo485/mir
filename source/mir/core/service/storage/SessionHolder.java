@@ -38,7 +38,7 @@ import net.sf.hibernate.SessionFactory;
 /**
  * SessionHolder
  * @author idefix
- * @version $Id: SessionHolder.java,v 1.1 2003/08/19 00:42:38 idfx Exp $
+ * @version $Id: SessionHolder.java,v 1.2 2003/09/05 20:23:59 idfx Exp $
  */
 public class SessionHolder {
 	private ThreadLocal threadLocalSession;
@@ -65,9 +65,10 @@ public class SessionHolder {
 	
 	public void closeSession() throws HibernateException {
 		Session session = (Session) threadLocalSession.get();
-		threadLocalSession.set(null);
 		if (session != null) {
+			session.flush();
 			session.close();
 		}
+		threadLocalSession.set(null);
 	} 
 }

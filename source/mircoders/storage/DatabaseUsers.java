@@ -34,12 +34,15 @@ import mir.log.LoggerWrapper;
 import mir.storage.Database;
 import mir.storage.StorageObject;
 import mir.storage.StorageObjectFailure;
-import freemarker.template.SimpleList;
 
 /**
- * <b>Diese Klasse implementiert die Datenbankverbindung zur MetaObjekt-Tabelle
  *
- *
+ * <p>Title: </p>
+ * <p>Description: </p>
+ * <p>Copyright: Copyright (c) 2003</p>
+ * <p>Company: </p>
+ * @author not attributable
+ * @version 1.0
  */
 
 public class DatabaseUsers extends Database implements StorageObject{
@@ -64,9 +67,5 @@ public class DatabaseUsers extends Database implements StorageObject{
     hasTimestamp = false;
     theTable = "webdb_users";
     theEntityClass = mircoders.entity.EntityUsers.class;
-  }
-
-  public SimpleList getPopupData() throws StorageObjectFailure {
-    return getPopupData("login", true);
   }
 }

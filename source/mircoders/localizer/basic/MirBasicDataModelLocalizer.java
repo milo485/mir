@@ -45,6 +45,7 @@ import mir.media.MediaHelper;
 import mir.media.MirMedia;
 import mir.util.ParameterExpander;
 import mir.util.RewindableIterator;
+import mir.util.StructuredContentParser;
 import mircoders.entity.EntityUploadedMedia;
 import mircoders.global.MirGlobal;
 import mircoders.localizer.MirAdminInterfaceLocalizer;
@@ -57,10 +58,11 @@ import mircoders.storage.DatabaseBreaking;
 import mircoders.storage.DatabaseComment;
 import mircoders.storage.DatabaseCommentStatus;
 import mircoders.storage.DatabaseContent;
+import mircoders.storage.DatabaseContentToMedia;
+import mircoders.storage.DatabaseContentToTopics;
 import mircoders.storage.DatabaseImageType;
 import mircoders.storage.DatabaseImages;
 import mircoders.storage.DatabaseLanguage;
-import mircoders.storage.DatabaseMedia;
 import mircoders.storage.DatabaseMediaType;
 import mircoders.storage.DatabaseMediafolder;
 import mircoders.storage.DatabaseMessages;
@@ -87,9 +89,9 @@ public class MirBasicDataModelLocalizer implements MirDataModelLocalizer {
 
   protected void constructContentAdapterDefinition(EntityAdapterDefinition anEntityAdapterDefinition) throws MirLocalizerFailure, MirLocalizerExc {
     try {
-      anEntityAdapterDefinition.addDBDateField("creationdate", "webdb_create");
-      anEntityAdapterDefinition.addDBDateField("changedate", "webdb_lastchange");
-      anEntityAdapterDefinition.addMirDateField("date", "date");
+      anEntityAdapterDefinition.addDBDateField("creationdate", "webdb_create", configuration.getString("Mir.DefaultTimezone"));
+      anEntityAdapterDefinition.addDBDateField("changedate", "webdb_lastchange", configuration.getString("Mir.DefaultTimezone"));
+      anEntityAdapterDefinition.addMirDateField("date", "date", configuration.getString("Mir.DefaultTimezone"));
       anEntityAdapterDefinition.addCalculatedField("to_topics", new ContentToTopicsField());
       anEntityAdapterDefinition.addCalculatedField("to_comments", new ContentToCommentsField());
       anEntityAdapterDefinition.addCalculatedField("language", new ContentToLanguageField());
@@ -129,7 +131,7 @@ public class MirBasicDataModelLocalizer implements MirDataModelLocalizer {
 
   protected void constructCommentAdapterDefinition(EntityAdapterDefinition anEntityAdapterDefinition) throws MirLocalizerFailure {
     try {
-      anEntityAdapterDefinition.addDBDateField("creationdate", "webdb_create");
+      anEntityAdapterDefinition.addDBDateField("creationdate", "webdb_create", configuration.getString("Mir.DefaultTimezone"));
       anEntityAdapterDefinition.addCalculatedField("to_content", new CommentToContentField());
       anEntityAdapterDefinition.addCalculatedField("status", new CommentToStatusField());
 
@@ -173,22 +175,40 @@ public class MirBasicDataModelLocalizer implements MirDataModelLocalizer {
       result.addMapping( "commentStatus", DatabaseCommentStatus.getInstance(), new EntityAdapterDefinition());
 
       definition = new EntityAdapterDefinition();
-      definition.addDBDateField("creationdate", "webdb_create");
+      definition.addDBDateField("creationdate", "webdb_create", configuration.getString("Mir.DefaultTimezone"));
       result.addMapping( "breakingNews", DatabaseBreaking.getInstance(), definition);
 
+      definition = new EntityAdapterDefinition();
+      definition.addDBDateField("creationdate", "webdb_create", configuration.getString("Mir.DefaultTimezone"));
+      result.addMapping( "internalMessage", DatabaseMessages.getInstance(), definition);
+
+      definition = new EntityAdapterDefinition();
+      definition.addCalculatedField("mediafolder", new MediaToMediaFolderField());
+      result.addMapping( "uploadedMedia", DatabaseUploadedMedia.getInstance(), definition);
+      definition = new EntityAdapterDefinition();
+      definition.addCalculatedField("mediafolder", new MediaToMediaFolderField());
+      result.addMapping( "image", DatabaseImages.getInstance(), definition);
+      definition = new EntityAdapterDefinition();
+      definition.addCalculatedField("mediafolder", new MediaToMediaFolderField());
+      result.addMapping( "audio", DatabaseAudio.getInstance(), definition);
+      definition = new EntityAdapterDefinition();
+      definition.addCalculatedField("mediafolder", new MediaToMediaFolderField());
+      result.addMapping( "video", DatabaseVideo.getInstance(), definition);
+      definition = new EntityAdapterDefinition();
+      definition.addCalculatedField("mediafolder", new MediaToMediaFolderField());
+      result.addMapping( "otherMedia", DatabaseOther.getInstance(), definition);
+
+
+      result.addMapping( "mediaFolder", DatabaseMediafolder.getInstance(), new EntityAdapterDefinition());
       result.addMapping( "imageType", DatabaseImageType.getInstance(), new EntityAdapterDefinition());
       result.addMapping( "language", DatabaseLanguage.getInstance(), new EntityAdapterDefinition());
-      result.addMapping( "mediaFolder", DatabaseMediafolder.getInstance(), new EntityAdapterDefinition());
       result.addMapping( "mediaType", DatabaseMediaType.getInstance(), new EntityAdapterDefinition());
-      result.addMapping( "internalMessage", DatabaseMessages.getInstance(), new EntityAdapterDefinition());
       result.addMapping( "topic", DatabaseTopics.getInstance(), new EntityAdapterDefinition());
       result.addMapping( "user", DatabaseUsers.getInstance(), new EntityAdapterDefinition());
-      result.addMapping( "media", DatabaseMedia.getInstance(), new EntityAdapterDefinition());
-      result.addMapping( "uploadedMedia", DatabaseUploadedMedia.getInstance(), new EntityAdapterDefinition());
-      result.addMapping( "image", DatabaseImages.getInstance(), new EntityAdapterDefinition());
-      result.addMapping( "audio", DatabaseAudio.getInstance(), new EntityAdapterDefinition());
-      result.addMapping( "video", DatabaseVideo.getInstance(), new EntityAdapterDefinition());
       result.addMapping( "otherMedia", DatabaseOther.getInstance(), new EntityAdapterDefinition());
+
+      result.addMapping( "content_x_topic", DatabaseContentToTopics.getInstance(), new EntityAdapterDefinition());
+
     }
     catch (Throwable t) {
       throw new MirLocalizerFailure(t.getMessage(), t);
@@ -269,6 +289,23 @@ public class MirBasicDataModelLocalizer implements MirDataModelLocalizer {
         else {
           return MirGlobal.localizer().producerAssistant().filterNonHTMLText((String) anEntityAdapter.get(fieldName));
         }
+      }
+      catch (Throwable t) {
+        throw new RuntimeException(t.getMessage());
+      }
+    }
+  }
+
+  protected class StructuredContentField implements EntityAdapterDefinition.CalculatedField {
+    private String expression;
+
+    public StructuredContentField(String anExpression) {
+      expression = anExpression;
+    }
+
+    public Object getValue(EntityAdapter anEntityAdapter) {
+      try {
+        return StructuredContentParser.parse(ParameterExpander.evaluateStringExpression(anEntityAdapter, expression));
       }
       catch (Throwable t) {
         throw new RuntimeException(t.getMessage());
@@ -367,12 +404,38 @@ public class MirBasicDataModelLocalizer implements MirDataModelLocalizer {
     }
   }
 
+  protected class MediaToMediaFolderField implements EntityAdapterDefinition.CalculatedField {
+    public Object getValue(EntityAdapter anEntityAdapter) {
+      try {
+        return anEntityAdapter.getToOneRelation(
+                    "id="+anEntityAdapter.get("to_media_folder"),
+                    "id",
+                    "mediaFolder" );
+      }
+      catch (Throwable t) {
+        throw new RuntimeException(t.getMessage());
+      }
+    }
+  }
+
   protected class ContentToCommentsField implements EntityAdapterDefinition.CalculatedField {
+    private String extracondition;
+    private String order;
+
+    public ContentToCommentsField() {
+      this ( " and is_published='1'", "webdb_create");
+    }
+
+    public ContentToCommentsField(String anExtraCondition, String anOrder) {
+      order = anOrder;
+      extracondition = anExtraCondition;
+    }
+
     public Object getValue(EntityAdapter anEntityAdapter) {
       try {
         return anEntityAdapter.getRelation(
-                    "to_media="+anEntityAdapter.get("id")+" and is_published='1'",
-                    "webdb_create",
+                    "to_media="+anEntityAdapter.get("id")+" " + extracondition,
+                    order,
                     "comment" );
       }
       catch (Throwable t) {
@@ -382,10 +445,24 @@ public class MirBasicDataModelLocalizer implements MirDataModelLocalizer {
   }
 
   protected class ContentToTopicsField implements EntityAdapterDefinition.CalculatedField {
+    private String topicCondition;
+
+    public ContentToTopicsField() {
+      this(null);
+    }
+
+    public ContentToTopicsField(String aTopicCondition) {
+      topicCondition = aTopicCondition;
+    }
+
     public Object getValue(EntityAdapter anEntityAdapter) {
       try {
+        String condition = "exists (select * from content_x_topic where content_id="+anEntityAdapter.get("id")+" and topic_id=id)";
+        if (topicCondition!=null && topicCondition.length()>0)
+          condition = "(" + topicCondition + ") and " + condition;
+
         return anEntityAdapter.getRelation(
-                    "exists (select * from content_x_topic where content_id="+anEntityAdapter.get("id")+" and topic_id=id)",
+                    condition,
                     "title",
                     "topic" );
       }
@@ -522,6 +599,35 @@ public class MirBasicDataModelLocalizer implements MirDataModelLocalizer {
         return Integer.toString(
             DatabaseComment.getInstance().getSize(
                   "to_media="+anEntityAdapter.get("id")+" " + extraCondition));
+      }
+      catch (Throwable t) {
+        throw new RuntimeException(t.getMessage());
+      }
+    }
+  }
+
+  protected class ContentMediaCountField implements EntityAdapterDefinition.CalculatedField {
+    private String table;
+    private boolean published;
+
+    public ContentMediaCountField(String aTable, boolean anOnlyPublished) {
+      table = aTable;
+      published = anOnlyPublished;
+    }
+
+    public ContentMediaCountField(String aTable) {
+      this(aTable, true);
+    }
+
+    public Object getValue(EntityAdapter anEntityAdapter) {
+      try {
+        String subQuery = "select * from "+table+" where id = media_id";
+        if (published)
+          subQuery = subQuery + " and is_published='t'";
+
+        return Integer.toString(
+            DatabaseContentToMedia.getInstance().getSize(
+                  "exists ("+subQuery+")"));
       }
       catch (Throwable t) {
         throw new RuntimeException(t.getMessage());

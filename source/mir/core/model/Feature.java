@@ -41,7 +41,7 @@ import org.apache.commons.lang.builder.ToStringBuilder;
  * 
  * Feature
  * @author idefix
- * @version $Id: Feature.java,v 1.2 2003/08/17 19:13:19 idfx Exp $
+ * @version $Id: Feature.java,v 1.3 2003/09/05 20:23:59 idfx Exp $
  */
 public class Feature implements Serializable {
 
@@ -123,11 +123,11 @@ public class Feature implements Serializable {
         this.mainUrl = mainUrl;
     }
 
-    public boolean isIsPublished() {
+    public boolean isPublished() {
         return this.isPublished;
     }
 
-    public void setIsPublished(boolean isPublished) {
+    public void setPublished(boolean isPublished) {
         this.isPublished = isPublished;
     }
 

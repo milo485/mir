@@ -33,8 +33,6 @@ package mircoders.storage;
 import mir.log.LoggerWrapper;
 import mir.storage.Database;
 import mir.storage.StorageObject;
-import mir.storage.StorageObjectFailure;
-import freemarker.template.SimpleList;
 
 /**
  * <b>Diese Klasse implementiert die Datenbankverbindung zur MetaObjekt-Tabelle
@@ -45,7 +43,6 @@ import freemarker.template.SimpleList;
 public class DatabaseImageLayout extends Database implements StorageObject{
 
   private static DatabaseImageLayout instance;
-  private static SimpleList publisherPopupData;
 
   // the following *has* to be sychronized cause this static method
   // could get preemted and we could end up with 2 instances of DatabaseFoo..
@@ -64,9 +61,4 @@ public class DatabaseImageLayout extends Database implements StorageObject{
     hasTimestamp = false;
     theTable = "img_layout";
   }
-
-  public SimpleList getPopupData() throws StorageObjectFailure {
-    return getPopupData("name", true);
-  }
-
 }

@@ -19,12 +19,21 @@
     <input type="hidden" name="do" value="update">
   </if>
 
-<table width="90%" cellspacing="3" cellpadding="2">
+<table width="100%" cellspacing="0" cellpadding="5">
   <tr>
     <td align="left" valign="top">
       <if new=="0">
-        [ <a href="${config.actionRoot}?module=Comment&do=articlecomments&articleid=${article.id}&returnurl=${thisurl}">${lang("content.comments")}</a> ] &nbsp;&nbsp;
-          [ <a href="${article.publicurl}">${lang("preview")}</a> ]
+        <call showButton(
+          "module=Comment&do=articlecomments&articleid="+article.id+"&returnurl="+utility.encodeURI(thisurl),
+          lang("content.comments"))>
+        <call showAbsoluteLinkButton(
+          article.publicurl,
+          lang("preview"))>
+        <list article.operations as op>
+          <call showButton(
+            "module=Localizer&do=articleoperation&operation="+op+"&articleid="+article.id+"&returnurl="+utility.encodeURI(thisurl), 
+            lang("content.operation."+op))>
+        </list>
       </if>
       
     </td>
@@ -38,7 +47,8 @@
       </if>
     </td>
   </tr>
-
+</table>
+<table width="100%" cellspacing="3" cellpadding="2">
   <tr>
     <td align="right" class="table-left">
       id # :
@@ -53,7 +63,7 @@
       ${lang("content.lastchange_date")}:
     </td>
     <td class="listrow2">
-      ${utility.encodeHTML(article.webdb_lastchange)}<br>
+      ${utility.encodeHTML(article.changedate.format(config["Mir.DefaultDateTimeFormat"]))}<br>
     </td>
   </tr>
 
@@ -62,11 +72,10 @@
       ${lang("content.create_date")}:
     </td>
     <td class="listrow2">
-      ${utility.encodeHTML(article.webdb_create)}<br>${lang("edit")}:
+      ${utility.encodeHTML(article.creationdate.format(config["Mir.DefaultDateTimeFormat"]))}<br>${lang("edit")}:
       <input type="text" size="10" maxlength="16" name="webdb_create" value=""> &nbsp; <span class="small">(yyyy-mm-dd [HH:mm])</span>
     </td>
   </tr>
-
 
   <call PulldownTableRow (lang("content.articletype"), "to_article_type", articletypes, "id", "name", article.to_article_type, "articletypes.")>
   <call PulldownTableRow (lang("content.language"), "to_language", languages, "id", "name", article.to_language, "")>
@@ -76,7 +85,7 @@
       ${lang("content.topic")}:
     </td>
     <td class="listrow2" >
-      <if config["Mir.Localizer.Admin.TopicListFlavor"]!="0">      
+      <if config["Mir.Localizer.Admin.TopicListFlavor"]!="0">
       <table border=0 cellpadding="2" cellspacing="0">
         <tr> 
           <assign col=config["Mir.Localizer.Admin.TopicListColumns"]>
@@ -100,12 +109,12 @@
         </tr>
       </table>
       <else>
-      <select name="to_topic" size="5" multiple>
-        <list topics as t>
-          <option value="${t.id}" <list article.to_topics as to><if (t.id == to["id"])>selected</if></list>>${t.title}</option>
+      <select name="to_topic" size="7" multiple>
+		<list topics as t>
+		  <option value="${t.id}" <list article.to_topics as to><if (t.id == to["id"])>selected</if></list>>${t.title}</option>
         </list>
       </select>
-      </if>        
+      </if>
     </td>
   </tr>
   

@@ -35,13 +35,14 @@ package mir.core.service.storage;
 import java.util.List;
 
 import mir.core.model.MirUser;
+import net.sf.hibernate.HibernateException;
 import net.sf.hibernate.SessionFactory;
 import net.sf.hibernate.expression.Expression;
 
 /**
  * UserService
  * @author idefix
- * @version $Id: UserService.java,v 1.1 2003/08/17 19:11:49 idfx Exp $
+ * @version $Id: UserService.java,v 1.3 2003/09/07 16:55:00 idfx Exp $
  */
 public class UserService extends StorageService {
 
@@ -63,7 +64,16 @@ public class UserService extends StorageService {
 				Expression.eq("isAdmin", new Boolean(true))
 			)
 		);
+		if(list.size() == 0){
+			return null;
+		}
 		return (MirUser)list.get(0);
 	}
 
+	/**
+	 * @see mir.core.service.storage.StorageService#initializeLazyCollections(java.lang.Object)
+	 */
+	protected void initializeLazyCollections(Object returnObject) throws HibernateException {		
+		//do nothing
+	}
 }

@@ -85,6 +85,9 @@
     <fileset dir="lib">
       <include name="*.jar"/>
     </fileset>
+    <fileset dir="lib/struts">
+      <include name="*.jar"/>
+    </fileset>
     <fileset dir="lib/hibernate">
       <include name="*.jar"/>
     </fileset>
@@ -164,8 +167,8 @@
         <exclude name="ant.jar"/>
         <exclude name="xerces.jar"/>
       </fileset>
-      <fileset dir="lib/hibernate">
-      </fileset>
+      <fileset dir="lib/hibernate"/>
+      <fileset dir="lib/struts"/>
     </copy>
   </target>
 
@@ -259,7 +262,7 @@
 
   <target name="javadoc" depends="prepare">
     <javadoc packagenames="mir.*, mircoders.*"
-	     sourcefiles="source/${app.name}.java,source/Open${app.name}.java"
+	     sourcefiles="source/Mir.java,source/OpenMir.java"
 	     sourcepath="source"
              destdir="${javadoc.home}">
 	  <classpath refid="project.class.path"/>

@@ -3,14 +3,16 @@
   not used for image-list because imagelist uses other display method
 </comment>
 
+<include "FUNCTIONS.template">
+
 <function MediaSearch (module)>
 
 <form method="post" action="${config.actionRoot}">
 
 <input type="hidden" name="module" value="${module}">
-<input type="hidden" name="do" value="list">
-<input type="hidden" name="articleid" value="${data.articleid}">
-<input type="hidden" name="commentid" value="${data.commentid}">
+<input type="hidden" name="do" value="search">
+<input type="hidden" name="articleid" value="${articleid}">
+<input type="hidden" name="commentid" value="${commentid}">
 
 <table border="0" cellspacing="2" cellpadding="2">
   <tr>
@@ -24,29 +26,30 @@
 
   <tr>
     <td class="listrow2">
-      <input type="text" size="20" maxlength="30" name="query_text" value="${data.query_text}">
+      <input type="text" size="20" maxlength="30" name="searchtext" value="${searchtext}">
     </td> 
     <td class="listrow2">
-      <select name="query_field">
-        <option value="title"<if data.query_field=="title"> selected</if>>${lang("media.title")}</option>
-        <option value="creator"<if data.query_field=="creator"> selected</if>>${lang("media.creator")}</option>
-        <option value="place"<if data.query_field=="place"> selected</if>>${lang("media.location")}</option>
+      <select name="searchfield">
+        <option value="title"<if searchfield=="title"> selected</if>>${lang("media.title")}</option>
+        <option value="creator"<if searchfield=="creator"> selected</if>>${lang("media.creator")}</option>
+        <option value="place"<if searchfield=="place"> selected</if>>${lang("media.location")}</option>
       </select>
     </td>
     
     <td class="listrow2">
-      <select name="query_is_published">
+      <select name="searchispublished">
         <option value="">${lang("dontcare")}</option>
-        <option value="0" <if data.query_is_published=="0"> selected</if>>${lang("no")}</option>
-        <option value="1" <if data.query_is_published=="1"> selected</if>>${lang("yes")}</option>
+        <option value="0" <if searchispublished=="0"> selected</if>>${lang("no")}</option>
+        <option value="1" <if searchispublished=="1"> selected</if>>${lang("yes")}</option>
       </select>
     </td>
     
     <td class="listrow2">
-    <select name="query_media_folder">
-    <list extra.mediafolderPopupData as m>
-    <option value="${m.key}" <if m.key == data.query_media_folder>selected</if>>${m.value}</option>
-    </list>
+    <select name="searchmediafolder">
+      <option value="">-</option>
+      <list mediafolders as m>
+        <option value="${m.id}" <if m.id == searchmediafolder>selected</if>>${m.name}</option>
+      </list>
     </select>
     </td>
     
@@ -66,82 +69,85 @@
 
 <function MediaList (module)>
 
-<table>
+  <call showAddOrBack("1", module, "Admin", "start")>
+    <if medialist>
+      <call showPrevNextLinks(prevurl, nexturl, "left")>
 
-  <tr class="darkgrey" >
-    <td class="table-head">
-  <b>${lang("media.icon")}</b></td>
-  <td class="table-head">
-  <b>${lang("media.title")}</b></td>
-    <td class="table-head">
-  <b>${lang("media.format")}</b></td>
-    <td class="table-head">
-  <b>${lang("media.size")}</b></td>
-    <td class="table-head">
-  <b>${lang("media.mediafolder")}</b></td>
-    <td class="table-head">
-  <b>${lang("media.creator")}</b></td>
-    <td class="table-head">
-  &nbsp;</td>
-
-  </tr>
-    <if data.contentlist>
-    <list data.contentlist as entry>
-    <tr <if grey=="1"><assign grey="0">class="listrow1"<else>class="listrow2"<assign grey="1"> </if>>
-    <td>
-          <a href="${config.actionRoot}?module=${module}&do=getMedia&id=${entry.id}">
-        <img src="${config.docRoot}/img/${entry.big_icon}" border=0></a>
-    </td>
-      <td>
-      ${entry.title}&nbsp;
-          <if entry.description><br>${entry.description}</if>
-    </td>
-      <td>
-      ${entry.media_descr}&nbsp;
-    </td>
-      <td>
-      ${entry.human_readable_size}&nbsp;
-    </td>
-      <td>
-      ${data.mediafolderHashdata[entry.to_media_folder]["name"]}&nbsp;
-    </td>
-      <td>
-      ${entry.creator}&nbsp;
-    </td>
-      <td>&nbsp;
-      <if data.articleid>
-        <a href="${config.actionRoot}?module=Content&do=attach&mid=${entry.id}&articleid=${data.articleid}">${lang("attach")}</a>
+      <table>
+      
+        <tr class="darkgrey" >
+          <td class="table-head">
+        <b>${lang("media.icon")}</b></td>
+        <td class="table-head">
+        <b>${lang("media.title")}</b></td>
+          <td class="table-head">
+        <b>${lang("media.format")}</b></td>
+          <td class="table-head">
+        <b>${lang("media.size")}</b></td>
+          <td class="table-head">
+        <b>${lang("media.mediafolder")}</b></td>
+          <td class="table-head">
+        <b>${lang("media.creator")}</b></td>
+          <td class="table-head">
+        &nbsp;</td>
+      
+        </tr>
+          <assign grey="0">
+          <list medialist as entry>
+          <tr <if grey=="1"><assign grey="0">class="listrow1"<else>class="listrow2"<assign grey="1"> </if>>
+          <td>
+              <a href="${config.actionRoot}?module=${module}&do=getMedia&id=${entry.id}">
+      <if module=="Images">
+              <img src="${config.actionRoot}?module=${module}&do=getIcon&id=${entry.id}" border=0></a>        
       <else>
-        <if data.commentid>
-          <a href="${config.actionRoot}?module=Comment&do=attach&mid=${entry.id}&commentid=${data.commentid}">${lang("attach")}</a>
-        <else>
-          <a href="${config.actionRoot}?module=${module}&do=delete&id=${entry.id}&query_text=${utility.encodeHTML(data.query_text_encoded)}&query_field=${utility.encodeHTML(data.query_field)}&query_is_published=${data.query_is_published}&query_media_folder=${data.query_media_folder}&offset=${data.offset}">${lang("delete")}</a>
-          | <a href="${config.actionRoot}?module=${module}&do=edit&id=${entry.id}">${lang("edit")}</a>
-        </if>
+              <img src="${config.docRoot}/img/${entry.big_icon}" border=0></a>
       </if>
-    </td>
-    </tr>
-  </list>
-  <tr>
-    <td colspan="7" class="table-foot">
-      ${data.count} ${lang("records")} / ${lang("show_from_to", data.from, data.to)}
-    </td>
-  </tr>
-
-  <tr>
-    <td>
-      <if data.prev>
-        <a href="${config.actionRoot}?module=${module}&do=list&query_text=${data.query_text_encoded}&query_field=${data.query_field}&query_is_published=${data.query_is_published}&query_media_folder=${data.query_media_folder}&offset=${data.prev}&prev=zur&uuml;ck&articleid=${data.articleid}&commentid=${data.commentid}">${lang("list.previous")}</a>&nbsp;
-      </if>
-      <if data.next>
-        <a href="${config.actionRoot}?module=${module}&do=list&query_text=${data.query_text_encoded}&query_field=${data.query_field}&query_is_published=${data.query_is_published}&query_media_folder=${data.query_media_folder}&offset=${data.next}&next=weiter&articleid=${data.articleid}&commentid=${data.commentid}">${lang("list.next")}</a>
-      </if>
-    </td>
-  </tr>
-
-<else>
-  <tr><td align="center" class="box" colspan="7">${lang("no_matches_found")}</td></tr>
-</if>
-</table>
+          </td>
+            <td>
+            ${entry.title}&nbsp;
+                <if entry.description><br>${entry.description}</if>
+          </td>
+            <td>
+            ${entry.media_descr}&nbsp;
+          </td>
+            <td>
+            ${entry.human_readable_size}&nbsp;
+          </td>
+            <td>
+             <if entry.mediafolder>
+                ${entry.mediafolder.name}
+             </if>&nbsp;
+          </td>
+            <td>
+            ${entry.creator}&nbsp;
+          </td>
+            <td>&nbsp;
+            <if articleid>
+              <a href="${config.actionRoot}?module=Content&do=attach&mid=${entry.id}&articleid=${articleid}">${lang("attach")}</a>
+            <else>
+              <if commentid>
+                <a href="${config.actionRoot}?module=Comment&do=attach&mid=${entry.id}&commentid=${commentid}">${lang("attach")}</a>
+              <else>
+                <a href="${config.actionRoot}?module=${module}&do=delete&id=${entry.id}&okurl=${utility.encodeURI(thisurl)}&cancelurl=${utility.encodeURI(thisurl)}">${lang("delete")}</a>
+                | 
+                <a href="${config.actionRoot}?module=${module}&do=edit&id=${entry.id}">${lang("edit")}</a>
+              </if>
+            </if>
+          </td>
+          </tr>
+        </list>
+        <tr>
+          <td colspan="7" class="table-foot">
+            ${count} ${lang("records")} / ${lang("show_from_to", from, to)}
+          </td>
+        </tr>
+      </table>
+      
+      <call showPrevNextLinks(prevurl, nexturl, "left")>
+      <call showAddOrBack("1", module, "Admin", "start")>
+  
+    <else>
+      <P align="center">${lang("no_matches_found")}</p>
+    </if>
 
 </function>

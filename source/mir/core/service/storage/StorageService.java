@@ -34,6 +34,8 @@ package mir.core.service.storage;
 
 import java.util.List;
 
+import mir.config.MirPropertiesConfiguration;
+import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
 import net.sf.hibernate.Criteria;
 import net.sf.hibernate.HibernateException;
 import net.sf.hibernate.Session;
@@ -45,21 +47,36 @@ import net.sf.hibernate.expression.Expression;
  * 
  * StorageService
  * @author idefix
- * @version $Id: StorageService.java,v 1.2 2003/08/19 00:42:38 idfx Exp $
+ * @version $Id: StorageService.java,v 1.4 2003/09/07 16:55:00 idfx Exp $
  */
 public abstract class StorageService {
 	private Class objectClass;
 	private SessionHolder sessionHolder;
+	protected MirPropertiesConfiguration _configuration;
 
 	public StorageService(Class objectClass, SessionFactory factory){
 		this.objectClass = objectClass;
 		sessionHolder = new SessionHolder(factory);
+		try {
+			_configuration = MirPropertiesConfiguration.instance();
+		} catch (PropertiesConfigExc e) {
+			throw new multex.Failure("could not get the config", e);
+		}
 	}
 	
 	public List list(int offset, int limit){
 		return list(offset, limit, null);
 	}
 	
+	public List list(int offset){
+		int limit = _configuration.getInt("ServletModule.Default.ListSize");
+		return list(offset, limit, null);
+	}
+		
+	public List list(int offset, Expression expression){
+		int limit = _configuration.getInt("ServletModule.Default.ListSize");
+		return list(offset, limit, expression);
+	}	
 	public List list(int offset, int limit, Expression expression){
 		try {
 			Session session = sessionHolder.currentSession();
@@ -73,6 +90,7 @@ public abstract class StorageService {
 				.setMaxResults(limit);
 			List returnList = criteria.list();
 			transaction.commit();
+			sessionHolder.closeSession();
 			return returnList;
 		} catch (HibernateException e) {
 			throw new StorageServiceFailure(e);
@@ -84,12 +102,20 @@ public abstract class StorageService {
 			Session session = sessionHolder.currentSession();
 			Transaction transaction = session.beginTransaction();
 			Object returnObject = session.load(objectClass, id);
+			initializeLazyCollections(returnObject);
 			transaction.commit();
+			sessionHolder.closeSession();
 			return returnObject;
 		} catch (HibernateException e) {
 			throw new StorageServiceFailure(e);
 		}	
 	}
+	
+	/**
+	 * @param returnObject
+	 */
+	protected abstract void initializeLazyCollections(Object returnObject) 
+		throws HibernateException;
 	
 	public Integer add(Object newObject){
 		try {

@@ -37,12 +37,10 @@ import mir.misc.StringUtil;
 import mir.storage.Database;
 import mir.storage.StorageObject;
 import mir.storage.StorageObjectFailure;
-import freemarker.template.SimpleList;
 
 public class DatabaseAudio extends Database implements StorageObject{
 
   private static DatabaseAudio instance;
-  private static SimpleList publisherPopupData;
 
   // the following *has* to be sychronized cause this static method
   // could get preemted and we could end up with 2 instances of DatabaseFoo..
@@ -62,10 +60,6 @@ public class DatabaseAudio extends Database implements StorageObject{
     theTable = "audio";
     theCoreTable = "media";
     theEntityClass = mircoders.entity.EntityAudio.class;
-  }
-
-  public SimpleList getPopupData() throws StorageObjectFailure {
-    return getPopupData("title", true);
   }
 
   public void update(Entity theEntity) throws StorageObjectFailure {

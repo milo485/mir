@@ -31,8 +31,10 @@
     
     <tr class="x-small"><td colspan="2">&nbsp;</td></tr>
 
-    <call CheckboxTableRow (lang("abuse.logpostings"), "logenabled", logenabled)>
-    <call TextInputTableRow (lang("abuse.logsize"), 10, 10, "logsize", logsize)>
+    <if config["Abuse.DisallowIPLogging"]!="1">
+      <call CheckboxTableRow (lang("abuse.logpostings"), "logenabled", logenabled)>
+      <call TextInputTableRow (lang("abuse.logsize"), 10, 10, "logsize", logsize)>
+    </if>
     
     <tr class="x-small"><td colspan="2">&nbsp;</td></tr>    
     
@@ -55,7 +57,9 @@
 <td valign="top">
 
 <p class="box">
-  &gt; <a href="${config.actionRoot}?module=Abuse&do=showlog">${lang("abuse.showlog")}</a><br>
+  <if config["Abuse.DisallowIPLogging"]!="1">
+    &gt; <a href="${config.actionRoot}?module=Abuse&do=showlog">${lang("abuse.showlog")}</a><br>
+  </if>  
   &gt; <a href="${config.actionRoot}?module=Abuse&do=showfilters">${lang("abuse.showfilters")}</a>
 </p>
 

@@ -29,18 +29,18 @@
  */
 package mircoders.servlet;
 
-import java.util.*;
-
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Vector;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import mir.entity.adapter.EntityAdapter;
 import mir.log.LoggerWrapper;
 import mir.servlet.ServletModule;
 import mir.servlet.ServletModuleExc;
-import mir.servlet.ServletModuleFailure;
-import mir.util.*;
+import mir.util.StringRoutines;
 import mircoders.entity.EntityComment;
 import mircoders.entity.EntityContent;
 import mircoders.entity.EntityUsers;
@@ -96,18 +96,7 @@ public class ServletModuleLocalizer extends ServletModule {
 
   }
 
-  private EntityAdapter getActiveUser(HttpServletRequest aRequest) throws ServletModuleExc {
-    try {
-      HttpSession session = aRequest.getSession(false);
-      return MirGlobal.localizer().dataModel().adapterModel().makeEntityAdapter
-          ("user", (EntityUsers) session.getAttribute("login.uid"));
-    }
-    catch (Throwable e) {
-      throw new ServletModuleFailure("ServletModuleLocalizer.getActiveUser: " + e.getMessage(), e);
-    }
-  }
-
-  public void performCommentOperation(EntityAdapter aUser, String anId, String anOperation) {
+  public void performCommentOperation(EntityUsers aUser, String anId, String anOperation) {
     MirAdminInterfaceLocalizer.MirSimpleEntityOperation operation;
     EntityAdapter comment;
     EntityComment entity;
@@ -116,9 +105,7 @@ public class ServletModuleLocalizer extends ServletModule {
       entity = (EntityComment) commentModule.getById(anId);
 
       if (entity != null) {
-        comment = MirGlobal.localizer().dataModel().adapterModel().makeEntityAdapter("comment", entity);
-        operation = MirGlobal.localizer().adminInterface().simpleCommentOperationForName(anOperation);
-        operation.perform(aUser, comment);
+        MirGlobal.performCommentOperation(aUser, entity, anOperation);
         logger.info("Operation " + anOperation + " successfully performed on comment " + anId);
       }
       else {
@@ -135,7 +122,7 @@ public class ServletModuleLocalizer extends ServletModule {
     String operationString = aRequest.getParameter("operation");
     String returnUrlString = aRequest.getParameter("returnurl");
 
-    performCommentOperation(getActiveUser(aRequest), commentIdString, operationString);
+    performCommentOperation(ServletHelper.getUser(aRequest), commentIdString, operationString);
 
     redirect(aResponse, returnUrlString);
   }
@@ -145,19 +132,21 @@ public class ServletModuleLocalizer extends ServletModule {
 
     String[] operations = aRequest.getParameterValues("operation");
 
-    for (int i=0; i<operations.length; i++) {
-      if (operations[i].length()>0) {
-        List parts = StringRoutines.splitString(operations[i], ";");
+    if (operations!=null) {
+      for (int i = 0; i < operations.length; i++) {
+        if (operations[i].length() > 0) {
+          List parts = StringRoutines.splitString(operations[i], ";");
 
-        if (parts.size() != 2) {
-          logger.error("commentoperationbatch: operation string invalid: " +
-                       operations[i]);
-        }
-        else {
-          String commentIdString = (String) parts.get(0);
-          String operationString = (String) parts.get(1);
+          if (parts.size() != 2) {
+            logger.error("commentoperationbatch: operation string invalid: " +
+                         operations[i]);
+          }
+          else {
+            String commentIdString = (String) parts.get(0);
+            String operationString = (String) parts.get(1);
 
-          performCommentOperation(getActiveUser(aRequest), commentIdString, operationString);
+            performCommentOperation(ServletHelper.getUser(aRequest), commentIdString, operationString);
+          }
         }
       }
     }
@@ -165,7 +154,7 @@ public class ServletModuleLocalizer extends ServletModule {
     redirect(aResponse, returnUrlString);
   }
 
-  public void performArticleOperation(EntityAdapter aUser, String anId, String anOperation) {
+  public void performArticleOperation(EntityUsers aUser, String anId, String anOperation) {
     MirAdminInterfaceLocalizer.MirSimpleEntityOperation operation;
     EntityAdapter article;
     EntityContent entity;
@@ -174,11 +163,7 @@ public class ServletModuleLocalizer extends ServletModule {
       entity = (EntityContent) contentModule.getById(anId);
 
       if (entity != null) {
-        article = MirGlobal.localizer().dataModel().adapterModel().
-            makeEntityAdapter("content", entity);
-        operation = MirGlobal.localizer().adminInterface().
-            simpleArticleOperationForName(anOperation);
-        operation.perform(aUser, article);
+        MirGlobal.performArticleOperation(aUser, entity, anOperation);
         logger.info("Operation " + anOperation + " successfully performed on article " + anId);
       }
       else {
@@ -195,7 +180,7 @@ public class ServletModuleLocalizer extends ServletModule {
     String operationString = aRequest.getParameter("operation");
     String returnUrlString = aRequest.getParameter("returnurl");
 
-    performArticleOperation(getActiveUser(aRequest), articleIdString, operationString);
+    performArticleOperation(ServletHelper.getUser(aRequest), articleIdString, operationString);
     redirect(aResponse, returnUrlString);
   }
 
@@ -204,18 +189,21 @@ public class ServletModuleLocalizer extends ServletModule {
 
     String[] operations = aRequest.getParameterValues("operation");
 
-    for (int i=0; i<operations.length; i++) {
-      if (operations[i].length()>0) {
-        List parts = StringRoutines.splitString(operations[i], ";");
+    if (operations!=null) {
 
-        if (parts.size() != 2) {
-          logger.error("articleoperationbatch: operation string invalid: " + operations[i]);
-        }
-        else {
-          String articleIdString = (String) parts.get(0);
-          String operationString = (String) parts.get(1);
+      for (int i = 0; i < operations.length; i++) {
+        if (operations[i].length() > 0) {
+          List parts = StringRoutines.splitString(operations[i], ";");
 
-          performArticleOperation(getActiveUser(aRequest), articleIdString, operationString);
+          if (parts.size() != 2) {
+            logger.error("articleoperationbatch: operation string invalid: " + operations[i]);
+          }
+          else {
+            String articleIdString = (String) parts.get(0);
+            String operationString = (String) parts.get(1);
+
+            performArticleOperation(ServletHelper.getUser(aRequest), articleIdString, operationString);
+          }
         }
       }
     }

@@ -30,8 +30,11 @@
 
 package mircoders.localizer.basic;
 
-import mir.session.*;
-import mircoders.entity.*;
+import mir.session.Request;
+import mir.session.Session;
+import mir.session.SessionExc;
+import mir.session.SessionFailure;
+import mircoders.entity.EntityContent;
 
 
 public class MirBasicChildArticlePostingHandler extends MirBasicArticlePostingHandler {
@@ -56,7 +59,4 @@ public class MirBasicChildArticlePostingHandler extends MirBasicArticlePostingHa
 
     aSession.setAttribute("to_content", parentId);
   };
-
-
-
 }

@@ -50,7 +50,7 @@
         length="255"
     />
     <property
-        name="isPublished"
+        name="published"
         type="boolean"
         column="is_published"
         not-null="true"

@@ -4,46 +4,36 @@
     <link rel="stylesheet" type="text/css" href="${config.docRoot}/style/admin.css">
 <head>
 <body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
-<include "FUNCTIONS.template">  
-<include "head.template">
-<form action="${config.actionRoot}" method="post">
-
-  <input type="hidden" name="module" value="ArticleType">
-  <input type="hidden" name="id" value="${data.id}">
-  <if data.new>
-    <input type="hidden" name="do" value="insert">
-  <else>
-    <input type="hidden" name="do" value="update">
-  </if>
-    
-  <table border="0">
-    <tr>
-      <td align="right" class="table-left">
-        <B>${lang("articletype.id")}: </B>
-      </td>
-      <td class="listrow2">
-        ${data.id}
-      </td>
-    </tr>
-
-    <call TextInputTableRow (lang("articletype.name"), 40, 255, "name", data.name)>
-
-
-    <tr>
-      <td colspan="2" align="right" class="table-foot">
-        <if data.new>
-          <input type="submit" name="save" value="${lang("insert")}">
+    <include "FUNCTIONS.template">
+    <include "head.template">
+  
+      <if new=="1">
+        <assign method="insert">
+      <else>
+        <assign method="update">
+      </if>
+      
+      <call EditStart(
+         ["module", "id", "do"],
+         [module, entity.id, method])>
+         
+        <call EditReadonlyTextNormal(lang("articletype.id"), entity.id)>
+        <call EditTextNormal(lang("articletype.name"), 40, 255, "name", entity.name)>
+      
+        <if new=="1">
+          <call EditSubmitButtonNormal(lang("insert"), "save")>
         <else>
-          <input type="submit" name="save" value="${lang("save")}">
+          <call EditSubmitButtonNormal(lang("save"), "save")>
         </if> 
-      </td>
-    </tr>
-  </table>
 
-</form>
+      <call EditEnd()>
+      
+      <if returnurl>
+        <call showBack(returnurl)>
+      <else>
+        <call showBack("module="+module+"&amp;do=list")>
+      </if>
 
-<p><a class="link-box" href="${config.actionRoot}?module=ArticleType&do=list">[&lt;] ${lang("back")} </a> &nbsp;</p>
-
-<include "foot.template">
+    <include "foot.template">
 </body>
 </html>

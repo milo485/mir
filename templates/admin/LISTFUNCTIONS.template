@@ -1,0 +1,66 @@
+<include "SETTINGS.template">
+<function ListStart()>
+  <table cellspacing="2" border="0">
+  <assign alt="0">
+</function>
+
+<function ListHead(aHeaders)>
+  <assign TABLE_NR_COLUMNS="1">
+  <list aHeaders as h>
+    <assign TABLE_NR_COLUMNS=utility.increment(TABLE_NR_COLUMNS)>
+  </list>
+
+  <tr class="${TABLE_HEAD_CLASS}">
+    <list aHeaders as i>
+      <td class="${TABLE_HEAD_CLASS}">
+        <b>${i}</b> 
+      </td>
+    </list>
+      <td class="${TABLE_HEAD_CLASS}">
+        &nbsp;
+      </td> 
+  </tr>
+</function>
+
+<function ListFoot(aNrRecords, aFrom, aTo)>
+  <tr>    
+    <td colspan="${TABLE_NR_COLUMNS}" class="table-foot">
+      ${aNrRecords} ${lang("records")} / ${lang("show_from_to", aFrom, aTo)}
+    </td>
+  </tr>
+</function>
+
+<function ListEnd()>
+</table>
+</function>
+
+<function ListEntry(aFields, aLinkPrefix, aLinks, aLinkTitles)>
+    <if alt=="1">
+      <assign alt="0">
+      <tr class="${LIST_ROW_CLASS_ALTERNATIVE}">
+    <else>
+      <assign alt="1"> 
+      <tr class="${LIST_ROW_CLASS}">
+    </if>
+      
+    <list aFields as i>   
+      <td>
+        ${i}
+      </td>
+    </list>
+      <td>
+        <assign index="0">
+        <assign first="1">
+        <list aLinks as i>
+          <if first=="1">
+            <assign first="0">
+          <else>  
+            |
+          </if>
+          <a class="listcommand" href="${config.actionRoot}?${utility.encodeHTML(aLinkPrefix)}${utility.encodeHTML(i)}">${aLinkTitles[index]}</a>        
+          <assign index=utility.increment(index)>
+        </list>
+      </td>
+    </tr>
+</function>
+

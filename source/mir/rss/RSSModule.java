@@ -39,6 +39,7 @@ public interface RSSModule {
   public interface RSSModuleProperty {
     String getName();
     int getType();
+    boolean getIsMultiValued();
   }
 
   public String getNamespaceURI();

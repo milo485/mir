@@ -22,33 +22,31 @@
   <input type="hidden" name="module" value="Hidden">
   <input type="hidden" name="do" value="list">
 
-
-
   ${lang("month")}
   <select name="month">
-  <option value="01" selected >01</option>
-  <option value="02">02</option>
-  <option value="03">03</option>
-  <option value="04">04</option>
-  <option value="05">05</option>
-  <option value="06">06</option>
-  <option value="07">07</option>
-  <option value="08">08</option>
-  <option value="09">09</option>
-  <option value="10">10</option>
-  <option value="11">11</option>
-  <option value="12">12</option>
+    <option value="01" selected >01</option>
+    <option value="02">02</option>
+    <option value="03">03</option>
+    <option value="04">04</option>
+    <option value="05">05</option>
+    <option value="06">06</option>
+    <option value="07">07</option>
+    <option value="08">08</option>
+    <option value="09">09</option>
+    <option value="10">10</option>
+    <option value="11">11</option>
+    <option value="12">12</option>
   </select>
   ${lang("year")}
   <select name="year">
-  <option value="2001">2001</option>
-  <option value="2002">2002</option>
-  <option value="2003" selected >2003</option>
-  <option value="2004">2004</option>
-  <option value="2005">2005</option>
-  <option value="2006">2006</option>
-  <option value="2007">2007</option>
-  <option value="2008">2008</option>
+    <option value="2001">2001</option>
+    <option value="2002">2002</option>
+    <option value="2003" selected >2003</option>
+    <option value="2004">2004</option>
+    <option value="2005">2005</option>
+    <option value="2006">2006</option>
+    <option value="2007">2007</option>
+    <option value="2008">2008</option>
   </select>
 
   &nbsp;
@@ -66,25 +64,25 @@
 
 <hr size="4" width="98%" noshade>
 
-<if data.contentlist>
+<if articles>
 <table cellpadding="6" width="98%" class="litegrey">
 <tr>
   <td>
-  <p>${lang("start.content.hidden")} | ${lang("month")}: ${data.month} , ${lang("year")}:${data.year}</p>
+  <p>${lang("start.content.hidden")} | ${lang("month")}: ${month} , ${lang("year")}:${year}</p>
   </td>
 </tr>
 </table>
 
-<list data.contentlist as i>
-  <p
+<list articles as i>
+  <p style='background: #FFFFFF; padding: 8px;'>
     ${lang("content.title")}: <b>${i.title}</b><br>
     ${lang("content.creator")}: ${i.creator}<br>
-    ${lang("message.date")}: ${i.webdb_create_formatted}<br>
+    ${lang("message.date")}: ${i.creationdate.format(config["Mir.DefaultDateTimeFormat"])}<br>
     <br>
-    <if i.to_media_audio >additional media, type: audio<br></if>
-    <if i.to_media_video >additional media, type: video<br></if>
-    <if i.to_media_other >additional media, type: other<br></if>
-    <if i.to_media_images >additional media, type: image<br></if>
+    <if i.to_media_audio>additional media, type: audio<br></if>
+    <if i.to_media_video>additional media, type: video<br></if>
+    <if i.to_media_other>additional media, type: other<br></if>
+    <if i.to_media_images>additional media, type: image<br></if>
   </p>
 
   <p>

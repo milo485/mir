@@ -39,14 +39,6 @@ import mir.module.ModuleExc;
 import mir.module.ModuleFailure;
 import mir.storage.StorageObject;
 import mircoders.storage.DatabaseTopics;
-import freemarker.template.SimpleList;
-
-/*
- *  ThemenModule -
- *
- *
- * @author RK
- */
 
 public class ModuleTopics extends AbstractModule {
 
@@ -54,15 +46,6 @@ public class ModuleTopics extends AbstractModule {
 
   public ModuleTopics(StorageObject theStorage) {
     this.theStorage = theStorage;
-  }
-
-  public SimpleList getTopicsAsSimpleList() throws ModuleExc, ModuleFailure {
-    try {
-      return ((DatabaseTopics) theStorage).getPopupData();
-    }
-    catch (Throwable e) {
-      throw new ModuleFailure(e);
-    }
   }
 
   /**

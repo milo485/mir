@@ -33,12 +33,15 @@
 package mir.core.service.storage;
 
 import mir.core.model.Content;
+import mir.core.model.IContent;
+import net.sf.hibernate.Hibernate;
+import net.sf.hibernate.HibernateException;
 import net.sf.hibernate.SessionFactory;
 
 /**
  * ContentService
  * @author idefix
- * @version $Id: ContentService.java,v 1.1 2003/08/17 19:11:49 idfx Exp $
+ * @version $Id: ContentService.java,v 1.2 2003/09/05 20:23:59 idfx Exp $
  */
 public class ContentService extends StorageService {
 
@@ -48,6 +51,19 @@ public class ContentService extends StorageService {
 	 */
 	public ContentService(SessionFactory factory) {
 		super(Content.class, factory);
+	}
+
+	/**
+	 * @see mir.core.service.storage.StorageService#initializeLazyCollections(java.lang.Object)
+	 */
+	protected void initializeLazyCollections(Object returnObject) throws HibernateException {
+		if(returnObject instanceof IContent){
+			IContent content = (IContent)returnObject;
+			Hibernate.initialize(content.getAttachedMedias());
+			Hibernate.initialize(content.getChildContent());
+			Hibernate.initialize(content.getContent());
+			Hibernate.initialize(content.getTopics());
+		}
 	}
 
 }

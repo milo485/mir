@@ -46,7 +46,7 @@ import mircoders.servlet.ServletModuleOpenIndy;
  *  OpenMir.java - main servlet for open posting and comment feature to articles
  *
  *  @author RK 1999-2001, the mir-coders group
- *  @version $Id: OpenMir.java,v 1.36 2003/06/15 22:59:44 idfx Exp $
+ *  @version $Id: OpenMir.java,v 1.37 2003/09/03 18:29:01 zapata Exp $
  *
  */
 
@@ -99,33 +99,6 @@ public class OpenMir extends AbstractServlet {
 
   public String getServletInfo(){
     return "OpenMir "+configuration.getString("Mir.Version");
-  }
-
-
-  /**
-   * Selects the language for the response.
-   *
-   * @param session
-   * @param aRequest
-   */
-  private void checkLanguage(HttpSession aSession, HttpServletRequest aRequest) {
-    String requestLanguage = aRequest.getParameter("language");
-    String sessionLanguage = (String) aSession.getAttribute("language");
-    String acceptLanguage = aRequest.getLocale().getLanguage();
-    String defaultLanguage = configuration.getString("Mir.Login.DefaultLanguage", "en");
-
-    String language = requestLanguage;
-
-    if (language==null)
-      language = sessionLanguage;
-
-    if (language==null)
-      language = acceptLanguage;
-
-    if (language==null)
-      language = defaultLanguage;
-
-    setLanguage(aSession, language);
   }
 }
 

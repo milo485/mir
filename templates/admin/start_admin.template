@@ -18,19 +18,12 @@
       <list administeroperations as a>
           <a href="${config.actionRoot}?${a.url}">${lang("start.administer."+a.name)}</a><br>
       </list>
-<!--      
-      <a href="${config.actionRoot}?module=Content&do=list&where=is_published%3d'1'%20and%20to_article_type%3D0&order=webdb_create%20desc">&gt; ${lang("start.allarticlesoftype", lang("articletypes.openposting"))}</a>  
-      <br>
-      <a href="${config.actionRoot}?module=Comment&do=list">
-        &gt; ${lang("start.content.comments")}
-      </a>
--->     
     </p>
 
-    <p class="box-head"><b>${lang("start.list.title")}</b></p>  
+    <p class="box-head"><b>${lang("start.articles.title")}</b></p>  
     <p class="box">
       <list articletypes as a>
-          <a href="${config.actionRoot}?module=Content&do=list&where=is_published%3d'1'%20and%20to_article_type%3D${a.id}&order=webdb_create%20desc">&gt; ${lang("start.allarticlesoftype", lang("articletypes."+a.name))}</a><br>
+          <a href="${config.actionRoot}?module=Content&do=search&searcharticletype=${a.id}&searchorder=datedesc">&gt; ${lang("start.allarticlesoftype", lang("articletypes."+a.name))}</a><br>
       </list>
       <br>  
       <a href="${config.actionRoot}?module=Content&do=list&where=${utility.encodeURI("is_published='f'")}&order=${utility.encodeURI("webdb_create desc")}" >&gt; ${lang("start.content.not_published")}</a><br>
@@ -40,6 +33,13 @@
       <br>
       <a href="${config.actionRoot}?module=Content&do=list&where=&order=${utility.encodeURI("webdb_create desc")}">&gt; ${lang("start.content.all")}</a><br>
     </p>
+    <p class="box-head"><b>${lang("start.comments.title")}</b></p>  
+    <p class="box">
+      <list commentstatuses as a>
+          <a href="${config.actionRoot}?module=Comment&do=list&where=to_comment_status%3D${a.id}&order=webdb_create%20desc">&gt; ${lang("start.allcommentswithstatus", lang("commentstatus."+a.name))}</a><br>
+      </list>
+    </p>
+
 
     <p class="box-head"><b>${lang("start.extra.title")}</b></p>   
     <p class="box"> 
@@ -70,7 +70,14 @@
       <form>
         <input type="hidden" name="module" value="Content">
         <input type="hidden" name="do" value="edit">
-        ${lang("start.open_by_id")}: 
+        ${lang("start.content.open_by_id")}: 
+        <input type="text" name="id" value="" size="7">
+        <input type="submit" value=" &gt; ">
+      </form>
+      <form>
+        <input type="hidden" name="module" value="Comment">
+        <input type="hidden" name="do" value="edit">
+        ${lang("start.comment.open_by_id")}: 
         <input type="text" name="id" value="" size="7">
         <input type="submit" value=" &gt; ">
       </form>
@@ -135,7 +142,7 @@
             <if m.title><b>${m.title}</b><br></if>
             ${m.description}<br>
             <span class="x-small">
-              <if m.creator><i>by: ${m.creator}</i> / </if>${m.webdb_create}<br>
+              <if m.creator><i>by: ${m.creator}</i> / </if>${m.creationdate.format(config["Mir.DefaultDateTimeFormat"])}}<br>
             </span>
           </p>
         </list>
@@ -154,17 +161,17 @@
       <div class="box">
         <call ContentSearch ("")>
       </div>
-      
+
+<comment>      
       <!-- HELP -DEMO -->
       <p class="box">
         <b>HELP-Demo:</b><br>
         popup small-link: <call Help ("../help/content_datum.html", "1", "" )>&nbsp;&nbsp;  popup big-link: <call Help ("../help/content_datum.html", "1", "1" )><br><br>
         newwin small-link: <call Help ("../help/content_datum.html", "", "" )>&nbsp;&nbsp; newwin big-link: <call Help ("../help/content_datum.html", "", "1" )>
       </p>
-      
+</comment>      
       
     </td>
-    <td>&nbsp;</td>
   </tr>
   
 </table>

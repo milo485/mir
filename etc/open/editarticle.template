@@ -6,7 +6,7 @@
 	<meta name="description" content="${lang("posting.meta.description")}>
 	<meta name="author" content="${lang("posting.meta.author")}>
 	<meta name="keywords" content="${lang("posting.meta.keywords")}>
-	<meta http-equiv="Content-Type" content="text/html; charset=${lang("htmlcharset")}>
+	<meta http-equiv="Content-Type" content="text/html; charset=${config["Mir.DefaultHTMLCharset"]}">
 	<meta name="robots" content="index">
 	<meta name="robots" content="follow">
 	<style type="text/css" media="all">@import "forms.css";</style>

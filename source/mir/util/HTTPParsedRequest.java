@@ -59,7 +59,7 @@ public class HTTPParsedRequest {
   private LoggerWrapper logger;
 
   public HTTPParsedRequest(HttpServletRequest aRequest, String anEncoding, int aMaxUploadSize, String aTempDir) throws UtilExc, UtilFailure {
-    logger = new LoggerWrapper("Utility,HTTPParsedRequest");
+    logger = new LoggerWrapper("Utility.HTTPParsedRequest");
 
     request = aRequest;
     encoding = anEncoding;

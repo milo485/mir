@@ -29,7 +29,8 @@
  */
 package mir.rss;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class RDFResource {
   private String identifier;
@@ -50,6 +51,10 @@ public class RDFResource {
     return identifier;
   }
 
+  public void setIdentifier(String aNewValue) {
+    identifier = aNewValue;
+  }
+
   public String getRdfClass() {
     return rdfClass;
   }
@@ -63,6 +68,6 @@ public class RDFResource {
   }
 
   public String toString() {
-    return rdfClass + " ("+identifier+")";
+    return rdfClass + " ("+identifier+") + ["+properties+"]";
   }
 }

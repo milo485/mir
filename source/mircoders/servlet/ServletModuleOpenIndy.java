@@ -102,6 +102,7 @@ import mircoders.search.ImagesSearchTerm;
 import mircoders.search.KeywordSearchTerm;
 import mircoders.search.TextSearchTerm;
 import mircoders.search.TopicSearchTerm;
+import mircoders.search.TopicMatrixSearchTerm;
 import mircoders.search.UnIndexedSearchTerm;
 import mircoders.search.VideoSearchTerm;
 import mircoders.storage.DatabaseComment;
@@ -119,7 +120,7 @@ import mircoders.storage.DatabaseTopics;
  *    open-postings to the newswire
  *
  * @author mir-coders group
- * @version $Id: ServletModuleOpenIndy.java,v 1.89 2003/05/08 02:43:42 zapata Exp $
+ * @version $Id: ServletModuleOpenIndy.java,v 1.90 2003/09/03 18:29:05 zapata Exp $
  *
  */
 
@@ -353,7 +354,7 @@ public class ServletModuleOpenIndy extends ServletModule
 
       Map extraInfo = new HashMap();
       extraInfo.put("languagePopUpData", DatabaseLanguage.getInstance().getPopupData());
-      extraInfo.put("themenPopupData", topicsModule.getTopicsAsSimpleList());
+      extraInfo.put("themenPopupData", DatabaseTopics.getInstance().getPopupData());
 
       extraInfo.put("topics", topicsModule.getTopicsList());
       deliver(req, res, mergeData, extraInfo, postingFormTemplate);
@@ -523,6 +524,35 @@ public class ServletModuleOpenIndy extends ServletModule
   private static final String SESSION_REQUEST_KEY="sessionid";
 
   /**
+   * Selects the language for the response.
+   *
+   * @param session
+   * @param aRequest
+   */
+
+  protected Locale getResponseLocale(HttpSession aSession, HttpServletRequest aRequest) {
+    String requestLanguage = aRequest.getParameter("language");
+    String sessionLanguage = (String) aSession.getAttribute("language");
+    String acceptLanguage = aRequest.getLocale().getLanguage();
+    String defaultLanguage = configuration.getString("Mir.Login.DefaultLanguage", "en");
+
+    String language = requestLanguage;
+
+    if (language==null)
+      language = sessionLanguage;
+
+    if (language==null)
+      language = acceptLanguage;
+
+    if (language==null)
+      language = defaultLanguage;
+
+    aSession.setAttribute("language", language);
+
+    return new Locale(language, "");
+  }
+
+  /**
    * Dispatch method for open sessions: a flexible extensible and customizable way
    *   for open access. Can be used for postings, but also for lots of other stuff.
    *
@@ -550,10 +580,10 @@ public class ServletModuleOpenIndy extends ServletModule
       Session session = new HTTPAdapters.HTTPSessionAdapter(aRequest.getSession());
 
       SimpleResponse response = new SimpleResponse(
-          ServletHelper.makeGenerationData(aResponse, new Locale[] {getLocale(aRequest), getFallbackLocale(aRequest)},
+          ServletHelper.makeGenerationData(aRequest, aResponse, new Locale[] { getResponseLocale(aRequest.getSession(), aRequest), getFallbackLocale(aRequest)},
              "bundles.open"));
 
-      response.setResponseValue("actionURL", aResponse.encodeURL(HttpUtils.getRequestURL(aRequest).toString())+"?"+SESSION_REQUEST_KEY+"="+aRequest.getSession().getId());
+      response.setResponseValue("actionURL", aResponse.encodeURL(MirGlobal.config().getString("RootUri") + "/servlet/OpenMir")+"?"+SESSION_REQUEST_KEY+"="+aRequest.getSession().getId());
 
       SessionHandler handler = MirGlobal.localizer().openPostings().getOpenSessionHandler(request, session);
 
@@ -583,6 +613,7 @@ public class ServletModuleOpenIndy extends ServletModule
     String to = req.getParameter("mail_to");
     String from = req.getParameter("mail_from");
     String from_name = req.getParameter("mail_from_name");
+    String from_ip = req.getRemoteAddr();
     String comment = req.getParameter("mail_comment");
     String mail_language = req.getParameter("mail_language");
 
@@ -616,8 +647,8 @@ public class ServletModuleOpenIndy extends ServletModule
       String theEmailText;
 
       if (MirGlobal.mruCache().hasObject(theCacheKey)){
-  logger.info("fetching email text for article "+aid+" from cache");
-  theEmailText = (String) MirGlobal.mruCache().getObject(theCacheKey);
+        logger.info("fetching email text for article "+aid+" from cache");
+        theEmailText = (String) MirGlobal.mruCache().getObject(theCacheKey);
       }
       else {
         EntityContent contentEnt;
@@ -641,7 +672,7 @@ public class ServletModuleOpenIndy extends ServletModule
 
 
       // add some headers
-      content = "To: " + to + "\nReply-To: "+ from + "\n" + content;
+      content = "To: " + to + "\nReply-To: "+ from + "\nX-Originating-IP: "+ from_ip + "\n" + content;
       // put in the comment where it should go
       if (comment != null) {
         String commentTextToInsert = "\n\nAttached comment from " + from_name + ":\n" + comment;
@@ -727,6 +758,7 @@ public class ServletModuleOpenIndy extends ServletModule
       TextSearchTerm descriptionTerm = new TextSearchTerm("description", "search_content", "description", "description", "description");
       ContentSearchTerm contentTerm = new ContentSearchTerm("content_data", "search_content", "content", "", "");
       TopicSearchTerm topicTerm = new TopicSearchTerm();
+      TopicMatrixSearchTerm topicMatrixTerm = new TopicMatrixSearchTerm();
       ImagesSearchTerm imagesTerm = new ImagesSearchTerm();
       AudioSearchTerm audioTerm = new AudioSearchTerm();
       VideoSearchTerm videoTerm = new VideoSearchTerm();
@@ -741,7 +773,7 @@ public class ServletModuleOpenIndy extends ServletModule
       }
 
       try {
-        mergeData.put("topics", topicsModule.getTopicsAsSimpleList());
+        mergeData.put("topics", DatabaseTopics.getInstance().getPopupData());
       }
       catch (Throwable e) {
         logger.debug("Can't get topics: " + e.toString());
@@ -789,6 +821,11 @@ public class ServletModuleOpenIndy extends ServletModule
           String topicFragment = topicTerm.makeTerm(req);
           if (topicFragment != null) {
             queryString = queryString + " +" + topicFragment;
+          }
+
+          String topicMatrixFragment = topicMatrixTerm.makeTerm(req);
+          if (topicMatrixFragment != null) {
+            queryString = queryString + " +" + topicMatrixFragment;
           }
 
           String imagesFragment = imagesTerm.makeTerm(req);
@@ -1089,7 +1126,7 @@ public class ServletModuleOpenIndy extends ServletModule
   public void deliver(PrintWriter anOutputWriter, HttpServletRequest aRequest, HttpServletResponse aResponse, Map aData, Map anExtra, String aGenerator)
       throws ServletModuleFailure {
     try {
-      Map responseData = ServletHelper.makeGenerationData(aResponse, new Locale[] { getLocale(aRequest), getFallbackLocale(aRequest)}, "bundles.open");
+      Map responseData = ServletHelper.makeGenerationData(aRequest, aResponse, new Locale[] { getLocale(aRequest), getFallbackLocale(aRequest)}, "bundles.open");
       responseData.put("data", aData);
       responseData.put("extra", anExtra);
 
@@ -1109,7 +1146,7 @@ public class ServletModuleOpenIndy extends ServletModule
   public void deliver(PrintWriter anOutputWriter, HttpServletRequest aRequest, HttpServletResponse aResponse, Map aData, Map anExtra, String aGenerator,String aLocaleString)
       throws ServletModuleFailure {
     try {
-      Map responseData = ServletHelper.makeGenerationData(aResponse, new Locale[] { new Locale(aLocaleString,""), getFallbackLocale(aRequest)}, "bundles.open");
+      Map responseData = ServletHelper.makeGenerationData(aRequest, aResponse, new Locale[] { new Locale(aLocaleString,""), getFallbackLocale(aRequest)}, "bundles.open");
       responseData.put("data", aData);
       responseData.put("extra", anExtra);
 

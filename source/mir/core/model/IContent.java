@@ -36,11 +36,11 @@ import java.util.Set;
 /**
  * IContent
  * @author idefix
- * @version $Id: IContent.java,v 1.1 2003/08/19 00:41:54 idfx Exp $
+ * @version $Id: IContent.java,v 1.2 2003/09/05 20:23:59 idfx Exp $
  */
 public interface IContent extends IMedia {
-	public abstract boolean isIsHtml();
-	public abstract void setIsHtml(boolean isHtml);
+	public abstract boolean isHtml();
+	public abstract void setHtml(boolean isHtml);
 	public abstract java.lang.String getContentData();
 	public abstract void setContentData(java.lang.String contentData);
 	public abstract ArticleType getArticleType();

@@ -41,7 +41,7 @@ import org.apache.commons.lang.builder.ToStringBuilder;
  * 
  * Comment
  * @author idefix
- * @version $Id: Comment.java,v 1.2 2003/08/17 19:13:19 idfx Exp $
+ * @version $Id: Comment.java,v 1.3 2003/09/05 20:23:59 idfx Exp $
  */
 public class Comment implements Serializable {
 
@@ -198,11 +198,11 @@ public class Comment implements Serializable {
         this.webdbCreate = webdbCreate;
     }
 
-    public boolean isIsPublished() {
+    public boolean isPublished() {
         return this.isPublished;
     }
 
-    public void setIsPublished(boolean isPublished) {
+    public void setPublished(boolean isPublished) {
         this.isPublished = isPublished;
     }
 
@@ -238,11 +238,11 @@ public class Comment implements Serializable {
         this.checksum = checksum;
     }
 
-    public boolean isIsHtml() {
+    public boolean isHtml() {
         return this.isHtml;
     }
 
-    public void setIsHtml(boolean isHtml) {
+    public void setHtml(boolean isHtml) {
         this.isHtml = isHtml;
     }
 

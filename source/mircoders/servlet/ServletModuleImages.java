@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with  any library licensed under the Apache Software License, 
- * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
- * (or with modified versions of the above that use the same license as the above), 
- * and distribute linked combinations including the two.  You must obey the 
- * GNU General Public License in all respects for all of the code used other than 
- * the above mentioned libraries.  If you modify this file, you may extend this 
- * exception to your version of the file, but you are not obligated to do so.  
+ * the code of this program with  any library licensed under the Apache Software License,
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library
+ * (or with modified versions of the above that use the same license as the above),
+ * and distribute linked combinations including the two.  You must obey the
+ * GNU General Public License in all respects for all of the code used other than
+ * the above mentioned libraries.  If you modify this file, you may extend this
+ * exception to your version of the file, but you are not obligated to do so.
  * If you do not wish to do so, delete this exception statement from your version.
  */
 package mircoders.servlet;
@@ -34,11 +34,12 @@ import mir.servlet.ServletModule;
 import mir.storage.StorageObjectFailure;
 import mircoders.module.ModuleImages;
 import mircoders.storage.DatabaseImages;
+import mircoders.global.*;
 
 /*
  *  ServletModuleImages -
  *
- * @version $Id: ServletModuleImages.java,v 1.26 2003/04/21 12:42:51 idfx Exp $
+ * @version $Id: ServletModuleImages.java,v 1.27 2003/09/03 18:29:05 zapata Exp $
  * @author RK, the mir-coders group
  */
 
@@ -52,14 +53,14 @@ public class ServletModuleImages extends ServletModuleUploadedMedia
   private ServletModuleImages() {
     super();
     logger = new LoggerWrapper("ServletModule.Images");
-    templateListString = configuration.getString("ServletModule.Images.ListTemplate");
-    templateObjektString = configuration.getString("ServletModule.Images.ObjektTemplate");
-    templateConfirmString = configuration.getString("ServletModule.Images.ConfirmTemplate");
+    moduleName = "Images";
 
     try {
+      model = MirGlobal.localizer().dataModel().adapterModel();
+      definition = "image";
       mainModule = new ModuleImages(DatabaseImages.getInstance());
     }
-    catch (StorageObjectFailure e) {
+    catch (Throwable e) {
       logger.error("Initialization of ServletModuleImages failed!: " + e.getMessage());
     }
   }

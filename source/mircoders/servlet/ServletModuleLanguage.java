@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with  any library licensed under the Apache Software License, 
- * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
- * (or with modified versions of the above that use the same license as the above), 
- * and distribute linked combinations including the two.  You must obey the 
- * GNU General Public License in all respects for all of the code used other than 
- * the above mentioned libraries.  If you modify this file, you may extend this 
- * exception to your version of the file, but you are not obligated to do so.  
+ * the code of this program with  any library licensed under the Apache Software License,
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library
+ * (or with modified versions of the above that use the same license as the above),
+ * and distribute linked combinations including the two.  You must obey the
+ * GNU General Public License in all respects for all of the code used other than
+ * the above mentioned libraries.  If you modify this file, you may extend this
+ * exception to your version of the file, but you are not obligated to do so.
  * If you do not wish to do so, delete this exception statement from your version.
  */
 package mircoders.servlet;
@@ -34,6 +34,7 @@ import mir.servlet.ServletModule;
 import mir.storage.StorageObjectFailure;
 import mircoders.module.ModuleLanguage;
 import mircoders.storage.DatabaseLanguage;
+import mircoders.global.*;
 
 /*
  *  ServletModuleLanguage -
@@ -52,14 +53,12 @@ public class ServletModuleLanguage extends ServletModule
     super();
     logger = new LoggerWrapper("ServletModule.Language");
 
-    templateListString = configuration.getString("ServletModule.Language.ListTemplate");
-    templateObjektString = configuration.getString("ServletModule.Language.ObjektTemplate");
-    templateConfirmString = configuration.getString("ServletModule.Language.ConfirmTemplate");
-
     try {
+      model = MirGlobal.localizer().dataModel().adapterModel();
+      definition = "language";
       mainModule = new ModuleLanguage(DatabaseLanguage.getInstance());
     }
-    catch (StorageObjectFailure e) {
+    catch (Throwable e) {
       logger.error("Initialization of ServletModuleLanguage failed: " + e.getMessage());
     }
   }

@@ -39,17 +39,17 @@ package mircoders.storage;
  * @version 1.0
  */
 
+import java.util.List;
+
 import mir.log.LoggerWrapper;
 import mir.storage.Database;
 import mir.storage.StorageObject;
 import mir.storage.StorageObjectFailure;
-import freemarker.template.SimpleList;
-
 
 public class DatabaseArticleType extends Database implements StorageObject{
 
   private static DatabaseArticleType instance;
-  private static SimpleList articletypePopupData;
+  private static List articletypePopupData;
 
   public synchronized static DatabaseArticleType getInstance() throws StorageObjectFailure {
     if (instance == null) {
@@ -65,7 +65,4 @@ public class DatabaseArticleType extends Database implements StorageObject{
     this.theTable = "article_type";
   }
 
-  public SimpleList getPopupData() throws StorageObjectFailure {
-    return getPopupData("name", false);
-  }
 }

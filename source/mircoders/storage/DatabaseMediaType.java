@@ -42,12 +42,8 @@ import mir.storage.StorageObjectFailure;
  */
 
 public class DatabaseMediaType extends Database implements StorageObject{
-
   private static DatabaseMediaType instance;
 
-  // the following *has* to be sychronized cause this static method
-  // could get preemted and we could end up with 2 instances of DatabaseFoo..
-  // see the "Singletons with needles and thread" article at JavaWorld -mh
   public synchronized static DatabaseMediaType getInstance() {
     if (instance == null) {
       instance = new DatabaseMediaType();

@@ -5,39 +5,40 @@
 <head>
 
 <body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
+    <include "FUNCTIONS.template">
+    <include "head.template">
+  
+      <if new=="1">
+        <assign method="insert">
+      <else>
+        <assign method="update">
+      </if>
+      
+      <call EditStart( ["module", "id", "do"], [module, entity.id, method])>
+         
+        <call EditReadonlyTextNormal(lang("mediafolder.id"), entity.id)>
+        
+        <call EditTextNormal(lang("mediafolder.date"), 8, 8, "date", entity.date)>
+        <call EditTextNormal(lang("mediafolder.name"), 40, 80, "name", entity.name)>
+        <call EditTextNormal(lang("mediafolder.location"), 40, 80, "place", entity.place)>
 
-<include "FUNCTIONS.template">  
-<include "head.template">
+        <call EditTextAreaNormal(lang("mediafolder.comment"), "", 40, 5, "comment", entity.comment)>
+        <call EditTextAreaNormal(lang("mediafolder.keywords"), "", 40,5, "keywords", entity.keywords)>
+        
+        <if new=="1">
+          <call EditSubmitButtonNormal(lang("insert"), "save")>
+        <else>
+          <call EditSubmitButtonNormal(lang("save"), "save")>
+        </if> 
 
-<form method="post" action="${config.actionRoot}">
-  <input type=hidden name=module value=Mediafolder>
-  <input type="hidden" name="id" value="${data.id}">
-  <if data.new> <input type="hidden" name="do" value="insert">
-  <else>   <input type="hidden" name="do" value="update"></if>
+      <call EditEnd()>
+      
+      <if returnurl>
+        <call showBack(returnurl)>
+      <else>
+        <call showBack("module="+module+"&amp;do=list")>
+      </if>
 
-<table border="0" cellspacing="2" cellpadding="2">
-<call TextInputTableRow (lang("mediafolder.date"), 8, 8, "date", data.date)>
-<call TextInputTableRow (lang("mediafolder.name"), 40, 80, "name", data.name)>  
-<call TextInputTableRow (lang("mediafolder.location"), 40, 80, "place", data.place)>  
-<call TextAreaTableRow (lang("mediafolder.comment"), "", 40, 5, "comment", data.comment)>  
-<call TextAreaTableRow (lang("mediafolder.keywords"), "", 40, 4, "keywords", data.keywords)>  
-
-
-  <tr>
-    <td colspan="4" align="right" class="table-foot"> 
-    <if data.new> <input type="submit" name="save" value="${lang("insert")}">
-      <else>   <input type="submit" name="save" value="${lang("save")}"></if>
-    
-    </td>
-  </tr>
-</table>
-
-</form>
-    <p>      
-      <a class="link-box" href="${config.actionRoot}?module=Mediafolder&do=list">[&lt;] ${lang("list")} </a> &nbsp;
-      <a class="link-box" href="${config.actionRoot}">[&lt;&lt;&lt;] ${lang("head.start")}</a>
-  </p>
-
-<include "foot.template">
+    <include "foot.template">
 </body>
 </html>

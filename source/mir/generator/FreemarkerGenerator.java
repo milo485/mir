@@ -30,17 +30,15 @@
 package mir.generator;
 
 import java.io.PrintWriter;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-import mir.log.LoggerWrapper;
-import mir.util.RewindableIterator;
-
-import org.apache.commons.beanutils.*;
-
+import org.apache.commons.beanutils.MethodUtils;
+import org.apache.commons.beanutils.PropertyUtils;
 import freemarker.template.FileTemplateCache;
 import freemarker.template.SimpleScalar;
 import freemarker.template.Template;
@@ -51,6 +49,9 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateModelRoot;
 import freemarker.template.TemplateScalarModel;
+import mir.log.LoggerWrapper;
+import mir.util.GeneratorFormatAdapters;
+import mir.util.RewindableIterator;
 
 
 public class FreemarkerGenerator implements Generator {
@@ -119,9 +120,12 @@ public class FreemarkerGenerator implements Generator {
       return makeIteratorAdapter((Iterator) anObject);
     else if (anObject instanceof List)
       return makeIteratorAdapter(((List) anObject).iterator());
+    else if (anObject instanceof Number)
+      return makeAdapter(new GeneratorFormatAdapters.NumberFormatAdapter((Number) anObject));
+    else if (anObject instanceof Date)
+      return makeAdapter(new GeneratorFormatAdapters.DateFormatAdapter((Date) anObject));
     else
       return makeBeanAdapter(anObject);
-//      throw new TemplateModelException("Unadaptable class: " + anObject.getClass().getName());
   }
 
   private static class MapAdapter implements TemplateModelRoot {
@@ -138,7 +142,6 @@ public class FreemarkerGenerator implements Generator {
     }
 
     public void remove(String aKey) {
-      // ML: kinda tricky...
     }
 
     public boolean isEmpty() {

@@ -1,67 +1,97 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <!DOCTYPE web-app
-    PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.2//EN"
-    "http://java.sun.com/j2ee/dtds/web-app_2_2.dtd">
+    PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+    "http://java.sun.com/dtd/web-app_2_3.dtd">
 
 <web-app>
+	<display-name>Mir CMS</display-name>
     <servlet>
-        <servlet-name>
-            Mir
-        </servlet-name>
-        <servlet-class>
-            Mir
-        </servlet-class>
-
+        <servlet-name>Mir</servlet-name>
+        <servlet-class>Mir</servlet-class>
         <init-param>
             <param-name>Config</param-name>
             <param-value>etc/config.properties</param-value>
         </init-param>
-
     </servlet>
 
     <servlet>
-        <servlet-name>
-            OpenMir
-        </servlet-name>
-        <servlet-class>
-            OpenMir
-        </servlet-class>
-
-        <init-param>
-            <param-name>Config</param-name>
-            <param-value>etc/config.properties</param-value>
-        </init-param>
-
-    </servlet>
-    
-    <servlet-mapping>
-        <servlet-name>
-            Mir
-        </servlet-name>
-        <url-pattern>
-            /Mir
-        </url-pattern>
-    </servlet-mapping>
-
-    <servlet-mapping>
-        <servlet-name>
-            Mir
-        </servlet-name>
-        <url-pattern>
-            /servlet/Mir
-        </url-pattern>
-    </servlet-mapping>
-
-    <servlet-mapping>
         <servlet-name>OpenMir</servlet-name>
-        <url-pattern>/OpenMir</url-pattern>
+        <servlet-class>OpenMir</servlet-class>
+        <init-param>
+            <param-name>Config</param-name>
+            <param-value>etc/config.properties</param-value>
+        </init-param>
+    </servlet>
+	
+	<servlet>
+		<servlet-name>presentation</servlet-name>
+		<description>Presentation</description>
+		<servlet-class>mir.core.ui.servlet.TemplateServlet</servlet-class>
+	</servlet>
+
+	<servlet>
+		<servlet-name>action</servlet-name>
+		<description>Action</description>
+	  	<servlet-class>org.apache.struts.action.ActionServlet</servlet-class>
+        <init-param>
+            <param-name>config</param-name>
+            <param-value>/WEB-INF/etc/struts-config.xml</param-value>            
+        </init-param>
+        <init-param>
+            <param-name>config/admin</param-name>
+            <param-value>/WEB-INF/etc/struts-config-admin.xml</param-value>
+        </init-param>
+        <init-param>
+            <param-name>debug</param-name>
+            <param-value>3</param-value>        
+        </init-param>
+        <init-param>
+            <param-name>detail</param-name>
+            <param-value>3</param-value>     
+        </init-param>
+        <load-on-startup>1</load-on-startup>
+	</servlet>
+	
+	<servlet-mapping>
+		<servlet-name>presentation</servlet-name>
+		<url-pattern>*.shtml</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>action</servlet-name>
+		<url-pattern>*.do</url-pattern>
+	</servlet-mapping> 
+
+    <servlet-mapping>
+        <servlet-name>Mir</servlet-name>
+        <url-pattern>/servlet/Mir</url-pattern>
     </servlet-mapping>
+
     <servlet-mapping>
         <servlet-name>OpenMir</servlet-name>
         <url-pattern>/servlet/OpenMir</url-pattern>
     </servlet-mapping>
 
+	<filter>
+		<filter-name>authentication</filter-name>
+		<filter-class>mir.core.ui.filter.AuthenticationFilter</filter-class>	
+	</filter>
+
+    <filter-mapping>
+		<filter-name>authentication</filter-name>
+		<servlet-name>presentation</servlet-name>
+	</filter-mapping>
+	
+	<filter-mapping>
+		<filter-name>authentication</filter-name>
+		<servlet-name>action</servlet-name>
+	</filter-mapping>	
+	
+	<welcome-file-list>
+		<welcome-file>index.shtml</welcome-file>
+	</welcome-file-list>
+	
     <mime-mapping>
       <extension>
         mp3 
@@ -126,43 +156,4 @@
         application/pdf
       </mime-type>
     </mime-mapping>
-
-    <security-constraint>
-      <web-resource-collection>
-         <web-resource-name>Protected Area</web-resource-name>
-	 <!-- Define the context-relative URL(s) to be protected -->
-         <url-pattern>/jsp/security/protected/*</url-pattern>
-	 <!-- If you list http methods, only those methods are protected -->
-	 <http-method>DELETE</http-method>
-         <http-method>GET</http-method>
-         <http-method>POST</http-method>
-	 <http-method>PUT</http-method>
-      </web-resource-collection>
-      <auth-constraint>
-         <!-- Anyone with one of the listed roles may access this area -->
-         <role-name>tomcat</role-name>
-	 <role-name>role1</role-name>
-      </auth-constraint>
-    </security-constraint>
-
-    <!-- Default login configuration uses BASIC authentication -->
-    <!--
-    <login-config>
-      <auth-method>BASIC</auth-method>
-      <realm-name>Example Basic Authentication Area</realm-name>
-    </login-config>
-    -->
-
-    <!-- Form-based login is enabled by default.  If you wish to
-         try Basic authentication, comment out the <login-config>
-         section below and uncomment the one above. -->
-    <login-config>
-      <auth-method>FORM</auth-method>
-      <realm-name>Example Form-Based Authentication Area</realm-name>
-      <form-login-config>
-        <form-login-page>/jsp/security/login/login.jsp</form-login-page>
-        <form-error-page>/jsp/security/login/error.jsp</form-error-page>
-      </form-login-config>
-    </login-config>
-
 </web-app>

@@ -34,20 +34,20 @@ import mir.log.LoggerWrapper;
 import mir.storage.Database;
 import mir.storage.StorageObject;
 import mir.storage.StorageObjectFailure;
-import freemarker.template.SimpleList;
 
 /**
- * <b>Diese Klasse implementiert die Datenbankverbindung zur MetaObjekt-Tabelle
  *
- *
+ * <p>Title: </p>
+ * <p>Description: </p>
+ * <p>Copyright: Copyright (c) 2003</p>
+ * <p>Company: </p>
+ * @author not attributable
+ * @version 1.0
  */
 
 public class DatabaseRights extends Database implements StorageObject{
   private static DatabaseRights instance;
 
-  // the following *has* to be sychronized cause this static method
-  // could get preemted and we could end up with 2 instances of DatabaseFoo..
-  // see the "Singletons with needles and thread" article at JavaWorld -mh
   public synchronized static DatabaseRights getInstance() {
     if (instance == null) {
       instance = new DatabaseRights();
@@ -63,9 +63,4 @@ public class DatabaseRights extends Database implements StorageObject{
     hasTimestamp = false;
     theTable = "rights";
   }
-
-  public SimpleList getPopupData() throws StorageObjectFailure {
-    return getPopupData("name", true);
-  }
-
 }
