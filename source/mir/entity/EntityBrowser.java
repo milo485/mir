@@ -31,10 +31,9 @@
 
 package mir.entity;
 
-import java.util.*;
-import mir.util.*;
-import mir.storage.*;
-import mir.entity.*;
+import mir.storage.StorageObject;
+import mir.storage.StorageObjectFailure;
+import mir.util.RewindableIterator;
 
 public class EntityBrowser implements RewindableIterator {
 
@@ -52,7 +51,7 @@ public class EntityBrowser implements RewindableIterator {
   private int positionInBatch;
 
   public EntityBrowser(StorageObject aStorage, String aWhereClause, String anOrderByClause,
-                       int aBatchSize, int aLimit, int aSkip) throws StorageObjectException {
+                       int aBatchSize, int aLimit, int aSkip) throws StorageObjectFailure {
 
     storage=aStorage;
     whereClause=aWhereClause;
@@ -66,11 +65,11 @@ public class EntityBrowser implements RewindableIterator {
 
   public EntityBrowser(StorageObject aStorage,
           String aWhereClause, String anOrderByClause,
-          int aBatchSize) throws StorageObjectException {
+          int aBatchSize) throws StorageObjectFailure {
     this(aStorage, aWhereClause, anOrderByClause, aBatchSize, -1, 0);
   }
 
-  public void readCurrentBatch(int aSkip) throws StorageObjectException {
+  public void readCurrentBatch(int aSkip) throws StorageObjectFailure {
     currentBatch = storage.selectByWhereClause(whereClause, orderByClause, aSkip, batchSize);
     batchPosition = aSkip;
     positionInBatch = 0;

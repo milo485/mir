@@ -31,23 +31,13 @@
 
 package mircoders.module;
 
-import java.io.*;
-import java.lang.*;
-import java.util.*;
-import java.sql.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
-
-import freemarker.template.*;
-
-import mir.servlet.*;
-import mir.module.*;
-import mir.entity.*;
-import mir.misc.*;
-import mir.storage.*;
-import mir.log.*;
-
-import mircoders.storage.*;
+import mir.log.LoggerWrapper;
+import mir.module.AbstractModule;
+import mir.module.ModuleException;
+import mir.storage.StorageObject;
+import mir.storage.StorageObjectFailure;
+import mircoders.storage.DatabaseFeature;
+import freemarker.template.SimpleList;
 
 /*
  *  Feature -
@@ -69,7 +59,7 @@ public class ModuleSchwerpunkt extends AbstractModule
     try {
       return ((DatabaseFeature)theStorage).getPopupData();
     }
-    catch (StorageObjectException e) {
+    catch (StorageObjectFailure e) {
       throw new ModuleException(e.toString());
     }
   }

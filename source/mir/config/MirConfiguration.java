@@ -36,7 +36,7 @@ package  mir.config;
 //import  java.util.*;
 //import  java.lang.*;
 
-import mir.config.exceptions.*;
+import mir.config.exceptions.ConfigFailure;
 
 public class MirConfiguration {
   private ConfigNode rootNode;

@@ -31,21 +31,22 @@
 
 package mircoders.servlet;
 
-import java.io.*;
-import java.net.*;
-import javax.servlet.http.*;
-import javax.servlet.*;
-import freemarker.template.*;
+import java.io.IOException;
+import java.net.URLEncoder;
 
-import mir.servlet.*;
-import mir.misc.*;
-import mir.entity.*;
-import mir.storage.*;
-import mir.module.*;
-import mir.log.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-import mircoders.module.*;
-import mircoders.storage.*;
+import mir.config.MirPropertiesConfiguration;
+import mir.entity.EntityList;
+import mir.log.LoggerWrapper;
+import mir.misc.HTMLTemplateProcessor;
+import mir.module.ModuleException;
+import mir.servlet.ServletModule;
+import mir.servlet.ServletModuleException;
+import mircoders.module.ModuleBreaking;
+import mircoders.storage.DatabaseBreaking;
+import freemarker.template.SimpleHash;
 
 /*
  *  ServletModuleBreaking -
@@ -64,15 +65,18 @@ public class ServletModuleBreaking extends ServletModule
 
   private ServletModuleBreaking() {
     logger = new LoggerWrapper("ServletModule.Breaking");
-    templateListString = MirConfig.getProp("ServletModule.Breaking.ListTemplate");
-    templateObjektString = MirConfig.getProp("ServletModule.Breaking.ObjektTemplate");
-    templateConfirmString = MirConfig.getProp("ServletModule.Breaking.ConfirmTemplate");
     try {
+			configuration = MirPropertiesConfiguration.instance();
+
+      templateListString = configuration.getString("ServletModule.Breaking.ListTemplate");
+      templateObjektString = configuration.getString("ServletModule.Breaking.ObjektTemplate");
+      templateConfirmString = configuration.getString("ServletModule.Breaking.ConfirmTemplate");
+
       DatabaseBreaking dbb = DatabaseBreaking.getInstance();
       mainModule = new ModuleBreaking(dbb);
     }
-    catch (StorageObjectException e) {
-      logger.error("Initializatoin of ServletModuleBreaking failed!: " + e.getMessage());
+    catch (Exception e) {
+      logger.error("Initialisation of ServletModuleBreaking failed!: " + e.getMessage());
     }
   }
 

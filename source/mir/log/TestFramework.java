@@ -1,6 +1,5 @@
 package mir.log;
 
-import mir.log.Log;
 
 
 public class TestFramework {

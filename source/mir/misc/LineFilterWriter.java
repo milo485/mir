@@ -30,7 +30,9 @@
  */
 
 package mir.misc;
-import java.io.*;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.Writer;
 
 /**
  *  LineFilterWriter eliminates superfluous \t \r \n and spaces

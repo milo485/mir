@@ -31,7 +31,6 @@
 
 package mir.module;
 
-import java.lang.*;
 
 /*
  *  ServletModuleException -

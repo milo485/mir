@@ -31,8 +31,6 @@
 
 package mircoders.servlet;
 
-import freemarker.template.SimpleHash;
-
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URLEncoder;
@@ -41,20 +39,18 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import mir.entity.EntityList;
+import mir.log.LoggerWrapper;
 import mir.misc.HTMLParseException;
 import mir.misc.HTMLTemplateProcessor;
-import mir.misc.Logfile;
-import mir.misc.MirConfig;
 import mir.module.ModuleException;
 import mir.servlet.ServletModule;
 import mir.servlet.ServletModuleException;
-import mir.storage.StorageObjectException;
-import mir.log.*;
-
+import mir.storage.StorageObjectFailure;
 import mircoders.module.ModuleLanguage;
 import mircoders.module.ModuleLinksImcs;
 import mircoders.storage.DatabaseLanguage;
 import mircoders.storage.DatabaseLinksImcs;
+import freemarker.template.SimpleHash;
 
 /*
  *  ServletModuleLinksImcs -
@@ -76,16 +72,17 @@ public class ServletModuleLinksImcs extends ServletModule {
 
 
   private ServletModuleLinksImcs() {
+    super();
     logger = new LoggerWrapper("ServletModule.LinksImcs");
-    templateListString = MirConfig.getProp("ServletModule.LinksImcs.ListTemplate");
-    templateObjektString = MirConfig.getProp("ServletModule.LinksImcs.ObjektTemplate");
-    templateConfirmString = MirConfig.getProp("ServletModule.LinksImcs.ConfirmTemplate");
+    templateListString = configuration.getString("ServletModule.LinksImcs.ListTemplate");
+    templateObjektString = configuration.getString("ServletModule.LinksImcs.ObjektTemplate");
+    templateConfirmString = configuration.getString("ServletModule.LinksImcs.ConfirmTemplate");
 
     try {
       mainModule = new ModuleLinksImcs(DatabaseLinksImcs.getInstance());
       languageModule = new ModuleLanguage(DatabaseLanguage.getInstance());
     }
-    catch (StorageObjectException e) {
+    catch (StorageObjectFailure e) {
       logger.error("Initialization of ServletModuleLinksImcs failed!: " + e.getMessage());
     }
   }

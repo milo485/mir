@@ -61,13 +61,18 @@ package mir.storage.store;
  * @version 1.0
  */
 
-import java.util.*;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
-import javax.servlet.http.*;
-import javax.servlet.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.MissingResourceException;
+import java.util.Properties;
+
+import javax.servlet.http.HttpServletRequest;
+
+import mir.config.MirPropertiesConfiguration;
+import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
 import mir.misc.Logfile;
-import mir.misc.MirConfig;
 
 public class ObjectStore {
 
@@ -78,7 +83,14 @@ public class ObjectStore {
   private Properties              ostoreConf;
 
 	private ObjectStore() {
-    String confName=MirConfig.getProp("Home")+"etc/objectstore.properties";
+    String confName = null;
+    try {
+      confName =
+        MirPropertiesConfiguration.instance().getString("Home")
+          + "etc/objectstore.properties";
+    } catch (PropertiesConfigExc e) {
+      e.printStackTrace(System.err);
+    }
     Properties conf = new Properties();
     try {
         conf.load( new BufferedInputStream(new FileInputStream(confName)));

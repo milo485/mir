@@ -31,10 +31,10 @@
 
 package mir.producer;
 
-import java.util.*;
-import java.io.*;
+import java.util.HashMap;
+import java.util.Map;
 
-import mir.log.*;
+import mir.log.LoggerWrapper;
 
 public class NodedProducer implements Producer {
   private ProducerNode rootNode;

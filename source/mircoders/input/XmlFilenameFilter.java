@@ -31,8 +31,8 @@
 
 package mircoders.input;
 
-import  java.io.FilenameFilter;
-import  java.io.File;
+import java.io.File;
+import java.io.FilenameFilter;
 
 
 /**

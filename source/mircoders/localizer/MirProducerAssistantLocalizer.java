@@ -31,8 +31,7 @@
 
 package mircoders.localizer;
 
-import java.util.*;
-import java.io.*;
+import java.util.Map;
 
 public interface MirProducerAssistantLocalizer {
   public void initializeGenerationValueSet(Map aValueSet) throws MirLocalizerExc, MirLocalizerFailure;

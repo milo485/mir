@@ -31,17 +31,29 @@
 
 package mircoders.localizer.basic;
 
-import java.util.*;
-import java.io.*;
-import freemarker.template.utility.*;
-import mir.misc.*;
-import mir.entity.*;
-import mir.entity.adapter.*;
-import mir.util.*;
-import mircoders.module.*;
-import mircoders.storage.*;
-import mircoders.localizer.*;
-import mircoders.global.*;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
+import mir.config.MirPropertiesConfiguration;
+import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
+import mir.entity.EntityList;
+import mir.entity.adapter.EntityAdapter;
+import mir.entity.adapter.EntityIteratorAdapter;
+import mir.misc.Logfile;
+import mir.misc.StringUtil;
+import mir.util.DateToMapAdapter;
+import mir.util.GeneratorHTMLFunctions;
+import mir.util.GeneratorIntegerFunctions;
+import mir.util.GeneratorListFunctions;
+import mir.util.GeneratorStringFunctions;
+import mircoders.global.MirGlobal;
+import mircoders.localizer.MirProducerAssistantLocalizer;
+import mircoders.module.ModuleLanguage;
+import mircoders.module.ModuleTopics;
+import mircoders.storage.DatabaseLanguage;
+import mircoders.storage.DatabaseTopics;
 
 public class MirBasicProducerAssistantLocalizer implements MirProducerAssistantLocalizer {
   protected static Logfile logger = Logfile.getInstance( MirGlobal.getConfigProperty("Home") + "/" + MirGlobal.getConfigProperty("Mir.Localizer.Logfile"));
@@ -68,7 +80,11 @@ public class MirBasicProducerAssistantLocalizer implements MirProducerAssistantL
     configMap.put("defEncoding", MirGlobal.getConfigProperty("Mir.DefaultEncoding"));
 
 // "new":
-    configMap.putAll( MirConfig.allSettings() );
+    try {
+      configMap.putAll( MirPropertiesConfiguration.instance().allSettings() );
+    } catch (PropertiesConfigExc e) {
+      e.printStackTrace(System.err);
+    }
 
     utilityMap.put("compressWhitespace", new freemarker.template.utility.CompressWhitespace() );
     utilityMap.put("encodeHTML", new GeneratorHTMLFunctions.encodeHTMLGeneratorFunction());

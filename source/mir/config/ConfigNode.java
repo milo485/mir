@@ -31,9 +31,7 @@
 
 package  mir.config;
 
-import java.util.*;
-
-import  mir.config.exceptions.*;
+import mir.config.exceptions.ConfigFailure;
 
 public interface ConfigNode {
   public String getLocationDescription();

@@ -31,18 +31,23 @@
 
 package mir.servlet;
 
-import mir.misc.Logfile;
-import mir.misc.MirConfig;
-import mir.misc.StringUtil;
-import mir.storage.StorageObjectException;
+import java.util.Locale;
 
-import javax.servlet.UnavailableException;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.util.Locale;
-import java.util.Random;
+
+import mir.config.MirPropertiesConfiguration;
+import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
+import mir.log.LoggerWrapper;
+import mir.storage.DatabaseAdaptor;
+
+import com.codestudio.util.JDBCPool;
+import com.codestudio.util.JDBCPoolMetaData;
+import com.codestudio.util.SQLManager;
 
 /**
  * Title:        Mir
@@ -50,12 +55,22 @@ import java.util.Random;
  * Copyright:    Copyright (c) 2001, 2002
  * Company:      Mir-coders group
  * @author       idfx, the Mir-coders group
- * @version      $Id: AbstractServlet.java,v 1.19 2002/12/23 03:12:46 mh Exp $
+ * @version      $Id: AbstractServlet.java,v 1.20 2003/01/25 17:45:19 idfx Exp $
  */
 
 public abstract class AbstractServlet extends HttpServlet {
     protected static String lang;
-    protected static Logfile theLog;
+    //protected static Logfile theLog;
+  	protected LoggerWrapper logger;
+		protected MirPropertiesConfiguration configuration;  	
+  	
+  /**
+   * Constructor for AbstractServlet.
+   */
+  public AbstractServlet() {
+    super();
+    logger = new LoggerWrapper("Servlet");
+  }
 
     protected void setNoCaching(HttpServletResponse res) {
       //nothing in Mir can or should be cached as it's all dynamic...
@@ -65,35 +80,6 @@ public abstract class AbstractServlet extends HttpServlet {
       res.setHeader("Pragma", "no-cache");
       res.setDateHeader("Expires", 0);
       res.setHeader("Cache-Control", "no-cache");
-    }
-
-    /**
-     * the configration
-     */
-    protected boolean getConfig(HttpServletRequest req)
-            throws UnavailableException {
-
-        String name = super.getServletName();
-
-        // init config
-        MirConfig.initConfig(super.getServletContext(), req.getContextPath(),
-                              name, getInitParameter("Config"));
-
-        theLog = Logfile.getInstance(MirConfig.getPropWithHome(name + ".Logfile"));
-        theLog.printInfo(name + " started.");
-        theLog.printInfo("Path is: " + MirConfig.getProp("Home"));
-        theLog.printInfo("Root URI is: " + MirConfig.getProp("RootUri"));
-        theLog.printInfo("StandardLanguage is: " + MirConfig.getProp("StandardLanguage"));
-        try {
-            MirConfig.initDbPool();
-        }
-        catch (StorageObjectException e) {
-            throw new UnavailableException(
-                    "Could not initialize database pool. -- "
-                    + e.toString(), 0);
-        }
-        super.getServletContext().setAttribute("mir.confed", new Boolean(true));
-        return true;
     }
 
     /**
@@ -148,4 +134,76 @@ public abstract class AbstractServlet extends HttpServlet {
         lang = loc.getLanguage();
         return lang;
     }
+  /**
+   * @see javax.servlet.Servlet#init(javax.servlet.ServletConfig)
+   */
+  public void init(ServletConfig arg0) throws ServletException {
+    super.init(arg0);
+    MirPropertiesConfiguration.setContext(arg0.getServletContext());
+    MirPropertiesConfiguration.setContextPath("/"+arg0.getServletName());
+    try {
+      configuration = MirPropertiesConfiguration.instance();
+    } catch (PropertiesConfigExc e) {
+      throw new ServletException(e);
+    }
+    
+    String dbUser=configuration.getString("Database.Username");
+    String dbPassword=configuration.getString("Database.Password");
+    String dbHost=configuration.getString("Database.Host");
+    String dbAdapName=configuration.getString("Database.Adaptor");
+    
+    DatabaseAdaptor adaptor;
+    try {
+      adaptor = (DatabaseAdaptor)Class.forName(dbAdapName).newInstance();
+    } catch (Exception e) {
+      throw new ServletException("Could not load DB adapator: "+
+                                        e.toString());
+    }
+    
+    String min,max,log,reset,dbname,dblogfile;
+
+    min=configuration.getString("Database.poolMin");
+    System.out.println(min);
+    max=configuration.getString("Database.poolMax");
+    System.out.println(max);
+    dbname=configuration.getString("Database.Name");
+    System.out.println(dbname);
+    log=configuration.getStringWithHome("Database.PoolLog");
+    System.out.println(log);
+    reset=configuration.getString("Database.poolResetTime");
+    System.out.println(reset);
+    dblogfile=configuration.getStringWithHome("Database.Logfile");
+    System.out.println(dblogfile);
+    
+    String dbDriver;
+    String dbUrl;
+    try{
+      dbDriver=adaptor.getDriver();
+      dbUrl=adaptor.getURL(dbUser,dbPassword, dbHost);
+    } catch (Exception e) {
+      throw new ServletException(e);
+    }
+
+    JDBCPoolMetaData meta = new JDBCPoolMetaData();
+    meta.setDbname(dbname);
+    meta.setDriver(dbDriver);
+    meta.setURL(dbUrl);
+    meta.setUserName(dbUser);
+    meta.setPassword(dbPassword);
+    meta.setJNDIName("mir");
+    meta.setMaximumSize(10);
+    meta.setMinimumSize(1);
+    meta.setPoolPreparedStatements(false);
+    meta.setCacheEnabled(false);
+    meta.setCacheSize(15);
+    meta.setDebugging(false);
+    meta.setLogFile(dblogfile+".pool");
+
+    SQLManager manager = SQLManager.getInstance();
+    JDBCPool pool = null;
+    if(manager != null){
+      pool = manager.createPool(meta);
+    }
+  }
+
 }

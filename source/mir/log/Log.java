@@ -1,7 +1,7 @@
 package mir.log;
 
-import mir.misc.MirConfig;
-
+import mir.config.MirPropertiesConfiguration;
+import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
 
 public class Log {
 
@@ -9,19 +9,20 @@ public class Log {
 
     static {
         try {
-            myLogger = (Logger)Class.forName(MirConfig.getProp("Log.LogClass")).newInstance();
-        }
-        catch (java.lang.ClassNotFoundException cnfe) {
-            System.err.println("Log was not able to initialize: class not found");
-            cnfe.printStackTrace(System.err);
-        }
-        catch (java.lang.InstantiationException ie) {
-            System.err.println("Log was not able to initialize: could not initialize class");
-            ie.printStackTrace(System.err);
-        }
-        catch (java.lang.IllegalAccessException iae) {
-            System.err.println("Log was not able to initialize: illegal access");
-            iae.printStackTrace(System.err);
+          String loggerClass = 
+          	MirPropertiesConfiguration.instance().getString("Log.LogClass");
+          myLogger = (Logger)Class.forName(loggerClass).newInstance();
+        } catch (java.lang.ClassNotFoundException cnfe) {
+          System.err.println("Log was not able to initialize: class not found");
+          cnfe.printStackTrace(System.err);
+        } catch (java.lang.InstantiationException ie) {
+          System.err.println("Log was not able to initialize: could not initialize class");
+          ie.printStackTrace(System.err);
+        } catch (java.lang.IllegalAccessException iae) {
+          System.err.println("Log was not able to initialize: illegal access");
+          iae.printStackTrace(System.err);
+        } catch (PropertiesConfigExc e) {
+          e.printStackTrace(System.err);
         }
     }
 

@@ -31,13 +31,28 @@
 
 package mir.generator;
 
-import freemarker.template.*;
+import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Vector;
+
+import mir.misc.MessageMethodModel;
+import mir.util.RewindableIterator;
+
 import org.apache.struts.util.MessageResources;
-import java.util.*;
-import java.io.*;
-import mir.entity.*;
-import mir.util.*;
-import mir.misc.*;
+
+import freemarker.template.FileTemplateCache;
+import freemarker.template.SimpleScalar;
+import freemarker.template.Template;
+import freemarker.template.TemplateHashModel;
+import freemarker.template.TemplateListModel;
+import freemarker.template.TemplateMethodModel;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateModelRoot;
+import freemarker.template.TemplateScalarModel;
 
 public class FreemarkerGenerator implements Generator {
   private Template template;
@@ -295,7 +310,7 @@ public class FreemarkerGenerator implements Generator {
 
     public FreemarkerGeneratorLibrary(String aTemplateRoot) {
       templateCache = new FileTemplateCache( aTemplateRoot+"/" );
-      templateCache.setLoadingPolicy(templateCache.LOAD_ON_DEMAND);
+      templateCache.setLoadingPolicy(FileTemplateCache.LOAD_ON_DEMAND);
     }
 
     public Generator makeGenerator(String anIdentifier) throws GeneratorExc, GeneratorFailure {

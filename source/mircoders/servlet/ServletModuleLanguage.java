@@ -31,22 +31,11 @@
 
 package mircoders.servlet;
 
-import java.io.*;
-import java.sql.*;
-import java.util.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
-
-import mir.servlet.*;
-import mir.module.*;
-import mir.misc.*;
-import mir.entity.*;
-import mir.storage.*;
-import mir.log.*;
-
-import mircoders.entity.*;
-import mircoders.storage.*;
-import mircoders.module.*;
+import mir.log.LoggerWrapper;
+import mir.servlet.ServletModule;
+import mir.storage.StorageObjectFailure;
+import mircoders.module.ModuleLanguage;
+import mircoders.storage.DatabaseLanguage;
 
 /*
  *  ServletModuleLanguage -
@@ -62,16 +51,17 @@ public class ServletModuleLanguage extends ServletModule
   public static ServletModule getInstance() { return instance; }
 
   private ServletModuleLanguage() {
+    super();
     logger = new LoggerWrapper("ServletModule.Language");
 
-    templateListString = MirConfig.getProp("ServletModule.Language.ListTemplate");
-    templateObjektString = MirConfig.getProp("ServletModule.Language.ObjektTemplate");
-    templateConfirmString = MirConfig.getProp("ServletModule.Language.ConfirmTemplate");
+    templateListString = configuration.getString("ServletModule.Language.ListTemplate");
+    templateObjektString = configuration.getString("ServletModule.Language.ObjektTemplate");
+    templateConfirmString = configuration.getString("ServletModule.Language.ConfirmTemplate");
 
     try {
       mainModule = new ModuleLanguage(DatabaseLanguage.getInstance());
     }
-    catch (StorageObjectException e) {
+    catch (StorageObjectFailure e) {
       logger.error("Initialization of ServletModuleLanguage failed: " + e.getMessage());
     }
   }

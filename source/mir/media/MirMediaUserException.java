@@ -31,14 +31,13 @@
 
 package mir.media;
 
-import java.lang.*;
 
 /*
  *  MirMediaException -
  *  differentiates itself from a bug in that it
  *  represents a probable user error
  * 
- * @version $Id: MirMediaUserException.java,v 1.4 2002/11/04 04:35:21 mh Exp $
+ * @version $Id: MirMediaUserException.java,v 1.5 2003/01/25 17:45:17 idfx Exp $
  * @author mh
  *
  */

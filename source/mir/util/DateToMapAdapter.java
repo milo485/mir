@@ -31,10 +31,14 @@
 
 package mir.util;
 
-import java.util.*;
-import java.text.*;
+import java.text.SimpleDateFormat;
+import java.util.AbstractMap;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashSet;
+import java.util.Set;
 
-import mir.misc.*;
+import mir.misc.StringUtil;
 
 public class DateToMapAdapter extends AbstractMap {
   Date date;

@@ -31,21 +31,22 @@
 
 package mircoders.search;
 
-import java.util.*;
+import java.util.StringTokenizer;
 
-import javax.servlet.*;
-import javax.servlet.http.*;
+import javax.servlet.http.HttpServletRequest;
 
-import mir.entity.*;
-import mir.storage.*;
-import mircoders.entity.*;
-import mircoders.storage.*;
+import mir.entity.Entity;
+import mir.entity.EntityList;
+import mir.storage.StorageObjectFailure;
+import mircoders.entity.EntityContent;
+import mircoders.storage.DatabaseContentToMedia;
 
-import org.apache.lucene.index.*;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 
-import freemarker.template.*;
+import freemarker.template.SimpleHash;
+import freemarker.template.SimpleList;
+import freemarker.template.SimpleScalar;
 
 
 public class ImagesSearchTerm extends SearchTerm{
@@ -56,7 +57,7 @@ public class ImagesSearchTerm extends SearchTerm{
   public static String dataField        = "images"; 
   public static String templateVariable = "images";
 
-  public void index(Document doc, Entity entity) throws StorageObjectException{
+  public void index(Document doc, Entity entity) throws StorageObjectFailure{
     EntityList images = DatabaseContentToMedia.getInstance().getImages((EntityContent) entity);
     if (images != null && images.size()>0){
       doc.add(Field.Keyword(matchField,"y"));

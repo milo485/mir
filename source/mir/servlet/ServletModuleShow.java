@@ -31,9 +31,10 @@
 
 package  mir.servlet;
 
-import javax.servlet.http.*;
-import freemarker.template.*;
-import mir.storage.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import freemarker.template.TemplateModelRoot;
 
 
 /**
@@ -51,7 +52,7 @@ public class ServletModuleShow extends ServletModule {
 	private static ServletModuleShow instance = new ServletModuleShow();
 
 	/**
-	 * Ein ServletModuleShow-Objekt wird über getInstance geliefert. Es gibt zur
+	 * Ein ServletModuleShow-Objekt wird ?ber getInstance geliefert. Es gibt zur
 	 * Laufzeit nur ein Objekt (Singleton)
 	 * @return ServletModuleShow
 	 */

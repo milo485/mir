@@ -31,12 +31,9 @@
 
 package mir.util;
 
-import java.util.*;
-
-import java.util.*;
-import mir.storage.*;
-import mir.util.*;
-import mir.entity.*;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Vector;
 
 public class CachingRewindableIterator implements RewindableIterator {
   private Iterator master;

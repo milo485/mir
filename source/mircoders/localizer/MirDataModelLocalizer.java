@@ -31,7 +31,7 @@
 
 package mircoders.localizer;
 
-import mir.entity.adapter.*;
+import mir.entity.adapter.EntityAdapterModel;
 
 public interface MirDataModelLocalizer {
   public EntityAdapterModel adapterModel() throws MirLocalizerExc, MirLocalizerFailure;

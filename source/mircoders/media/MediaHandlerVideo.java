@@ -31,12 +31,7 @@
 
 package  mircoders.media;
 
-import java.util.*;
-
-import mir.media.*;
-import mir.entity.*;
-import mir.misc.*;
-import mir.storage.*;
+import mir.media.MirMedia;
 
 
 /**
@@ -47,15 +42,21 @@ import mir.storage.*;
  * @see mir.media.MediaHandlerGeneric
  * @see mir.media.MirMedia
  * @author john <john@manifestor.org>
- * @version $Id: MediaHandlerVideo.java,v 1.5 2002/11/28 07:28:24 mh Exp $
+ * @version $Id: MediaHandlerVideo.java,v 1.6 2003/01/25 17:50:35 idfx Exp $
  */
 
 public class MediaHandlerVideo extends MediaHandlerGeneric implements MirMedia
 {
 
-  private static String tinyIcon = MirConfig.getProp("Producer.Icon.TinyVideo");
-  private static String bigIcon = MirConfig.getProp("Producer.Icon.BigVideo");
+  private static String tinyIcon;
+  private static String bigIcon;
 
+	static {
+    tinyIcon = configuration.getString("Producer.Icon.TinyVideo");
+    bigIcon = configuration.getString("Producer.Icon.BigVideo");
+		   
+	}
+	
   public String getTinyIcon()
   {
     return tinyIcon;

@@ -31,18 +31,12 @@
 
 package mircoders.storage;
 
-import java.lang.*;
-import java.sql.*;
-import java.io.*;
-import java.util.*;
-
-import freemarker.template.*;
-
-import mir.storage.*;
-import mir.entity.*;
-import mir.misc.*;
-
-import mircoders.entity.*;
+import mir.entity.Entity;
+import mir.entity.EntityRelation;
+import mir.storage.Database;
+import mir.storage.StorageObject;
+import mir.storage.StorageObjectExc;
+import mir.storage.StorageObjectFailure;
 
 /**
  * <b>this class implements the access to the content-table</b>
@@ -58,7 +52,7 @@ public class DatabaseUploadedMedia extends Database implements StorageObject {
   // Contructors / Singleton
 
   public static DatabaseUploadedMedia getInstance()
-    throws StorageObjectException {
+    throws StorageObjectFailure {
 
     if (instance == null ) {
       instance = new DatabaseUploadedMedia();
@@ -68,14 +62,14 @@ public class DatabaseUploadedMedia extends Database implements StorageObject {
   }
 
   private DatabaseUploadedMedia()
-    throws StorageObjectException {
+    throws StorageObjectFailure {
 
     super();
     this.theTable="uploaded_media";
     this.theCoreTable="media";
     relationMediaType = new EntityRelation("to_media_type", "id", DatabaseMediaType.getInstance(), EntityRelation.TO_ONE);
     try { this.theEntityClass = Class.forName("mircoders.entity.EntityUploadedMedia"); }
-    catch (Exception e) { throw new StorageObjectException(e.toString()); }
+    catch (Exception e) { throw new StorageObjectFailure(e); }
   }
 
   // methods
@@ -85,14 +79,15 @@ public class DatabaseUploadedMedia extends Database implements StorageObject {
    * returns the media_type that belongs to the media item (via entityrelation)
    * where db-flag is_published is true
    */
-  public Entity getMediaType(Entity ent) throws StorageObjectException {
+  public Entity getMediaType(Entity ent) 
+  	throws StorageObjectFailure, StorageObjectExc {
     Entity type=null;
     try {
       type = relationMediaType.getOne(ent);
     }
-    catch (StorageObjectException e) {
+    catch (StorageObjectFailure e) {
       theLog.printError("DatabaseUploadedMedia :: failed to get media_type");
-      throw new StorageObjectException("DatabaseUploadedMedia :: failed to get media_type"+ e.toString());
+      throw new StorageObjectFailure("DatabaseUploadedMedia :: failed to get media_type", e);
     }
     return type;
   }

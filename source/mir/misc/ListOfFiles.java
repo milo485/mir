@@ -35,8 +35,13 @@
 
 package mir.misc;
 
-import java.util.*;
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.util.Enumeration;
+import java.util.LinkedList;
+import java.util.ListIterator;
+import java.util.NoSuchElementException;
 
 public class ListOfFiles implements Enumeration {
 

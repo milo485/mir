@@ -47,7 +47,9 @@ package mir.storage.store;
  */
 
 import java.util.HashMap;
-import mir.misc.*;
+
+import mir.misc.Logfile;
+import mir.misc.StringUtil;
 
 public class StoreContainerType {
 

@@ -31,10 +31,12 @@
 
 package mir.producer;
 
-import java.util.*;
-import java.io.*;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Vector;
 
-import mir.log.*;
+import mir.log.LoggerWrapper;
 
 public class CompositeProducerNode implements ProducerNode {
   private List subNodes;

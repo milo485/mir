@@ -31,20 +31,25 @@
 
 package mircoders.producer;
 
-import java.util.*;
-import java.io.*;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
-import mir.util.*;
-import mir.producer.*;
-import mir.entity.*;
-import mir.entity.adapter.*;
-import mir.log.*;
+import mir.entity.Entity;
+import mir.entity.EntityList;
+import mir.entity.adapter.EntityAdapter;
+import mir.log.LoggerToWriterAdapter;
+import mir.log.LoggerWrapper;
 import mir.misc.StringUtil;
+import mir.producer.ProducerFailure;
+import mir.producer.ProducerNode;
+import mir.util.CachingRewindableIterator;
 import mir.util.HTMLRoutines;
-
-
-import mircoders.entity.*;
-import mircoders.storage.*;
+import mir.util.ParameterExpander;
+import mircoders.entity.EntityContent;
+import mircoders.entity.EntityImages;
+import mircoders.storage.DatabaseContentToMedia;
 
 //because images are returned as a template model!(maybe not needed after all!)
 //import freemarker.template.*;

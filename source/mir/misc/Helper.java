@@ -33,6 +33,9 @@ package mir.misc;
 
 import java.io.IOException;
 
+import mir.config.MirPropertiesConfiguration;
+import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
+
 /**
  * Title:        Indy
  * Description:  This class provides some satic help methods
@@ -51,7 +54,15 @@ public class Helper {
 	 * returns 255 if rsync should not be used
    */
   public static int rsync(){
-		if(!MirConfig.getProp("Rsync").toLowerCase().equals("yes")){
+    MirPropertiesConfiguration configuration = null;
+    try {
+      configuration = MirPropertiesConfiguration.instance();
+    } catch (PropertiesConfigExc e) {
+      e.printStackTrace();
+      return 255;
+    }
+    
+		if(!configuration.getString("Rsync").toLowerCase().equals("yes")){
 			return 255;
 		}
 		
@@ -59,7 +70,7 @@ public class Helper {
     int returnValue = -1;
     try {
       Runtime run = Runtime.getRuntime();
-      p = run.exec(MirConfig.getProp("Rsync.Script.Path"));
+      p = run.exec(configuration.getString("Rsync.Script.Path"));
       returnValue = p.waitFor();
     } catch (IOException e) {
       return returnValue;

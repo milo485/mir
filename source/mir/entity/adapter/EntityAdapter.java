@@ -31,9 +31,14 @@
 
 package mir.entity.adapter;
 
-import java.util.*;
-import mir.entity.*;
-import mir.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+
+import mir.entity.Entity;
+import mir.util.CachingRewindableIterator;
 
 public class EntityAdapter implements Map {
   private Entity entity;

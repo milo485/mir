@@ -31,16 +31,14 @@
 
 package mircoders.storage;
 
-import java.lang.*;
-import java.sql.*;
-import java.io.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 
-import freemarker.template.*;
-
-import mir.storage.*;
-import mir.entity.*;
-import mir.misc.*;
+import mir.storage.Database;
+import mir.storage.StorageObject;
+import mir.storage.StorageObjectFailure;
+import freemarker.template.SimpleList;
 
 /**
  * <b>This class implements the access to the comment-table for the
@@ -57,7 +55,7 @@ public class DatabaseComment extends Database implements StorageObject{
 	// could get preemted and we could end up with 2 instances of DatabaseFoo..
 	// see the "Singletons with needles and thread" article at JavaWorld -mh
 	public synchronized static DatabaseComment getInstance() 
-	  throws StorageObjectException {
+	  throws StorageObjectFailure {
 		if (instance == null) {
 			instance = new DatabaseComment();
 			instance.myselfDatabase = instance;
@@ -65,7 +63,7 @@ public class DatabaseComment extends Database implements StorageObject{
 		return instance;
 	}
 
-	private DatabaseComment() throws StorageObjectException
+	private DatabaseComment() throws StorageObjectFailure
 	{
 		super();
 		this.hasTimestamp = false;
@@ -74,14 +72,14 @@ public class DatabaseComment extends Database implements StorageObject{
 		try {
 			this.theEntityClass = Class.forName("mircoders.entity.EntityComment");
 		}
-		catch (Exception e) { throw new StorageObjectException(e.toString());	}
+		catch (Exception e) { throw new StorageObjectFailure(e);	}
 	}
 
 	public SimpleList getPopupData()
-        throws StorageObjectException { return getPopupData("title",true); }
+        throws StorageObjectFailure { return getPopupData("title",true); }
 
 	public boolean deleteByContentId(String id)
-		throws StorageObjectException {
+		throws StorageObjectFailure {
 		Statement   stmt=null;
 		Connection  con=null;
 		String      sql;
@@ -96,7 +94,7 @@ public class DatabaseComment extends Database implements StorageObject{
 			stmt = con.createStatement();
 			res = stmt.executeUpdate(sql);
 		}	catch (SQLException sqe) {
-			new StorageObjectException(sqe.toString());
+			new StorageObjectFailure(sqe);
 			return false;
 		} finally {
 			freeConnection(con,stmt);

@@ -31,18 +31,19 @@
 
 package mircoders.storage;
 
-import java.lang.*;
-import java.sql.*;
-import java.io.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 
-import freemarker.template.*;
-
-import mir.storage.*;
-import mir.entity.*;
-import mir.misc.*;
-
-import mircoders.entity.*;
+import mir.entity.EntityList;
+import mir.storage.Database;
+import mir.storage.StorageObject;
+import mir.storage.StorageObjectFailure;
+import mircoders.entity.EntityContent;
+import mircoders.entity.EntityTopics;
 
 /**
  * <b>This class implements the 1-n-relation between
@@ -58,7 +59,7 @@ public class DatabaseContentToTopics extends Database implements StorageObject{
   // could get preemted and we could end up with 2 instances of DatabaseFoo.
   // see the "Singletons with needles and thread" article at JavaWorld -mh
   public synchronized static DatabaseContentToTopics getInstance()
-    throws StorageObjectException {
+    throws StorageObjectFailure {
     if (instance == null) {
       instance = new DatabaseContentToTopics();
       instance.myselfDatabase = instance;
@@ -67,13 +68,13 @@ public class DatabaseContentToTopics extends Database implements StorageObject{
   }
 
   private DatabaseContentToTopics()
-    throws StorageObjectException {
+    throws StorageObjectFailure {
 
     super();
     this.hasTimestamp = false;
     this.theTable="content_x_topic";
     try { this.theEntityClass = Class.forName("mir.entity.GenericEntity"); }
-    catch (Exception e) { throw new StorageObjectException(e.toString()); }
+    catch (Exception e) { throw new StorageObjectFailure(e); }
 
   }
 
@@ -103,7 +104,7 @@ public class DatabaseContentToTopics extends Database implements StorageObject{
    * @returns ArrayList
    */
   public ArrayList getTopicsOfContent(String contentId)
-    throws StorageObjectException {
+    throws StorageObjectFailure {
     ArrayList returnList = new ArrayList();
     if (contentId != null) {
       String sql = "select topic_id from " + theTable + " where content_id=" + contentId;
@@ -132,7 +133,7 @@ public class DatabaseContentToTopics extends Database implements StorageObject{
    * Set new topics
    */
   public void setTopics(String contentId, String[] topicId)
-    throws StorageObjectException {
+    throws StorageObjectFailure {
     if (contentId == null){
       return;
     }
@@ -230,7 +231,7 @@ public class DatabaseContentToTopics extends Database implements StorageObject{
   }
 
   public void deleteByContentId(String contentId)
-    throws StorageObjectException {
+    throws StorageObjectFailure {
     if (contentId == null) {
       //theLog.printDebugInfo("-- delete topics failed -- no content id");
       return;
@@ -252,7 +253,7 @@ public class DatabaseContentToTopics extends Database implements StorageObject{
   }
 
   public void deleteByTopicId(String topicId)
-    throws StorageObjectException {
+    throws StorageObjectFailure {
     if (topicId == null) {
       //theLog.printDebugInfo("-- delete topics failed -- no topic id");
       return;
@@ -275,7 +276,7 @@ public class DatabaseContentToTopics extends Database implements StorageObject{
 
 
   public EntityList getContent(EntityTopics topic)
-    throws StorageObjectException {
+    throws StorageObjectFailure {
     EntityList returnList=null;
     if (topic != null) {
       String id = topic.getId();

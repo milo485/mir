@@ -31,26 +31,29 @@
 
 package mir.servlet;
 
-import freemarker.template.SimpleHash;
-import freemarker.template.TemplateModelRoot;
-import freemarker.template.TemplateModel;
-
-import mir.entity.EntityList;
-import mir.log.*;
-import mir.misc.*;
-import mir.module.AbstractModule;
-import mir.module.ModuleException;
-import mir.storage.StorageObject;
-import mir.storage.StorageObjectException;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import mir.config.MirPropertiesConfiguration;
+import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
+import mir.entity.EntityList;
+import mir.log.LoggerWrapper;
+import mir.misc.HTMLParseException;
+import mir.misc.HTMLTemplateProcessor;
+import mir.misc.LineFilterWriter;
+import mir.module.AbstractModule;
+import mir.module.ModuleException;
+import mir.storage.StorageObject;
+import mir.storage.StorageObjectFailure;
+import freemarker.template.SimpleHash;
+import freemarker.template.TemplateModelRoot;
 
 
 /**
@@ -60,7 +63,7 @@ import java.util.Locale;
  *
  *
  *  Abstrakte Klasse ServletModule stellt die Basisfunktionalitaet der
- *  abgeleiteten ServletModule zur Verfügung.
+ *  abgeleiteten ServletModule zur Verf?gung.
  *
  * @version 28.6.1999
  * @author RK
@@ -70,11 +73,21 @@ public abstract class ServletModule {
 
   public String defaultAction;
   protected LoggerWrapper logger;
-
+	protected MirPropertiesConfiguration configuration;
   protected AbstractModule mainModule;
   protected String templateListString;
   protected String templateObjektString;
   protected String templateConfirmString;
+  
+  
+  public ServletModule(){
+    try {
+      configuration = MirPropertiesConfiguration.instance();
+    } catch (PropertiesConfigExc e) {
+      e.printStackTrace(System.err);
+    }
+  }
+  
 
   /**
    * Singelton - Methode muss in den abgeleiteten Klassen ueberschrieben werden.
@@ -98,7 +111,7 @@ public abstract class ServletModule {
     HttpSession session = req.getSession(false);
     String language = (String) session.getAttribute("Language");
     if (language == null) {
-      language = MirConfig.getProp("StandardLanguage");
+      language = configuration.getString("StandardLanguage");
     }
     return language;
   }
@@ -123,7 +136,7 @@ public abstract class ServletModule {
 
   public void redirect(HttpServletResponse aResponse, String aQuery) throws ServletModuleException {
     try {
-      aResponse.sendRedirect(MirConfig.getProp("RootUri") + "/Mir?"+aQuery);
+      aResponse.sendRedirect(MirPropertiesConfiguration.instance().getString("RootUri") + "/Mir?"+aQuery);
     }
     catch (Throwable t) {
       throw new ServletModuleException(t.getMessage());
@@ -440,7 +453,7 @@ public abstract class ServletModule {
     try {
       theFieldList = theStorage.getFields();
     }
-    catch (StorageObjectException e) {
+    catch (StorageObjectFailure e) {
       throw new ServletModuleException("ServletModule.getIntersectingValues: " + e.getMessage());
     }
 

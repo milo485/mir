@@ -31,12 +31,15 @@
 
 package mir.producer.reader;
 
-import java.util.*;
-import java.io.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
-import mir.producer.*;
-import mir.util.*;
-import mir.log.*;
+import mir.log.LoggerWrapper;
+import mir.producer.ProducerExc;
+import mir.producer.ProducerFailure;
+import mir.producer.ProducerNode;
+import mir.util.ParameterExpander;
 
 public class ScriptedProducerNode implements ProducerNode {
   private ScriptedProducerNodeDefinition definition;

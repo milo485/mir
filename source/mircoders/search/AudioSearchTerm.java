@@ -31,21 +31,19 @@
 
 package mircoders.search;
 
-import java.util.*;
+import javax.servlet.http.HttpServletRequest;
 
-import javax.servlet.*;
-import javax.servlet.http.*;
+import mir.entity.Entity;
+import mir.entity.EntityList;
+import mir.storage.StorageObjectFailure;
+import mircoders.entity.EntityContent;
+import mircoders.storage.DatabaseContentToMedia;
 
-import mir.entity.*;
-import mir.storage.*;
-import mircoders.entity.*;
-import mircoders.storage.*;
-
-import org.apache.lucene.index.*;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 
-import freemarker.template.*;
+import freemarker.template.SimpleHash;
+import freemarker.template.SimpleScalar;
 
 
 public class AudioSearchTerm extends SearchTerm{
@@ -55,7 +53,7 @@ public class AudioSearchTerm extends SearchTerm{
   public static String paramName        = "search_hasAudio"; 
   public static String templateVariable = "hasAudio";
 
-  public void index(Document doc, Entity entity) throws StorageObjectException{
+  public void index(Document doc, Entity entity) throws StorageObjectFailure{
     EntityList audio = DatabaseContentToMedia.getInstance().getAudio((EntityContent) entity);
     if (audio != null && audio.size()>0){
       doc.add(Field.Keyword(matchField,"y"));

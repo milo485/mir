@@ -31,13 +31,14 @@
 
 package mir.misc;
 
+import java.util.List;
+import java.util.Locale;
+
+import org.apache.struts.util.MessageResources;
+
 import freemarker.template.SimpleScalar;
 import freemarker.template.TemplateMethodModel;
 import freemarker.template.TemplateModel;
-import org.apache.struts.util.MessageResources;
-
-import java.util.List;
-import java.util.Locale;
 
 /**
  * A FreeMarker <code>TemplateMethodModel</code> that provides access to a

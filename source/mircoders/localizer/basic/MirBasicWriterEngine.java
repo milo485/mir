@@ -31,10 +31,13 @@
 
 package mircoders.localizer.basic;
 
-import java.util.*;
-import java.io.*;
-import mir.generator.*;
-import mircoders.localizer.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+
+import mir.generator.WriterEngine;
+import mircoders.localizer.MirLocalizerFailure;
 
 public class MirBasicWriterEngine implements WriterEngine {
   private String defaultEncoding;

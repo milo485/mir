@@ -31,16 +31,10 @@
 
 package mircoders.storage;
 
-import java.lang.*;
-import java.sql.*;
-import java.io.*;
-import java.util.*;
-
-import freemarker.template.*;
-
-import mir.storage.*;
-import mir.entity.*;
-import mir.misc.*;
+import mir.storage.Database;
+import mir.storage.StorageObject;
+import mir.storage.StorageObjectFailure;
+import freemarker.template.SimpleList;
 
 /**
  * <b>Diese Klasse implementiert die Datenbankverbindung zur MetaObjekt-Tabelle
@@ -57,7 +51,7 @@ public class DatabaseImageColor extends Database implements StorageObject{
 	// could get preemted and we could end up with 2 instances of DatabaseFoo..
 	// see the "Singletons with needles and thread" article at JavaWorld -mh
 	public synchronized static DatabaseImageColor getInstance() 
-	  throws StorageObjectException
+	  throws StorageObjectFailure
 	{
 		if (instance == null) {
 			instance = new DatabaseImageColor();
@@ -66,7 +60,7 @@ public class DatabaseImageColor extends Database implements StorageObject{
 		return instance;
 	}
 
-	private DatabaseImageColor() throws StorageObjectException
+	private DatabaseImageColor() throws StorageObjectFailure
 	{
 		super();
 		this.hasTimestamp = false;
@@ -74,7 +68,7 @@ public class DatabaseImageColor extends Database implements StorageObject{
 	}
 
 	public SimpleList getPopupData()
-        throws StorageObjectException { return getPopupData("name",true); }
+        throws StorageObjectFailure { return getPopupData("name",true); }
 
 
 }

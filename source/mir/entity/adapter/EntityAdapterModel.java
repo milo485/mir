@@ -31,10 +31,11 @@
 
 package mir.entity.adapter;
 
-import java.util.*;
-import mir.entity.*;
-import mir.storage.*;
-import mir.util.*;
+import java.util.HashMap;
+import java.util.Map;
+
+import mir.entity.Entity;
+import mir.storage.StorageObject;
 
 public class EntityAdapterModel {
   private Map entityAdapterMappings;

@@ -31,8 +31,10 @@
 
 package mir.storage;
 
-import java.util.*;
-import mir.misc.*;
+import java.util.Properties;
+
+import mir.config.MirPropertiesConfiguration;
+import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
 
 /**
  * <b>Diese Klasse implementiert die abstrakte Klasse DatabaseAdaptor
@@ -43,12 +45,12 @@ import mir.misc.*;
 
 public final class DatabaseAdaptorMySQL implements DatabaseAdaptor{
 
-  public String getDriver() {
-    return MirConfig.getProp("Adaptor.MySQL.Driver");
+  public String getDriver() throws PropertiesConfigExc {
+    return MirPropertiesConfiguration.instance().getString("Adaptor.MySQL.Driver");
   }
 
-  public String getURL(String user, String pass, String host) {
-    return MirConfig.getProp("Adaptor.MySQL.URL");
+  public String getURL(String user, String pass, String host) throws PropertiesConfigExc {
+    return MirPropertiesConfiguration.instance().getString("Adaptor.MySQL.URL");
   }
 
   public boolean hasLimit() {

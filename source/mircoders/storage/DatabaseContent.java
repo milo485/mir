@@ -31,18 +31,15 @@
 
 package mircoders.storage;
 
-import java.lang.*;
-import java.sql.*;
-import java.io.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.Statement;
 
-import freemarker.template.*;
-
-import mir.storage.*;
-import mir.entity.*;
-import mir.misc.*;
-
-import mircoders.entity.*;
+import mir.entity.EntityList;
+import mir.entity.EntityRelation;
+import mir.storage.Database;
+import mir.storage.StorageObject;
+import mir.storage.StorageObjectFailure;
+import mircoders.entity.EntityContent;
 
 /**
  * <b>this class implements the access to the content-table</b>
@@ -62,7 +59,7 @@ public class DatabaseContent extends Database implements StorageObject {
   // could get preemted and we could end up with 2 instances of DatabaseFoo.
   // see the "Singletons with needles and thread" article at JavaWorld -mh
   public synchronized static DatabaseContent getInstance()
-    throws StorageObjectException {
+    throws StorageObjectFailure {
 
     if (instance == null ) {
       instance = new DatabaseContent();
@@ -72,7 +69,7 @@ public class DatabaseContent extends Database implements StorageObject {
   }
 
   private DatabaseContent()
-    throws StorageObjectException {
+    throws StorageObjectFailure {
 
     super();
     this.theTable="content";
@@ -81,7 +78,7 @@ public class DatabaseContent extends Database implements StorageObject {
     relationComments = new EntityRelation("id", "to_media", DatabaseComment.getInstance(), EntityRelation.TO_MANY);
     relationFeature = new EntityRelation("id", "to_feature", DatabaseFeature.getInstance(), EntityRelation.TO_ONE);
     try { this.theEntityClass = Class.forName("mircoders.entity.EntityContent"); }
-    catch (Exception e) { throw new StorageObjectException(e.toString()); }
+    catch (Exception e) { throw new StorageObjectFailure(e); }
   }
 
   // methods
@@ -90,7 +87,7 @@ public class DatabaseContent extends Database implements StorageObject {
    * sets the database flag is_produced to unproduced
    */
 
-  public void setUnproduced(String where) throws StorageObjectException
+  public void setUnproduced(String where) throws StorageObjectFailure
   {
     Connection con=null;Statement stmt=null;
     String sql = "update content set is_produced='0' where " + where;
@@ -110,18 +107,18 @@ public class DatabaseContent extends Database implements StorageObject {
    * returns the comments that belong to the article (via entityrelation)
    * where db-flag is_published is true
    */
-  public EntityList getComments(EntityContent entC) throws StorageObjectException {
+  public EntityList getComments(EntityContent entC) throws StorageObjectFailure {
     return relationComments.getMany(entC,"webdb_create","is_published='1'");
   }
 
   /**
    * returns the features that belong to the article (via entityrelation)
    */
-  public EntityList getFeature(EntityContent entC) throws StorageObjectException {
+  public EntityList getFeature(EntityContent entC) throws StorageObjectFailure {
     return relationFeature.getMany(entC);
   }
 
-  public boolean delete(String id) throws StorageObjectException
+  public boolean delete(String id) throws StorageObjectFailure
   {
     DatabaseComment.getInstance().deleteByContentId(id);
     super.delete(id);

@@ -31,10 +31,11 @@
 
 package mir.util;
 
-import java.util.*;
+import java.util.List;
 
-import mir.misc.*;
-import mir.generator.*;
+import mir.generator.Generator;
+import mir.generator.GeneratorExc;
+import mir.generator.GeneratorFailure;
 
 public class GeneratorHTMLFunctions {
   private GeneratorHTMLFunctions() {}

@@ -31,22 +31,11 @@
 
 package mircoders.servlet;
 
-import java.io.*;
-import java.sql.*;
-import java.util.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
-
-import mir.servlet.*;
-import mir.module.*;
-import mir.misc.*;
-import mir.entity.*;
-import mir.storage.*;
-import mir.log.*;
-
-import mircoders.entity.*;
-import mircoders.storage.*;
-import mircoders.module.*;
+import mir.config.MirPropertiesConfiguration;
+import mir.log.LoggerWrapper;
+import mir.servlet.ServletModule;
+import mircoders.module.ModuleCommentStatus;
+import mircoders.storage.DatabaseCommentStatus;
 
 public class ServletModuleCommentStatus extends ServletModule
 {
@@ -56,14 +45,14 @@ public class ServletModuleCommentStatus extends ServletModule
   private ServletModuleCommentStatus() {
     logger = new LoggerWrapper("ServletModule.CommentStatus");
 
-    templateListString = MirConfig.getProp("ServletModule.CommentStatus.ListTemplate");
-    templateObjektString = MirConfig.getProp("ServletModule.CommentStatus.EditTemplate");
-    templateConfirmString = MirConfig.getProp("ServletModule.CommentStatus.ConfirmTemplate");
-
     try {
+      configuration = MirPropertiesConfiguration.instance();
+      templateListString = configuration.getString("ServletModule.CommentStatus.ListTemplate");
+      templateObjektString = configuration.getString("ServletModule.CommentStatus.EditTemplate");
+      templateConfirmString = configuration.getString("ServletModule.CommentStatus.ConfirmTemplate");
+
       mainModule = new ModuleCommentStatus(DatabaseCommentStatus.getInstance());
-    }
-    catch (StorageObjectException e) {
+    } catch (Exception e) {
       logger.error("Initialization of ServletModuleCommentStatus failed!: " + e.getMessage());
     }
   }

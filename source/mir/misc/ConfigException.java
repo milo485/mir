@@ -32,14 +32,13 @@
 package mir.misc;
 
 
-import java.io.*;
 
 /**
  * Reports the location of the error in the File.
  * Based and inspired by a source from the Ant distribution
  * (Copyright (c) 1999-2001 The Apache Software Foundation.)
  *
- * @version $Id: ConfigException.java,v 1.2 2002/09/01 22:05:49 mh Exp $
+ * @version $Id: ConfigException.java,v 1.3 2003/01/25 17:45:17 idfx Exp $
  *
  * @author The Mir-coders group
  */

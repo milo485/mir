@@ -31,7 +31,6 @@
 
 package mir.xml;
 
-import java.util.*;
 import java.util.StringTokenizer;
 
 /** micro-XPath match - match a path

@@ -31,54 +31,87 @@
 
 package mircoders.servlet;
 
-import java.io.*;
-import java.lang.*;
-import java.sql.*;
-import java.util.*;
-import java.net.*;
-import java.lang.reflect.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.ListIterator;
+import java.util.Locale;
+import java.util.Random;
+import java.util.Set;
 
-import freemarker.template.*;
-import com.oreilly.servlet.multipart.*;
-import com.oreilly.servlet.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
-import org.apache.commons.net.smtp.*;
-
-import org.xml.sax.InputSource;
-import org.xml.sax.XMLReader;
-
-import org.apache.fop.apps.Driver;
-import org.apache.fop.apps.Version;
-import org.apache.fop.apps.XSLTInputHandler;
-
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.search.*;
-import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field;
-import org.apache.lucene.analysis.standard.*;
-import org.apache.lucene.queryParser.*;
-
-import org.apache.log.*;
-
-import mir.servlet.*;
-import mir.module.*;
-import mir.misc.*;
-import mir.entity.*;
-import mir.storage.*;
-import mir.media.*;
-import mir.log.*;
+import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
+import mir.entity.Entity;
+import mir.entity.EntityList;
+import mir.log.LoggerWrapper;
+import mir.misc.FileHandler;
+import mir.misc.FileHandlerException;
+import mir.misc.FileHandlerUserException;
+import mir.misc.HTMLParseException;
+import mir.misc.HTMLTemplateProcessor;
+import mir.misc.StringUtil;
+import mir.misc.WebdbMultipartRequest;
+import mir.module.ModuleException;
+import mir.servlet.ServletModule;
+import mir.servlet.ServletModuleException;
+import mir.servlet.ServletModuleUserException;
+import mir.storage.StorageObjectFailure;
 import mir.util.StringRoutines;
-
-import mircoders.entity.*;
-import mircoders.storage.*;
-import mircoders.module.*;
-import mircoders.producer.*;
+import mircoders.entity.EntityComment;
+import mircoders.entity.EntityContent;
+import mircoders.global.MirGlobal;
 import mircoders.media.MediaRequest;
-import mircoders.global.*;
-import mircoders.localizer.*;
-import mircoders.search.*;
+import mircoders.module.ModuleComment;
+import mircoders.module.ModuleContent;
+import mircoders.module.ModuleImages;
+import mircoders.module.ModuleTopics;
+import mircoders.search.AudioSearchTerm;
+import mircoders.search.ContentSearchTerm;
+import mircoders.search.ImagesSearchTerm;
+import mircoders.search.KeywordSearchTerm;
+import mircoders.search.TextSearchTerm;
+import mircoders.search.TopicSearchTerm;
+import mircoders.search.UnIndexedSearchTerm;
+import mircoders.search.VideoSearchTerm;
+import mircoders.storage.DatabaseComment;
+import mircoders.storage.DatabaseContent;
+import mircoders.storage.DatabaseContentToMedia;
+import mircoders.storage.DatabaseContentToTopics;
+import mircoders.storage.DatabaseImages;
+import mircoders.storage.DatabaseLanguage;
+import mircoders.storage.DatabaseTopics;
+
+import org.apache.commons.net.smtp.SMTPClient;
+import org.apache.commons.net.smtp.SMTPReply;
+import org.apache.fop.apps.Driver;
+import org.apache.fop.apps.XSLTInputHandler;
+import org.apache.log.Hierarchy;
+import org.apache.log.Priority;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.queryParser.QueryParser;
+import org.apache.lucene.search.Hits;
+import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.Query;
+import org.apache.lucene.search.Searcher;
+
+import freemarker.template.SimpleHash;
+import freemarker.template.SimpleList;
+import freemarker.template.SimpleScalar;
+import freemarker.template.TemplateModelRoot;
 
 /*
  *  ServletModuleOpenIndy -
@@ -87,7 +120,7 @@ import mircoders.search.*;
  *    open-postings to the newswire
  *
  * @author mir-coders group
- * @version $Id: ServletModuleOpenIndy.java,v 1.55 2003/01/19 14:13:34 john Exp $
+ * @version $Id: ServletModuleOpenIndy.java,v 1.58 2003/01/25 17:50:36 idfx Exp $
  *
  */
 
@@ -111,20 +144,21 @@ public class ServletModuleOpenIndy extends ServletModule
   public static ServletModule getInstance() { return instance; }
 
   private ServletModuleOpenIndy() {
+    super();
     try {
       logger = new LoggerWrapper("ServletModule.OpenIndy");
 
-      commentFormTemplate = MirConfig.getProp("ServletModule.OpenIndy.CommentTemplate");
-      commentFormDoneTemplate = MirConfig.getProp("ServletModule.OpenIndy.CommentDoneTemplate");
-      commentFormDupeTemplate = MirConfig.getProp("ServletModule.OpenIndy.CommentDupeTemplate");
-      postingFormTemplate = MirConfig.getProp("ServletModule.OpenIndy.PostingTemplate");
-      postingFormDoneTemplate = MirConfig.getProp("ServletModule.OpenIndy.PostingDoneTemplate");
-      postingFormDupeTemplate = MirConfig.getProp("ServletModule.OpenIndy.PostingDupeTemplate");
-      searchResultsTemplate = MirConfig.getProp("ServletModule.OpenIndy.SearchResultsTemplate");
-      prepareMailTemplate = MirConfig.getProp("ServletModule.OpenIndy.PrepareMailTemplate");
-      sentMailTemplate = MirConfig.getProp("ServletModule.OpenIndy.SentMailTemplate");
-      directOp = MirConfig.getProp("DirectOpenposting").toLowerCase();
-      passwdProtection = MirConfig.getProp("PasswdProtection").toLowerCase();
+      commentFormTemplate = configuration.getString("ServletModule.OpenIndy.CommentTemplate");
+      commentFormDoneTemplate = configuration.getString("ServletModule.OpenIndy.CommentDoneTemplate");
+      commentFormDupeTemplate = configuration.getString("ServletModule.OpenIndy.CommentDupeTemplate");
+      postingFormTemplate = configuration.getString("ServletModule.OpenIndy.PostingTemplate");
+      postingFormDoneTemplate = configuration.getString("ServletModule.OpenIndy.PostingDoneTemplate");
+      postingFormDupeTemplate = configuration.getString("ServletModule.OpenIndy.PostingDupeTemplate");
+      searchResultsTemplate = configuration.getString("ServletModule.OpenIndy.SearchResultsTemplate");
+      prepareMailTemplate = configuration.getString("ServletModule.OpenIndy.PrepareMailTemplate");
+      sentMailTemplate = configuration.getString("ServletModule.OpenIndy.SentMailTemplate");
+      directOp = configuration.getString("DirectOpenposting").toLowerCase();
+      passwdProtection = configuration.getString("PasswdProtection").toLowerCase();
       mainModule = new ModuleComment(DatabaseComment.getInstance());
       contentModule = new ModuleContent(DatabaseContent.getInstance());
       themenModule = new ModuleTopics(DatabaseTopics.getInstance());
@@ -132,7 +166,7 @@ public class ServletModuleOpenIndy extends ServletModule
       defaultAction="addposting";
 
     }
-    catch (StorageObjectException e) {
+    catch (StorageObjectFailure e) {
       logger.error("servletmoduleopenindy could not be initialized: " + e.getMessage());
     }
   }
@@ -242,7 +276,7 @@ public class ServletModuleOpenIndy extends ServletModule
           SimpleHash mergeData = new SimpleHash();
           deliver(req, res, mergeData, commentFormDoneTemplate);
         }
-        catch (StorageObjectException e) { throw new ServletModuleException(e.toString());}
+        catch (StorageObjectFailure e) { throw new ServletModuleException(e.toString());}
         catch (ModuleException e) { throw new ServletModuleException(e.toString());}
 
       }
@@ -267,8 +301,8 @@ public class ServletModuleOpenIndy extends ServletModule
       mergeData.put("passwd", passwd);
     }
 
-    String maxMedia = MirConfig.getProp("ServletModule.OpenIndy.MaxMediaUploadItems");
-    String defaultMedia = MirConfig.getProp("ServletModule.OpenIndy.DefaultMediaUploadItems");
+    String maxMedia = configuration.getString("ServletModule.OpenIndy.MaxMediaUploadItems");
+    String defaultMedia = configuration.getString("ServletModule.OpenIndy.DefaultMediaUploadItems");
     String numOfMedia = req.getParameter("medianum");
 
     if(numOfMedia==null||numOfMedia.equals("")){
@@ -329,6 +363,8 @@ public class ServletModuleOpenIndy extends ServletModule
         mediaList = mediaReq.getEntityList();
       }
       catch (FileHandlerUserException e) {
+        throw new ServletModuleUserException(e.getMessage());
+      } catch (PropertiesConfigExc e) {
         throw new ServletModuleUserException(e.getMessage());
       }
 
@@ -435,7 +471,7 @@ public class ServletModuleOpenIndy extends ServletModule
       throw new ServletModuleException("MediaException: "+ e.getMessage());
     }
     catch (IOException e) { throw new ServletModuleException("IOException: "+ e.getMessage());}
-    catch (StorageObjectException e) { throw new ServletModuleException("StorageObjectException" + e.getMessage());}
+    catch (StorageObjectFailure e) { throw new ServletModuleException("StorageObjectException" + e.getMessage());}
     catch (ModuleException e) { throw new ServletModuleException("ModuleException"+e.getMessage());}
 
     deliver(req, res, mergeData, postingFormDoneTemplate);
@@ -444,126 +480,125 @@ public class ServletModuleOpenIndy extends ServletModule
     /*
    * Method for preparing and sending a content as an email message
    */
-  
+
   public void mail(HttpServletRequest req, HttpServletResponse res)
     throws ServletModuleException, ServletModuleUserException {
     String aid = req.getParameter("mail_aid");
     if (aid == null){
       throw new ServletModuleUserException("An article id must be specified in requests to email an article.  Something therefore went badly wrong....");
     }
-    
+
     String to = req.getParameter("mail_to");
     String from = req.getParameter("mail_from");
     String from_name = req.getParameter("mail_from_name");
     String comment = req.getParameter("mail_comment");
     String mail_language = req.getParameter("mail_language");
-    
+
     SimpleHash mergeData = new SimpleHash();
-    
+
     if (to == null || from == null || from_name == null|| to.equals("") || from.equals("") || from_name.equals("") || mail_language == null || mail_language.equals("")){
 
       for (Enumeration theParams = req.getParameterNames(); theParams.hasMoreElements() ;) {
-	String pName=(String)theParams.nextElement();
-	if (pName.startsWith("mail_")){
-	  mergeData.put(pName,new SimpleScalar(req.getParameter(pName)));
-	}
+        String pName=(String)theParams.nextElement();
+        if (pName.startsWith("mail_")){
+          mergeData.put(pName,new SimpleScalar(req.getParameter(pName)));
+        }
       }
-      deliver(req,res,mergeData,prepareMailTemplate); 
+      deliver(req,res,mergeData,prepareMailTemplate);
     }
     else {
       //run checks on to and from and mail_language to make sure no monkey business occurring
       if (mail_language.indexOf('.') != -1 || mail_language.indexOf('/') != -1 ){
-	throw new ServletModuleUserException("Sorry, you've entered an illegal character into the language field.  Go back and try again, asshole.");
+        throw new ServletModuleUserException("Sorry, you've entered an illegal character into the language field.  Go back and try again, asshole.");
       }
-      if (to.indexOf('\n') != -1 
-	  || to.indexOf('\r') != -1 
-	  || to.indexOf(',') != -1 
-	  || from.indexOf('\n') != -1 
-	  || from.indexOf('\r') != -1 
-	  || from.indexOf(',') != -1 ){
-	throw new ServletModuleUserException("Sorry, you've entered an illegal character into the from or to field.  Go back and try again.");
+      if (to.indexOf('\n') != -1
+          || to.indexOf('\r') != -1
+          || to.indexOf(',') != -1
+          || from.indexOf('\n') != -1
+          || from.indexOf('\r') != -1
+          || from.indexOf(',') != -1 ){
+        throw new ServletModuleUserException("Sorry, you've entered an illegal character into the from or to field.  Go back and try again.");
       }
       EntityContent contentEnt;
       try{
-	contentEnt = (EntityContent)contentModule.getById(aid);
+        contentEnt = (EntityContent)contentModule.getById(aid);
       }
-      catch (ModuleException e){ 
-	throw new ServletModuleUserException("Couldn't get content for article "+aid);
+      catch (ModuleException e){
+        throw new ServletModuleUserException("Couldn't get content for article "+aid);
       }
-      String producerStorageRoot=MirConfig.getProp("Producer.StorageRoot");
-      String producerDocRoot=MirConfig.getProp("Producer.DocRoot");
+      String producerStorageRoot=configuration.getString("Producer.StorageRoot");
+      String producerDocRoot=configuration.getString("Producer.DocRoot");
       String publishPath = contentEnt.getValue("publish_path");
       String txtFilePath = producerStorageRoot + producerDocRoot + "/" + mail_language + 
-	 publishPath + "/" + aid + ".txt";
-      
+					 								 publishPath + "/" + aid + ".txt";
+
 
       File inputFile = new File(txtFilePath);
       String content;
-      
+
       try{
-	FileReader in = new FileReader(inputFile);
-	StringWriter out = new StringWriter();
-	int c;
-	while ((c = in.read()) != -1)
-	  out.write(c);
-	in.close();
-	content= out.toString();
+        FileReader in = new FileReader(inputFile);
+        StringWriter out = new StringWriter();
+        int c;
+        while ((c = in.read()) != -1)
+          out.write(c);
+        in.close();
+        content= out.toString();
       }
       catch (FileNotFoundException e){
-	throw new ServletModuleUserException("No text file found in " + txtFilePath);
+        throw new ServletModuleUserException("No text file found in " + txtFilePath);
       }
       catch (IOException e){
-	throw new ServletModuleUserException("Problem reading file in " + txtFilePath);
+        throw new ServletModuleUserException("Problem reading file in " + txtFilePath);
       }
       // add some headers
       content = "To: " + to + "\nReply-To: "+ from + "\n" + content;
       // put in the comment where it should go
-      if (comment != null) { 
-	String commentTextToInsert = "\n\nAttached comment from " + from_name + ":\n" + comment;
-	try {
-	  content=StringRoutines.performRegularExpressionReplacement(content,"!COMMENT!",commentTextToInsert);
-	}
-	catch (Exception e){
-	  throw new ServletModuleUserException("Problem doing regular expression replacement " + e.toString());
-	}
+      if (comment != null) {
+        String commentTextToInsert = "\n\nAttached comment from " + from_name + ":\n" + comment;
+        try {
+          content=StringRoutines.performRegularExpressionReplacement(content,"!COMMENT!",commentTextToInsert);
+        }
+        catch (Exception e){
+          throw new ServletModuleUserException("Problem doing regular expression replacement " + e.toString());
+        }
       }
       else{
-	try {
-	  content=StringRoutines.performRegularExpressionReplacement(content,"!COMMENT!","");
-	}
-	catch (Exception e){
-	  throw new ServletModuleUserException("Problem doing regular expression replacement " + e.toString());
-	}
+        try {
+          content=StringRoutines.performRegularExpressionReplacement(content,"!COMMENT!","");
+        }
+        catch (Exception e){
+          throw new ServletModuleUserException("Problem doing regular expression replacement " + e.toString());
+        }
       }
-      
+
       SMTPClient client=new SMTPClient();
       try {
-	int reply;
-	client.connect(MirConfig.getProp("ServletModule.OpenIndy.SMTPServer"));
-	System.out.print(client.getReplyString());
-	
-	reply = client.getReplyCode();
-	
-	if(!SMTPReply.isPositiveCompletion(reply)) {
-	  client.disconnect();
-	  throw new ServletModuleUserException("SMTP server refused connection.");
-	}
-	
-	client.sendSimpleMessage(MirConfig.getProp("ServletModule.OpenIndy.EmailIsFrom"),to,content);
-	
-	client.disconnect();
-	//mission accomplished
-	deliver(req,res,mergeData,sentMailTemplate); 
-
+				int reply;
+				client.connect(configuration.getString("ServletModule.OpenIndy.SMTPServer"));
+				System.out.print(client.getReplyString());
+				
+				reply = client.getReplyCode();
+				
+				if(!SMTPReply.isPositiveCompletion(reply)) {
+				  client.disconnect();
+				  throw new ServletModuleUserException("SMTP server refused connection.");
+				}
+				
+				client.sendSimpleMessage(configuration.getString("ServletModule.OpenIndy.EmailIsFrom"),to,content);
+				
+				client.disconnect();
+				//mission accomplished
+				deliver(req,res,mergeData,sentMailTemplate); 
       } catch(IOException e) {
-	if(client.isConnected()) {
-	  try {
-	    client.disconnect();
-	  } catch(IOException f) {
-	    // do nothing
-	  }
-	}
-	throw new ServletModuleUserException(e.toString());
+        if(client.isConnected()) {
+          try {
+            client.disconnect();
+          } catch(IOException f) {
+            // do nothing
+          }
+        }
+        throw new ServletModuleUserException(e.toString());
       }
     }
   }
@@ -610,29 +645,31 @@ public class ServletModuleOpenIndy extends ServletModule
         logger.debug("Can't get topics: " + e.toString());
       }
 
-      String searchSubmitValue = req.getParameter("search_submit");
+      String searchBackValue = req.getParameter("search_back");
+      String searchForwardValue = req.getParameter("search_forward");
 
-      if (searchSubmitValue != null && searchSubmitValue.equals("Back")){
+      if (searchBackValue != null){
         int totalHits = ((Integer) session.getAttribute("numberOfHits")).intValue();
         int newPosition=((Integer)session.getAttribute("positionInResults")).intValue()-increment;
-        if (newPosition < 0 || newPosition >= totalHits){
-          throw new ServletModuleUserException("newPosition: index out bounds, value was:"+(new Integer(newPosition)).toString());
-        }
+        if (newPosition<0)
+          newPosition=0;
+        if (newPosition >= totalHits)
+          newPosition=totalHits-1;
         session.setAttribute("positionInResults",new Integer(newPosition));
-
       }
       else {
-        if (searchSubmitValue != null && searchSubmitValue.equals("Forward")){
+        if (searchForwardValue != null){
           int totalHits = ((Integer) session.getAttribute("numberOfHits")).intValue();
           int newPosition=((Integer)session.getAttribute("positionInResults")).intValue()+increment;
-          if (newPosition < 0 || newPosition >= totalHits){
-            throw new ServletModuleUserException("newPosition: index out bounds, value was:"+(new Integer(newPosition)).toString());
-          }
-          session.setAttribute("positionInResults",new Integer(newPosition));
+          if (newPosition<0)
+            newPosition=0;
+          if (newPosition >= totalHits)
+            newPosition=totalHits-1;
 
+          session.setAttribute("positionInResults",new Integer(newPosition));
         }
         else {
-          String indexPath=MirConfig.getProp("IndexPath");
+          String indexPath=configuration.getString("IndexPath");
 
 
           String creatorFragment = creatorTerm.makeTerm(req);
@@ -793,7 +830,7 @@ public class ServletModuleOpenIndy extends ServletModule
           if (!(pIR+increment>=numHits)){
             mergeData.put("hasNext","y");
           }
-          if (pIR-increment>=0){
+          if (pIR>0){
             mergeData.put("hasPrevious","y");
           }
 
@@ -840,9 +877,9 @@ public class ServletModuleOpenIndy extends ServletModule
     throws ServletModuleException, ServletModuleUserException {
     String ID_REQUEST_PARAM = "id";
     String language = req.getParameter("language");
-    
-    String generateFO=MirConfig.getProp("GenerateFO");
-    String generatePDF=MirConfig.getProp("GeneratePDF");
+    String generateFO=configuration.getString("GenerateFO");
+    String generatePDF=configuration.getString("GeneratePDF");
+
 
     //don't do anything if we are not making FO files, or if we are
     //pregenerating PDF's
@@ -853,27 +890,27 @@ public class ServletModuleOpenIndy extends ServletModule
       log = hierarchy.getLoggerFor("fop");
       log.setPriority(Priority.WARN);
 
-      String producerStorageRoot=MirConfig.getProp("Producer.StorageRoot");
-      String producerDocRoot=MirConfig.getProp("Producer.DocRoot");
+      String producerStorageRoot=configuration.getString("Producer.StorageRoot");
+      String producerDocRoot=configuration.getString("Producer.DocRoot");
       //      String templateDir=MirConfig.getPropWithHome("HTMLTemplateProcessor.Dir");
-      String xslSheet=MirConfig.getProp("Producer.HTML2FOStyleSheet");
+      String xslSheet=configuration.getString("Producer.HTML2FOStyleSheet");
       try {
         String idParam = req.getParameter(ID_REQUEST_PARAM);
         if (idParam != null) {
           EntityContent contentEnt =
             (EntityContent)contentModule.getById(idParam);
-          String publishPath = contentEnt.getValue("publish_path");
+          String publishPath = StringUtil.webdbDate2path(contentEnt.getValue("date"));
           String foFile;
-	  
-	  if (language == null){
-	    foFile = producerStorageRoot + producerDocRoot + "/"
-	      + publishPath  + idParam + ".fo";
-	  }
-	  else{
-	    foFile = producerStorageRoot + producerDocRoot + "/"
-	      + language + publishPath  + idParam + ".fo";
-	  }
-	  logger.debug("USING FILES" + foFile + " and " + xslSheet);
+
+          if (language == null){
+            foFile = producerStorageRoot + producerDocRoot + "/"
+              + publishPath  + idParam + ".fo";
+          }
+          else{
+            foFile = producerStorageRoot + producerDocRoot + "/"
+              + language + publishPath  + idParam + ".fo";
+          }
+          logger.debug("USING FILES" + foFile + " and " + xslSheet);
           XSLTInputHandler input = new XSLTInputHandler(new File(foFile),
                                                         new File(xslSheet));
 
@@ -894,7 +931,7 @@ public class ServletModuleOpenIndy extends ServletModule
           throw new ServletModuleUserException("Missing id parameter.");
         }
       } catch (Exception ex) {
-	logger.error(ex.toString());
+        logger.error(ex.toString());
         throw new ServletModuleException(ex.toString());
       }
     } else {

@@ -31,12 +31,11 @@
 
 package mir.media;
 
-import java.lang.*;
 
 /*
  *  MirMediaException -
  *
- * @version $Id: MirMediaException.java,v 1.7 2002/12/01 15:05:51 zapata Exp $
+ * @version $Id: MirMediaException.java,v 1.8 2003/01/25 17:45:17 idfx Exp $
  * @author mh
  *
  */

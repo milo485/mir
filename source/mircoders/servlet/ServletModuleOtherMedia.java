@@ -31,11 +31,9 @@
 
 package mircoders.servlet;
 
-import mir.misc.MirConfig;
+import mir.log.LoggerWrapper;
 import mir.servlet.ServletModule;
-import mir.storage.StorageObjectException;
-import mir.log.*;
-
+import mir.storage.StorageObjectFailure;
 import mircoders.module.ModuleUploadedMedia;
 import mircoders.storage.DatabaseOther;
 
@@ -54,16 +52,17 @@ public class ServletModuleOtherMedia extends ServletModuleUploadedMedia {
   }
 
   private ServletModuleOtherMedia() {
+    super();
     logger = new LoggerWrapper("ServletModule.OtherMedia");
 
-    templateListString = MirConfig.getProp("ServletModule.OtherMedia.ListTemplate");
-    templateObjektString = MirConfig.getProp("ServletModule.OtherMedia.ObjektTemplate");
-    templateConfirmString = MirConfig.getProp("ServletModule.OtherMedia.ConfirmTemplate");
+    templateListString = configuration.getString("ServletModule.OtherMedia.ListTemplate");
+    templateObjektString = configuration.getString("ServletModule.OtherMedia.ObjektTemplate");
+    templateConfirmString = configuration.getString("ServletModule.OtherMedia.ConfirmTemplate");
     try {
       mainModule = new ModuleUploadedMedia(DatabaseOther.getInstance());
       //dbRights = DatabaseRights.getInstance();
     }
-    catch (StorageObjectException e) {
+    catch (StorageObjectFailure e) {
       logger.error("servletmodule otherMedia could not be initialized: " + e.getMessage());
     }
   }

@@ -40,23 +40,17 @@ package mircoders.storage;
  * @version 1.0
  */
 
-import java.lang.*;
-import java.sql.*;
-import java.io.*;
-import java.util.*;
-
-import freemarker.template.*;
-
-import mir.storage.*;
-import mir.entity.*;
-import mir.misc.*;
+import mir.storage.Database;
+import mir.storage.StorageObject;
+import mir.storage.StorageObjectFailure;
+import freemarker.template.SimpleList;
 
 
 public class DatabaseCommentStatus extends Database implements StorageObject{
 
   private static DatabaseCommentStatus instance;
 
-  public static DatabaseCommentStatus getInstance() throws StorageObjectException {
+  public static DatabaseCommentStatus getInstance() throws StorageObjectFailure {
     if (instance == null) {
       synchronized (DatabaseCommentStatus.class) {
         if (instance == null) {
@@ -69,13 +63,13 @@ public class DatabaseCommentStatus extends Database implements StorageObject{
     return instance;
   }
 
-  private DatabaseCommentStatus() throws StorageObjectException {
+  private DatabaseCommentStatus() throws StorageObjectFailure {
     super();
     this.hasTimestamp = false;
     this.theTable = "comment_status";
   }
 
-  public SimpleList getPopupData() throws StorageObjectException {
+  public SimpleList getPopupData() throws StorageObjectFailure {
     return getPopupData("name", false);
   }
 }

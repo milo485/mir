@@ -31,18 +31,12 @@
 
 package mircoders.entity;
 
-import java.lang.*;
-import java.io.*;
-import java.util.*;
-import java.sql.*;
-
-import mir.entity.*;
-import mir.misc.*;
-import mir.storage.*;
-
-import mircoders.storage.*;
+import mir.entity.Entity;
+import mir.storage.StorageObject;
+import mir.storage.StorageObjectFailure;
+import mircoders.storage.DatabaseContent;
 /**
- * Diese Klasse enthält die Daten eines MetaObjekts
+ * Diese Klasse enth?lt die Daten eines MetaObjekts
  *
  * @author RK
  * @version 29.6.1999
@@ -61,7 +55,7 @@ public class EntityFeature extends Entity
     setStorage(theStorage);
   }
 
-  public void update() throws StorageObjectException{
+  public void update() throws StorageObjectFailure{
     super.update();
     DatabaseContent dbContent = DatabaseContent.getInstance();
     dbContent.setUnproduced("to_feature="+getId());

@@ -31,7 +31,6 @@
 
 package mir.servlet;
 
-import java.lang.*;
 
 /*
  *  ServletModuleUserException -

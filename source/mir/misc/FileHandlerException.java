@@ -31,11 +31,10 @@
 
 package mir.misc;
 
-import java.lang.*;
 
 /*
  * 
- * @version $Id: FileHandlerException.java,v 1.3 2002/11/27 07:46:34 mh Exp $
+ * @version $Id: FileHandlerException.java,v 1.4 2003/01/25 17:45:17 idfx Exp $
  * @author mh, mir-coders
  *
  */

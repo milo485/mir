@@ -31,18 +31,20 @@
 
 package  mir.servlet;
 
-import  java.lang.reflect.*;
-import  javax.servlet.http.*;
-import  mir.servlet.ServletModuleException;
-import  mir.misc.*;
-import  mir.log.*;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import mir.log.LoggerWrapper;
 
 
 /**
  * Dispatcher, calls the method passed to ServletModule Class, through the "do"
  * Parameter (via POST or GET)
  *
- * @version $Id: ServletModuleDispatch.java,v 1.11 2002/12/01 15:05:51 zapata Exp $
+ * @version $Id: ServletModuleDispatch.java,v 1.12 2003/01/25 17:45:19 idfx Exp $
  *
  * @Author rk
  *
@@ -70,7 +72,7 @@ public final class ServletModuleDispatch {
          * @param res Http-Response, die vom Dispatcher an die Methode des
          *    ServletModules durchgereicht wird
          * @param sMod ServletModule, an das dispatched wird.
-         * @param mod Name des Modules als String (für Logfile)
+         * @param mod Name des Modules als String (f?r Logfile)
          */
 
   public static void dispatch(ServletModule sMod, HttpServletRequest req,

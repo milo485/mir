@@ -31,11 +31,13 @@
 
 package mircoders.global;
 
+import mir.config.MirPropertiesConfiguration;
+import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
 import mir.misc.*;
 import mircoders.localizer.*;
 
 public class MirGlobal {
-  static private MirConfig configuration;
+  static private MirPropertiesConfiguration configuration;
   static private MirLocalizer localizer;
   static private ProducerEngine producerEngine;
 
@@ -71,12 +73,13 @@ public class MirGlobal {
     return localizer;
   }
 
-  public static MirConfig config() {
-    if (configuration == null) {
-      configuration = new MirConfig();
+  public static MirPropertiesConfiguration config() {
+  	try {
+      return MirPropertiesConfiguration.instance();
+    } catch (PropertiesConfigExc e) {
+      e.printStackTrace();
+      throw new RuntimeException(e.getMessage());
     }
-
-    return configuration;
   }
 
   public static ProducerEngine producerEngine() {
@@ -94,7 +97,7 @@ public class MirGlobal {
     //instead of MirConfig, we can get rid of the Runtime exception we through
     //in getProp, and deal with it here.. needs more thinking.. -mh
     try {
-      result = config().getProp(aPropertyName);
+      result = config().getString(aPropertyName);
     } catch (Throwable t) {
       result = aDefault;
     }
@@ -109,7 +112,7 @@ public class MirGlobal {
   public static String getConfigProperty(String aPropertyName) {
     String result;
 
-    result = config().getProp(aPropertyName);
+    result = config().getString(aPropertyName);
 
     if (result==null)
       throw new ConfigException("Property '" + aPropertyName + "' not present");
@@ -118,21 +121,10 @@ public class MirGlobal {
   }
 
   public static int getConfigIntegerProperty(String aPropertyName) {
-    String result;
-
-    result = config().getProp(aPropertyName);
-
-    return Integer.parseInt(result);
+    return config().getInt(aPropertyName);
   }
 
   public static boolean getConfigBooleanProperty(String aPropertyName) {
-    String result;
-
-    result = config().getProp(aPropertyName);
-
-    if (result==null)
-      throw new ConfigException("Boolean property '" + aPropertyName + "' not present");
-
-    return (result.equals("yes") || result.equals("1"));
+    return config().getBoolean(aPropertyName);
   }
 }

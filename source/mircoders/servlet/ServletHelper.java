@@ -1,17 +1,17 @@
 package mircoders.servlet;
 
-import java.util.*;
-import java.io.*;
+import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+
+import mir.generator.Generator;
+import mir.servlet.ServletModuleException;
+import mir.util.NullWriter;
+import mir.util.ResourceBundleGeneratorFunction;
+import mircoders.global.MirGlobal;
 
 import org.apache.struts.util.MessageResources;
-
-import mir.entity.*;
-import mir.entity.adapter.*;
-import mir.generator.*;
-import mir.servlet.*;
-import mir.util.*;
-
-import mircoders.global.*;
 
 
 

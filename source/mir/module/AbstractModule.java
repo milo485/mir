@@ -31,12 +31,15 @@
 
 package  mir.module;
 
-import  java.util.*;
-import  java.sql.*;
-import  freemarker.template.*;
-import  mir.storage.*;
-import  mir.misc.*;
-import  mir.entity.*;
+import java.sql.SQLException;
+import java.util.HashMap;
+
+import mir.entity.Entity;
+import mir.entity.EntityList;
+import mir.storage.StorageObject;
+import mir.storage.StorageObjectExc;
+import mir.storage.StorageObjectFailure;
+import freemarker.template.SimpleHash;
 
 
 /**
@@ -45,8 +48,8 @@ import  mir.entity.*;
  * on Database and Entity classes. The modules are used by ServletModules.
  * Future possibility could be access via Applications.
  *
- * Abstrakte Klasse, von denen die Modules die Basisfunktionalität erben.
- * Die Moduleschicht dient dazu, Funktionalitaeten zur Verfügung zu stellen,
+ * Abstrakte Klasse, von denen die Modules die Basisfunktionalit?t erben.
+ * Die Moduleschicht dient dazu, Funktionalitaeten zur Verf?gung zu stellen,
  * die von mehreren ServletModulen verwendet werden.
  *
  */
@@ -59,7 +62,7 @@ public class AbstractModule {
   }
 
   /**
-   * Liefert das Standard-StorageObject zurück, mit dem das Module assoziiert ist.
+   * Liefert das Standard-StorageObject zur?ck, mit dem das Module assoziiert ist.
    * @return Standard-StorageObject
    */
   public StorageObject getStorageObject () {
@@ -80,7 +83,7 @@ public class AbstractModule {
         throw new ModuleException("No object for id = " + id);
       else return entity;
     }
-    catch (StorageObjectException e){
+    catch (StorageObjectExc e){
       throw new ModuleException(e.toString());
     }
   }
@@ -89,7 +92,7 @@ public class AbstractModule {
    *   Holt eine EntityListe anhand des WhereClause via StorageObject
    *   @param String whereclause
    *   @param offset - ab welchem Datensatz die gematchten Entities zurueckgeliefert werden
-   *   @return EntityList Liste der gematchten Datensätze
+   *   @return EntityList Liste der gematchten Datens?tze
    */
   public EntityList getByWhereClause (String whereClause, int offset) throws ModuleException {
     try {
@@ -97,7 +100,7 @@ public class AbstractModule {
         throw  new ModuleException("Kein StorageObject gesetzt");
       return theStorage.selectByWhereClause(whereClause, offset);
     }
-    catch (StorageObjectException e){
+    catch (StorageObjectFailure e){
       throw new ModuleException(e.toString());
     }
   }
@@ -107,14 +110,14 @@ public class AbstractModule {
    *   @param String where WhereClause
    *   @param String order Sortierreihenfolge
    *   @param offset - ab welchem Datensatz die gematchten Entities zurueckgeliefert werden
-   *   @return EntityList Liste der gematchten Datensätze
+   *   @return EntityList Liste der gematchten Datens?tze
    */
   public EntityList getByWhereClause (String where, String order, int offset) throws ModuleException {
     try {
       if (theStorage==null) throw new ModuleException("Kein StorageObject gesetzt");
       return theStorage.selectByWhereClause(where, order, offset);
     }
-    catch (StorageObjectException e){
+    catch (StorageObjectFailure e){
       throw new ModuleException(e.toString());
     }
   }
@@ -135,7 +138,7 @@ public class AbstractModule {
       if (theStorage==null) throw new ModuleException("StorageObject not set!");
       return theStorage.selectByWhereClause(where, order, offset, limit);
     }
-    catch (StorageObjectException e){
+    catch (StorageObjectFailure e){
       throw new ModuleException(e.toString());
     }
   }
@@ -145,7 +148,7 @@ public class AbstractModule {
    *   @param String aField - Feldname im StorageObject
    *   @param String aValue - Wert in Feld im StorageObject
    *   @param offset - ab welchem Datensatz die gematchten Entities zurueckgeliefert werden
-   *   @return EntityList Liste der gematchten Datensätze
+   *   @return EntityList Liste der gematchten Datens?tze
    */
   public EntityList getByFieldValue (String aField, String aValue, int offset) throws ModuleException {
     String whereClause;
@@ -154,9 +157,9 @@ public class AbstractModule {
   }
 
   /**
-   * Standardfunktion, um einen Datensatz via StorageObject einzufügen
+   * Standardfunktion, um einen Datensatz via StorageObject einzuf?gen
    * @param theValues Hash mit Spalte/Wert-Paaren
-   * @return Id des eingefügten Objekts
+   * @return Id des eingef?gten Objekts
    * @exception ModuleException
    */
   public String add (HashMap theValues) throws ModuleException {
@@ -173,7 +176,7 @@ public class AbstractModule {
   /**
    * Standardfunktion, um einen Datensatz via StorageObject zu aktualisieren
    * @param theValues Hash mit Spalte/Wert-Paaren
-   * @return Id des eingefügten Objekts
+   * @return Id des eingef?gten Objekts
    * @exception ModuleException
    */
   public String set (HashMap theValues) throws ModuleException {
@@ -185,7 +188,7 @@ public class AbstractModule {
       theEntity.update();
       return theEntity.getId();
     }
-    catch (StorageObjectException e){
+    catch (StorageObjectExc e){
       e.printStackTrace(System.err);
       throw new ModuleException(e.toString());
     }
@@ -199,7 +202,7 @@ public class AbstractModule {
   public void deleteById (String idParam) throws ModuleException {
     try {
       theStorage.delete(idParam);
-    } catch (StorageObjectException e){
+    } catch (StorageObjectFailure e){
       throw new ModuleException(e.toString());
     }
   }
@@ -216,7 +219,7 @@ public class AbstractModule {
    * returns the number of rows
    */
   public int getSize(String where)
-      throws SQLException,StorageObjectException {
+      throws SQLException,StorageObjectFailure {
     return theStorage.getSize(where);
   }
 

@@ -31,16 +31,11 @@
 
 package mir.producer;
 
-import java.util.*;
-import java.io.*;
+import java.io.File;
+import java.util.Map;
 
-import mir.util.*;
-import mir.producer.*;
-import mir.generator.*;
-import mir.log.*;
-
-import mircoders.global.*;
-import mircoders.localizer.*;
+import mir.log.LoggerWrapper;
+import mir.util.ParameterExpander;
 
 public abstract class FileOperationProducerNode implements ProducerNode {
   String fileName;

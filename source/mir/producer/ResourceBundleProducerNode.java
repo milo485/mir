@@ -31,13 +31,14 @@
 
 package mir.producer;
 
-import java.util.*;
-import java.io.*;
-import org.apache.struts.util.MessageResources;
+import java.util.Locale;
+import java.util.Map;
 
-import mir.util.*;
-import mir.misc.*;
-import mir.log.*;
+import mir.log.LoggerWrapper;
+import mir.util.ParameterExpander;
+import mir.util.ResourceBundleGeneratorFunction;
+
+import org.apache.struts.util.MessageResources;
 
 public class ResourceBundleProducerNode implements ProducerNode {
   private String key;

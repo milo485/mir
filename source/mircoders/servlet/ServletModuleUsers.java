@@ -31,24 +31,19 @@
 
 package mircoders.servlet;
 
-import java.io.*;
-import java.sql.*;
-import java.util.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
+import java.util.HashMap;
 
-import freemarker.template.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-import mir.servlet.*;
-import mir.module.*;
-import mir.misc.*;
-import mir.entity.*;
-import mir.storage.*;
-import mir.log.*;
-
-import mircoders.entity.*;
-import mircoders.storage.*;
-import mircoders.module.*;
+import mir.log.LoggerWrapper;
+import mir.module.ModuleException;
+import mir.servlet.ServletModule;
+import mir.servlet.ServletModuleException;
+import mir.storage.StorageObjectFailure;
+import mircoders.module.ModuleUsers;
+import mircoders.storage.DatabaseUsers;
+import freemarker.template.SimpleHash;
 
 /*
  *  ServletModuleUsers -
@@ -64,16 +59,17 @@ public class ServletModuleUsers extends mir.servlet.ServletModule
   public static ServletModule getInstance() { return instance; }
 
   private ServletModuleUsers() {
+    super();
     logger = new LoggerWrapper("ServletModule.Users");
 
-    templateListString = MirConfig.getProp("ServletModule.Users.ListTemplate");
-    templateObjektString = MirConfig.getProp("ServletModule.Users.ObjektTemplate");
-    templateConfirmString = MirConfig.getProp("ServletModule.Users.ConfirmTemplate");
+    templateListString = configuration.getString("ServletModule.Users.ListTemplate");
+    templateObjektString = configuration.getString("ServletModule.Users.ObjektTemplate");
+    templateConfirmString = configuration.getString("ServletModule.Users.ConfirmTemplate");
 
     try {
       mainModule = new ModuleUsers(DatabaseUsers.getInstance());
     }
-    catch (StorageObjectException e) {
+    catch (StorageObjectFailure e) {
       logger.debug("initialization of ServletModuleUsers failed!: " + e.getMessage());
     }
   }

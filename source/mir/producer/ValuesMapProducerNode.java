@@ -31,12 +31,9 @@
 
 package mir.producer;
 
-import java.util.*;
-import java.io.*;
-import org.apache.struts.util.MessageResources;
+import java.util.Map;
 
-import mir.util.*;
-import mir.log.*;
+import mir.log.LoggerWrapper;
 
 public class ValuesMapProducerNode extends ProducerNodeDecorator {
   private String key;

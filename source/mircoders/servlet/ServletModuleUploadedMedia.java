@@ -31,47 +31,45 @@
 
 package mircoders.servlet;
 
-import freemarker.template.SimpleHash;
-import freemarker.template.SimpleList;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URLEncoder;
+import java.util.HashMap;
 
+import javax.servlet.ServletContext;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import mir.config.MirPropertiesConfiguration;
+import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
 import mir.entity.Entity;
 import mir.entity.EntityList;
+import mir.log.LoggerWrapper;
 import mir.media.MediaHelper;
 import mir.media.MirMedia;
-import mir.media.MirMediaException;
-import mir.media.MirMediaUserException;
-import mir.misc.*;
+import mir.misc.FileHandler;
+import mir.misc.FileHandlerException;
+import mir.misc.FileHandlerUserException;
+import mir.misc.WebdbMultipartRequest;
 import mir.module.ModuleException;
 import mir.servlet.ServletModule;
 import mir.servlet.ServletModuleException;
 import mir.servlet.ServletModuleUserException;
-import mir.storage.Database;
-import mir.storage.StorageObjectException;
-import mir.log.*;
-
-import mircoders.entity.EntityUsers;
+import mir.storage.StorageObjectFailure;
 import mircoders.entity.EntityUploadedMedia;
-import mircoders.storage.DatabaseMediaType;
-import mircoders.storage.DatabaseMediafolder;
+import mircoders.entity.EntityUsers;
 import mircoders.media.MediaRequest;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletOutputStream;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URLEncoder;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
+import mircoders.storage.DatabaseMediafolder;
+import freemarker.template.SimpleHash;
+import freemarker.template.SimpleList;
 
 /*
  *  ServletModuleBilder -
  *  liefert HTML fuer Bilder
  *
- * @version $Id: ServletModuleUploadedMedia.java,v 1.14 2002/12/23 03:44:51 mh Exp $
+ * @version $Id: ServletModuleUploadedMedia.java,v 1.15 2003/01/25 17:50:36 idfx Exp $
  * @author RK, the mir-coders group
  */
 
@@ -85,6 +83,7 @@ public abstract class ServletModuleUploadedMedia
   }
 
   public ServletModuleUploadedMedia() {
+    super();
     logger = new LoggerWrapper("ServletModule.UploadedMedia");
   }
 
@@ -114,21 +113,19 @@ public abstract class ServletModuleUploadedMedia
       popups.put("mediafolderPopupData", DatabaseMediafolder.getInstance().getPopupData());
       // raus damit
       deliver(req, res, mergeData, popups, templateListString);
-    }
-    catch (FileHandlerUserException e) {
+    } catch (FileHandlerUserException e) {
       logger.error("ServletModuleUploadedMedia.insert: " + e.getMessage());
       throw new ServletModuleUserException(e.getMessage());
-    }
-    catch (FileHandlerException e) {
+    } catch (FileHandlerException e) {
       throw new ServletModuleException(
               "upload -- media handling exception " + e.toString());
-    }
-    catch (StorageObjectException e) {
+    } catch (StorageObjectFailure e) {
       throw new ServletModuleException("upload -- storageobjectexception "
                                       + e.toString());
-    }
-    catch (IOException e) {
+    } catch (IOException e) {
       throw new ServletModuleException("upload -- ioexception " + e.toString());
+    } catch (PropertiesConfigExc e) {
+      throw new ServletModuleException("upload -- configexception " + e.toString());
     }
   }
 
@@ -245,7 +242,7 @@ public abstract class ServletModuleUploadedMedia
       mergeData.put("new", "1");
       SimpleHash popups = new SimpleHash();
       popups.put("mediafolderPopupData", DatabaseMediafolder.getInstance().getPopupData());
-      String maxMedia = MirConfig.getProp("ServletModule.OpenIndy.MaxMediaUploadItems");
+      String maxMedia = MirPropertiesConfiguration.instance().getString("ServletModule.OpenIndy.MaxMediaUploadItems");
       String numOfMedia = req.getParameter("medianum");
       if(numOfMedia==null||numOfMedia.equals("")){
         numOfMedia="1";
@@ -285,7 +282,7 @@ public abstract class ServletModuleUploadedMedia
       catch (ModuleException e) {
         throw new ServletModuleException(e.toString());
       }
-      catch (StorageObjectException e) {
+      catch (StorageObjectFailure e) {
         throw new ServletModuleException(e.toString());
       }
     }
@@ -311,8 +308,7 @@ public abstract class ServletModuleUploadedMedia
         Entity mediaType = ent.getMediaType();
         MirMedia mediaHandler;
 
-        ServletContext ctx =
-                    (ServletContext)MirConfig.getPropAsObject("ServletContext");
+        ServletContext ctx = MirPropertiesConfiguration.getContext();
         String fName = ent.getId()+"."+mediaType.getValue("name");
 
         mediaHandler = MediaHelper.getHandler(mediaType);
@@ -355,8 +351,7 @@ public abstract class ServletModuleUploadedMedia
         Entity mediaType = ent.getMediaType();
         MirMedia mediaHandler;
 
-        ServletContext ctx =
-                    (ServletContext)MirConfig.getPropAsObject("ServletContext");
+        ServletContext ctx = MirPropertiesConfiguration.getContext();
         String fName = ent.getId()+"."+mediaType.getValue("name");
 
         mediaHandler = MediaHelper.getHandler(mediaType);

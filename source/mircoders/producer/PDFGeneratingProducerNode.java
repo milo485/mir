@@ -31,13 +31,12 @@
 
 package mircoders.producer;
 
-import java.util.*;
-import java.io.*;
+import java.util.Map;
 
-import mir.log.*;
-import mir.util.*;
-import mir.producer.*;
+import mir.log.LoggerWrapper;
 import mir.misc.PDFUtil;
+import mir.producer.ProducerNode;
+import mir.util.ParameterExpander;
 
 public class PDFGeneratingProducerNode implements ProducerNode {
   private String generatorExpression;

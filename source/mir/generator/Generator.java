@@ -31,8 +31,9 @@
 
 package mir.generator;
 
-import java.util.*;
-import java.io.*;
+import java.io.PrintWriter;
+import java.util.List;
+import java.util.Map;
 
 public interface Generator {
   public void generate(Object anOutputWriter, Map aValues, PrintWriter aLogger) throws GeneratorExc, GeneratorFailure;

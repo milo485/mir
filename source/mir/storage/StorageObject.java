@@ -29,23 +29,28 @@
  * not wish to do so, delete this exception statement from your version.
  */
 /*
- * Implementiert Interface für die Speicherschicht.
- * Bislang gibt es in der Bibliothek nur die Möglichkeit
+ * Implementiert Interface f?r die Speicherschicht.
+ * Bislang gibt es in der Bibliothek nur die M?glichkeit
  * in einer Datenbank zu speichern.
  */
 
 package mir.storage;
 
-import java.lang.*;
-import java.util.*;
-import java.sql.*;
-import freemarker.template.*;
-import mir.entity.*;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+
+import mir.entity.Entity;
+import mir.entity.EntityList;
+import freemarker.template.SimpleHash;
+import freemarker.template.SimpleList;
 
 
 /**
- * Implementiert Interface für die Speicherschicht.
- * Bislang gibt es in der Bibliothek nur die Möglichkeit
+ * Implementiert Interface f?r die Speicherschicht.
+ * Bislang gibt es in der Bibliothek nur die M?glichkeit
  * in einer Datenbank zu speichern.
  * @author RK
  * @version	29.6.1999
@@ -58,7 +63,7 @@ public interface StorageObject {
    * @return Entity
    * @exception StorageObjectException
    */
-  abstract public Entity selectById(String id) throws StorageObjectException;
+  abstract public Entity selectById(String id) throws StorageObjectExc;
 
   /**
    * Dokumentation siehe Database.java
@@ -68,7 +73,7 @@ public interface StorageObject {
    * @exception StorageObjectException
    */
   abstract public EntityList selectByFieldValue(String aField, String aValue) throws
-      StorageObjectException;
+      StorageObjectFailure;
 
   /**
    * Dokumentation siehe Database.java
@@ -77,7 +82,7 @@ public interface StorageObject {
    * @exception StorageObjectException
    */
   abstract public EntityList selectByWhereClause(String whereClause) throws
-      StorageObjectException;
+      StorageObjectFailure;
 
   /**
    * Dokumentation siehe Database.java
@@ -87,7 +92,7 @@ public interface StorageObject {
    * @exception StorageObjectException
    */
   abstract public EntityList selectByWhereClause(String whereClause, int offset) throws
-      StorageObjectException;
+      StorageObjectFailure;
 
   /**
    * Dokumentation siehe Database.java
@@ -100,7 +105,7 @@ public interface StorageObject {
   abstract public EntityList selectByWhereClause(String whereClause,
                                                  String orderBy,
                                                  int offset) throws
-      StorageObjectException;
+      StorageObjectFailure;
 
   /**
    * Dokumentation siehe Database.java
@@ -114,7 +119,7 @@ public interface StorageObject {
   abstract public EntityList selectByWhereClause(String whereClause,
                                                  String orderBy,
                                                  int offset, int limit) throws
-      StorageObjectException;
+      StorageObjectFailure;
 
   /**
    * Dokumentation siehe Database.java
@@ -122,35 +127,35 @@ public interface StorageObject {
    * @return boolen
    * @exception StorageObjectException
    */
-  abstract public boolean delete(String id) throws StorageObjectException;
+  abstract public boolean delete(String id) throws StorageObjectFailure;
 
   /**
    * Dokumentation siehe Database.java
    * @return ArrayList
    * @exception StorageObjectException
    */
-  abstract public ArrayList getFields() throws StorageObjectException;
+  abstract public ArrayList getFields() throws StorageObjectFailure;
 
   /**
    * Dokumentation siehe Database.java
    * @return int[]
    * @exception StorageObjectException
    */
-  abstract public int[] getTypes() throws StorageObjectException;
+  abstract public int[] getTypes() throws StorageObjectFailure;
 
   /**
    * Dokumentation siehe Database.java
    * @return ArrayList
    * @exception StorageObjectException
    */
-  abstract public ArrayList getLabels() throws StorageObjectException;
+  abstract public ArrayList getLabels() throws StorageObjectFailure;
 
   /**
    * Dokumentation siehe Database.java
    * @param a
    * @exception StorageObjectException
    */
-  abstract public void update(Entity a) throws StorageObjectException;
+  abstract public void update(Entity a) throws StorageObjectFailure;
 
   /**
    * Dokumentation siehe Database.java
@@ -158,7 +163,7 @@ public interface StorageObject {
    * @return String id
    * @exception StorageObjectException
    */
-  abstract public String insert(Entity a) throws StorageObjectException;
+  abstract public String insert(Entity a) throws StorageObjectFailure;
 
   /**
    * Dokumentation siehe Database.java
@@ -189,7 +194,7 @@ public interface StorageObject {
    * @return Connection
    * @exception StorageObjectException
    */
-  abstract public Connection getPooledCon() throws StorageObjectException;
+  abstract public Connection getPooledCon() throws StorageObjectFailure;
 
   /**
    * Dokumentation siehe Database.java
@@ -199,7 +204,7 @@ public interface StorageObject {
    * @exception StorageObjectException, SQLException
    */
   abstract public ResultSet executeSql(Statement a, String sql) throws
-      StorageObjectException,
+      StorageObjectFailure,
       SQLException;
 
   /**
@@ -208,22 +213,22 @@ public interface StorageObject {
    * @param stmt
    */
   abstract public void freeConnection(Connection con, Statement stmt) throws
-      StorageObjectException;
+      StorageObjectFailure;
 
   /**
    * Dokumentation siehe Database.java
    * @return
    */
-  abstract public SimpleList getPopupData() throws StorageObjectException;
+  abstract public SimpleList getPopupData() throws StorageObjectFailure;
 
   abstract public int executeUpdate(Statement a, String sql) throws
-      StorageObjectException, SQLException;
+      StorageObjectFailure, SQLException;
 
-  abstract public int executeUpdate(String sql) throws StorageObjectException,
+  abstract public int executeUpdate(String sql) throws StorageObjectFailure,
       SQLException;
 
   abstract public int getSize(String where) throws SQLException,
-      StorageObjectException;
+      StorageObjectFailure;
 }
 
 

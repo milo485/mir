@@ -32,6 +32,7 @@
 package mircoders.localizer;
 
 import java.util.List;
+
 import mir.producer.ProducerFactory;
 
 public interface MirProducerLocalizer {

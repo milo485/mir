@@ -31,10 +31,10 @@
 
 package mircoders.localizer;
 
-import java.util.*;
-import javax.servlet.http.*;
+import javax.servlet.http.HttpServletRequest;
 
-import mircoders.entity.*;
+import mircoders.entity.EntityComment;
+import mircoders.entity.EntityContent;
 
 public interface MirOpenPostingLocalizer {
   public void afterContentPosting(EntityContent aContent);

@@ -31,11 +31,11 @@
 
 package mir.producer;
 
-import java.util.*;
-import java.io.*;
-import mir.entity.*;
-import mir.entity.adapter.*;
-import mir.util.*;
+import java.io.PrintWriter;
+import java.util.Map;
+
+import mir.entity.adapter.EntityAdapter;
+import mir.util.ParameterExpander;
 
 
 public abstract class EntityModifyingProducerNode implements ProducerNode {

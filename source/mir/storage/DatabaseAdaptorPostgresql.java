@@ -31,11 +31,13 @@
 
 package mir.storage;
 
-import java.util.*;
-import mir.misc.*;
+import java.util.Properties;
+
+import mir.config.MirPropertiesConfiguration;
+import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
 
 /**
- * <b>Diese Klasse implementiert die abstrakte Klasse DatabaseAdaptor für Postgresql-Datenbanken
+ * <b>Diese Klasse implementiert die abstrakte Klasse DatabaseAdaptor f?r Postgresql-Datenbanken
  *
  * @author <RK>
  * @version 30.12.2000
@@ -43,12 +45,12 @@ import mir.misc.*;
 
 public final class DatabaseAdaptorPostgresql implements DatabaseAdaptor{
 
-  public String getDriver() {
-    return MirConfig.getProp("Adaptor.PostgreSQL.Driver");
+  public String getDriver() throws PropertiesConfigExc {
+    return MirPropertiesConfiguration.instance().getString("Adaptor.PostgreSQL.Driver");
   }
 
-  public String getURL(String user, String pass, String host) {
-    return MirConfig.getProp("Adaptor.PostgreSQL.URL");
+  public String getURL(String user, String pass, String host) throws PropertiesConfigExc {
+    return MirPropertiesConfiguration.instance().getString("Adaptor.PostgreSQL.URL");
   }
 
   public boolean hasLimit() {

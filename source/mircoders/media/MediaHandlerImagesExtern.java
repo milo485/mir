@@ -32,20 +32,15 @@
 package mircoders.media;
 
 
-import java.lang.*;
-import java.io.*;
-import java.util.*;
-import java.lang.reflect.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 
-import freemarker.template.SimpleList;
-
-import mir.media.*;
-import mir.misc.*;
-import mir.entity.*;
-import mir.storage.*;
-
-import mircoders.entity.*;
-import mircoders.storage.*;
+import mir.config.MirPropertiesConfiguration;
+import mir.entity.Entity;
+import mir.media.MirMediaException;
+import mir.misc.StringUtil;
+import mircoders.storage.DatabaseUploadedMedia;
 
 
 /**
@@ -64,7 +59,7 @@ public class MediaHandlerImagesExtern extends MediaHandlerGeneric
       String datePath = StringUtil.webdbDate2path(date);
       String ext = "." + mediaTypeEnt.getValue("name");
       String filePath = datePath + anImageEntity.getId() + ext;
-      String iconFilePath = MirConfig.getProp("Producer.StorageRoot") + getIconStoragePath() + filePath;
+      String iconFilePath = MirPropertiesConfiguration.instance().getString("Producer.StorageRoot") + getIconStoragePath() + filePath;
       String imageFilePath = getStoragePath() + File.separator + filePath;
 
       File imageFile = new File(imageFilePath);
@@ -76,7 +71,7 @@ public class MediaHandlerImagesExtern extends MediaHandlerGeneric
       else {
         ImageProcessor processor = new ImageProcessor(imageFile, "JPEG");
 
-        processor.descaleImage(50, 0.8F);
+        processor.descaleImage(150, 0.8F);
         File dir = new File(iconFile.getParent());
           if (dir!=null && !dir.exists()){
             dir.mkdirs();
@@ -111,7 +106,7 @@ public class MediaHandlerImagesExtern extends MediaHandlerGeneric
       String date = anImageEntity.getValue("date");
       String datePath = StringUtil.webdbDate2path(date);
       String ext = "." + mediaType.getValue("name");
-      String filePath = MirConfig.getProp("Producer.StorageRoot") +
+      String filePath = MirPropertiesConfiguration.instance().getString("Producer.StorageRoot") +
           getIconStoragePath() + datePath + anImageEntity.getId() + ext;
 
       return new FileInputStream(new File(filePath));
@@ -123,27 +118,27 @@ public class MediaHandlerImagesExtern extends MediaHandlerGeneric
 
   public String getStoragePath()
   {
-    return MirConfig.getProp("Producer.Image.Path");
+    return configuration.getString("Producer.Image.Path");
   }
 
   public String getIconStoragePath()
   {
-    return MirConfig.getProp("Producer.Image.IconPath");
+    return configuration.getString("Producer.Image.IconPath");
   }
 
   public String getPublishHost()
   {
-    return StringUtil.removeSlash(MirConfig.getProp("Producer.Image.Host"));
+    return StringUtil.removeSlash(configuration.getString("Producer.Image.Host"));
   }
 
   public String getTinyIconName()
   {
-    return MirConfig.getProp("Producer.Icon.TinyImage");
+    return configuration.getString("Producer.Icon.TinyImage");
   }
 
   public String getBigIconName()
   {
-    return MirConfig.getProp("Producer.Icon.BigImage");
+    return configuration.getString("Producer.Icon.BigImage");
   }
 
   public String getIconAltName()

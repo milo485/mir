@@ -35,16 +35,21 @@ package mir.misc;
  * Title:
  * Description:
  * Copyright:    Copyright (c) 2002 Mir-coders
- * @author $Author: mh $
- * @version $Id: WebdbImage.java,v 1.8 2002/11/04 04:35:21 mh Exp $
+ * @author $Author: idfx $
+ * @version $Id: WebdbImage.java,v 1.9 2003/01/25 17:45:18 idfx Exp $
  */
 
-import java.io.*;
-import java.util.Vector;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Random;
-import javax.media.jai.*;
-import com.sun.media.jai.codec.*;
-import java.awt.image.renderable.ParameterBlock;
+
+import javax.media.jai.InterpolationBilinear;
+import javax.media.jai.JAI;
+import javax.media.jai.ParameterBlockJAI;
+import javax.media.jai.PlanarImage;
+
+import com.sun.media.jai.codec.FileSeekableStream;
 
 public class WebdbImage
 {

@@ -31,22 +31,16 @@
 
 package mircoders.entity;
 
-import java.lang.*;
-import java.io.*;
-import java.util.*;
-import java.sql.*;
+import java.util.HashMap;
 
-import mir.entity.*;
-import mir.misc.*;
-import mir.storage.*;
-
-import mir.storage.*;
+import mir.entity.Entity;
+import mir.storage.StorageObject;
 
 /**
  * This class maps one line of the comment-table to a java-object.
  *
- * @author $Author: zapata $
- * @version $Revision: 1.12 $ $Date: 2002/12/02 12:33:23 $
+ * @author $Author: idfx $
+ * @version $Revision: 1.13 $ $Date: 2003/01/25 17:50:34 $
  */
 
 

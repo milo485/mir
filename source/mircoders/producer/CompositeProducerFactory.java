@@ -31,9 +31,15 @@
 
 package mircoders.producer;
 
-import java.util.*;
-import mir.entity.*;
-import mir.producer.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Vector;
+
+import mir.producer.ProducerExc;
+import mir.producer.ProducerFactory;
+import mir.producer.ProducerFailure;
 
 public class CompositeProducerFactory implements ProducerFactory {
   private Map factories;          // verb -> Vector ( ProducerFactory )

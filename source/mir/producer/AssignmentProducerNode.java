@@ -31,13 +31,10 @@
 
 package mir.producer;
 
-import java.util.*;
-import java.io.*;
+import java.util.Map;
 
-import org.apache.struts.util.MessageResources;
-
-import mir.util.*;
-import mir.log.*;
+import mir.log.LoggerWrapper;
+import mir.util.ParameterExpander;
 
 public class AssignmentProducerNode extends ProducerNodeDecorator {
   private String key;

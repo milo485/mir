@@ -31,10 +31,8 @@
 
 package mircoders.entity;
 
-import  java.util.*;
-
-import  mir.entity.*;
-import  mir.storage.*;
+import mir.entity.Entity;
+import mir.storage.StorageObject;
 
 /**
  * This class is objectmapping of database webdb_users

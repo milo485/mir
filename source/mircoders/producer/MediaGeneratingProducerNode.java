@@ -31,20 +31,18 @@
 
 package mircoders.producer;
 
-import java.util.*;
-import java.io.*;
+import java.util.Map;
 
-import mir.util.*;
-import mir.log.*;
-import mir.misc.*;
-import mir.media.*;
-import mir.producer.*;
-import mir.generator.*;
-import mir.entity.*;
-import mir.entity.adapter.*;
-
-import mircoders.entity.*;
-import mircoders.storage.*;
+import mir.entity.Entity;
+import mir.entity.adapter.EntityAdapter;
+import mir.log.LoggerWrapper;
+import mir.media.MediaHelper;
+import mir.media.MirMedia;
+import mir.producer.ProducerExc;
+import mir.producer.ProducerNode;
+import mir.util.ParameterExpander;
+import mircoders.entity.EntityUploadedMedia;
+import mircoders.storage.DatabaseUploadedMedia;
 
 public class MediaGeneratingProducerNode implements ProducerNode {
   private String mediaEntityKey;

@@ -31,15 +31,12 @@
 
 package  mir.misc;
 
-import freemarker.template.*;
-
 import java.text.NumberFormat;
-import java.util.List; 
 
 /**
  * Help methods for number handling.
  *
- * @version $Id: NumberUtils.java,v 1.3 2002/11/28 19:12:08 mh Exp $
+ * @version $Id: NumberUtils.java,v 1.4 2003/01/25 17:45:18 idfx Exp $
  * @author mh, Mir-coders group
  *
  */

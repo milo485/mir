@@ -31,22 +31,30 @@
 
 package mircoders.media;
 
-import java.util.*;
-import java.io.*;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.Iterator;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.ServletContext;
 
-import com.oreilly.servlet.multipart.FilePart;
-
-import mircoders.storage.DatabaseMediaType;
-import mircoders.producer.ProducerMedia;
-import mir.storage.StorageObjectException;
-import mir.storage.Database;
+import mir.config.MirPropertiesConfiguration;
+import mir.entity.Entity;
+import mir.entity.EntityList;
+import mir.media.MediaHelper;
+import mir.media.MirMedia;
+import mir.media.MirMediaException;
+import mir.misc.FileHandler;
+import mir.misc.FileHandlerException;
+import mir.misc.FileHandlerUserException;
+import mir.misc.StringUtil;
 import mir.module.ModuleException;
-import mir.entity.*;
-import mir.misc.*;
-import mir.media.*;
+import mir.storage.Database;
+import mir.storage.StorageObjectExc;
+import mir.storage.StorageObjectFailure;
+import mircoders.producer.ProducerMedia;
+import mircoders.storage.DatabaseMediaType;
+
+import com.oreilly.servlet.multipart.FilePart;
 
 /*
  *  MediaRequest.java -
@@ -55,7 +63,7 @@ import mir.media.*;
  *    appropriate media objects are set.
  *
  * @author mh
- * @version $Id: MediaRequest.java,v 1.11 2002/12/23 03:38:32 mh Exp $
+ * @version $Id: MediaRequest.java,v 1.12 2003/01/25 17:50:35 idfx Exp $
  *
  */
 
@@ -130,8 +138,7 @@ public class MediaRequest implements FileHandler
          * So if you support a new media type you have to make sure that
          * it is in this file -mh
          */
-        ServletContext ctx =
-          (ServletContext)MirConfig.getPropAsObject("ServletContext");
+        ServletContext ctx = MirPropertiesConfiguration.getContext();
         contentType = ctx.getMimeType(fileName);
         if (contentType==null)
           contentType = "text/plain"; // rfc1867 says this is the default
@@ -271,9 +278,11 @@ public class MediaRequest implements FileHandler
 
       _returnList.add(mediaEnt);
     }
-    catch (StorageObjectException e) {
+    catch (StorageObjectFailure e) {
       // first try to delete it.. don't catch exception as we've already..
       try { mediaStorage.delete(mediaId); } catch (Exception e2) {}
+      throw new FileHandlerException("error in MediaRequest: "+e.toString());
+    } catch (StorageObjectExc e) {
       throw new FileHandlerException("error in MediaRequest: "+e.toString());
     } //end try/catch block
 

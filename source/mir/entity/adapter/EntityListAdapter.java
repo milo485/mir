@@ -31,8 +31,11 @@
 
 package mir.entity.adapter;
 
-import java.util.*;
-import mir.entity.*;
+import java.util.AbstractList;
+import java.util.List;
+import java.util.Vector;
+
+import mir.entity.EntityBrowser;
 
 public class EntityListAdapter extends AbstractList {
   private int skip;

@@ -31,15 +31,12 @@
 
 package mir.producer;
 
-import java.util.*;
-import java.io.*;
+import java.io.File;
+import java.util.Date;
+import java.util.Map;
 
-import mir.log.*;
-import mir.util.*;
-import mir.producer.*;
-import mir.generator.*;
-import mircoders.global.*;
-import mircoders.localizer.*;
+import mir.log.LoggerWrapper;
+import mir.util.ParameterExpander;
 
 public class FileDateSettingProducerNode extends FileOperationProducerNode {
   String dateExpression;

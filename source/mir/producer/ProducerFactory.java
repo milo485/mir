@@ -31,7 +31,8 @@
 
 package mir.producer;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.Map;
 
 public interface ProducerFactory {
   public interface ProducerVerb {

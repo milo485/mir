@@ -31,14 +31,14 @@
 
 package mir.producer;
 
-import java.util.*;
-import java.io.*;
+import java.util.Map;
+import java.util.Vector;
 
-import mir.entity.adapter.*;
-import mir.entity.*;
-import mir.storage.*;
-import mir.util.*;
-import mir.log.*;
+import mir.entity.adapter.EntityAdapterModel;
+import mir.entity.adapter.EntityIteratorAdapter;
+import mir.log.LoggerWrapper;
+import mir.util.CachingRewindableIterator;
+import mir.util.ParameterExpander;
 
 public class EntityListProducerNode extends ProducerNodeDecorator {
   private String key;

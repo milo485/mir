@@ -31,26 +31,31 @@
 
 package mircoders.servlet;
 
-import java.io.*;
-import java.net.*;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
 
-import javax.servlet.http.*;
-import javax.servlet.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-import freemarker.template.*;
-
-import mir.servlet.*;
-import mir.misc.*;
+import mir.log.LoggerWrapper;
 import mir.misc.FileExtFilter;
-import mir.log.*;
+import mir.misc.HTMLTemplateProcessor;
+import mir.servlet.ServletModule;
+import mir.servlet.ServletModuleException;
+import freemarker.template.SimpleHash;
+import freemarker.template.SimpleList;
 
 /*
  *  ServletModuleFileEdit -
  *  Allows one to do a basic edit of a file in a directory specified
  *  in the config file.
  *
- * @author $Author: zapata $
- * @version $Revision: 1.3 $ $Date: 2002/11/29 13:43:42 $
+ * @author $Author: idfx $
+ * @version $Revision: 1.4 $ $Date: 2003/01/25 17:50:36 $
  *
  */
 
@@ -67,18 +72,16 @@ public class ServletModuleFileEdit extends ServletModule
   private String _extName;
 
   private ServletModuleFileEdit() {
+    super();
 
     logger = new LoggerWrapper("ServletModule.FileEdit");
 
-    _dirName = MirConfig.getProp("ServletModule.FileEdit.FileDirectory");
-    _extName = MirConfig.getProp("ServletModule.FileEdit.ExtFilter");
+    _dirName = configuration.getString("ServletModule.FileEdit.FileDirectory");
+    _extName = configuration.getString("ServletModule.FileEdit.ExtFilter");
 
-    templateListString =
-        MirConfig.getProp("ServletModule.FileEdit.ListTemplate");
-    templateObjektString =
-        MirConfig.getProp("ServletModule.FileEdit.ObjektTemplate");
-    templateConfirmString =
-        MirConfig.getProp("ServletModule.FileEdit.ConfirmTemplate");
+    templateListString =configuration.getString("ServletModule.FileEdit.ListTemplate");
+    templateObjektString =configuration.getString("ServletModule.FileEdit.ObjektTemplate");
+    templateConfirmString =configuration.getString("ServletModule.FileEdit.ConfirmTemplate");
   }
 
   public void list(HttpServletRequest req, HttpServletResponse res)

@@ -31,18 +31,17 @@
 
 package mircoders.producer;
 
-import java.util.*;
-import java.io.*;
+import java.util.Map;
 
-import mir.util.*;
-import mir.producer.*;
-import mir.entity.*;
-import mir.entity.adapter.*;
-import mir.log.*;
-
-import mircoders.entity.*;
-import mircoders.module.*;
-import mircoders.storage.*;
+import mir.entity.Entity;
+import mir.entity.adapter.EntityAdapter;
+import mir.log.LoggerWrapper;
+import mir.producer.ProducerFailure;
+import mir.producer.ProducerNode;
+import mir.util.ParameterExpander;
+import mircoders.entity.EntityContent;
+import mircoders.module.ModuleContent;
+import mircoders.storage.DatabaseContent;
 
 
 public class ContentModifyingProducerNode implements ProducerNode {

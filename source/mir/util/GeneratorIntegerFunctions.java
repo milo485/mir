@@ -1,7 +1,10 @@
 package mir.util;
 
-import java.util.*;
-import mir.generator.*;
+import java.util.List;
+
+import mir.generator.Generator;
+import mir.generator.GeneratorExc;
+import mir.generator.GeneratorFailure;
 
 public class GeneratorIntegerFunctions {
 

@@ -1,20 +1,23 @@
 package mir.log.log4j;
 
+import mir.config.MirPropertiesConfiguration;
+import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
+
 import org.apache.log4j.PropertyConfigurator;
 import org.apache.log4j.Logger;
 
 import java.util.Map;
 import java.util.HashMap;
 
-import mir.misc.MirConfig;
 
 public class LoggerImpl implements mir.log.Logger {
   private static Map loggers = new HashMap();
 
-  public LoggerImpl() {
-    System.setProperty("log.home", MirConfig.getPropWithHome("Log.Home"));
-    PropertyConfigurator.configure(MirConfig.getPropWithHome(
-        "Log.log4j.ConfigurationFile").trim());
+  public LoggerImpl() throws PropertiesConfigExc {
+    System.setProperty("log.home", 
+                       MirPropertiesConfiguration.instance().getStringWithHome("Log.Home"));
+    PropertyConfigurator.configure(MirPropertiesConfiguration.instance()
+                                   .getStringWithHome("Log.log4j.ConfigurationFile").trim());
   }
 
   public void debug(Object o, String s) {

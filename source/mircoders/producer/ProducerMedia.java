@@ -31,33 +31,29 @@
 
 package mircoders.producer;
 
-import java.io.*;
-import java.lang.*;
-import java.util.*;
+import java.io.PrintWriter;
 
-//import freemarker.template.*;
-
-import mir.misc.*;
-import mir.storage.*;
-import mir.module.*;
-import mir.entity.*;
-import mir.media.*;
-
-import mircoders.media.*;
-import mircoders.entity.*;
-import mircoders.storage.*;
+import mir.entity.Entity;
+import mir.entity.EntityList;
+import mir.media.MediaHelper;
+import mir.media.MirMedia;
+import mir.module.ModuleException;
+import mir.storage.Database;
+import mir.storage.StorageObjectFailure;
+import mircoders.entity.EntityUsers;
+import mircoders.storage.DatabaseUploadedMedia;
 
 abstract public class ProducerMedia extends Producer {
 
-  abstract Database getStorage() throws StorageObjectException;
+  abstract Database getStorage() throws StorageObjectFailure;
 
   public void handle(PrintWriter htmlout, EntityUsers user, boolean force,
-    boolean sync) throws StorageObjectException, ModuleException {
+    boolean sync) throws StorageObjectFailure, ModuleException {
     handle(htmlout,user,force,sync,null);
   }
 
   public void handle(PrintWriter htmlout,EntityUsers user,boolean force,
-    boolean sync, String id) throws StorageObjectException, ModuleException
+    boolean sync, String id) throws StorageObjectFailure, ModuleException
   {
     long                sessionConnectTime = 0;
     long                startTime = (new java.util.Date()).getTime();
@@ -68,7 +64,7 @@ abstract public class ProducerMedia extends Producer {
     EntityList          batchEntityList;
 
     int contentBatchsize =
-            Integer.parseInt(MirConfig.getProp("Producer.Content.Batchsize"));
+            Integer.parseInt(configuration.getString("Producer.Content.Batchsize"));
     orderBy = "webdb_lastchange desc";
 
     // get batch of non-produced medias, that are to be published

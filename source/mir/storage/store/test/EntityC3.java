@@ -40,8 +40,11 @@ package mir.storage.store.test;
  * @version 1.0
  */
 
-import java.util.*;
-import mir.storage.store.*;
+import java.util.Set;
+
+import mir.storage.store.StorableObject;
+import mir.storage.store.StoreContainerType;
+import mir.storage.store.StoreIdentifier;
 
 public class EntityC3 implements StorableObject {
 

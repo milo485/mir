@@ -31,14 +31,15 @@
 
 package mircoders.producer;
 
-import java.util.*;
+import java.util.Map;
 
-import mir.log.*;
-import mir.util.*;
-import mir.producer.*;
-import mir.entity.*;
-import mir.entity.adapter.*;
-import mircoders.entity.*;
+import mir.entity.Entity;
+import mir.entity.adapter.EntityAdapter;
+import mir.log.LoggerWrapper;
+import mir.producer.ProducerFailure;
+import mir.producer.ProducerNode;
+import mir.util.ParameterExpander;
+import mircoders.entity.EntityContent;
 
 
 public class ContentMarkingProducerNode implements ProducerNode {

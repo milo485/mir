@@ -31,7 +31,7 @@
 
 package mir.util;
 
-import java.util.*;
+import java.util.Iterator;
 
 public interface RewindableIterator extends Iterator {
   public void rewind();

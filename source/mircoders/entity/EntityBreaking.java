@@ -41,11 +41,12 @@ package mircoders.entity;
  */
 
 
-import  java.util.*;
+import java.util.Set;
 
-import  mir.entity.*;
-import  mir.storage.*;
-import  mir.storage.store.*;
+import mir.entity.Entity;
+import mir.storage.StorageObject;
+import mir.storage.store.StorableObject;
+import mir.storage.store.StoreIdentifier;
 
 
 public class EntityBreaking extends Entity implements StorableObject

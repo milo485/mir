@@ -31,11 +31,18 @@
 
 package mir.producer.reader;
 
-import java.util.*;
-import java.io.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.Stack;
 
-import mir.producer.*;
-import mir.log.*;
+import mir.log.LoggerWrapper;
+import mir.producer.CompositeProducerNode;
+import mir.producer.ProducerExc;
+import mir.producer.ProducerFailure;
+import mir.producer.ProducerNode;
 
 public class ScriptedProducerNodeDefinition {
   private Map integerParameters;               // name -> default value

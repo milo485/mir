@@ -31,8 +31,17 @@
 
 package mir.producer.reader;
 
-import java.util.*;
-import mir.producer.*;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import mir.producer.CompositeProducerNode;
+import mir.producer.NodedProducer;
+import mir.producer.Producer;
+import mir.producer.ProducerExc;
+import mir.producer.ProducerFactory;
+import mir.producer.ProducerFailure;
+import mir.producer.ProducerNode;
 
 public class ScriptedProducerFactory implements ProducerFactory {
   private List verbs;

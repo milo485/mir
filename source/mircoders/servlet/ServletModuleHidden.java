@@ -31,25 +31,21 @@
 
 package mircoders.servlet;
 
-import java.io.*;
-import java.sql.*;
-import java.util.*;
-import java.net.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
+import java.io.IOException;
 
-import freemarker.template.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-import mir.servlet.*;
-import mir.module.*;
-import mir.misc.*;
-import mir.entity.*;
-import mir.storage.*;
-import mir.entity.*;
-import mir.log.*;
-
-import mircoders.storage.*;
-import mircoders.module.*;
+import mir.entity.EntityList;
+import mir.log.LoggerWrapper;
+import mir.misc.HTMLTemplateProcessor;
+import mir.module.ModuleException;
+import mir.servlet.ServletModule;
+import mir.servlet.ServletModuleException;
+import mir.storage.StorageObjectFailure;
+import mircoders.module.ModuleContent;
+import mircoders.storage.DatabaseContent;
+import freemarker.template.SimpleHash;
 
 /*
  *  ServletModuleHidden - output of so called "censored" articles
@@ -66,12 +62,13 @@ public class ServletModuleHidden extends ServletModule
   public static ServletModule getInstance() { return instance; }
 
   private ServletModuleHidden() {
+    super();
     logger = new LoggerWrapper("ServletModule.Hidden");
-    templateListString = MirConfig.getProp("ServletModule.Hidden.ListTemplate");
+    templateListString = configuration.getString("ServletModule.Hidden.ListTemplate");
     try {
       mainModule = new ModuleContent(DatabaseContent.getInstance());
     }
-    catch (StorageObjectException e) {
+    catch (StorageObjectFailure e) {
       logger.error("initialization of servletmoduleHidden failed: " + e.getMessage());
     }
   }

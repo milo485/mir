@@ -31,9 +31,9 @@
 
 package mir.entity;
 
-import mir.storage.*;
-import mir.misc.*;
-import freemarker.template.*;
+import mir.storage.StorageObject;
+import mir.storage.StorageObjectExc;
+import mir.storage.StorageObjectFailure;
 
 public class EntityRelation {
 
@@ -68,7 +68,7 @@ public class EntityRelation {
    *           null.
    */
 
-  public Entity getOne(Entity entity) throws StorageObjectException {
+  public Entity getOne(Entity entity) throws StorageObjectExc {
     if (type==TO_ONE) {
       return storage.selectById(entity.getValue(fromId));
     }
@@ -81,7 +81,7 @@ public class EntityRelation {
    *           null.
    */
 
-  public EntityList getMany(Entity entity) throws StorageObjectException{
+  public EntityList getMany(Entity entity) throws StorageObjectFailure{
     if (type==TO_MANY) {
       return storage.selectByFieldValue(toId, entity.getValue(fromId));
     }
@@ -94,7 +94,7 @@ public class EntityRelation {
    *           null.
    */
 
-  public EntityList getMany(Entity entity, String order) throws StorageObjectException{
+  public EntityList getMany(Entity entity, String order) throws StorageObjectFailure{
     if (type==TO_MANY) {
       return storage.selectByWhereClause(toId+"="+entity.getValue(fromId), order,-1);
     }
@@ -107,7 +107,7 @@ public class EntityRelation {
    *           null.
    */
 
-  public EntityList getMany(Entity entity, String order, String whereClause) throws StorageObjectException{
+  public EntityList getMany(Entity entity, String order, String whereClause) throws StorageObjectFailure{
     if (type==TO_MANY) {
       return storage.selectByWhereClause(toId + "=" + entity.getValue(fromId) + " and " + whereClause, order,-1);
     }

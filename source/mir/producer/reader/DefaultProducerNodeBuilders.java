@@ -31,14 +31,32 @@
 
 package mir.producer.reader;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
-import mir.generator.*;
-
-import mir.producer.*;
-import mir.entity.adapter.*;
-import mir.util.*;
-import mir.log.*;
+import mir.entity.adapter.EntityAdapterModel;
+import mir.generator.Generator;
+import mir.generator.WriterEngine;
+import mir.log.LoggerWrapper;
+import mir.producer.ConditionalProducerNode;
+import mir.producer.DirCopyingProducerNode;
+import mir.producer.EntityBatchingProducerNode;
+import mir.producer.EntityEnumeratingProducerNode;
+import mir.producer.EntityListProducerNode;
+import mir.producer.EvaluatedAssignmentProducerNode;
+import mir.producer.ExpandedAssignmentProducerNode;
+import mir.producer.FileDateSettingProducerNode;
+import mir.producer.FileDeletingProducerNode;
+import mir.producer.GeneratingProducerNode;
+import mir.producer.LoggingProducerNode;
+import mir.producer.LoopProducerNode;
+import mir.producer.ProducerNode;
+import mir.producer.ResourceBundleProducerNode;
+import mir.producer.ScriptCallingProducerNode;
 
 public class DefaultProducerNodeBuilders {
 

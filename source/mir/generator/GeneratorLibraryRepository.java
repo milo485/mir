@@ -1,7 +1,9 @@
 package mir.generator;
 
-import java.util.*;
-import mir.util.*;
+import java.util.HashMap;
+import java.util.Map;
+
+import mir.util.SimpleParser;
 
 public class GeneratorLibraryRepository {
   private Map factories;

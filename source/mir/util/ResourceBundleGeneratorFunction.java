@@ -31,10 +31,15 @@
 
 package mir.util;
 
-import java.util.*;
-import org.apache.struts.util.MessageResources;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Vector;
 
-import mir.generator.*;
+import mir.generator.Generator;
+import mir.generator.GeneratorExc;
+
+import org.apache.struts.util.MessageResources;
 
 public class ResourceBundleGeneratorFunction implements Generator.GeneratorFunction {
   private List messages;

@@ -31,7 +31,8 @@
 
 package mircoders.localizer;
 
-import mir.generator.*;
+import mir.generator.Generator;
+import mir.generator.WriterEngine;
 
 public interface MirGeneratorLocalizer {
   public WriterEngine makeWriterEngine() throws MirLocalizerExc, MirLocalizerFailure;

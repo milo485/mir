@@ -31,33 +31,32 @@
 
 package mircoders.servlet;
 
-import java.io.*;
-import java.sql.*;
-import java.util.*;
-import java.net.*;
+import java.io.PrintWriter;
+import java.util.Map;
 
-import javax.servlet.*;
-import javax.servlet.http.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-import org.apache.struts.util.MessageResources;
-
-import freemarker.template.*;
-
-import mir.servlet.*;
-import mir.module.*;
-import mir.misc.*;
-import mir.entity.*;
-import mir.storage.*;
-import mir.generator.*;
-import mir.entity.*;
-import mir.entity.adapter.*;
-import mir.util.*;
-import mir.log.*;
-
-import mircoders.storage.*;
-import mircoders.global.*;
-import mircoders.localizer.*;
-import mircoders.module.*;
+import mir.config.MirPropertiesConfiguration;
+import mir.entity.adapter.EntityAdapterModel;
+import mir.entity.adapter.EntityIteratorAdapter;
+import mir.log.LoggerToWriterAdapter;
+import mir.log.LoggerWrapper;
+import mir.servlet.ServletModule;
+import mir.servlet.ServletModuleException;
+import mir.util.CachingRewindableIterator;
+import mir.util.HTTPRequestParser;
+import mir.util.JDBCStringRoutines;
+import mir.util.URLBuilder;
+import mircoders.global.MirGlobal;
+import mircoders.module.ModuleComment;
+import mircoders.module.ModuleContent;
+import mircoders.storage.DatabaseComment;
+import mircoders.storage.DatabaseCommentStatus;
+import mircoders.storage.DatabaseContent;
+import mircoders.storage.DatabaseLanguage;
+import freemarker.template.SimpleHash;
+import freemarker.template.TemplateModelRoot;
 
 /*
  *  ServletModuleComment - controls navigation for Comments
@@ -78,15 +77,17 @@ public class ServletModuleComment extends ServletModule
   private ServletModuleComment() {
     logger = new LoggerWrapper("ServletModule.Comment");
 
-    templateListString = MirConfig.getProp("ServletModule.Comment.ListTemplate");
-    templateObjektString = MirConfig.getProp("ServletModule.Comment.ObjektTemplate");
-    templateConfirmString = MirConfig.getProp("ServletModule.Comment.ConfirmTemplate");
 
     try {
+      configuration = MirPropertiesConfiguration.instance();
+      templateListString = configuration.getString("ServletModule.Comment.ListTemplate");
+      templateObjektString = configuration.getString("ServletModule.Comment.ObjektTemplate");
+      templateConfirmString = configuration.getString("ServletModule.Comment.ConfirmTemplate");
+
       mainModule = new ModuleComment(DatabaseComment.getInstance());
       moduleContent = new ModuleContent(DatabaseContent.getInstance());
     }
-    catch (StorageObjectException e) {
+    catch (Exception e) {
       logger.error("servletmodule comment could not be initialized:" + e.getMessage());
     }
   }
@@ -266,7 +267,7 @@ public class ServletModuleComment extends ServletModule
       ServletHelper.generateResponse(aResponse.getWriter(), responseData, "commentlist.template");
     }
     catch (Throwable e) {
-      e.printStackTrace(new PrintWriter(new LoggerToWriterAdapter(logger, logger.ERROR_MESSAGE)));
+      e.printStackTrace(new PrintWriter(new LoggerToWriterAdapter(logger, LoggerWrapper.ERROR_MESSAGE)));
 
       throw new ServletModuleException(e.getMessage());
     }

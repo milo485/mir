@@ -31,10 +31,11 @@
 
 package mircoders.producer;
 
-import java.io.*;
+import java.io.PrintWriter;
 
-import mir.producer.*;
-import mir.log.*;
+import mir.log.LoggerToWriterAdapter;
+import mir.log.LoggerWrapper;
+import mir.producer.ProducerFailure;
 
 public class OldProducerAdapter implements mir.producer.Producer {
 

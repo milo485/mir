@@ -31,10 +31,9 @@
 
 package mir.producer;
 
-import java.util.*;
-import java.io.*;
+import java.util.Map;
 
-import mir.log.*;
+import mir.log.LoggerWrapper;
 
 public class ProducerNodeDecorator implements ProducerNode {
   private ProducerNode slave;

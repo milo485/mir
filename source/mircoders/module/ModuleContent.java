@@ -31,28 +31,25 @@
 
 package mircoders.module;
 
-import java.io.*;
-import java.util.*;
-import java.sql.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.StringTokenizer;
 
-import javax.servlet.*;
-import javax.servlet.http.*;
-
-import mir.servlet.*;
-import mir.module.*;
-import mir.entity.*;
-import mir.misc.*;
-import mir.util.*;
-import mir.storage.*;
-import mir.log.*;
-
-import mircoders.entity.*;
-import mircoders.storage.*;
+import mir.entity.EntityList;
+import mir.log.LoggerWrapper;
+import mir.module.AbstractModule;
+import mir.module.ModuleException;
+import mir.storage.StorageObject;
+import mir.storage.StorageObjectFailure;
+import mir.util.JDBCStringRoutines;
+import mircoders.entity.EntityUsers;
+import mircoders.storage.DatabaseContentToMedia;
 
 /*
  *  ContentObjekt -
  *
- * @version $Id: ModuleContent.java,v 1.13 2002/12/14 01:37:43 zapata Exp $
+ * @version $Id: ModuleContent.java,v 1.14 2003/01/25 17:50:35 idfx Exp $
  *
  * @author RK, mir-coders
  *
@@ -148,7 +145,7 @@ public class ModuleContent extends AbstractModule
       }
       return theStorage.selectByWhereClause(whereClause, offset);
     }
-    catch (StorageObjectException e){
+    catch (StorageObjectFailure e){
       throw new ModuleException(e.toString());
     }
 
@@ -171,14 +168,14 @@ public class ModuleContent extends AbstractModule
       }
       return theStorage.selectByWhereClause(whereClause, orderBy, offset, limit);
     }
-    catch (StorageObjectException e){	throw new ModuleException(e.toString()); }
+    catch (StorageObjectFailure e){	throw new ModuleException(e.toString()); }
   }
 
   public EntityList getContent(String whereClause, String orderBy,int offset, int limit)
       throws ModuleException {
     try {
       return theStorage.selectByWhereClause(whereClause, orderBy, offset, limit);
-    } catch (StorageObjectException e){
+    } catch (StorageObjectFailure e){
       throw new ModuleException(e.toString());
     }
   }
@@ -226,7 +223,7 @@ public class ModuleContent extends AbstractModule
       }
       return theStorage.selectByWhereClause(whereClause, orderBy, offset);
     }
-    catch (StorageObjectException e) {
+    catch (StorageObjectFailure e) {
       throw new ModuleException(e.toString());
     }
   }

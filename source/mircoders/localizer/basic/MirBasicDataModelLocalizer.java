@@ -31,16 +31,43 @@
 
 package mircoders.localizer.basic;
 
-import java.util.*;
-import mir.entity.*;
-import mir.entity.adapter.*;
-import mir.media.*;
-import mir.misc.*;
-import mir.util.*;
-import mircoders.storage.*;
-import mircoders.global.*;
-import mircoders.entity.*;
-import mircoders.localizer.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Vector;
+
+import mir.entity.Entity;
+import mir.entity.adapter.EntityAdapter;
+import mir.entity.adapter.EntityAdapterDefinition;
+import mir.entity.adapter.EntityAdapterModel;
+import mir.media.MediaHelper;
+import mir.media.MirMedia;
+import mir.util.RewindableIterator;
+import mircoders.entity.EntityUploadedMedia;
+import mircoders.global.MirGlobal;
+import mircoders.localizer.MirAdminInterfaceLocalizer;
+import mircoders.localizer.MirDataModelLocalizer;
+import mircoders.localizer.MirLocalizerFailure;
+import mircoders.storage.DatabaseArticleType;
+import mircoders.storage.DatabaseAudio;
+import mircoders.storage.DatabaseBreaking;
+import mircoders.storage.DatabaseComment;
+import mircoders.storage.DatabaseCommentStatus;
+import mircoders.storage.DatabaseContent;
+import mircoders.storage.DatabaseFeature;
+import mircoders.storage.DatabaseImageType;
+import mircoders.storage.DatabaseImages;
+import mircoders.storage.DatabaseLanguage;
+import mircoders.storage.DatabaseMedia;
+import mircoders.storage.DatabaseMediaType;
+import mircoders.storage.DatabaseMediafolder;
+import mircoders.storage.DatabaseMessages;
+import mircoders.storage.DatabaseOther;
+import mircoders.storage.DatabaseTopics;
+import mircoders.storage.DatabaseUploadedMedia;
+import mircoders.storage.DatabaseUsers;
+import mircoders.storage.DatabaseVideo;
 
 public class MirBasicDataModelLocalizer implements MirDataModelLocalizer {
   private EntityAdapterModel model;

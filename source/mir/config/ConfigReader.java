@@ -31,17 +31,27 @@
 
 package  mir.config;
 
-import java.io.*;
-import java.util.*;
-import java.lang.System;
-import org.xml.sax.helpers.DefaultHandler;
-import org.xml.sax.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Stack;
+
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import mir.config.exceptions.*;
-import mir.misc.Location;
+import mir.config.exceptions.ConfigDefineNotKnownException;
+import mir.config.exceptions.ConfigFailure;
+
+import org.xml.sax.Attributes;
+import org.xml.sax.InputSource;
+import org.xml.sax.Locator;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
+import org.xml.sax.helpers.DefaultHandler;
 
 public class ConfigReader {
   final static String propertyTagName="property";

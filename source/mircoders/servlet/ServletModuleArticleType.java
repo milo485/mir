@@ -31,22 +31,11 @@
 
 package mircoders.servlet;
 
-import java.io.*;
-import java.sql.*;
-import java.util.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
-
-import mir.servlet.*;
-import mir.module.*;
-import mir.misc.*;
-import mir.entity.*;
-import mir.storage.*;
-import mir.log.*;
-
-import mircoders.entity.*;
-import mircoders.storage.*;
-import mircoders.module.*;
+import mir.config.MirPropertiesConfiguration;
+import mir.log.LoggerWrapper;
+import mir.servlet.ServletModule;
+import mircoders.module.ModuleArticleType;
+import mircoders.storage.DatabaseArticleType;
 
 public class ServletModuleArticleType extends ServletModule
 {
@@ -55,15 +44,14 @@ public class ServletModuleArticleType extends ServletModule
 
   private ServletModuleArticleType() {
     logger = new LoggerWrapper("ServletModule.ArticleType");
-
-    templateListString = MirConfig.getProp("ServletModule.ArticleType.ListTemplate");
-    templateObjektString = MirConfig.getProp("ServletModule.ArticleType.EditTemplate");
-    templateConfirmString = MirConfig.getProp("ServletModule.ArticleType.ConfirmTemplate");
-
     try {
+      configuration = MirPropertiesConfiguration.instance();
+      templateListString = configuration.getString("ServletModule.ArticleType.ListTemplate");
+      templateObjektString = configuration.getString("ServletModule.ArticleType.EditTemplate");
+      templateConfirmString = configuration.getString("ServletModule.ArticleType.ConfirmTemplate");
       mainModule = new ModuleArticleType(DatabaseArticleType.getInstance());
     }
-    catch (StorageObjectException e) {
+    catch (Exception e) {
       logger.error("Initialization of ServletModuleArticleType failed!: " + e.getMessage());
     }
   }

@@ -29,29 +29,32 @@
  * not wish to do so, delete this exception statement from your version.
  */
 
-import java.io.*;
-import java.util.*;
-import java.net.*;
-import java.lang.reflect.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
-import java.sql.*;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.GregorianCalendar;
+import java.util.Locale;
 
-import freemarker.template.*;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
-import mir.misc.*;
-import mir.servlet.*;
-
-import mircoders.servlet.*;
-import mircoders.module.*;
-import mircoders.entity.*;
-import mircoders.storage.*;
+import mir.config.MirPropertiesConfiguration;
+import mir.misc.HTMLTemplateProcessor;
+import mir.misc.StringUtil;
+import mir.servlet.AbstractServlet;
+import mir.servlet.ServletModuleDispatch;
+import mir.servlet.ServletModuleException;
+import mir.servlet.ServletModuleUserException;
+import mircoders.servlet.ServletModuleOpenIndy;
+import freemarker.template.SimpleHash;
+import freemarker.template.SimpleScalar;
 
 /**
  *  OpenMir.java - main servlet for open posting and comment feature to articles
  *
  *  @author RK 1999-2001, the mir-coders group
- *  @version $Id: OpenMir.java,v 1.18 2003/01/18 08:38:06 mh Exp $
+ *  @version $Id: OpenMir.java,v 1.19 2003/01/25 17:50:34 idfx Exp $
  *
  */
 
@@ -72,14 +75,6 @@ public class OpenMir extends AbstractServlet {
 
     long            startTime = (new java.util.Date()).getTime();
     long            sessionConnectTime=0;
-
-    // get the configration - this could conflict if 2 mirs are in the
-    // VM maybe? to be checked. -mh
-    // -- they would have different servlet contexts, so the following is
-    // no problem (br1)
-    if(getServletContext().getAttribute("mir.confed") == null) {
-      getConfig(req);
-    }
       
     session = req.getSession();
 
@@ -99,7 +94,7 @@ public class OpenMir extends AbstractServlet {
     setNoCaching(res);
 
     res.setContentType("text/html");
-    //res.setContentType("text/html; charset="+MirConfig.getProp("Mir.DefaultHTMLCharset"));
+    //res.setContentType("text/html; charset="+MirPropertiesConfiguration.instance().getString("Mir.DefaultHTMLCharset"));
     try {
       ServletModuleDispatch.dispatch(ServletModuleOpenIndy.getInstance(),req,res);
     }
@@ -112,17 +107,17 @@ public class OpenMir extends AbstractServlet {
     }
     // timing...
     sessionConnectTime = new java.util.Date().getTime() - startTime;
-    theLog.printInfo("EXECTIME (ServletModuleOpenIndy): " + sessionConnectTime + " ms");
+    logger.debug("EXECTIME (ServletModuleOpenIndy): " + sessionConnectTime + " ms");
   }
 
   private void handleUserError(HttpServletRequest req, HttpServletResponse res,
                                PrintWriter out, String errorString) {
     try {
-      theLog.printError(errorString);
+      logger.error(errorString);
       SimpleHash modelRoot = new SimpleHash();
       modelRoot.put("errorstring", new SimpleScalar(errorString));
       modelRoot.put("date", new SimpleScalar(StringUtil.date2readableDateTime(new GregorianCalendar())));
-      HTMLTemplateProcessor.process(res,MirConfig.getProp("Mir.UserErrorTemplate"),
+      HTMLTemplateProcessor.process(res,MirPropertiesConfiguration.instance().getString("Mir.UserErrorTemplate"),
                                     modelRoot, out, req.getLocale() );
       out.close();
     }
@@ -135,12 +130,12 @@ public class OpenMir extends AbstractServlet {
   private void handleError(HttpServletRequest req, HttpServletResponse res,PrintWriter out, String errorString) {
 
     try {
-      theLog.printError(errorString);
+      logger.error(errorString);
       SimpleHash modelRoot = new SimpleHash();
       modelRoot.put("errorstring", new SimpleScalar(errorString));
       modelRoot.put("date", new SimpleScalar(StringUtil.date2readableDateTime(
                                                new GregorianCalendar())));
-      HTMLTemplateProcessor.process(res,MirConfig.getProp("Mir.ErrorTemplate"),
+      HTMLTemplateProcessor.process(res,MirPropertiesConfiguration.instance().getString("Mir.ErrorTemplate"),
                                     modelRoot,out, req.getLocale());
       out.close();
     }
@@ -151,7 +146,7 @@ public class OpenMir extends AbstractServlet {
   }
 
   public String getServletInfo(){
-    return "OpenMir "+MirConfig.getProp("Mir.Version");
+    return "OpenMir "+configuration.getString("Mir.Version");
   }
 
 }

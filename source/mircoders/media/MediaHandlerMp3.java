@@ -31,16 +31,15 @@
 
 package  mircoders.media;
 
-import java.util.*;
 import java.io.StringReader;
 
-import freemarker.template.SimpleList;
+import mir.entity.Entity;
+import mir.media.MirMedia;
+import mir.media.MirMediaException;
+import mir.misc.FileUtil;
+import mir.misc.StringUtil;
 import freemarker.template.SimpleHash;
-
-import mir.media.*;
-import mir.entity.*;
-import mir.misc.*;
-import mir.storage.*;
+import freemarker.template.SimpleList;
 
 
 /**
@@ -67,7 +66,7 @@ import mir.storage.*;
  * 
  * @see mir.media.MirMedia
  * @author mh <mh@nadir.org>
- * @version $Id: MediaHandlerMp3.java,v 1.9 2002/11/28 07:28:24 mh Exp $
+ * @version $Id: MediaHandlerMp3.java,v 1.10 2003/01/25 17:50:35 idfx Exp $
  */
 
 public class MediaHandlerMp3 extends MediaHandlerAudio implements MirMedia

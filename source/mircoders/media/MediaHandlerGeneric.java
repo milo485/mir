@@ -31,15 +31,20 @@
 
 package  mircoders.media;
 
-import java.util.*;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
+import mir.config.MirPropertiesConfiguration;
+import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
+import mir.entity.Entity;
+import mir.media.MirMedia;
+import mir.media.MirMediaException;
+import mir.misc.FileUtil;
+import mir.misc.Logfile;
+import mir.misc.StringUtil;
 import freemarker.template.SimpleList;
-
-import mir.media.*;
-import mir.entity.*;
-import mir.misc.*;
-import mir.storage.*;
 
 
 /**
@@ -59,17 +64,27 @@ import mir.storage.*;
  *
  * @see mir.media.MirMedia
  * @author mh <mh@nadir.org>
- * @version $Id: MediaHandlerGeneric.java,v 1.12 2003/01/17 17:34:52 zapata Exp $
+ * @version $Id: MediaHandlerGeneric.java,v 1.13 2003/01/25 17:50:35 idfx Exp $
  */
 
 public class MediaHandlerGeneric implements MirMedia
 {
-    protected static String imageHost = MirConfig.getProp("Producer.Image.Host");
-    protected static String imageRoot = MirConfig.getProp("Producer.ImageRoot");
-    protected static Logfile theLog = Logfile.getInstance(
-                                                  MirConfig.getProp("Home")+
-                                                  "log/media.log");
+    protected static MirPropertiesConfiguration configuration;
+    protected static String imageHost;
+    protected static String imageRoot;
+    protected static Logfile theLog;
     private final String sepChar = File.separator;
+    
+    static {
+      try {
+        configuration = MirPropertiesConfiguration.instance();
+      } catch (PropertiesConfigExc e) {
+        e.printStackTrace();
+      }
+      imageHost = configuration.getString("Producer.Image.Host");
+      imageRoot = configuration.getString("Producer.ImageRoot");
+      theLog = Logfile.getInstance(configuration.getStringWithHome("log/media.log"));
+    }
 
     public void set (InputStream in, Entity ent, Entity mediaTypeEnt )
         throws MirMediaException {
@@ -128,27 +143,27 @@ public class MediaHandlerGeneric implements MirMedia
 
     public String getStoragePath()
     {
-        return MirConfig.getProp("Producer.Media.Path");
+        return configuration.getString("Producer.Media.Path");
     }
 
     public String getIconStoragePath()
     {
-        return MirConfig.getProp("Producer.Image.IconPath");
+        return configuration.getString("Producer.Image.IconPath");
     }
 
     public String getPublishHost()
     {
-        return StringUtil.removeSlash(MirConfig.getProp("Producer.Media.Host"));
+        return StringUtil.removeSlash(configuration.getString("Producer.Media.Host"));
     }
 
     public String getTinyIconName()
     {
-        return MirConfig.getProp("Producer.Icon.TinyText");
+        return configuration.getString("Producer.Icon.TinyText");
     }
 
     public String getBigIconName()
     {
-        return MirConfig.getProp("Producer.Icon.BigText");
+        return configuration.getString("Producer.Icon.BigText");
     }
 
     public String getIconAltName()

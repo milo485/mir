@@ -31,7 +31,6 @@
 
 package mir.misc;
 
-import java.lang.*;
 
 /*
  *  HTMLParseException -

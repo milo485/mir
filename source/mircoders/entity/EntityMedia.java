@@ -31,18 +31,13 @@
 
 package mircoders.entity;
 
-import java.lang.*;
-import java.io.*;
-import java.util.*;
-import java.sql.*;
-
-import mir.entity.*;
-import mir.misc.*;
-import mir.storage.*;
-
-import mircoders.storage.*;
+import mir.entity.Entity;
+import mir.storage.StorageObject;
+import mir.storage.StorageObjectExc;
+import mir.storage.StorageObjectFailure;
+import mircoders.storage.DatabaseMedia;
 /**
- * Diese Klasse enthält die Daten eines MetaObjekts
+ * Diese Klasse enth?lt die Daten eines MetaObjekts
  *
  * @author RK
  * @version 29.6.1999
@@ -67,12 +62,14 @@ public class EntityMedia extends Entity
 	 *
 	 * @return mir.entity.Entity
 	 */
-	public Entity getMediaType() throws StorageObjectException {
-        try {
-            return ((DatabaseMedia)theStorageObject).getMediaType(this);
-        } catch (StorageObjectException e) {
-            throw new StorageObjectException("getMediaType(): "+e.toString());
-        }
+	public Entity getMediaType() throws StorageObjectFailure {
+    try {
+    	return ((DatabaseMedia)theStorageObject).getMediaType(this);
+    } catch (StorageObjectFailure e) {
+      throw new StorageObjectFailure("getMediaType(): ",e);
+    } catch (StorageObjectExc e) {
+      throw new StorageObjectFailure("getMediaType(): ",e);
+    }
 
 	}
 }

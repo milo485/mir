@@ -31,23 +31,22 @@
 
 package mircoders.servlet;
 
-import java.io.*;
-import java.net.*;
+import java.io.IOException;
+import java.net.URLEncoder;
 
-import javax.servlet.http.*;
-import javax.servlet.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-import freemarker.template.*;
-
-import mir.servlet.*;
-import mir.misc.*;
-import mir.entity.*;
-import mir.storage.*;
-import mir.module.*;
-import mir.log.*;
-
-import mircoders.module.*;
-import mircoders.storage.*;
+import mir.entity.EntityList;
+import mir.log.LoggerWrapper;
+import mir.misc.HTMLTemplateProcessor;
+import mir.module.ModuleException;
+import mir.servlet.ServletModule;
+import mir.servlet.ServletModuleException;
+import mir.storage.StorageObjectFailure;
+import mircoders.module.ModuleMessage;
+import mircoders.storage.DatabaseMessages;
+import freemarker.template.SimpleHash;
 
 /**
  * Title:       ServletModuleMessage
@@ -68,16 +67,17 @@ public class ServletModuleMessage extends ServletModule
   public static ServletModule getInstance() { return instance; }
 
   private ServletModuleMessage() {
+    super();
     logger = new LoggerWrapper("ServletModule.Messages");
 
-    templateListString = MirConfig.getProp("ServletModule.Messages.ListTemplate");
-    templateObjektString = MirConfig.getProp("ServletModule.Messages.ObjektTemplate");
-    templateConfirmString = MirConfig.getProp("ServletModule.Messages.ConfirmTemplate");
+    templateListString = configuration.getString("ServletModule.Messages.ListTemplate");
+    templateObjektString = configuration.getString("ServletModule.Messages.ObjektTemplate");
+    templateConfirmString = configuration.getString("ServletModule.Messages.ConfirmTemplate");
 
     try {
       mainModule = new ModuleMessage(DatabaseMessages.getInstance());
     }
-    catch (StorageObjectException e) {
+    catch (StorageObjectFailure e) {
       logger.error("initialization of ServletModuleMessage failed!: " + e.getMessage());
     }
   }

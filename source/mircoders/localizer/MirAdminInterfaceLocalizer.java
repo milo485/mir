@@ -31,12 +31,9 @@
 
 package mircoders.localizer;
 
-import java.util.*;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
-import mir.entity.*;
-import mir.entity.adapter.*;
+import mir.entity.adapter.EntityAdapter;
 
 public interface MirAdminInterfaceLocalizer {
   public List simpleCommentOperations();

@@ -31,17 +31,23 @@
 
 package mircoders.localizer.basic;
 
-import java.util.*;
-import java.text.*;
+import java.text.SimpleDateFormat;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Vector;
 
-import mir.entity.adapter.*;
-import mir.storage.*;
-import mir.entity.*;
-import mir.util.*;
-
-import mircoders.localizer.*;
-import mircoders.entity.*;
-import mircoders.storage.*;
+import mir.entity.Entity;
+import mir.entity.adapter.EntityAdapter;
+import mir.storage.StorageObjectFailure;
+import mir.util.StringRoutines;
+import mircoders.entity.EntityComment;
+import mircoders.entity.EntityContent;
+import mircoders.localizer.MirAdminInterfaceLocalizer;
+import mircoders.localizer.MirLocalizerExc;
+import mircoders.localizer.MirLocalizerFailure;
+import mircoders.storage.DatabaseContent;
 
 
 public class MirBasicAdminInterfaceLocalizer implements MirAdminInterfaceLocalizer {
@@ -134,8 +140,8 @@ public class MirBasicAdminInterfaceLocalizer implements MirAdminInterfaceLocaliz
       }
     };
 
-    protected abstract boolean isAvailable(Entity anEntity) throws StorageObjectException ;
-    protected abstract void performModification(EntityAdapter aUser, Entity anEntity) throws StorageObjectException ;
+    protected abstract boolean isAvailable(Entity anEntity) throws StorageObjectFailure ;
+    protected abstract void performModification(EntityAdapter aUser, Entity anEntity) throws StorageObjectFailure ;
   }
 
   public static abstract class CommentModifyingOperation extends EntityModifyingOperation {
@@ -143,17 +149,17 @@ public class MirBasicAdminInterfaceLocalizer implements MirAdminInterfaceLocaliz
       super(aName);
     }
 
-    protected boolean isAvailable(Entity anEntity) throws StorageObjectException {
+    protected boolean isAvailable(Entity anEntity) throws StorageObjectFailure {
       return anEntity instanceof EntityComment && isAvailable((EntityComment) anEntity);
     }
 
-    protected void performModification(EntityAdapter aUser, Entity anEntity) throws StorageObjectException {
+    protected void performModification(EntityAdapter aUser, Entity anEntity) throws StorageObjectFailure {
       performModification(aUser, (EntityComment) anEntity);
       DatabaseContent.getInstance().setUnproduced("id="+anEntity.getValue("to_media"));
     };
 
-    protected abstract boolean isAvailable(EntityComment aComment) throws StorageObjectException ;
-    protected abstract void performModification(EntityAdapter aUser, EntityComment aComment) throws StorageObjectException ;
+    protected abstract boolean isAvailable(EntityComment aComment) throws StorageObjectFailure ;
+    protected abstract void performModification(EntityAdapter aUser, EntityComment aComment) throws StorageObjectFailure ;
   }
 
   public static abstract class ArticleModifyingOperation extends EntityModifyingOperation {
@@ -165,11 +171,11 @@ public class MirBasicAdminInterfaceLocalizer implements MirAdminInterfaceLocaliz
       logOperation = aLogOperation;
     }
 
-    protected boolean isAvailable(Entity anEntity) throws StorageObjectException {
+    protected boolean isAvailable(Entity anEntity) throws StorageObjectFailure {
       return anEntity instanceof EntityContent && isAvailable((EntityContent) anEntity);
     }
 
-    protected void performModification(EntityAdapter aUser, Entity anEntity) throws StorageObjectException {
+    protected void performModification(EntityAdapter aUser, Entity anEntity) throws StorageObjectFailure {
       performModification(aUser, (EntityContent) anEntity);
       anEntity.setValueForProperty("is_produced", "0");
 
@@ -196,8 +202,8 @@ public class MirBasicAdminInterfaceLocalizer implements MirAdminInterfaceLocaliz
       }
     };
 
-    protected abstract boolean isAvailable(EntityContent anArticle) throws StorageObjectException ;
-    protected abstract void performModification(EntityAdapter aUser, EntityContent anArticle) throws StorageObjectException ;
+    protected abstract boolean isAvailable(EntityContent anArticle) throws StorageObjectFailure ;
+    protected abstract void performModification(EntityAdapter aUser, EntityContent anArticle) throws StorageObjectFailure ;
   }
 
   protected static class SetCommentFieldOperation extends CommentModifyingOperation {
@@ -215,7 +221,7 @@ public class MirBasicAdminInterfaceLocalizer implements MirAdminInterfaceLocaliz
       return true;
     }
 
-    protected void performModification(EntityAdapter aUser, EntityComment aComment) throws StorageObjectException {
+    protected void performModification(EntityAdapter aUser, EntityComment aComment) throws StorageObjectFailure {
       aComment.setValueForProperty(field, value);
     }
   }
@@ -235,7 +241,7 @@ public class MirBasicAdminInterfaceLocalizer implements MirAdminInterfaceLocaliz
       return aComment.getValue(field) == null || !aComment.getValue(field).equals(value);
     }
 
-    protected void performModification(EntityAdapter aUser, EntityComment aComment) throws StorageObjectException {
+    protected void performModification(EntityAdapter aUser, EntityComment aComment) throws StorageObjectFailure {
       aComment.setValueForProperty(field, value);
     }
   }
@@ -255,7 +261,7 @@ public class MirBasicAdminInterfaceLocalizer implements MirAdminInterfaceLocaliz
       return true;
     }
 
-    protected void performModification(EntityAdapter aUser, EntityContent anArticle) throws StorageObjectException {
+    protected void performModification(EntityAdapter aUser, EntityContent anArticle) throws StorageObjectFailure {
       anArticle.setValueForProperty(field, value);
     }
   }
@@ -275,7 +281,7 @@ public class MirBasicAdminInterfaceLocalizer implements MirAdminInterfaceLocaliz
       return anArticle.getValue(field) == null || !anArticle.getValue(field).equals(value);
     }
 
-    protected void performModification(EntityAdapter aUser, EntityContent anArticle) throws StorageObjectException {
+    protected void performModification(EntityAdapter aUser, EntityContent anArticle) throws StorageObjectFailure {
       anArticle.setValueForProperty(field, value);
     }
   }
@@ -297,7 +303,7 @@ public class MirBasicAdminInterfaceLocalizer implements MirAdminInterfaceLocaliz
       return anArticle.getValue(field) != null && anArticle.getValue(field).equals(oldValue);
     }
 
-    protected void performModification(EntityAdapter aUser, EntityContent anArticle) throws StorageObjectException {
+    protected void performModification(EntityAdapter aUser, EntityContent anArticle) throws StorageObjectFailure {
       anArticle.setValueForProperty(field, newValue);
     }
   }

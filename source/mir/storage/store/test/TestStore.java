@@ -40,7 +40,9 @@ package mir.storage.store.test;
  * @version 1.0
  */
 
-import mir.storage.store.*;
+import mir.storage.store.ObjectStore;
+import mir.storage.store.StorableObject;
+import mir.storage.store.StoreIdentifier;
 
 public class TestStore {
 

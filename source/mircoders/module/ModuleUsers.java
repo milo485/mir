@@ -31,25 +31,15 @@
 
 package mircoders.module;
 
-import java.io.*;
-import java.lang.*;
-import java.util.*;
-import java.sql.*;
-
-import javax.servlet.*;
-import javax.servlet.http.*;
-
-import freemarker.template.*;
-
-import mir.servlet.*;
-import mir.module.*;
-import mir.entity.*;
-import mir.misc.*;
-import mir.storage.*;
-import mir.log.*;
-
-import mircoders.entity.*;
-import mircoders.storage.*;
+import mir.entity.EntityList;
+import mir.log.LoggerWrapper;
+import mir.module.AbstractModule;
+import mir.module.ModuleException;
+import mir.storage.StorageObject;
+import mir.storage.StorageObjectFailure;
+import mircoders.entity.EntityUsers;
+import mircoders.storage.DatabaseUsers;
+import freemarker.template.SimpleList;
 
 
 /*
@@ -90,7 +80,7 @@ public class ModuleUsers extends AbstractModule
     try {
       return theStorage.selectByWhereClause(whereClause, null, offset, limit);
     }
-    catch (StorageObjectException e){
+    catch (StorageObjectFailure e){
       throw new ModuleException(e.toString());
     }
   }
@@ -99,7 +89,7 @@ public class ModuleUsers extends AbstractModule
     try {
       return ((DatabaseUsers)theStorage).getPopupData();
     }
-    catch(StorageObjectException e) {
+    catch(StorageObjectFailure e) {
       throw new ModuleException(e.toString());
     }
   }

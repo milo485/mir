@@ -31,9 +31,15 @@
 
 package mircoders.localizer.basic;
 
-import mir.misc.*;
-import mircoders.global.*;
-import mircoders.localizer.*;
+import mircoders.localizer.MirAdminInterfaceLocalizer;
+import mircoders.localizer.MirDataModelLocalizer;
+import mircoders.localizer.MirGeneratorLocalizer;
+import mircoders.localizer.MirLocalizer;
+import mircoders.localizer.MirLocalizerExc;
+import mircoders.localizer.MirLocalizerFailure;
+import mircoders.localizer.MirOpenPostingLocalizer;
+import mircoders.localizer.MirProducerAssistantLocalizer;
+import mircoders.localizer.MirProducerLocalizer;
 
 public class MirBasicLocalizer implements MirLocalizer {
 //  protected static Logfile logger = Logfile.getInstance( MirGlobal.getConfigProperty("Home") + "/" + MirGlobal.getConfigProperty("Mir.Localizer.Logfile"));

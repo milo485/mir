@@ -31,16 +31,9 @@
 
 package mircoders.storage;
 
-import java.lang.*;
-import java.sql.*;
-import java.io.*;
-import java.util.*;
-
-import freemarker.template.*;
-
-import mir.storage.*;
-import mir.entity.*;
-import mir.misc.*;
+import mir.storage.Database;
+import mir.storage.StorageObject;
+import mir.storage.StorageObjectFailure;
 
 
 /**
@@ -61,7 +54,7 @@ public class DatabaseMessages extends Database implements StorageObject{
   // could get preemted and we could end up with 2 instances of DatabaseFoo..
   // see the "Singletons with needles and thread" article at JavaWorld -mh
   public synchronized static DatabaseMessages getInstance() 
-    throws StorageObjectException {
+    throws StorageObjectFailure {
     if (instance == null) {
       instance = new DatabaseMessages();
       instance.myselfDatabase = instance;
@@ -69,7 +62,7 @@ public class DatabaseMessages extends Database implements StorageObject{
     return instance;
   }
 
-  private DatabaseMessages() throws StorageObjectException
+  private DatabaseMessages() throws StorageObjectFailure
   {
     super();
     //this.cache = new DatabaseCache(10);

@@ -31,15 +31,18 @@
 
 package  mircoders.storage;
 
-import  java.lang.*;
-import  java.sql.*;
-import  java.io.*;
-import  java.util.*;
-import  freemarker.template.*;
-import  mir.storage.*;
-import  mir.entity.*;
-import  mir.misc.*;
-import  mir.util.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import mir.entity.Entity;
+import mir.storage.Database;
+import mir.storage.StorageObject;
+import mir.storage.StorageObjectFailure;
+import mir.util.JDBCStringRoutines;
 
 
 /**
@@ -60,7 +63,7 @@ public class DatabaseLinksImcs extends Database
   // could get preemted and we could end up with 2 instances of DatabaseFoo..
   // see the "Singletons with needles and thread" article at JavaWorld -mh
   public synchronized static DatabaseLinksImcs getInstance() throws
-      StorageObjectException {
+      StorageObjectFailure {
     if (instance == null) {
       instance = new DatabaseLinksImcs();
       instance.myselfDatabase = instance;
@@ -71,7 +74,7 @@ public class DatabaseLinksImcs extends Database
   /**
    * put your documentation comment here
    */
-  private DatabaseLinksImcs() throws StorageObjectException {
+  private DatabaseLinksImcs() throws StorageObjectFailure {
     super();
     ////this.cache = new HashMap();
     this.hasTimestamp = false;
@@ -80,13 +83,13 @@ public class DatabaseLinksImcs extends Database
       this.theEntityClass = Class.forName("mircoders.entity.EntityLinksImcs");
     }
     catch (Exception e) {
-      throw new StorageObjectException(e.toString());
+      throw new StorageObjectFailure(e);
     }
   }
 
   /** @todo toooo much copy/paste in this class //rk  */
 
-  public String insert(Entity theEntity) throws StorageObjectException {
+  public String insert(Entity theEntity) throws StorageObjectFailure {
     String returnId = "0";
     Connection con = null;
     PreparedStatement pstmt = null;
@@ -174,7 +177,7 @@ public class DatabaseLinksImcs extends Database
     return returnId;
   }
 
-  public void update(Entity theEntity) throws StorageObjectException {
+  public void update(Entity theEntity) throws StorageObjectFailure {
     Connection con = null;
     PreparedStatement pstmt = null;
     ArrayList streamedInput = theEntity.streamedInput();

@@ -31,36 +31,16 @@
 
 package mircoders.servlet;
 
-import java.io.*;
-import java.lang.*;
-import java.sql.*;
-import java.util.*;
-import java.net.*;
-import java.lang.reflect.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
-
-import freemarker.template.*;
-import com.oreilly.servlet.multipart.*;
-import com.oreilly.servlet.*;
-
-import mir.log.*;
-import mir.servlet.*;
-import mir.module.*;
-import mir.misc.*;
-import mir.entity.*;
-import mir.storage.*;
-import mir.media.*;
-
-import mircoders.entity.*;
-import mircoders.storage.*;
-import mircoders.module.*;
-import mircoders.producer.*;
+import mir.log.LoggerWrapper;
+import mir.servlet.ServletModule;
+import mir.storage.StorageObjectFailure;
+import mircoders.module.ModuleImages;
+import mircoders.storage.DatabaseImages;
 
 /*
  *  ServletModuleImages -
  *
- * @version $Id: ServletModuleImages.java,v 1.24 2002/11/29 13:43:42 zapata Exp $
+ * @version $Id: ServletModuleImages.java,v 1.25 2003/01/25 17:50:36 idfx Exp $
  * @author RK, the mir-coders group
  */
 
@@ -72,15 +52,16 @@ public class ServletModuleImages extends ServletModuleUploadedMedia
 
 
   private ServletModuleImages() {
+    super();
     logger = new LoggerWrapper("ServletModule.Images");
-    templateListString = MirConfig.getProp("ServletModule.Images.ListTemplate");
-    templateObjektString = MirConfig.getProp("ServletModule.Images.ObjektTemplate");
-    templateConfirmString = MirConfig.getProp("ServletModule.Images.ConfirmTemplate");
+    templateListString = configuration.getString("ServletModule.Images.ListTemplate");
+    templateObjektString = configuration.getString("ServletModule.Images.ObjektTemplate");
+    templateConfirmString = configuration.getString("ServletModule.Images.ConfirmTemplate");
 
     try {
       mainModule = new ModuleImages(DatabaseImages.getInstance());
     }
-    catch (StorageObjectException e) {
+    catch (StorageObjectFailure e) {
       logger.error("Initialization of ServletModuleImages failed!: " + e.getMessage());
     }
   }

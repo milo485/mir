@@ -31,26 +31,27 @@
 
 package mircoders.servlet;
 
-import java.io.*;
-import java.sql.*;
-import java.util.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
+import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Vector;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import mir.generator.Generator;
+import mir.log.LoggerWrapper;
+import mir.producer.ProducerFactory;
+import mir.servlet.ServletModule;
+import mir.servlet.ServletModuleException;
+import mir.util.NullWriter;
+import mir.util.ResourceBundleGeneratorFunction;
+import mircoders.global.MirGlobal;
 
 import org.apache.struts.util.MessageResources;
-
-import freemarker.template.*;
-
-import mir.servlet.*;
-import mir.misc.*;
-import mir.producer.*;
-import mir.generator.*;
-import mir.producer.*;
-import mir.entity.adapter.*;
-import mir.util.*;
-import mir.log.*;
-
-import mircoders.global.*;
 
 public class ServletModuleProducer extends ServletModule
 {
@@ -76,6 +77,7 @@ public class ServletModuleProducer extends ServletModule
   }
 
   private ServletModuleProducer() {
+    super();
     logger = new LoggerWrapper("ServletModule.Producer");
     defaultAction="showProducerQueueStatus";
   }

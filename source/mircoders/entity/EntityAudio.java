@@ -31,29 +31,17 @@
 
 package mircoders.entity;
 
-import java.lang.*;
-import java.io.*;
-import java.util.*;
-import java.sql.*;
+import java.sql.SQLException;
+import java.util.HashMap;
 
-/*
- * kind of hack for postgres non-standard LargeObjects that Poolman
- * doesn't know about. see all the casting, LargeObj stuff in getIcon, getAudio
- * at some point when postgres has normal BLOB support, this should go.
- */
-import org.postgresql.Connection;
-import org.postgresql.largeobject.LargeObject;
-import org.postgresql.largeobject.LargeObjectManager;
-
-import mir.entity.*;
-import mir.misc.*;
-import mir.storage.*;
+import mir.storage.StorageObject;
+import mir.storage.StorageObjectFailure;
 
 /**
  * This class handles storage of audio data and meta data
  *
  * @author mh
- * @version $Id: EntityAudio.java,v 1.4 2002/11/04 04:35:21 mh Exp $
+ * @version $Id: EntityAudio.java,v 1.5 2003/01/25 17:50:34 idfx Exp $
  */
 
 
@@ -69,12 +57,12 @@ public class EntityAudio extends EntityUploadedMedia
 		setStorage(theStorage);
 	}
 
-	public void update() throws StorageObjectException {
+	public void update() throws StorageObjectFailure {
 		super.update();
 		try {
 			theStorageObject.executeUpdate("update content set is_produced='0' where to_media="+getId());
 		} catch (SQLException e) {
-			throwStorageObjectException(e, "EntityAudio :: update :: failed!! ");
+			throwStorageObjectFailure(e, "EntityAudio :: update :: failed!! ");
 		}
 	}
 

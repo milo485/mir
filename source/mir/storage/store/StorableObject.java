@@ -41,7 +41,7 @@ package mir.storage.store;
  * @version 1.0
  */
 
-import java.util.*;
+import java.util.Set;
 
 public interface StorableObject {
 

@@ -31,10 +31,10 @@
 
 package mir.entity.adapter;
 
-import java.util.*;
-import mir.storage.*;
-import mir.util.*;
-import mir.entity.*;
+import mir.entity.Entity;
+import mir.entity.EntityBrowser;
+import mir.storage.StorageObjectFailure;
+import mir.util.RewindableIterator;
 
 public class EntityIteratorAdapter implements RewindableIterator {
   private String definitionName;
@@ -49,13 +49,13 @@ public class EntityIteratorAdapter implements RewindableIterator {
 
   public EntityIteratorAdapter(String aWhereClause, String anOrderByClause,
           int aBatchSize, EntityAdapterModel aModel, String aDefinitionName )
-          throws StorageObjectException, EntityAdapterExc {
+          throws StorageObjectFailure, EntityAdapterExc {
     this(new EntityBrowser(aModel.getMappingForName(aDefinitionName).getStorage(), aWhereClause, anOrderByClause, aBatchSize), aModel, aDefinitionName);
   }
 
   public EntityIteratorAdapter(String aWhereClause, String anOrderByClause,
           int aBatchSize, EntityAdapterModel aModel, String aDefinitionName,
-          int aLimit, int aSkip) throws StorageObjectException, EntityAdapterExc {
+          int aLimit, int aSkip) throws StorageObjectFailure, EntityAdapterExc {
     this(new EntityBrowser(aModel.getMappingForName(aDefinitionName).getStorage(), aWhereClause, anOrderByClause, aBatchSize, aLimit, aSkip), aModel, aDefinitionName);
   }
 

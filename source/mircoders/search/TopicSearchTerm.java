@@ -31,21 +31,18 @@
 
 package mircoders.search;
 
-import java.util.*;
+import javax.servlet.http.HttpServletRequest;
 
-import javax.servlet.*;
-import javax.servlet.http.*;
+import mir.entity.Entity;
+import mir.entity.EntityList;
+import mir.storage.StorageObjectFailure;
+import mircoders.entity.EntityContent;
+import mircoders.storage.DatabaseContentToTopics;
 
-import mir.entity.*;
-import mir.storage.*;
-import mircoders.entity.*;
-import mircoders.storage.*;
-
-import org.apache.lucene.index.*;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 
-import freemarker.template.*;
+import freemarker.template.SimpleHash;
 
 
 public class TopicSearchTerm extends SearchTerm{
@@ -54,7 +51,7 @@ public class TopicSearchTerm extends SearchTerm{
   public static String matchField       = "topic"; 
   public static String paramName        = "search_topic"; 
 
-  public void index(Document doc, Entity entity) throws StorageObjectException{
+  public void index(Document doc, Entity entity) throws StorageObjectFailure{
     EntityList topics = DatabaseContentToTopics.getInstance().getTopics((EntityContent) entity);
     if (topics != null && topics.size()>0){
       for(int k=0;k<topics.size();k++){

@@ -31,18 +31,15 @@
 
 package mircoders.search;
 
-import java.util.*;
+import javax.servlet.http.HttpServletRequest;
 
-import javax.servlet.*;
-import javax.servlet.http.*;
+import mir.entity.Entity;
 
-import mir.entity.*;
-
-import org.apache.lucene.index.*;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 
-import freemarker.template.*;
+import freemarker.template.SimpleHash;
+import freemarker.template.SimpleScalar;
 
 
 public class TextSearchTerm extends SearchTerm{

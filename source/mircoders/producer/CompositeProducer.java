@@ -31,10 +31,13 @@
 
 package mircoders.producer;
 
-import java.util.*;
-import java.io.*;
-import mir.producer.*;
-import mir.log.*;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Vector;
+
+import mir.log.LoggerWrapper;
+import mir.producer.ProducerExc;
+import mir.producer.ProducerFailure;
 
 public class CompositeProducer implements mir.producer.Producer {
   private List producers;

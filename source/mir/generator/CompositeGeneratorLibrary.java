@@ -31,7 +31,8 @@
 
 package mir.generator;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class CompositeGeneratorLibrary implements Generator.GeneratorLibrary {
   private Map generatorLibraries;

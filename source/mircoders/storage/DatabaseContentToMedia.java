@@ -31,24 +31,23 @@
 
 package mircoders.storage;
 
-import java.lang.*;
-import java.sql.*;
-import java.io.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
 
-import freemarker.template.*;
-
-import mir.storage.*;
-import mir.entity.*;
-import mir.misc.*;
-
-import mircoders.entity.*;
+import mir.entity.EntityList;
+import mir.storage.Database;
+import mir.storage.StorageObject;
+import mir.storage.StorageObjectExc;
+import mir.storage.StorageObjectFailure;
+import mircoders.entity.EntityContent;
+import mircoders.entity.EntityUploadedMedia;
 
 /**
  * <b>implements abstract DB connection to the content_x_media SQL table
  *
  * @author RK, mir-coders group
- * @version $Id: DatabaseContentToMedia.java,v 1.11 2002/12/06 08:08:44 mh Exp $
+ * @version $Id: DatabaseContentToMedia.java,v 1.12 2003/01/25 17:50:36 idfx Exp $
  *
  */
 
@@ -60,7 +59,7 @@ public class DatabaseContentToMedia extends Database implements StorageObject{
   // could get preemted and we could end up with 2 instances of DatabaseFoo.
   // see the "Singletons with needles and thread" article at JavaWorld -mh
   public synchronized static DatabaseContentToMedia getInstance()
-    throws StorageObjectException {
+    throws StorageObjectFailure {
     if (instance == null) {
       instance = new DatabaseContentToMedia();
       instance.myselfDatabase = instance;
@@ -69,13 +68,13 @@ public class DatabaseContentToMedia extends Database implements StorageObject{
   }
 
   private DatabaseContentToMedia()
-    throws StorageObjectException {
+    throws StorageObjectFailure {
 
     super();
     this.hasTimestamp = false;
     this.theTable="content_x_media";
     try { this.theEntityClass = Class.forName("mir.entity.GenericEntity"); }
-    catch (Exception e) { throw new StorageObjectException(e.toString()); }
+    catch (Exception e) { throw new StorageObjectFailure(e); }
   }
 
   /**
@@ -83,7 +82,7 @@ public class DatabaseContentToMedia extends Database implements StorageObject{
    *
    */
   public EntityList getMedia(EntityContent content)
-    throws StorageObjectException {
+    throws StorageObjectFailure {
     EntityList returnList=null;
     if (content != null) {
       // get all to_topic from media_x_topic
@@ -98,14 +97,14 @@ public class DatabaseContentToMedia extends Database implements StorageObject{
         returnList = DatabaseMedia.getInstance().selectByWhereClause(subselect,"id",-1);
       } catch (Exception e) {
         theLog.printDebugInfo("-- get media failed " + e.toString());
-        throw new StorageObjectException("-- get media failed " + e.toString());
+        throw new StorageObjectFailure("-- get media failed ", e);
       }
     }
     return returnList;
   }
 
   public boolean hasMedia(EntityContent content)
-    throws StorageObjectException {
+    throws StorageObjectFailure, StorageObjectExc {
     String wc = "content_id="+content.getId();
     if( content != null) {
       try {
@@ -115,11 +114,11 @@ public class DatabaseContentToMedia extends Database implements StorageObject{
           return true;
       } catch (Exception e) {
         theLog.printError("-- hasMedia failed " + e.toString());
-        throw new StorageObjectException("-- hasMedia failed " + e.toString());
+        throw new StorageObjectFailure("-- hasMedia failed ",e);
       }
     } else {
       theLog.printError("-- hasMedia failed: content is NULL");
-      throw new StorageObjectException("-- hasMedia failed: content is NULL");
+      throw new StorageObjectExc("-- hasMedia failed: content is NULL");
     }
   }
 
@@ -131,7 +130,7 @@ public class DatabaseContentToMedia extends Database implements StorageObject{
    *
    */
   public EntityList getAudio(EntityContent content)
-    throws StorageObjectException {
+    throws StorageObjectFailure {
     EntityList returnList=null;
     if (content != null) {
       // get all to_topic from media_x_topic
@@ -146,7 +145,7 @@ public class DatabaseContentToMedia extends Database implements StorageObject{
         returnList = DatabaseAudio.getInstance().selectByWhereClause(subselect,"id",-1);
       } catch (Exception e) {
         theLog.printDebugInfo("-- get audio failed " + e.toString());
-        throw new StorageObjectException("-- get audio failed " + e.toString());
+        throw new StorageObjectFailure("-- get audio failed ",e);
       }
     }
     return returnList;
@@ -157,7 +156,7 @@ public class DatabaseContentToMedia extends Database implements StorageObject{
    *
    */
   public EntityList getVideo(EntityContent content)
-    throws StorageObjectException {
+    throws StorageObjectFailure {
     EntityList returnList=null;
     if (content != null) {
       // get all to_topic from media_x_topic
@@ -172,7 +171,7 @@ public class DatabaseContentToMedia extends Database implements StorageObject{
         returnList = DatabaseVideo.getInstance().selectByWhereClause(subselect,"id",-1);
       } catch (Exception e) {
         theLog.printDebugInfo("-- get video failed " + e.toString());
-        throw new StorageObjectException("-- get video failed " + e.toString());
+        throw new StorageObjectFailure("-- get video failed ",e);
       }
     }
     return returnList;
@@ -183,7 +182,7 @@ public class DatabaseContentToMedia extends Database implements StorageObject{
    *
    */
   public EntityList getImages(EntityContent content)
-    throws StorageObjectException {
+    throws StorageObjectFailure {
     EntityList returnList=null;
     if (content != null) {
       // get all to_topic from media_x_topic
@@ -198,7 +197,7 @@ public class DatabaseContentToMedia extends Database implements StorageObject{
         returnList = DatabaseImages.getInstance().selectByWhereClause(subselect,"id",-1);
       } catch (Exception e) {
         theLog.printDebugInfo("-- get images failed " + e.toString());
-        throw new StorageObjectException("-- get images failed " + e.toString());
+        throw new StorageObjectFailure("-- get images failed ",e);
       }
     }
     return returnList;
@@ -210,7 +209,7 @@ public class DatabaseContentToMedia extends Database implements StorageObject{
    *
    */
   public EntityList getOther(EntityContent content)
-    throws StorageObjectException
+    throws StorageObjectFailure
   {
     /** @todo this should only fetch published media / rk */
 
@@ -231,8 +230,7 @@ public class DatabaseContentToMedia extends Database implements StorageObject{
       } catch (Exception e) {
         e.printStackTrace();
         theLog.printDebugInfo("-- get Other failed " + e.toString());
-        throw new StorageObjectException("-- get Other failed "
-                                        + e.toString());
+        throw new StorageObjectFailure("-- get Other failed ",e);                                        
       }
     }
     return returnList;
@@ -243,7 +241,7 @@ public class DatabaseContentToMedia extends Database implements StorageObject{
    *
    */
   public EntityList getUploadedMedia(EntityContent content)
-    throws StorageObjectException
+    throws StorageObjectFailure
   {
     /** @todo this should only fetch published media / rk */
 
@@ -261,8 +259,7 @@ public class DatabaseContentToMedia extends Database implements StorageObject{
       } catch (Exception e) {
         e.printStackTrace();
         theLog.printDebugInfo("-- get uploadedMedia failed " + e.toString());
-        throw new StorageObjectException("-- get uploadedMedia failed "
-                                        + e.toString());
+        throw new StorageObjectFailure("-- get uploadedMedia failed ", e);
       }
     }
     return returnList;
@@ -270,7 +267,7 @@ public class DatabaseContentToMedia extends Database implements StorageObject{
 
 
   public void setMedia(String contentId, String[] mediaId)
-    throws StorageObjectException {
+    throws StorageObjectFailure {
     if (contentId == null){
       return;
     }
@@ -288,7 +285,7 @@ public class DatabaseContentToMedia extends Database implements StorageObject{
       ResultSet rs = executeSql(stmt,sql);
     } catch (Exception e) {
       theLog.printDebugInfo("-- set media failed -- delete");
-      throw new StorageObjectException("-- set media failed -- delete"+e.toString());
+      throw new StorageObjectFailure("-- set media failed -- delete",e);
     } finally {
       freeConnection(con,stmt);
     }
@@ -305,7 +302,7 @@ public class DatabaseContentToMedia extends Database implements StorageObject{
         int rs = executeUpdate(stmt,sql);
       } catch (Exception e) {
         theLog.printDebugInfo("-- set topics failed -- insert");
-        throw new StorageObjectException("-- set topics failed -- insert "+e.toString());
+        throw new StorageObjectFailure("-- set topics failed -- insert ",e);
       } finally {
         freeConnection(con,stmt);
       }
@@ -313,7 +310,7 @@ public class DatabaseContentToMedia extends Database implements StorageObject{
   }
 
   public void addMedia(String contentId, String mediaId)
-    throws StorageObjectException {
+    throws StorageObjectFailure {
     if (contentId == null && mediaId == null) {
       return;
     }
@@ -330,15 +327,14 @@ public class DatabaseContentToMedia extends Database implements StorageObject{
       int rs = executeUpdate(stmt,sql);
     } catch (Exception e) {
       theLog.printDebugInfo("-- add media failed -- insert");
-      throw new StorageObjectException("-- add media failed -- insert "
-        +e.toString());
+      throw new StorageObjectFailure("-- add media failed -- insert ",e);
     } finally {
       freeConnection(con,stmt);
     }
   }
 
   public void setMedia(String contentId, String mediaId)
-    throws StorageObjectException {
+    throws StorageObjectFailure {
     if (contentId == null && mediaId == null) {
       return;
     }
@@ -353,8 +349,7 @@ public class DatabaseContentToMedia extends Database implements StorageObject{
       int rs = executeUpdate(stmt,sql);
     } catch (Exception e) {
       theLog.printDebugInfo("-- set media failed -- delete");
-      throw new StorageObjectException("-- set media failed -- delete "
-        +e.toString());
+      throw new StorageObjectFailure("-- set media failed -- delete ",e);
     } finally {
       freeConnection(con,stmt);
     }
@@ -371,15 +366,14 @@ public class DatabaseContentToMedia extends Database implements StorageObject{
       int rs = executeUpdate(stmt,sql);
     } catch (Exception e) {
       theLog.printDebugInfo("-- set media failed -- insert");
-      throw new StorageObjectException("-- set media failed -- insert "
-        +e.toString());
+      throw new StorageObjectFailure("-- set media failed -- insert ",e);
     } finally {
       freeConnection(con,stmt);
     }
   }
 
   public void deleteByContentId(String contentId)
-    throws StorageObjectException {
+    throws StorageObjectFailure {
     if (contentId == null) {
       //theLog.printDebugInfo("-- delete topics failed -- no content id");
       return;
@@ -395,15 +389,14 @@ public class DatabaseContentToMedia extends Database implements StorageObject{
       int rs = executeUpdate(stmt,sql);
     } catch (Exception e) {
       theLog.printDebugInfo("-- delete by contentId failed  ");
-      throw new StorageObjectException("-- delete by content id failed -- delete "
-        +e.toString());
+      throw new StorageObjectFailure("-- delete by content id failed -- delete ",e);
     } finally {
       freeConnection(con,stmt);
     }
   }
 
   public void deleteByMediaId(String mediaId)
-    throws StorageObjectException {
+    throws StorageObjectFailure {
     if (mediaId == null) {
       //theLog.printDebugInfo("-- delete topics failed -- no topic id");
       return;
@@ -420,15 +413,14 @@ public class DatabaseContentToMedia extends Database implements StorageObject{
       theLog.printDebugInfo("-- delete media success ");
     } catch (Exception e) {
       theLog.printDebugInfo("-- delete media failed ");
-      throw new StorageObjectException("-- delete by media id failed -- "
-        +e.toString());
+      throw new StorageObjectFailure("-- delete by media id failed -- ",e);
     } finally {
       freeConnection(con,stmt);
     }
   }
 
   public void delete(String contentId, String mediaId)
-    throws StorageObjectException {
+    throws StorageObjectFailure {
     if (mediaId == null || contentId==null) {
       theLog.printDebugInfo("-- delete media failed -- missing parameter");
       return;
@@ -445,8 +437,7 @@ public class DatabaseContentToMedia extends Database implements StorageObject{
       theLog.printDebugInfo("-- delete content_x_media success ");
     } catch (Exception e) {
       theLog.printDebugInfo("-- delete content_x_media failed ");
-      throw new StorageObjectException("-- delete content_x_media failed -- "
-        +e.toString());
+      throw new StorageObjectFailure("-- delete content_x_media failed -- ",e );
     } finally {
       freeConnection(con,stmt);
     }
@@ -454,7 +445,7 @@ public class DatabaseContentToMedia extends Database implements StorageObject{
 
 
   public EntityList getContent(EntityUploadedMedia media)
-    throws StorageObjectException {
+    throws StorageObjectFailure {
     EntityList returnList=null;
     if (media != null) {
       String id = media.getId();
@@ -482,8 +473,7 @@ public class DatabaseContentToMedia extends Database implements StorageObject{
       }
       catch (Exception e) {
         theLog.printDebugInfo("-- get content failed");
-        throw new StorageObjectException("-- get content failed -- "
-        +e.toString());
+        throw new StorageObjectFailure("-- get content failed -- ", e);
       }
       finally { freeConnection(con,stmt);}
     }
@@ -495,7 +485,7 @@ public class DatabaseContentToMedia extends Database implements StorageObject{
  */
 
 public EntityList getContent()
-    throws StorageObjectException {
+    throws StorageObjectFailure {
     EntityList returnList=null;
 
     String select = "select distinct content_id from " + theTable;
@@ -521,8 +511,7 @@ public EntityList getContent()
     }
     catch (Exception e) {
         theLog.printDebugInfo("-- get content failed");
-        throw new StorageObjectException("-- get content failed -- "
-        +e.toString());
+        throw new StorageObjectFailure("-- get content failed -- ",e );
     }
     finally { freeConnection(con,stmt);}
 

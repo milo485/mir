@@ -1,7 +1,6 @@
 package mir.log;
 
-import java.io.*;
-import java.util.*;
+import java.io.Writer;
 
 public class LoggerToWriterAdapter extends Writer {
   private LoggerWrapper logger;

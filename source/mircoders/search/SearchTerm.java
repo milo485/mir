@@ -31,19 +31,13 @@
 
 package mircoders.search;
 
-import java.util.*;
+import javax.servlet.http.HttpServletRequest;
 
-import javax.servlet.*;
-import javax.servlet.http.*;
+import mir.entity.Entity;
 
-import mir.entity.*;
-import mircoders.entity.*;
-import mircoders.storage.*;
-
-import org.apache.lucene.index.*;
 import org.apache.lucene.document.Document;
 
-import freemarker.template.*;
+import freemarker.template.SimpleHash;
 
 
 abstract public class SearchTerm {

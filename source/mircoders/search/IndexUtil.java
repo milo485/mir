@@ -30,10 +30,12 @@
 
 package mircoders.search;
 
-import java.util.*;
-import java.io.*;
-import mircoders.entity.*;
-import org.apache.lucene.index.*;
+import java.io.IOException;
+
+import mircoders.entity.EntityContent;
+
+import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.Term;
 import org.apache.lucene.store.FSDirectory;
 
 

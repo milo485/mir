@@ -43,9 +43,10 @@
 
 package mircoders.input;
 
-import  org.xml.sax.helpers.DefaultHandler;
-import  org.xml.sax.Attributes;
-import  java.util.HashMap;
+import java.util.HashMap;
+
+import org.xml.sax.Attributes;
+import org.xml.sax.helpers.DefaultHandler;
 
 
 /**

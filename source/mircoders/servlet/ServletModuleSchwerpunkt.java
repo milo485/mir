@@ -31,24 +31,11 @@
 
 package mircoders.servlet;
 
-import java.io.*;
-import java.sql.*;
-import java.util.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
-
-import freemarker.template.*;
-
-import mir.servlet.*;
-import mir.module.*;
-import mir.misc.*;
-import mir.entity.*;
-import mir.storage.*;
-import mir.log.*;
-
-import mircoders.entity.*;
-import mircoders.storage.*;
-import mircoders.module.*;
+import mir.log.LoggerWrapper;
+import mir.servlet.ServletModule;
+import mir.storage.StorageObjectFailure;
+import mircoders.module.ModuleSchwerpunkt;
+import mircoders.storage.DatabaseFeature;
 
 /*
  *  ServletModuleSchwerpunkt - code for the handling of "features"
@@ -65,14 +52,15 @@ public class ServletModuleSchwerpunkt extends ServletModule
   public static ServletModule getInstance() { return instance; }
 
   private ServletModuleSchwerpunkt() {
+    super();
     logger = new LoggerWrapper("ServletModule.Feature");
-    templateListString = MirConfig.getProp("ServletModule.Schwerpunkt.ListTemplate");
-    templateObjektString = MirConfig.getProp("ServletModule.Schwerpunkt.ObjektTemplate");
-    templateConfirmString = MirConfig.getProp("ServletModule.Schwerpunkt.ConfirmTemplate");
+    templateListString = configuration.getString("ServletModule.Schwerpunkt.ListTemplate");
+    templateObjektString = configuration.getString("ServletModule.Schwerpunkt.ObjektTemplate");
+    templateConfirmString = configuration.getString("ServletModule.Schwerpunkt.ConfirmTemplate");
     try {
       mainModule = new ModuleSchwerpunkt(DatabaseFeature.getInstance());
     }
-    catch (StorageObjectException e) {
+    catch (StorageObjectFailure e) {
       logger.error("Intialization of ServletModuleSchwerpunkt (Features) failed!: " + e.getMessage());
     }
   }

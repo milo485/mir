@@ -31,12 +31,21 @@
 
 package mir.misc;
 
-import java.util.*;
-import java.io.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
-import com.oreilly.servlet.multipart.*;
-import com.oreilly.servlet.*;
+import java.io.IOException;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Vector;
+
+import javax.servlet.http.HttpServletRequest;
+
+import mir.config.MirPropertiesConfiguration;
+import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
+
+import com.oreilly.servlet.multipart.FilePart;
+import com.oreilly.servlet.multipart.MultipartParser;
+import com.oreilly.servlet.multipart.ParamPart;
+import com.oreilly.servlet.multipart.Part;
 
 /**
  * Title:
@@ -55,10 +64,17 @@ public class WebdbMultipartRequest
   FileHandler           _fHandler;
 
   public WebdbMultipartRequest(HttpServletRequest theReq, FileHandler handler)
-    throws FileHandlerException, FileHandlerUserException, IOException
+    throws FileHandlerException, FileHandlerUserException, IOException, PropertiesConfigExc
   {
     req=theReq;
-    int maxSize = Integer.parseInt(MirConfig.getProp("MaxMediaUploadSize"));
+    int maxSize;
+    try {
+      maxSize =
+        MirPropertiesConfiguration.instance().getInt("MaxMediaUploadSize");
+    } catch (PropertiesConfigExc e) {
+      maxSize = 1024;
+      throw e;
+    }
     mp = new MultipartParser(req, 1024*maxSize);
     _fHandler = handler;
     _evaluateRequest();

@@ -31,16 +31,10 @@
 
 package mircoders.storage;
 
-import java.lang.*;
-import java.sql.*;
-import java.io.*;
-import java.util.*;
-
-import freemarker.template.*;
-
-import mir.storage.*;
-import mir.entity.*;
-import mir.misc.*;
+import mir.storage.Database;
+import mir.storage.StorageObject;
+import mir.storage.StorageObjectFailure;
+import freemarker.template.SimpleList;
 
 /**
  * <b>Diese Klasse implementiert die Datenbankverbindung zur MetaObjekt-Tabelle
@@ -56,7 +50,7 @@ public class DatabaseTopics extends Database implements StorageObject{
   // could get preemted and we could end up with 2 instances of DatabaseFoo..
   // see the "Singletons with needles and thread" article at JavaWorld -mh
   public synchronized static DatabaseTopics getInstance() 
-    throws StorageObjectException {
+    throws StorageObjectFailure {
       if (instance == null) {
     instance = new DatabaseTopics();
     instance.myselfDatabase = instance;
@@ -64,7 +58,7 @@ public class DatabaseTopics extends Database implements StorageObject{
     return instance;
   }
 
-  private DatabaseTopics() throws StorageObjectException
+  private DatabaseTopics() throws StorageObjectFailure
   {
           super();
       //this.cache = new DatabaseCache(20);
@@ -74,12 +68,12 @@ public class DatabaseTopics extends Database implements StorageObject{
     this.theEntityClass = Class.forName("mircoders.entity.EntityTopics");
       }
       catch (Exception e) {
-    throw new StorageObjectException(e.toString());
+    throw new StorageObjectFailure(e);
       }
 
   }
 
-  public SimpleList getPopupData() throws StorageObjectException {
+  public SimpleList getPopupData() throws StorageObjectFailure {
     return getPopupData("title",true);
   }
 

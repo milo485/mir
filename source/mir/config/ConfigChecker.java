@@ -31,9 +31,12 @@
 
 package  mir.config;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Vector;
 
-import  mir.config.exceptions.*;
+import mir.config.exceptions.ConfigFailure;
 
 public class ConfigChecker {
   public final static int STRING = 0;

@@ -1,6 +1,8 @@
 package mir.util;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 public class URLBuilder {
   private Map keyValues;

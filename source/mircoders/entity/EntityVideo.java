@@ -31,17 +31,14 @@
 
 package mircoders.entity;
 
-import java.lang.*;
-import java.io.*;
-import java.util.*;
-import java.sql.*;
+import java.sql.SQLException;
+import java.util.HashMap;
 
-import mir.entity.*;
-import mir.misc.*;
-import mir.storage.*;
+import mir.storage.StorageObject;
+import mir.storage.StorageObjectFailure;
 
 /**
- * Diese Klasse enthält die Daten eines MetaObjekts
+ * Diese Klasse enth?lt die Daten eines MetaObjekts
  *
  * @author RK
  * @version 11.11.2000
@@ -64,7 +61,7 @@ public class EntityVideo extends EntityUploadedMedia
 	//
 	// methods
 
-	public void update() throws StorageObjectException {
+	public void update() throws StorageObjectFailure {
 		super.update();
 		try {
 			theStorageObject.executeUpdate("update content set is_produced='0' where to_media="+getId());

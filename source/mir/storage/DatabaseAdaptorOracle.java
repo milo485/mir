@@ -36,8 +36,10 @@
 
 package  mir.storage;
 
-import java.util.*;
-import  mir.misc.*;
+import java.util.Properties;
+
+import mir.config.MirPropertiesConfiguration;
+import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
 
 
 /**
@@ -51,30 +53,30 @@ public final class DatabaseAdaptorOracle
 
 	/**
 	 * Liefert den Namen der Adaptorklasse <code>Adaptor.Oracle.Driver</code>
-	 * für Oracle zurück.
+	 * f?r Oracle zur?ck.
 	 * @return Adaptorklasse als String
 	 */
-    public String getDriver() {
-	    return MirConfig.getProp("Adaptor.Oracle.Driver");
+    public String getDriver() throws PropertiesConfigExc {
+	    return MirPropertiesConfiguration.instance().getString("Adaptor.Oracle.Driver");
     }
 
 	/**
-	 * Liefert die URL für JDBC zurück, in den die Parameter user, pass und host
-	 * eingefügt werden. Die URL wird aus der Konfiguration geholt.
+	 * Liefert die URL f?r JDBC zur?ck, in den die Parameter user, pass und host
+	 * eingef?gt werden. Die URL wird aus der Konfiguration geholt.
 	 *
 	 * @param user user als String
 	 * @param pass passwort als String
 	 * @param host host als String
 	 * @return url als String
 	 */
-    public String getURL(String user, String pass, String host) {
-	    return MirConfig.getProp("Adaptor.Oracle.URL");
+    public String getURL(String user, String pass, String host) throws PropertiesConfigExc {
+	    return MirPropertiesConfiguration.instance().getString("Adaptor.Oracle.URL");
 		/** @todo   hier muesste bessererweise $HOST durch HOST ersetzt, etc. werden */
 
     }
 
 	/**
-	 * Gibt zurück, ob das SQL der Datenbank den <code>limit</code>-Befehl beherrscht.
+	 * Gibt zur?ck, ob das SQL der Datenbank den <code>limit</code>-Befehl beherrscht.
 	 * @return false
 	 */
      public  boolean hasLimit() {
@@ -82,8 +84,8 @@ public final class DatabaseAdaptorOracle
     }
 
 	/**
-	 * Liefert zurück, ob der <code>limit</code>-Befehl erst start und dann offset
-	 * hat (true), oder umgekehrt. Nur Relevant, wenn hasLimit true zurückliefert.
+	 * Liefert zur?ck, ob der <code>limit</code>-Befehl erst start und dann offset
+	 * hat (true), oder umgekehrt. Nur Relevant, wenn hasLimit true zur?ckliefert.
 	 *
 	 * @return false
 	 */

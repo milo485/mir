@@ -34,9 +34,11 @@ package mir.misc;
 import freemarker.template.*;
 import mir.util.*;
 import mir.generator.*;
+import mir.config.MirPropertiesConfiguration;
+import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
 import mir.entity.Entity;
 import mir.entity.EntityList;
-import mir.storage.StorageObjectException;
+import mir.storage.StorageObjectFailure;
 import org.apache.struts.util.MessageResources;
 
 import javax.servlet.http.HttpServletResponse;
@@ -51,22 +53,31 @@ import java.util.*;
 public final class HTMLTemplateProcessor {
 
   public static String templateDir;
+  private static MirPropertiesConfiguration configuration;
   private static FileTemplateCache templateCache;
   private static Logfile theLog;
   private static String docRoot;
   private static String actionRoot;
 
   static {
-    templateDir = MirConfig.getPropWithHome("HTMLTemplateProcessor.Dir");
-    templateCache = new FileTemplateCache(templateDir);
-    templateCache.setLoadingPolicy(templateCache.LOAD_ON_DEMAND);
-    // gone in freemarker 1.7.1: templateCache.startAutoUpdate();
-    theLog = Logfile.getInstance(MirConfig.getPropWithHome(
-        "HTMLTemplateProcessor.Logfile"));
-
-    docRoot = MirConfig.getProp("RootUri");
     try {
-      actionRoot = docRoot + MirConfig.getProp("Producer.ActionServlet");
+      configuration = MirPropertiesConfiguration.instance();
+    } catch (PropertiesConfigExc e) {
+      e.printStackTrace();
+    }
+    theLog = Logfile.getInstance(
+      configuration.getStringWithHome("HTMLTemplateProcessor.Logfile"));
+    templateDir = 
+    	configuration.getStringWithHome("HTMLTemplateProcessor.Dir");
+    theLog.printDebugInfo("templateDir: " + templateDir);
+    templateCache = new FileTemplateCache(templateDir);
+    templateCache.setLoadingPolicy(FileTemplateCache.LOAD_ON_DEMAND);
+    // gone in freemarker 1.7.1: templateCache.startAutoUpdate();
+
+
+    docRoot = configuration.getString("RootUri");
+    try {
+      actionRoot = docRoot +configuration.getString("Producer.ActionServlet");
     }
     catch (ConfigException ce) {
       // if  Producer.ActionServlet is not set in the conf file
@@ -119,7 +130,7 @@ public final class HTMLTemplateProcessor {
   }
 
   /**
-   * Wandelt Entitylist in freemarker-Struktur um, fügt <code>additionalModel</code>
+   * Wandelt Entitylist in freemarker-Struktur um, f?gt <code>additionalModel</code>
        * unter dem Namen <code>additionalModelName</code> ein und mischt die Daten mit
    * Template <code>templateFilename</code> und gibt das Ergebnis an den PrintWriter
    * <code>out</code>
@@ -152,7 +163,7 @@ public final class HTMLTemplateProcessor {
 
         process(res, templateFilename, modelRoot, out, locale);
       }
-      catch (StorageObjectException e) {
+      catch (StorageObjectFailure e) {
         throw new HTMLParseException(e.toString());
       }
     }
@@ -233,11 +244,13 @@ public final class HTMLTemplateProcessor {
     SimpleHash configHash = new SimpleHash();
 
     // pass the whole config hash to the templates
-    Enumeration en = MirConfig.getResourceKeys();
+    Iterator it = configuration.getKeys();
     String key;
-    while (en.hasMoreElements()) {
-      key = (String) en.nextElement();
-      configHash.put(key, new SimpleScalar(MirConfig.getProp(key)));
+    while (it.hasNext()) {
+      key = (String) it.next();
+      configHash.put(key, new SimpleScalar(
+      	configuration.getString(key))
+      );
     }
 
     // this does not come directly from the config file
@@ -306,7 +319,7 @@ public final class HTMLTemplateProcessor {
    *    @deprecated EntityLists comply with TemplateListModel now.
    */
   public static SimpleList makeSimpleList(EntityList aList) throws
-      StorageObjectException {
+      StorageObjectFailure {
     theLog.printWarning(
         "## using deprecated makeSimpleList(entityList) - a waste of resources");
     SimpleList simpleList = new SimpleList();
@@ -326,7 +339,7 @@ public final class HTMLTemplateProcessor {
    *
    */
   public static SimpleHash makeSimpleHash(EntityList aList) throws
-      StorageObjectException {
+      StorageObjectFailure {
     SimpleHash simpleHash = new SimpleHash();
     Entity currentEntity;
 
@@ -371,7 +384,7 @@ public final class HTMLTemplateProcessor {
    */
 
   public static SimpleHash makeSimpleHashWithEntitylistInfos(EntityList entList) throws
-      StorageObjectException {
+      StorageObjectFailure {
     SimpleHash modelRoot = new SimpleHash();
     if (entList != null) {
       modelRoot.put("contentlist", entList);

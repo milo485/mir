@@ -31,13 +31,21 @@
 
 package mircoders.producer.reader;
 
-import java.util.*;
-import mir.producer.*;
-import mir.producer.reader.*;
-import mir.util.*;
-import mir.entity.adapter.*;
-import mir.generator.*;
-import mircoders.producer.*;
+import java.util.Map;
+
+import mir.entity.adapter.EntityAdapterModel;
+import mir.producer.ProducerNode;
+import mir.producer.reader.DefaultProducerNodeBuilders;
+import mir.producer.reader.ProducerConfigExc;
+import mir.producer.reader.ProducerNodeBuilderLibrary;
+import mir.producer.reader.ReaderTool;
+import mircoders.producer.ContentMarkingProducerNode;
+import mircoders.producer.ContentModifyingProducerNode;
+import mircoders.producer.IndexingProducerNode;
+import mircoders.producer.MediaGeneratingProducerNode;
+import mircoders.producer.PDFGeneratingProducerNode;
+import mircoders.producer.PDFPreFormattingProducerNode;
+import mircoders.producer.UnIndexingProducerNode;
 
 public class SupplementalProducerNodeBuilders {
 

@@ -31,29 +31,28 @@
 
 package mircoders.entity;
 
-import freemarker.template.SimpleList;
-import freemarker.template.SimpleScalar;
-import freemarker.template.TemplateModel;
-import freemarker.template.TemplateModelException;
+import java.util.HashMap;
 
 import mir.entity.Entity;
 import mir.entity.EntityList;
 import mir.media.MediaHelper;
 import mir.media.MirMedia;
-import mir.storage.StorageObject;
-import mir.storage.StorageObjectException;
 import mir.misc.NumberUtils;
-import mircoders.storage.DatabaseUploadedMedia;
+import mir.storage.StorageObject;
+import mir.storage.StorageObjectExc;
+import mir.storage.StorageObjectFailure;
 import mircoders.storage.DatabaseContentToMedia;
-
-import java.sql.SQLException;
-import java.util.HashMap;
+import mircoders.storage.DatabaseUploadedMedia;
+import freemarker.template.SimpleList;
+import freemarker.template.SimpleScalar;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
 
 /**
- * Diese Klasse enthält die Daten eines MetaObjekts
+ * Diese Klasse enth?lt die Daten eines MetaObjekts
  *
  * @author mh, mir-coders group
- * @version $Id: EntityUploadedMedia.java,v 1.16 2002/12/06 08:09:51 mh Exp $
+ * @version $Id: EntityUploadedMedia.java,v 1.17 2003/01/25 17:50:34 idfx Exp $
  */
 
 
@@ -69,7 +68,7 @@ public class EntityUploadedMedia extends Entity {
     setStorage(theStorage);
   }
 
-  public void update() throws StorageObjectException {
+  public void update() throws StorageObjectFailure {
     super.update();
     EntityList contentList = DatabaseContentToMedia.getInstance().getContent(this);
     if (contentList!=null && contentList.size()>0) {
@@ -94,13 +93,15 @@ public class EntityUploadedMedia extends Entity {
    *
    * @return mir.entity.Entity
    */
-  public Entity getMediaType() throws StorageObjectException {
+  public Entity getMediaType() throws StorageObjectFailure {
     Entity ent = null;
     try {
       ent = DatabaseUploadedMedia.getInstance().getMediaType(this);
     }
-    catch (StorageObjectException e) {
-      throwStorageObjectException(e, "get MediaType failed -- ");
+    catch (StorageObjectFailure e) {
+      throwStorageObjectFailure(e, "get MediaType failed -- ");
+    } catch (StorageObjectExc e) {
+      throwStorageObjectFailure(e, "get MediaType failed -- ");
     }
     return ent;
   }

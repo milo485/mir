@@ -31,10 +31,14 @@
 
 package mir.entity.adapter;
 
-import java.util.*;
-import mir.entity.*;
-import mir.storage.*;
-import mir.util.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.Map;
+
+import mir.entity.Entity;
+import mir.util.DateToMapAdapter;
 
 public class EntityAdapterDefinition {
   Map calculatedFields;

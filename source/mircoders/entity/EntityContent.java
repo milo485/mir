@@ -31,26 +31,28 @@
 
 package mircoders.entity;
 
-import java.lang.*;
-import java.io.*;
-import java.util.*;
-import java.sql.*;
-import java.lang.reflect.*;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.HashMap;
 
-import freemarker.template.*;
-
-import mir.entity.*;
-import mir.misc.*;
-import mir.media.*;
-import mir.storage.*;
-
-import mircoders.storage.*;
+import mir.entity.Entity;
+import mir.entity.EntityList;
+import mir.storage.StorageObject;
+import mir.storage.StorageObjectExc;
+import mir.storage.StorageObjectFailure;
+import mircoders.storage.DatabaseContent;
+import mircoders.storage.DatabaseContentToMedia;
+import mircoders.storage.DatabaseContentToTopics;
+import freemarker.template.SimpleScalar;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
 
 /**
  * this class implements mapping of one line of the database table content
  * to a java object
  *
- * @version $Id: EntityContent.java,v 1.13 2002/12/02 12:33:23 zapata Exp $
+ * @version $Id: EntityContent.java,v 1.14 2003/01/25 17:50:34 idfx Exp $
  * @author mir-coders group
  *
  */
@@ -59,10 +61,10 @@ import mircoders.storage.*;
 public class EntityContent extends Entity
 {
 
-  String mirconf_extLinkName  = MirConfig.getProp("Producer.ExtLinkName");
-  String mirconf_intLinkName  = MirConfig.getProp("Producer.IntLinkName");
-  String mirconf_mailLinkName = MirConfig.getProp("Producer.MailLinkName");
-  String mirconf_imageRoot    = MirConfig.getProp("Producer.ImageRoot");
+  String mirconf_extLinkName  = configuration.getString("Producer.ExtLinkName");
+  String mirconf_intLinkName  = configuration.getString("Producer.IntLinkName");
+  String mirconf_mailLinkName = configuration.getString("Producer.MailLinkName");
+  String mirconf_imageRoot    = configuration.getString("Producer.ImageRoot");
 
   //this should always be transient i.e it can never be stored in the db
   //or ObjectStore. (so the ObjectStore should only be caching what comes
@@ -92,7 +94,7 @@ public class EntityContent extends Entity
    * set is_produced flag for the article
    */
 
-  public void setProduced(boolean yesno) throws StorageObjectException
+  public void setProduced(boolean yesno) throws StorageObjectFailure
   {
     String value = (yesno) ? "1":"0";
     if (value.equals( getValue("is_produced") )) return;
@@ -105,11 +107,11 @@ public class EntityContent extends Entity
       stmt = con.createStatement();
       theStorageObject.executeUpdate(stmt,sql);
     }
-    catch (StorageObjectException e) {
-      throwStorageObjectException(e, "\n -- set produced failed");
+    catch (StorageObjectFailure e) {
+      throwStorageObjectFailure(e, "\n -- set produced failed");
     }
     catch (SQLException e) {
-      throwStorageObjectException(e, "\n -- set produced failed");
+      throwStorageObjectFailure(e, "\n -- set produced failed");
     }
     finally {
       theStorageObject.freeConnection(con,stmt);
@@ -121,15 +123,15 @@ public class EntityContent extends Entity
    * make openposting to newswire
    */
 
-  public void newswire() throws StorageObjectException
+  public void newswire() throws StorageObjectFailure
   {
     String sql = "update content set to_article_type='1', is_produced='0' where id='" + getId()+"'";
     try {
       theStorageObject.executeUpdate(sql);
-    } catch (StorageObjectException e) {
-      throwStorageObjectException(e, "\n -- newswire failed");
+    } catch (StorageObjectFailure e) {
+      throwStorageObjectFailure(e, "\n -- newswire failed");
     } catch (SQLException e) {
-      throwStorageObjectException(e, "\n -- newswire failed");
+      throwStorageObjectFailure(e, "\n -- newswire failed");
     }
   }
 
@@ -137,14 +139,14 @@ public class EntityContent extends Entity
   /**
    * dettach from media
    */
-  public void dettach(String cid,String mid) throws StorageObjectException
+  public void dettach(String cid,String mid) throws StorageObjectFailure
   {
     if (mid!=null){
       try{
         DatabaseContentToMedia.getInstance().delete(cid,mid);
       }
       catch (Exception e){
-        throwStorageObjectException(e, "\n -- failed to get instance");
+        throwStorageObjectFailure(e, "\n -- failed to get instance");
       }
 
       //set Content to unproduced
@@ -156,14 +158,14 @@ public class EntityContent extends Entity
    * attach to media
    */
 
-  public void attach(String mid) throws StorageObjectException
+  public void attach(String mid) throws StorageObjectFailure
   {
     if (mid!=null) {
       //write media-id mid and content-id in table content_x_media
       try{
         DatabaseContentToMedia.getInstance().addMedia(getId(),mid);
-      } catch(StorageObjectException e){
-        throwStorageObjectException(e, "attach: could not get the instance");
+      } catch(StorageObjectFailure e){
+        throwStorageObjectFailure(e, "attach: could not get the instance");
       }
       //set Content to unproduced
       setProduced(false);
@@ -275,15 +277,19 @@ public class EntityContent extends Entity
    *
    * @return freemarker.template.SimpleList
    */
-  private EntityList getComments() throws StorageObjectException {
+  private EntityList getComments() throws StorageObjectFailure {
     return ((DatabaseContent)theStorageObject).getComments(this);
   }
 
-  private boolean hasMedia() throws StorageObjectException
+  private boolean hasMedia() throws StorageObjectFailure
   {
     if (_hasMedia == null) {
-      _hasMedia =
-          new Boolean(DatabaseContentToMedia.getInstance().hasMedia(this));
+      try {
+        _hasMedia =
+            new Boolean(DatabaseContentToMedia.getInstance().hasMedia(this));
+      } catch (StorageObjectExc e) {
+        throw new StorageObjectFailure(e);
+      }
     }
     return _hasMedia.booleanValue();
   }
@@ -291,7 +297,7 @@ public class EntityContent extends Entity
   //######## @todo all of the following getBlahForContent should have
   // and optimized version where LIMIT=1 sql for list view.
   private EntityList getImagesForContent()
-      throws StorageObjectException, TemplateModelException
+      throws StorageObjectFailure, TemplateModelException
   {
     if (hasMedia())
       return DatabaseContentToMedia.getInstance().getImages(this);
@@ -300,7 +306,7 @@ public class EntityContent extends Entity
   }
 
   private EntityList getAudioForContent()
-      throws StorageObjectException, TemplateModelException
+      throws StorageObjectFailure, TemplateModelException
   {
     if (hasMedia())
       return DatabaseContentToMedia.getInstance().getAudio(this) ;
@@ -309,7 +315,7 @@ public class EntityContent extends Entity
   }
 
   private EntityList getVideoForContent()
-      throws StorageObjectException, TemplateModelException
+      throws StorageObjectFailure, TemplateModelException
   {
     if (hasMedia())
       return DatabaseContentToMedia.getInstance().getVideo(this) ;
@@ -318,7 +324,7 @@ public class EntityContent extends Entity
   }
 
   private EntityList getOtherMediaForContent()
-      throws StorageObjectException, TemplateModelException
+      throws StorageObjectFailure, TemplateModelException
   {
     if (hasMedia())
       return DatabaseContentToMedia.getInstance().getOther(this);

@@ -31,15 +31,21 @@
 
 package mir.misc;
 
-import java.io.*;
-import javax.servlet.http.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 
-import mircoders.global.*;
+import javax.servlet.http.HttpServletResponse;
 
-import org.apache.fop.apps.* ;
-import org.xml.sax.InputSource;
+import mircoders.global.MirGlobal;
+
+import org.apache.fop.apps.Driver;
+import org.apache.fop.apps.InputHandler;
+import org.apache.fop.apps.XSLTInputHandler;
+import org.apache.log.Hierarchy;
+import org.apache.log.Logger;
+import org.apache.log.Priority;
 import org.xml.sax.XMLReader;
-import org.apache.log.*;
 
 public class PDFUtil {
     

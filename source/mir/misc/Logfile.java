@@ -31,8 +31,12 @@
 
 package  mir.misc;
 
-import  java.util.*;
-import  java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
 
 
 /**
@@ -138,7 +142,7 @@ public final class Logfile {
 	 *  Interne Ausgabeprozedur.
 	 *	Erfordert etwas Handarbeit, da PrintStream nicht mit RandomAcccessFile
 	 *	kooperiert. Und ein RandomAccessFile brauchen wir, weil FileOutputStream
-	 *	kein "append" zul‰ﬂt.
+	 *	kein "append" zul??t.
 	 *
 	 */
 		private void print(String line) {

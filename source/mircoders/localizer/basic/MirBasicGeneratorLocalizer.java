@@ -31,11 +31,15 @@
 
 package mircoders.localizer.basic;
 
-import freemarker.template.*;
-import mir.misc.*;
-import mir.generator.*;
-import mircoders.localizer.*;
-import mircoders.global.*;
+import mir.generator.FreemarkerGenerator;
+import mir.generator.Generator;
+import mir.generator.GeneratorLibraryRepository;
+import mir.generator.WriterEngine;
+import mir.misc.Logfile;
+import mircoders.global.MirGlobal;
+import mircoders.localizer.MirGeneratorLocalizer;
+import mircoders.localizer.MirLocalizerExc;
+import mircoders.localizer.MirLocalizerFailure;
 
 public class MirBasicGeneratorLocalizer implements MirGeneratorLocalizer {
   protected static Logfile logger = Logfile.getInstance( MirGlobal.getConfigProperty("Home") + "/" + MirGlobal.getConfigProperty("Mir.Localizer.Logfile"));

@@ -32,18 +32,20 @@
 
 package mircoders.media;
 
-import java.lang.*;
-import java.io.*;
-import java.util.*;
-import java.lang.reflect.*;
+import java.io.File;
+import java.io.InputStream;
 
-import freemarker.template.SimpleList;
-
-import mir.media.*;
-import mir.misc.*;
-import mir.entity.*;
-import mir.storage.StorageObjectException;
+import mir.config.MirPropertiesConfiguration;
+import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
+import mir.entity.Entity;
+import mir.media.MirMedia;
+import mir.media.MirMediaException;
+import mir.misc.FileUtil;
+import mir.misc.Logfile;
+import mir.misc.StringUtil;
+import mir.storage.StorageObjectFailure;
 import mircoders.entity.EntityImages;
+import freemarker.template.SimpleList;
 
 /**
  * This class handles saving, fetching creating representations
@@ -59,17 +61,26 @@ import mircoders.entity.EntityImages;
  *
  * @see mir.media.MirMedia
  * @author mh
- * @version $Id: MediaHandlerImages.java,v 1.15 2002/12/17 19:20:31 zapata Exp $
+ * @version $Id: MediaHandlerImages.java,v 1.16 2003/01/25 17:50:35 idfx Exp $
  */
 
 
 public abstract class MediaHandlerImages implements MirMedia
 {
-  static Logfile theLog = Logfile.getInstance(MirConfig.getProp("Home")+
-                                                "log/media.log");
+  static MirPropertiesConfiguration configuration;
+  static Logfile theLog;
   static final String PNG = "PNG";
   static final String JPEG = "JPEG";
 
+  static {
+    try {
+      configuration = MirPropertiesConfiguration.instance();
+    } catch (PropertiesConfigExc e) {
+      e.printStackTrace();
+    }
+    theLog = Logfile.getInstance(configuration.getString("Home")+"log/media.log");
+  }
+  
   abstract String getType();
 
         public InputStream getMedia(Entity ent, Entity mediaTypeEnt)
@@ -78,7 +89,7 @@ public abstract class MediaHandlerImages implements MirMedia
     InputStream in;
     try {
       in = ((EntityImages)ent).getImage();
-    } catch ( StorageObjectException e) {
+    } catch ( StorageObjectFailure e) {
       theLog.printDebugInfo("MediaHandlerImages.getImage: "+e.toString());
       throw new MirMediaException(e.toString());
     }
@@ -92,7 +103,7 @@ public abstract class MediaHandlerImages implements MirMedia
     try {
       ((EntityImages)ent).setImage(in, getType());
     }
-    catch ( StorageObjectException e) {
+    catch ( StorageObjectFailure e) {
       e.printStackTrace(System.out);
       theLog.printError("MediaHandlerImages.set: "+e.getMessage());
       throw new MirMediaException(e.getMessage());
@@ -105,7 +116,7 @@ public abstract class MediaHandlerImages implements MirMedia
     String datePath = StringUtil.webdbDate2path(date);
     String ext = "."+mediaTypeEnt.getValue("name");
     String filepath = datePath+ent.getId()+ext;
-    String iconFilePath = MirConfig.getProp("Producer.StorageRoot")
+    String iconFilePath = configuration.getString("Producer.StorageRoot")
                           +getIconStoragePath() + filepath;
     String productionFilePath = getStoragePath() + File.separator + filepath;
 
@@ -140,7 +151,7 @@ public abstract class MediaHandlerImages implements MirMedia
     InputStream in;
     try {
       in = ((EntityImages)ent).getIcon();
-    } catch ( StorageObjectException e) {
+    } catch ( StorageObjectFailure e) {
       theLog.printDebugInfo("MediaHandlerImages.getIcon: "+e.toString());
       throw new MirMediaException(e.toString());
     }
@@ -157,27 +168,27 @@ public abstract class MediaHandlerImages implements MirMedia
 
   public String getStoragePath()
   {
-    return MirConfig.getProp("Producer.Image.Path");
+    return configuration.getString("Producer.Image.Path");
   }
 
   public String getIconStoragePath()
   {
-    return MirConfig.getProp("Producer.Image.IconPath");
+    return configuration.getString("Producer.Image.IconPath");
   }
 
   public String getPublishHost()
   {
-    return StringUtil.removeSlash(MirConfig.getProp("Producer.Image.Host"));
+    return StringUtil.removeSlash(configuration.getString("Producer.Image.Host"));
   }
 
   public String getTinyIconName()
   {
-    return MirConfig.getProp("Producer.Icon.TinyImage");
+    return configuration.getString("Producer.Icon.TinyImage");
   }
 
   public String getBigIconName()
   {
-    return MirConfig.getProp("Producer.Icon.BigImage");
+    return configuration.getString("Producer.Icon.BigImage");
   }
 
   public String getIconAltName()

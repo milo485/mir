@@ -31,12 +31,9 @@
 
 package mircoders.servlet;
 
-import mir.misc.Logfile;
-import mir.misc.MirConfig;
+import mir.log.LoggerWrapper;
 import mir.servlet.ServletModule;
-import mir.storage.StorageObjectException;
-import mir.log.*;
-
+import mir.storage.StorageObjectFailure;
 import mircoders.module.ModuleUploadedMedia;
 import mircoders.storage.DatabaseVideo;
 
@@ -59,15 +56,16 @@ public class ServletModuleVideo extends ServletModuleUploadedMedia {
 
 
   private ServletModuleVideo() {
+    super();
     logger = new LoggerWrapper("ServletModule.Video");
-    templateListString = MirConfig.getProp("ServletModule.Video.ListTemplate");
-    templateObjektString = MirConfig.getProp("ServletModule.Video.ObjektTemplate");
-    templateConfirmString = MirConfig.getProp("ServletModule.Video.ConfirmTemplate");
+    templateListString = configuration.getString("ServletModule.Video.ListTemplate");
+    templateObjektString = configuration.getString("ServletModule.Video.ObjektTemplate");
+    templateConfirmString = configuration.getString("ServletModule.Video.ConfirmTemplate");
     try {
       mainModule = new ModuleUploadedMedia(DatabaseVideo.getInstance());
       //dbRights = DatabaseRights.getInstance();
     }
-    catch (StorageObjectException e) {
+    catch (StorageObjectFailure e) {
       logger.error("servletmodule video could not be initialized: " + e.getMessage());
     }
   }

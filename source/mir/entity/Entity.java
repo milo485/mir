@@ -36,43 +36,55 @@
 
 package  mir.entity;
 
-import java.lang.*;
-import java.io.*;
-import java.util.*;
-import java.sql.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Set;
 
-import freemarker.template.*;
-
-import mir.storage.*;
-import mir.misc.*;
+import mir.config.MirPropertiesConfiguration;
+import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
+import mir.misc.Logfile;
+import mir.misc.StringUtil;
+import mir.storage.StorageObject;
+import mir.storage.StorageObjectExc;
+import mir.storage.StorageObjectFailure;
+import freemarker.template.SimpleScalar;
+import freemarker.template.TemplateHashModel;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateModelRoot;
 
 /**
  * Base Class of Entities
  * Interfacing TemplateHashModel and TemplateModelRoot to be freemarker compliant
  *
- * @version $Id: Entity.java,v 1.12 2002/12/17 19:20:31 zapata Exp $
+ * @version $Id: Entity.java,v 1.13 2003/01/25 17:45:17 idfx Exp $
  * @author rk
  *
  */
 
 public class Entity implements TemplateHashModel, TemplateModelRoot
 {
+  protected static MirPropertiesConfiguration configuration;
+  protected static Logfile    theLog;
+  
   private boolean             changed;
   protected HashMap           theValuesHash;   // tablekey / value
   protected StorageObject     theStorageObject;
-  protected static Logfile    theLog;
   protected ArrayList         streamedInput=null;
-  private static int instances = 0;
-    static {
-      theLog = Logfile.getInstance(MirConfig.getProp("Home") + MirConfig.getProp("Entity.Logfile"));
+  
+
+    static {      
+      try {
+        configuration = MirPropertiesConfiguration.instance();
+      } catch (PropertiesConfigExc e) {
+        e.printStackTrace();
+      }
+      theLog = Logfile.getInstance(configuration.getStringWithHome("Entity.Logfile"));
     }
 
     public Entity() {
-
       this.changed = false;
-      instances++;
-      Integer i = new Integer(instances);
-      //System.err.println("New abstract entity instance: "+i.toString());
     }
 
   /**
@@ -174,20 +186,20 @@ public class Entity implements TemplateHashModel, TemplateModelRoot
    * @return Primary Key of the Entity
    * @exception StorageObjectException
    */
-  public String insert () throws StorageObjectException {
+  public String insert () throws StorageObjectExc {
     theLog.printDebugInfo("Entity: trying to insert ...");
     if (theStorageObject != null) {
       return theStorageObject.insert((Entity)this);
     }
     else
-      throw  new StorageObjectException("Kein StorageObject gesetzt!");
+      throw  new StorageObjectExc("Kein StorageObject gesetzt!");
   }
 
   /**
    * Saves changes of this Entity to the database
    * @exception StorageObjectException
    */
-  public void update () throws StorageObjectException {
+  public void update () throws StorageObjectFailure {
     theStorageObject.update((Entity)this);
   }
 
@@ -199,7 +211,7 @@ public class Entity implements TemplateHashModel, TemplateModelRoot
    * @exception StorageObjectException
    */
   public void setValueForProperty (String theProp, String theValue)
-    throws StorageObjectException {
+    throws StorageObjectFailure {
     this.changed = true;
     if (isField(theProp))
       theValuesHash.put(theProp, theValue);
@@ -214,7 +226,7 @@ public class Entity implements TemplateHashModel, TemplateModelRoot
    * @return ArrayList with field names
    * @exception StorageObjectException is throuwn if database access was impossible
    */
-  public ArrayList getFields () throws StorageObjectException {
+  public ArrayList getFields () throws StorageObjectFailure {
     return  theStorageObject.getFields();
     }
 
@@ -223,7 +235,7 @@ public class Entity implements TemplateHashModel, TemplateModelRoot
    * @return int[] that contains the types of the fields
    * @exception StorageObjectException
    */
-  public int[] getTypes () throws StorageObjectException {
+  public int[] getTypes () throws StorageObjectFailure {
     return  theStorageObject.getTypes();
     }
 
@@ -232,7 +244,7 @@ public class Entity implements TemplateHashModel, TemplateModelRoot
    * @return List with field names
    * @exception StorageObjectException
    */
-  public ArrayList getLabels () throws StorageObjectException {
+  public ArrayList getLabels () throws StorageObjectFailure {
     return  theStorageObject.getLabels();
     }
 
@@ -271,21 +283,17 @@ public class Entity implements TemplateHashModel, TemplateModelRoot
    * @return true in case fieldName is a field name, else false.
    * @exception StorageObjectException
    */
-  public boolean isField (String fieldName) throws StorageObjectException {
+  public boolean isField (String fieldName) throws StorageObjectFailure {
     return  theStorageObject.getFields().contains(fieldName);
   }
 
-   /** Returns the number of instances of this Entity
-   * @return int The number of instances
-   */
-  public int getInstances() {
-     return instances;
-  }
 
-  protected void throwStorageObjectException (Exception e, String wo) throws StorageObjectException {
+
+  protected void throwStorageObjectFailure (Exception e, String wo) 
+  	throws StorageObjectFailure {
     theLog.printError( e.toString() + " Funktion: "+ wo);
     e.printStackTrace(System.out);
-    throw  new StorageObjectException("Storage Object Exception in entity" +e.toString());
+    throw  new StorageObjectFailure("Storage Object Exception in entity", e);
   }
 
   // Now implements freemarkers TemplateHashModel

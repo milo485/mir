@@ -34,8 +34,11 @@ import java.io.PrintWriter;
 import java.lang.reflect.Method;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
-import java.util.*;
+import java.util.Map;
+import java.util.Vector;
 
 import javax.servlet.ServletException;
 import javax.servlet.UnavailableException;
@@ -43,30 +46,36 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import freemarker.template.*;
-
-import org.apache.struts.util.MessageResources;
-
-import mir.misc.*;
-import mir.servlet.*;
-import mir.util.*;
-import mir.generator.*;
-//import mir.log.Log;
-
-import mircoders.global.*;
-import mircoders.localizer.*;
+import mir.config.MirPropertiesConfiguration;
+import mir.generator.FreemarkerGenerator;
+import mir.misc.HTMLTemplateProcessor;
+import mir.misc.StringUtil;
+import mir.servlet.AbstractServlet;
+import mir.servlet.ServletModule;
+import mir.servlet.ServletModuleDispatch;
+import mir.servlet.ServletModuleException;
+import mir.servlet.ServletModuleUserException;
+import mir.util.StringRoutines;
 import mircoders.entity.EntityUsers;
+import mircoders.global.MirGlobal;
 import mircoders.module.ModuleMessage;
 import mircoders.module.ModuleUsers;
 import mircoders.storage.DatabaseArticleType;
 import mircoders.storage.DatabaseMessages;
 import mircoders.storage.DatabaseUsers;
 
+import org.apache.struts.util.MessageResources;
+
+import freemarker.template.SimpleHash;
+import freemarker.template.SimpleList;
+import freemarker.template.SimpleScalar;
+import freemarker.template.TemplateModel;
+
 /**
  * Mir.java - main servlet, that dispatches to servletmodules
  *
- * @author $Author: mh $
- * @version $Id: Mir.java,v 1.26 2003/01/18 08:32:07 mh Exp $
+ * @author $Author: idfx $
+ * @version $Id: Mir.java,v 1.27 2003/01/25 17:50:34 idfx Exp $
  *
  */
 
@@ -81,6 +90,8 @@ public class Mir extends AbstractServlet {
   private static List loginLanguages = null;
 
   public HttpSession session;
+  
+  
 
   public void doGet(HttpServletRequest req, HttpServletResponse res) throws
       ServletException, IOException {
@@ -146,11 +157,7 @@ public class Mir extends AbstractServlet {
     EntityUsers userEntity;
     String http = "";
 
-    if (getServletContext().getAttribute("mir.confed") == null) {
-      getConfig(req);
-    }
-
-    MirConfig.setServletName(getServletName());
+    configuration.addProperty("ServletName",getServletName());
 
     //*** test
      // Log.info(this, "blalalala");
@@ -189,25 +196,25 @@ public class Mir extends AbstractServlet {
     if ( (moduleName != null && moduleName.equals("login")) || (userEntity == null)) {
       String user = req.getParameter("login");
       String passwd = req.getParameter("password");
-      theLog.printDebugInfo("--login: evaluating for user: " + user);
+      logger.debug("--login: evaluating for user: " + user);
       userEntity = allowedUser(user, passwd);
       if (userEntity == null) {
         // login failed: redirecting to login
-        theLog.printWarning("--login: failed!");
+        logger.warn("--login: failed!");
         _sendLoginPage(res, req, res.getWriter());
         return;
       }
       else if (moduleName != null && moduleName.equals("login")) {
         // login successful
 
-        theLog.printInfo("--login: successful! setting uid: " +
+        logger.info("--login: successful! setting uid: " +
                          userEntity.getId());
         session.setAttribute("login.uid", userEntity);
-        theLog.printDebugInfo("--login: trying to retrieve login.target");
+        logger.debug("--login: trying to retrieve login.target");
         String target = (String) session.getAttribute("login.target");
 
         if (target != null) {
-          theLog.printDebugInfo("Redirect: " + target);
+          logger.debug("Redirect: " + target);
           int serverPort = req.getServerPort();
           String redirect = "";
           String redirectString = "";
@@ -237,7 +244,7 @@ public class Mir extends AbstractServlet {
         }
         else {
           // redirecting to default target
-          theLog.printDebugInfo("--login: no target - redirecting to default");
+          logger.debug("--login: no target - redirecting to default");
           _sendStartPage(res, req, res.getWriter(), userEntity);
         }
         return;
@@ -245,7 +252,7 @@ public class Mir extends AbstractServlet {
     } // if login
 
     if (moduleName != null && moduleName.equals("logout")) {
-      theLog.printDebugInfo("--logout");
+      logger.info("--logout");
       session.invalidate();
 
       //session = req.getSession(true);
@@ -261,7 +268,7 @@ public class Mir extends AbstractServlet {
       String queryString = req.getQueryString();
       if (queryString != null && !queryString.equals("")) {
         redirectString += "?" + req.getQueryString();
-        theLog.printDebugInfo("STORING: " + redirectString);
+        logger.debug("STORING: " + redirectString);
         session.setAttribute("login.target", redirectString);
       }
       _sendLoginPage(res, req, res.getWriter());
@@ -270,7 +277,7 @@ public class Mir extends AbstractServlet {
 
     // If no module is specified goto standard startpage
     if (moduleName == null || moduleName.equals("")) {
-      theLog.printDebugInfo("no module: redirect to standardpage");
+      logger.debug("no module: redirect to standardpage");
       _sendStartPage(res, req, res.getWriter(), userEntity);
       return;
     }
@@ -293,7 +300,7 @@ public class Mir extends AbstractServlet {
 
     // timing...
     sessionConnectTime = System.currentTimeMillis() - startTime;
-    theLog.printInfo("EXECTIME (" + moduleName + "): " + sessionConnectTime +
+    logger.info("EXECTIME (" + moduleName + "): " + sessionConnectTime +
                      " ms");
   }
 
@@ -342,12 +349,12 @@ public class Mir extends AbstractServlet {
                            PrintWriter out, String errorString) {
 
     try {
-      theLog.printError(errorString);
+      logger.error(errorString);
       SimpleHash modelRoot = new SimpleHash();
       modelRoot.put("errorstring", new SimpleScalar(errorString));
       modelRoot.put("date",
                     new SimpleScalar(StringUtil.date2readableDateTime(new GregorianCalendar())));
-      HTMLTemplateProcessor.process(res, MirConfig.getProp("Mir.ErrorTemplate"),
+      HTMLTemplateProcessor.process(res, MirPropertiesConfiguration.instance().getString("Mir.ErrorTemplate"),
                                     modelRoot, out, getLocale(req));
       out.close();
     }
@@ -360,13 +367,13 @@ public class Mir extends AbstractServlet {
   private void handleUserError(HttpServletRequest req, HttpServletResponse res,
                                PrintWriter out, String errorString) {
     try {
-      theLog.printError(errorString);
+      logger.error(errorString);
       SimpleHash modelRoot = new SimpleHash();
       modelRoot.put("errorstring", new SimpleScalar(errorString));
       modelRoot.put("date",
                     new SimpleScalar(StringUtil.date2readableDateTime(new GregorianCalendar())));
       HTMLTemplateProcessor.process(res,
-                                    MirConfig.getProp("Mir.UserErrorTemplate"),
+                                    MirPropertiesConfiguration.instance().getString("Mir.UserErrorTemplate"),
                                     modelRoot, out, getLocale(req));
       out.close();
     }
@@ -386,7 +393,7 @@ public class Mir extends AbstractServlet {
       return usersModule.getUserForLogin(user, password);
     }
     catch (Exception e) {
-      theLog.printDebugInfo(e.getMessage());
+      logger.debug(e.getMessage());
       e.printStackTrace();
       return null;
     }
@@ -395,7 +402,8 @@ public class Mir extends AbstractServlet {
   // Redirect-methods
   private void _sendLoginPage(HttpServletResponse res, HttpServletRequest req,
                               PrintWriter out) {
-    String loginTemplate = MirConfig.getProp("Mir.LoginTemplate");
+    String loginTemplate = 
+    	configuration.getString("Mir.LoginTemplate");
     String sessionUrl = res.encodeURL("");
 
     try {
@@ -443,20 +451,20 @@ public class Mir extends AbstractServlet {
   }
 
   public String getServletInfo() {
-    return "Mir " + MirConfig.getProp("Mir.Version");
+    return "Mir " + configuration.getString("Mir.Version");
   }
 
   private void checkLanguage(HttpSession session, HttpServletRequest req) {
     // a lang parameter always sets the language
     String lang = req.getParameter("language");
     if (lang != null) {
-      theLog.printInfo("selected language " + lang + " overrides accept-language");
+      logger.info("selected language " + lang + " overrides accept-language");
       setLanguage(session, lang);
       setLocale(session, new Locale(lang, ""));
     }
     // otherwise store language from accept header in session
     else if (session.getAttribute("Language") == null) {
-      theLog.printInfo("accept-language is " + req.getLocale().getLanguage());
+      logger.info("accept-language is " + req.getLocale().getLanguage());
       setLanguage(session, req.getLocale().getLanguage());
       setLocale(session, req.getLocale());
     }

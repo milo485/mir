@@ -37,11 +37,11 @@ import freemarker.template.SimpleList;
 
 import mir.entity.Entity;
 import mir.entity.EntityList;
-import mir.misc.MirConfig;
 import mir.module.AbstractModule;
 import mir.module.ModuleException;
 import mir.storage.StorageObject;
-import mir.storage.StorageObjectException;
+import mir.storage.StorageObjectExc;
+import mir.storage.StorageObjectFailure;
 import mir.log.*;
 
 import mircoders.entity.EntityContent;
@@ -69,7 +69,7 @@ public class ModuleTopics extends AbstractModule {
     try {
       return ((DatabaseTopics) theStorage).getPopupData();
     }
-    catch (StorageObjectException e) {
+    catch (StorageObjectFailure e) {
       throw new ModuleException(e.toString());
     }
   }
@@ -95,7 +95,7 @@ public class ModuleTopics extends AbstractModule {
    * Overrides the AbstractModule.set(),
    * All dependent ContentEntities are set unproduced.
    * @param theValues Hash mit Spalte/Wert-Paaren
-   * @return Id des eingefügten Objekts
+   * @return Id des eingef?gten Objekts
    * @exception ModuleException
    */
   public String set(HashMap theValues) throws ModuleException {
@@ -116,7 +116,10 @@ public class ModuleTopics extends AbstractModule {
       theEntity.update();
       return theEntity.getId();
     }
-    catch (StorageObjectException e) {
+    catch (StorageObjectFailure e) {
+      e.printStackTrace(System.err);
+      throw new ModuleException(e.toString());
+    } catch (StorageObjectExc e) {
       e.printStackTrace(System.err);
       throw new ModuleException(e.toString());
     }

@@ -33,8 +33,6 @@ package mir.config.exceptions;
 
 import multex.Failure;
 
-import java.io.*;
-
 public class ConfigFailure extends Failure {
   private String locationDescription;
   private Throwable cause;

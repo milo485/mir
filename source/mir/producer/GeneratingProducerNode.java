@@ -31,13 +31,14 @@
 
 package mir.producer;
 
-import java.util.*;
-import java.io.*;
+import java.io.PrintWriter;
+import java.util.Map;
 
-import mir.util.*;
-import mir.producer.*;
-import mir.generator.*;
-import mir.log.*;
+import mir.generator.Generator;
+import mir.generator.WriterEngine;
+import mir.log.LoggerToWriterAdapter;
+import mir.log.LoggerWrapper;
+import mir.util.ParameterExpander;
 
 public class GeneratingProducerNode implements ProducerNode {
   private String generatorExpression;

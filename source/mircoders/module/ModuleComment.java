@@ -31,23 +31,20 @@
 
 package mircoders.module;
 
-import java.io.*;
-import java.lang.*;
-import java.util.*;
-import java.sql.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
+import java.io.PrintWriter;
+import java.util.HashMap;
 
-import freemarker.template.*;
-
-import mir.servlet.*;
-import mir.module.*;
-import mir.entity.*;
-import mir.misc.*;
-import mir.storage.*;
-import mir.log.*;
-
-import mircoders.storage.*;
+import mir.entity.Entity;
+import mir.log.LoggerToWriterAdapter;
+import mir.log.LoggerWrapper;
+import mir.module.AbstractModule;
+import mir.module.ModuleException;
+import mir.storage.StorageObject;
+import mir.storage.StorageObjectExc;
+import mir.storage.StorageObjectFailure;
+import mircoders.storage.DatabaseComment;
+import mircoders.storage.DatabaseContent;
+import freemarker.template.SimpleList;
 
 
 /*
@@ -72,7 +69,7 @@ public class ModuleComment extends AbstractModule
     try {
       return ((DatabaseComment)theStorage).getPopupData();
     }
-    catch (StorageObjectException e) {
+    catch (StorageObjectFailure e) {
       throw new ModuleException(e.toString());
     }
   }
@@ -85,7 +82,9 @@ public class ModuleComment extends AbstractModule
 
       super.deleteById(anId);
     }
-    catch (StorageObjectException e){
+    catch (StorageObjectFailure e){
+      throw new ModuleException(e.toString());
+    } catch (StorageObjectExc e) {
       throw new ModuleException(e.toString());
     }
   }
@@ -103,10 +102,12 @@ public class ModuleComment extends AbstractModule
       theEntity.update();
       return theEntity.getId();
     }
-    catch (StorageObjectException e){
+    catch (StorageObjectFailure e){
       logger.error("ModuleComment.set: " + e.getMessage());
       e.printStackTrace(new PrintWriter(new LoggerToWriterAdapter(logger, LoggerWrapper.DEBUG_MESSAGE)));
 
+      throw new ModuleException(e.toString());
+    } catch (StorageObjectExc e) {
       throw new ModuleException(e.toString());
     }
   }

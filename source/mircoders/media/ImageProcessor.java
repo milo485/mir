@@ -31,12 +31,22 @@
 
 package mircoders.media;
 
-import java.io.*;
-import java.awt.image.renderable.ParameterBlock;
-import javax.media.jai.*;
-import com.sun.media.jai.codec.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 
-import mir.log.*;
+import javax.media.jai.InterpolationBilinear;
+import javax.media.jai.JAI;
+import javax.media.jai.ParameterBlockJAI;
+import javax.media.jai.PlanarImage;
+
+import mir.log.LoggerWrapper;
+
+import com.sun.media.jai.codec.ByteArraySeekableStream;
+import com.sun.media.jai.codec.FileSeekableStream;
+import com.sun.media.jai.codec.SeekableStream;
 
 /**
  *
@@ -49,9 +59,6 @@ import mir.log.*;
 
 public class ImageProcessor {
   static final LoggerWrapper logger = new LoggerWrapper("media");
-
-  private static final int DEFAULT_MAX_ICON_SIZE=120;
-  private static final int DEFAULT_MAX_IMAGE_SIZE=640;
 
   private PlanarImage image;
   private PlanarImage scaledImage;

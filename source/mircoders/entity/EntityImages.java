@@ -31,30 +31,28 @@
 
 package mircoders.entity;
 
-import java.lang.*;
-import java.io.*;
-import java.util.*;
-import java.sql.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
 
-/*
- * kind of hack for postgres non-standard LargeObjects that Poolman
- * doesn't know about. see all the casting, LargeObj stuff in getIcon, getImage
- * at some point when postgres has normal BLOB support, this should go.
- */
-import org.postgresql.Connection;
+import mir.config.MirPropertiesConfiguration;
+import mir.misc.FileUtil;
+import mir.misc.WebdbImage;
+import mir.storage.StorageObject;
+import mir.storage.StorageObjectFailure;
+
+import org.postgresql.largeobject.BlobInputStream;
 import org.postgresql.largeobject.LargeObject;
 import org.postgresql.largeobject.LargeObjectManager;
-import org.postgresql.largeobject.BlobInputStream;
-
-import mir.entity.*;
-import mir.misc.*;
-import mir.storage.*;
 
 /**
- * Diese Klasse enthält die Daten eines MetaObjekts
+ * Diese Klasse enth?lt die Daten eines MetaObjekts
  *
  * @author RK, mh, mir-coders
- * @version $Id: EntityImages.java,v 1.13 2002/12/17 19:20:31 zapata Exp $
+ * @version $Id: EntityImages.java,v 1.14 2003/01/25 17:50:34 idfx Exp $
  */
 
 
@@ -75,7 +73,7 @@ public class EntityImages extends EntityUploadedMedia
   // methods
 
 
-  public InputStream getImage() throws StorageObjectException
+  public InputStream getImage() throws StorageObjectFailure
   {
     theLog.printDebugInfo("--getimage started");
     java.sql.Connection con=null;Statement stmt=null;
@@ -113,14 +111,14 @@ public class EntityImages extends EntityUploadedMedia
             +e2.toString());
       }
       theStorageObject.freeConnection(con,stmt);
-      throwStorageObjectException(e, "EntityImages -- getImage failed: ");
+      throwStorageObjectFailure(e, "EntityImages -- getImage failed: ");
     }
     //}
     return img_in;
   }
 
   public void setImage(InputStream in, String type)
-      throws StorageObjectException {
+      throws StorageObjectFailure {
 
     if (in!=null) {
       java.sql.Connection con=null;PreparedStatement pstmt=null;
@@ -129,7 +127,7 @@ public class EntityImages extends EntityUploadedMedia
 
         theLog.printDebugInfo("settimage :: making internal representation of image");
 
-        File tempDir = new File(MirConfig.getProp("TempDir"));
+        File tempDir = new File(MirPropertiesConfiguration.instance().getString("TempDir"));
         f = File.createTempFile("mir", ".tmp", tempDir);
         FileUtil.write(f, in);
         WebdbImage webdbImage= new WebdbImage(f, type);
@@ -169,7 +167,7 @@ public class EntityImages extends EntityUploadedMedia
         update();
       }
       catch (Exception e) {
-        throwStorageObjectException(e, "settimage :: setImage gescheitert: ");
+        throwStorageObjectFailure(e, "settimage :: setImage gescheitert: ");
       }
       finally {
         try {
@@ -193,7 +191,7 @@ public class EntityImages extends EntityUploadedMedia
    *
    * It will also take care of closing the OutputStream.
    */
-  public InputStream getIcon() throws StorageObjectException
+  public InputStream getIcon() throws StorageObjectFailure
   {
     java.sql.Connection con=null;Statement stmt=null;
     BlobInputStream in=null;ImageInputStream img_in=null;
@@ -232,7 +230,7 @@ public class EntityImages extends EntityUploadedMedia
             +e2.toString());
       }
       theStorageObject.freeConnection(con,stmt);
-      throwStorageObjectException(e, "EntityImages -- getIcon failed:");
+      throwStorageObjectFailure(e, "EntityImages -- getIcon failed:");
     }
 
     return img_in;

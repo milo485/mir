@@ -32,8 +32,8 @@
 
 package mircoders.media;
 
-import mir.media.*;
 import mir.entity.Entity;
+import mir.media.MirMedia;
 
 /**
  * This class handles saving, fetching creating representations
@@ -45,7 +45,7 @@ import mir.entity.Entity;
  * @see mir.media.MirMedia
  * @see mircoders.media.MediaHandlerImages
  * @author mh, mir-coders group
- * @version $Id: MediaHandlerImagesJpeg.java,v 1.3 2002/11/27 08:57:32 mh Exp $
+ * @version $Id: MediaHandlerImagesJpeg.java,v 1.4 2003/01/25 17:50:35 idfx Exp $
  */
 
 

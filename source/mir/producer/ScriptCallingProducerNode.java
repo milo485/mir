@@ -31,11 +31,10 @@
 
 package mir.producer;
 
-import java.io.*;
-import java.util.*;
+import java.util.Map;
 
-import mir.util.*;
-import mir.log.*;
+import mir.log.LoggerWrapper;
+import mir.util.ParameterExpander;
 
 public class ScriptCallingProducerNode implements ProducerNode  {
   String scriptExpression;

@@ -31,12 +31,10 @@
 
 package mir.producer;
 
-import java.io.*;
-import java.util.*;
+import java.util.Map;
 
-import mir.util.*;
-import mir.producer.*;
-import mir.log.*;
+import mir.log.LoggerWrapper;
+import mir.util.ParameterExpander;
 
 public class LoggingProducerNode implements ProducerNode {
   private String expression;

@@ -31,26 +31,17 @@
 
 package mircoders.servlet;
 
-import java.io.*;
-import java.sql.*;
-import java.util.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
+import java.io.PrintWriter;
+import java.util.Map;
 
-import org.apache.struts.util.MessageResources;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-import freemarker.template.*;
-
-import mir.servlet.*;
-import mir.misc.*;
-import mir.producer.*;
-import mir.generator.*;
-import mir.producer.*;
-import mir.entity.adapter.*;
-import mir.util.*;
-import mir.log.*;
-
-import mircoders.global.*;
+import mir.log.LoggerToWriterAdapter;
+import mir.log.LoggerWrapper;
+import mir.servlet.ServletModule;
+import mir.servlet.ServletModuleException;
+import mir.util.URLBuilder;
 
 public class ServletModuleAdmin extends ServletModule
 {
@@ -79,7 +70,7 @@ public class ServletModuleAdmin extends ServletModule
       ServletHelper.generateResponse(aResponse.getWriter(), responseData, "superusermenu.template");
     }
     catch (Throwable e) {
-      e.printStackTrace(new PrintWriter(new LoggerToWriterAdapter(logger, logger.ERROR_MESSAGE)));
+      e.printStackTrace(new PrintWriter(new LoggerToWriterAdapter(logger, LoggerWrapper.ERROR_MESSAGE)));
 
       throw new ServletModuleException(e.getMessage());
     }

@@ -31,8 +31,7 @@
 
 package mir.producer;
 
-import java.io.*;
-import mir.log.*;
+import mir.log.LoggerWrapper;
 
 public interface Producer {
   public void produce( LoggerWrapper aLogger ) throws ProducerFailure, ProducerExc;

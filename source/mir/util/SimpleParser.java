@@ -31,8 +31,9 @@
 
 package mir.util;
 
-import java.util.*;
-import gnu.regexp.*;
+import gnu.regexp.RE;
+import gnu.regexp.REException;
+import gnu.regexp.REMatch;
 import multex.Exc;
 import multex.Failure;
 

@@ -31,8 +31,13 @@
 
 package mircoders.producer;
 
-import mir.producer.*;
-import java.util.*;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Vector;
+
+import mir.producer.ProducerFactory;
+import mir.producer.SimpleProducerVerb;
 
 public class OldProducerAdapterFactory implements ProducerFactory {
   private List verbs;

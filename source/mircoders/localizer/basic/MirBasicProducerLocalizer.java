@@ -31,19 +31,35 @@
 
 package mircoders.localizer.basic;
 
-import java.util.*;
-import java.io.*;
-import mir.producer.*;
-import mir.generator.*;
-import mir.producer.reader.*;
-import mir.misc.*;
-import mir.util.*;
-import mir.entity.adapter.*;
-import mircoders.global.*;
-import mircoders.global.*;
-import mircoders.localizer.*;
-import mircoders.producer.reader.*;
-import mircoders.producer.*;
+import java.io.File;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Vector;
+
+import mir.entity.adapter.EntityAdapterModel;
+import mir.generator.Generator;
+import mir.generator.WriterEngine;
+import mir.misc.Logfile;
+import mir.producer.CompositeProducerNode;
+import mir.producer.ProducerFactory;
+import mir.producer.reader.DefaultProducerNodeBuilders;
+import mir.producer.reader.ProducerConfigReader;
+import mir.producer.reader.ProducerNodeBuilderLibrary;
+import mir.util.FileMonitor;
+import mircoders.global.MirGlobal;
+import mircoders.global.ProducerEngine;
+import mircoders.localizer.MirLocalizerExc;
+import mircoders.localizer.MirLocalizerFailure;
+import mircoders.localizer.MirProducerLocalizer;
+import mircoders.producer.CompositeProducerFactory;
+import mircoders.producer.OldProducerAdapterFactory;
+import mircoders.producer.ProducerAudio;
+import mircoders.producer.ProducerImages;
+import mircoders.producer.ProducerOther;
+import mircoders.producer.ProducerVideo;
+import mircoders.producer.reader.SupplementalProducerNodeBuilders;
 
 public class MirBasicProducerLocalizer implements MirProducerLocalizer {
   private List producerFactories;

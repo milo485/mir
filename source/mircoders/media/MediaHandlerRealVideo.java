@@ -31,16 +31,15 @@
 
 package  mircoders.media;
 
-import java.util.*;
 import java.io.StringReader;
 
-import freemarker.template.SimpleList;
+import mir.entity.Entity;
+import mir.media.MirMedia;
+import mir.media.MirMediaException;
+import mir.misc.FileUtil;
+import mir.misc.StringUtil;
 import freemarker.template.SimpleHash;
-
-import mir.media.*;
-import mir.entity.*;
-import mir.misc.*;
-import mir.storage.*;
+import freemarker.template.SimpleList;
 
 
 
@@ -52,7 +51,7 @@ import mir.storage.*;
  * @see mir.media.MediaHandlerGeneric
  * @see mir.media.MirMedia
  * @author john <john@manifestor.org>, mh <mh@nadir.org>
- * @version $Id: MediaHandlerRealVideo.java,v 1.13 2002/11/28 07:28:24 mh Exp $
+ * @version $Id: MediaHandlerRealVideo.java,v 1.14 2003/01/25 17:50:35 idfx Exp $
  */
 
 
@@ -68,8 +67,8 @@ public class MediaHandlerRealVideo extends MediaHandlerVideo implements
     String baseName = ent.getId();
     String date = ent.getValue("date");
     String datePath = StringUtil.webdbDate2path(date);
-    String rtspDir = MirConfig.getProp("Producer.RealMedia.Path");
-    String rtspMediaHost = MirConfig.getProp("Producer.RealMedia.Host");
+    String rtspDir = configuration.getString("Producer.RealMedia.Path");
+    String rtspMediaHost = configuration.getString("Producer.RealMedia.Host");
 
     String RealMediaPointer = rtspMediaHost+ent.getValue("publish_path");
     String RealMediaFile = datePath+ent.getId()+".ram";
@@ -98,7 +97,7 @@ public class MediaHandlerRealVideo extends MediaHandlerVideo implements
     // somehow
     SimpleHash ramHash = new SimpleHash();
     ramHash.put("publish_path", basePath+".ram");
-    ramHash.put("publish_server", MirConfig.getProp("Producer.Media.Host"));
+    ramHash.put("publish_server", configuration.getString("Producer.Media.Host"));
     ramHash.put("title", "stream URL");
     theList.add(ramHash);
 
@@ -108,7 +107,7 @@ public class MediaHandlerRealVideo extends MediaHandlerVideo implements
 
   public String getStoragePath()
   {
-    return MirConfig.getProp("Producer.RealMedia.Path");
+    return configuration.getString("Producer.RealMedia.Path");
   }
 
   public String getDescr(Entity mediaType)
@@ -118,7 +117,7 @@ public class MediaHandlerRealVideo extends MediaHandlerVideo implements
 
   public String getPublishHost()
   {
-    return StringUtil.removeSlash(MirConfig.getProp("Producer.RealMedia.Host"));
+    return StringUtil.removeSlash(configuration.getString("Producer.RealMedia.Host"));
   }
 
 }

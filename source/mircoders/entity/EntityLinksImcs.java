@@ -31,14 +31,15 @@
 
 package mircoders.entity;
 
-import  java.util.*;
+import java.util.Set;
 
-import  mir.entity.*;
-import  mir.storage.*;
-import  mir.storage.store.*;
+import mir.entity.Entity;
+import mir.storage.StorageObject;
+import mir.storage.store.StorableObject;
+import mir.storage.store.StoreIdentifier;
 
 /**
- * Diese Klasse enthält die Daten eines MetaObjekts
+ * Diese Klasse enth?lt die Daten eines MetaObjekts
  *
  * @author RK
  * @version 29.6.1999

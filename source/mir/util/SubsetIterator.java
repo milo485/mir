@@ -31,12 +31,8 @@
 
 package mir.util;
 
-import java.util.*;
-
-import java.util.*;
-import mir.storage.*;
-import mir.util.*;
-import mir.entity.*;
+import java.util.List;
+import java.util.NoSuchElementException;
 
 public class SubsetIterator implements RewindableIterator {
   private RewindableIterator master;

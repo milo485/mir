@@ -31,21 +31,26 @@
 
 package mircoders.servlet;
 
-import java.util.*;
+import java.util.List;
 
-import javax.servlet.*;
-import javax.servlet.http.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
-import mir.servlet.*;
-import mir.entity.adapter.*;
-import mir.log.*;
-import mir.util.*;
-
-import mircoders.global.*;
-import mircoders.localizer.*;
-import mircoders.storage.*;
-import mircoders.entity.*;
-import mircoders.module.*;
+import mir.entity.adapter.EntityAdapter;
+import mir.log.LoggerWrapper;
+import mir.servlet.ServletModule;
+import mir.servlet.ServletModuleException;
+import mir.util.StringRoutines;
+import mircoders.entity.EntityComment;
+import mircoders.entity.EntityContent;
+import mircoders.entity.EntityUsers;
+import mircoders.global.MirGlobal;
+import mircoders.localizer.MirAdminInterfaceLocalizer;
+import mircoders.module.ModuleComment;
+import mircoders.module.ModuleContent;
+import mircoders.storage.DatabaseComment;
+import mircoders.storage.DatabaseContent;
 
 public class ServletModuleLocalizer extends ServletModule {
   private static ServletModuleLocalizer instance = new ServletModuleLocalizer();

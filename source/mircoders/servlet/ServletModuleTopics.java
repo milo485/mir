@@ -31,22 +31,11 @@
 
 package mircoders.servlet;
 
-import java.io.*;
-import java.sql.*;
-import java.util.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
-
-import mir.servlet.*;
-import mir.module.*;
-import mir.misc.*;
-import mir.entity.*;
-import mir.storage.*;
-import mir.log.*;
-
-import mircoders.entity.*;
-import mircoders.storage.*;
-import mircoders.module.*;
+import mir.log.LoggerWrapper;
+import mir.servlet.ServletModule;
+import mir.storage.StorageObjectFailure;
+import mircoders.module.ModuleTopics;
+import mircoders.storage.DatabaseTopics;
 
 /*
  *  ServletModuleTopics
@@ -63,16 +52,17 @@ public class ServletModuleTopics extends ServletModule
   public static ServletModule getInstance() { return instance; }
 
   private ServletModuleTopics() {
+    super();
     logger = new LoggerWrapper("ServletModule.Topics");
 
-    templateListString = MirConfig.getProp("ServletModule.Themen.ListTemplate");
-    templateObjektString = MirConfig.getProp("ServletModule.Themen.ObjektTemplate");
-    templateConfirmString = MirConfig.getProp("ServletModule.Themen.ConfirmTemplate");
+    templateListString = configuration.getString("ServletModule.Themen.ListTemplate");
+    templateObjektString = configuration.getString("ServletModule.Themen.ObjektTemplate");
+    templateConfirmString = configuration.getString("ServletModule.Themen.ConfirmTemplate");
 
     try {
       mainModule = new ModuleTopics(DatabaseTopics.getInstance());
     }
-    catch (StorageObjectException e) {
+    catch (StorageObjectFailure e) {
       logger.error("Initialization of ServletModuleTopics failed!: " + e.getMessage());
     }
   }

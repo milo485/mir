@@ -31,16 +31,9 @@
 
 package mircoders.storage;
 
-import java.lang.*;
-import java.sql.*;
-import java.io.*;
-import java.util.*;
-
-import freemarker.template.*;
-
-import mir.storage.*;
-import mir.entity.*;
-import mir.misc.*;
+import mir.storage.Database;
+import mir.storage.StorageObject;
+import mir.storage.StorageObjectFailure;
 
 /**
  * <b>This class implements the access to the media_type-table for the
@@ -57,7 +50,7 @@ public class DatabaseMediaType extends Database implements StorageObject{
   // could get preemted and we could end up with 2 instances of DatabaseFoo..
   // see the "Singletons with needles and thread" article at JavaWorld -mh
   public synchronized static DatabaseMediaType getInstance() 
-    throws StorageObjectException {
+    throws StorageObjectFailure {
     if (instance == null) {
       instance = new DatabaseMediaType();
       instance.myselfDatabase = instance;
@@ -65,7 +58,7 @@ public class DatabaseMediaType extends Database implements StorageObject{
     return instance;
   }
 
-  private DatabaseMediaType() throws StorageObjectException
+  private DatabaseMediaType() throws StorageObjectFailure
   {
     super();
     this.hasTimestamp = false;
@@ -74,7 +67,7 @@ public class DatabaseMediaType extends Database implements StorageObject{
     try {
       this.theEntityClass = Class.forName("mir.entity.GenericEntity");
     }
-    catch (Exception e) { throw new StorageObjectException(e.toString()); }
+    catch (Exception e) { throw new StorageObjectFailure(e); }
   }
 
 }

@@ -31,8 +31,7 @@
 
 package mir.media;
 
-import java.lang.reflect.*;
-import java.lang.*;
+import java.lang.reflect.Method;
 
 import mir.entity.Entity;
 import mir.storage.Database;

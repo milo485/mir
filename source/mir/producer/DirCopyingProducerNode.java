@@ -31,11 +31,12 @@
 
 package mir.producer;
 
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.util.Map;
 
-import mir.util.*;
-import mir.log.*;
+import mir.log.LoggerWrapper;
+import mir.util.FileCopier;
+import mir.util.ParameterExpander;
 
 public class DirCopyingProducerNode implements ProducerNode  {
   private String sourceExpression;

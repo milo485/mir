@@ -30,30 +30,33 @@
 
 package mircoders.producer;
 
-import java.util.*;
-import java.io.*;
+import java.io.PrintWriter;
+import java.util.Map;
+
+import mir.entity.Entity;
+import mir.entity.adapter.EntityAdapter;
+import mir.log.LoggerToWriterAdapter;
+import mir.log.LoggerWrapper;
+import mir.misc.StringUtil;
+import mir.producer.ProducerFailure;
+import mir.producer.ProducerNode;
+import mir.util.ParameterExpander;
+import mircoders.entity.EntityContent;
+import mircoders.search.AudioSearchTerm;
+import mircoders.search.ContentSearchTerm;
+import mircoders.search.ImagesSearchTerm;
+import mircoders.search.IndexUtil;
+import mircoders.search.KeywordSearchTerm;
+import mircoders.search.TextSearchTerm;
+import mircoders.search.TopicSearchTerm;
+import mircoders.search.UnIndexedSearchTerm;
+import mircoders.search.VideoSearchTerm;
 
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.index.*;
 import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field;
+import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.store.FSDirectory;
-
-import freemarker.template.*;
-
-
-import mir.util.*;
-import mir.log.*;
-import mir.producer.*;
-//import mir.generator.*;
-import mircoders.global.*;
-import mircoders.localizer.*;
-import mir.entity.*;
-import mir.entity.adapter.*;
-import mircoders.entity.*;
-import mircoders.storage.*;
-import mircoders.search.*;
-
 
 public class IndexingProducerNode implements ProducerNode {
   private String contentKey;
@@ -74,9 +77,9 @@ public class IndexingProducerNode implements ProducerNode {
     long endTime;
 
     startTime = System.currentTimeMillis();
-    
-    
-    
+
+
+
     try {
       index = ParameterExpander.expandExpression(aValueMap, indexPath);
       data =  ParameterExpander.findValueForKey( aValueMap, contentKey );
@@ -92,9 +95,9 @@ public class IndexingProducerNode implements ProducerNode {
 
       // create an index here if one did not already exist
       if (! (IndexReader.indexExists(index))){
-	aLogger.error("Didn't find existing index, so I'm making one in "+index);
-	IndexWriter indexCreator = new IndexWriter(index,new StandardAnalyzer(),true);
-	indexCreator.close();
+        aLogger.error("Didn't find existing index, so I'm making one in "+index);
+        IndexWriter indexCreator = new IndexWriter(index,new StandardAnalyzer(),true);
+        indexCreator.close();
       }
 
       IndexUtil.unindexEntity((EntityContent) entity,index);
@@ -106,14 +109,14 @@ public class IndexingProducerNode implements ProducerNode {
       // Text is tokenized,stored, indexed
       // Unindexed is not tokenized or indexed, only stored
       // Unstored is tokenized and indexed, but not stored
-      
+
       //this initialization should go somewhere global like an xml file....
 
       (new KeywordSearchTerm("id","","id","","id")).index(theDoc,entity);
-      
+
       (new KeywordSearchTerm("webdb_create_formatted","search_date","webdb_create_formatted","webdb_create_formatted","webdb_create_formatted")).index(theDoc,entity);
-      
-      (new UnIndexedSearchTerm("","","","where","where")).indexValue(theDoc,entity.getValue("publish_path")+entity.getValue("id")+".shtml");
+
+      (new UnIndexedSearchTerm("","","","where","where")).indexValue(theDoc, StringUtil.webdbDate2path(entity.getValue("date"))+entity.getValue("id")+".shtml");
 
       (new TextSearchTerm("creator","search_creator","creator","creator","creator")).index(theDoc,entity);
       (new TextSearchTerm("title","search_title","title","title","title")).index(theDoc,entity);
@@ -121,17 +124,17 @@ public class IndexingProducerNode implements ProducerNode {
       (new UnIndexedSearchTerm("webdb_create","search_irrelevant","creationDate","creationDate","creationDate")).index(theDoc,entity);
 
       (new ContentSearchTerm("content_data","search_content","content","","")).indexValue(theDoc,
-										     entity.getValue("content_data")+ " "
-										     + entity.getValue("description")+ " "
-										     + entity.getValue("title")
-										     );
+                                                                                     entity.getValue("content_data")+ " "
+                                                                                     + entity.getValue("description")+ " "
+                                                                                     + entity.getValue("title")
+                                                                                     );
 
       (new TopicSearchTerm()).index(theDoc,entity);
 
       (new ImagesSearchTerm()).index(theDoc,entity);
-      
+
       (new AudioSearchTerm()).index(theDoc,entity);
-      
+
       (new VideoSearchTerm()).index(theDoc,entity);
 
 

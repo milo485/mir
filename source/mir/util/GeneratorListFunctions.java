@@ -31,11 +31,12 @@
 
 package mir.util;
 
-import java.util.*;
-import java.net.*;
+import java.util.List;
+import java.util.Vector;
 
-//import mir.misc.*;
-import mir.generator.*;
+import mir.generator.Generator;
+import mir.generator.GeneratorExc;
+import mir.generator.GeneratorFailure;
 
 public class GeneratorListFunctions {
   private GeneratorListFunctions() {}

@@ -31,14 +31,19 @@
 
 package  mir.entity;
 
-import  java.lang.*;
-import  java.util.*;
+import java.util.ArrayList;
+import java.util.Set;
 
-import  freemarker.template.*;
-
-import  mir.misc.*;
-import  mir.storage.*;
-import  mir.storage.store.*;
+import mir.config.MirPropertiesConfiguration;
+import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
+import mir.misc.Logfile;
+import mir.storage.StorageObject;
+import mir.storage.store.StorableObject;
+import mir.storage.store.StoreContainerType;
+import mir.storage.store.StoreIdentifier;
+import mir.storage.store.StoreUtil;
+import freemarker.template.TemplateListModel;
+import freemarker.template.TemplateModel;
 
 /**
  *
@@ -54,6 +59,7 @@ import  mir.storage.store.*;
 public class EntityList implements TemplateListModel, StorableObject {
 
   private static Logfile      theLog;
+  protected static MirPropertiesConfiguration configuration;
   private ArrayList           theEntityArrayList = new ArrayList();
   private String              whereClause, orderClause;
   private StorageObject       theStorage;
@@ -63,7 +69,12 @@ public class EntityList implements TemplateListModel, StorableObject {
 
 
   static {
-    theLog = Logfile.getInstance(MirConfig.getProp("Home") + MirConfig.getProp("Entity.Logfile"));
+    try {
+      configuration = MirPropertiesConfiguration.instance();
+    } catch (PropertiesConfigExc e) {
+      e.printStackTrace();
+    }
+    theLog = Logfile.getInstance(configuration.getStringWithHome("Entity.Logfile"));
   }
 
   /**

@@ -31,9 +31,11 @@
 
 package  mir.config;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
-import mir.config.exceptions.*;
+import mir.config.exceptions.ConfigInvalidPropertyTypeException;
+import mir.config.exceptions.ConfigMissingPropertyException;
 
 public class ConfigSimpleNode implements ConfigNode, ConfigNodeBuilder {
   private Map properties;

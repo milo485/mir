@@ -31,8 +31,10 @@
 
 package mir.producer.reader;
 
-import java.util.*;
-import mir.producer.*;
+import java.util.Map;
+import java.util.Set;
+
+import mir.producer.ProducerNode;
 
 public interface ProducerNodeBuilder  {
   public void setAttributes(Map anAttributes) throws ProducerConfigExc;

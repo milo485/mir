@@ -31,21 +31,18 @@
 
 package mircoders.producer;
 
-import java.util.*;
-import java.io.*;
+import java.io.PrintWriter;
+import java.util.Map;
 
-import freemarker.template.*;
-
-import mir.util.*;
-import mir.log.*;
-import mir.producer.*;
-import mircoders.global.*;
-import mircoders.localizer.*;
-import mir.entity.*;
-import mir.entity.adapter.*;
-import mircoders.entity.*;
-import mircoders.storage.*;
-import mircoders.search.*;
+import mir.entity.Entity;
+import mir.entity.adapter.EntityAdapter;
+import mir.log.LoggerToWriterAdapter;
+import mir.log.LoggerWrapper;
+import mir.producer.ProducerFailure;
+import mir.producer.ProducerNode;
+import mir.util.ParameterExpander;
+import mircoders.entity.EntityContent;
+import mircoders.search.IndexUtil;
 
 
 public class UnIndexingProducerNode implements ProducerNode {

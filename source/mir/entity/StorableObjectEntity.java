@@ -40,8 +40,10 @@ package mir.entity;
  * @version       1.0
  */
 
-import  java.util.*;
-import  mir.storage.store.*;
+import java.util.Set;
+
+import mir.storage.store.StorableObject;
+import mir.storage.store.StoreIdentifier;
 
 
 public class StorableObjectEntity extends Entity

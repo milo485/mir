@@ -1,7 +1,9 @@
 package mir.util;
 
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 public class FileCopier {
   protected static final int FILE_COPY_BUFFER_SIZE = 65536;

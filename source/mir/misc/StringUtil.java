@@ -31,16 +31,19 @@
 
 package  mir.misc;
 
-import  java.io.*;
-import  java.lang.*;
-import  java.util.*;
-import  java.text.NumberFormat;
-import  gnu.regexp.*;
+import gnu.regexp.RE;
+import gnu.regexp.REException;
+
+import java.io.File;
+import java.text.NumberFormat;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.StringTokenizer;
 
 /**
  * Statische Hilfsmethoden zur Stringbehandlung
  *
- * @version $Id: StringUtil.java,v 1.31 2002/12/23 03:15:32 mh Exp $
+ * @version $Id: StringUtil.java,v 1.32 2003/01/25 17:45:18 idfx Exp $
  * @author mir-coders group
  *
  */
@@ -362,7 +365,7 @@ public final class StringUtil {
 
 
   /**
-   * Fügt einen Separator an den Pfad an
+   * F?gt einen Separator an den Pfad an
    * @param path
    * @return Pfad mit Separator am Ende
    */
@@ -372,7 +375,7 @@ public final class StringUtil {
   }
 
   /**
-   * Fügt ein <code>/</code> ans ende des Strings and
+   * F?gt ein <code>/</code> ans ende des Strings and
    * @param path
    * @return Pfad mit <code>/</code> am Ende
    */
@@ -381,7 +384,7 @@ public final class StringUtil {
   }
 
   /**
-   * Löscht <code>/</code> am Ende des Strings, falls vorhanden
+   * L?scht <code>/</code> am Ende des Strings, falls vorhanden
    * @param path
    * @return String ohne <code>/</code> am Ende
    */
@@ -401,7 +404,7 @@ public final class StringUtil {
   }
 
   /**
-   * Löscht Slash am Anfang des Strings
+   * L?scht Slash am Anfang des Strings
    * @param path
    * @return
    */
@@ -483,9 +486,9 @@ public final class StringUtil {
   }
 
   /**
-   * Ermittelt CRC-Prüfsumme von String <code>s</code>
+   * Ermittelt CRC-Pr?fsumme von String <code>s</code>
    * @param s
-   * @return CRC-Prüfsumme
+   * @return CRC-Pr?fsumme
    */
   public static int getCRC(String s) {
     int h = 0;
@@ -501,7 +504,7 @@ public final class StringUtil {
   }
 
   /**
-   * Liefert Default-Wert def zurück, wenn String <code>s</code>
+   * Liefert Default-Wert def zur?ck, wenn String <code>s</code>
    * kein Integer ist.
    *
    * @param s
@@ -518,7 +521,7 @@ public final class StringUtil {
   }
 
   /**
-   * Liefert Defaultwert def zurück, wenn s nicht zu einem float geparsed werden kann.
+   * Liefert Defaultwert def zur?ck, wenn s nicht zu einem float geparsed werden kann.
    * @param s
    * @param def
    * @return geparster float oder def

@@ -113,10 +113,10 @@
 <!--Lucene Query was: ${data.queryString} <br>-->
 <hr>
 <if data.hasPrevious=="y">	
-<input type="submit" name="search_submit" value="${lang("search.back")}" />	
+<input type="submit" name="search_back" value="${lang("search.back")}" />	
 </if>
 <if data.hasNext=="y">	
-<input type="submit" name="search_submit" value="${lang("search.forward")}" />	
+<input type="submit" name="search_forward" value="${lang("search.forward")}" />	
 </if>
 </form>
 <br>

@@ -31,24 +31,14 @@
 
 package mircoders.producer;
 
-import java.io.*;
-import java.lang.*;
-import java.util.*;
-
-import freemarker.template.*;
-
-import mir.misc.*;
-import mir.storage.*;
-import mir.module.*;
-import mir.entity.*;
-
-import mircoders.entity.*;
-import mircoders.storage.*;
+import mir.storage.Database;
+import mir.storage.StorageObjectFailure;
+import mircoders.storage.DatabaseImages;
 
 
 public class ProducerImages extends ProducerMedia {
 
-  protected Database getStorage() throws StorageObjectException {
+  protected Database getStorage() throws StorageObjectFailure {
     return DatabaseImages.getInstance();
   }
 

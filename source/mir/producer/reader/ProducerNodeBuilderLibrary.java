@@ -31,8 +31,8 @@
 
 package mir.producer.reader;
 
-import java.util.*;
-import mir.producer.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ProducerNodeBuilderLibrary {
   private Map nodeBuilders;

@@ -31,7 +31,11 @@
 
 package mir.producer.reader;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.Stack;
 
 public class ScriptedProducerNodeTool {
 

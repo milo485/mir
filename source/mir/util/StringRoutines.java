@@ -31,8 +31,11 @@
 
 package mir.util;
 
-import java.util.*;
-import gnu.regexp.*;
+import gnu.regexp.RE;
+import gnu.regexp.REException;
+
+import java.util.List;
+import java.util.Vector;
 
 public class StringRoutines {
 

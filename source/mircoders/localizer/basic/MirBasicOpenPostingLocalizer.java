@@ -31,14 +31,17 @@
 
 package mircoders.localizer.basic;
 
-import java.util.*;
-import javax.servlet.http.*;
+import java.util.List;
+import java.util.Locale;
 
-import mir.misc.*;
-import mir.util.*;
-import mircoders.global.*;
-import mircoders.localizer.*;
-import mircoders.entity.*;
+import javax.servlet.http.HttpServletRequest;
+
+import mir.misc.Logfile;
+import mircoders.entity.EntityComment;
+import mircoders.entity.EntityContent;
+import mircoders.global.MirGlobal;
+import mircoders.global.ProducerEngine;
+import mircoders.localizer.MirOpenPostingLocalizer;
 
 public class MirBasicOpenPostingLocalizer implements MirOpenPostingLocalizer {
   private List afterContentProducerTasks;

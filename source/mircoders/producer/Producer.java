@@ -31,28 +31,43 @@
 
 package mircoders.producer;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 
-import freemarker.template.*;
-
-import mir.misc.*;
-import mir.storage.*;
-import mir.module.*;
-
-import mircoders.module.*;
-import mircoders.entity.*;
-import mircoders.storage.*;
+import mir.config.MirPropertiesConfiguration;
+import mir.misc.HTMLParseException;
+import mir.misc.HTMLTemplateProcessor;
+import mir.misc.LineFilterWriter;
+import mir.misc.Logfile;
+import mir.module.ModuleException;
+import mir.storage.StorageObjectFailure;
+import mircoders.entity.EntityUsers;
+import mircoders.module.ModuleContent;
+import mircoders.module.ModuleFeature;
+import mircoders.module.ModuleImages;
+import mircoders.module.ModuleLinksImcs;
+import mircoders.module.ModuleSchwerpunkt;
+import mircoders.module.ModuleTopics;
+import mircoders.module.ModuleUploadedMedia;
+import mircoders.storage.DatabaseContent;
+import mircoders.storage.DatabaseFeature;
+import mircoders.storage.DatabaseImages;
+import mircoders.storage.DatabaseLinksImcs;
+import mircoders.storage.DatabaseTopics;
+import freemarker.template.TemplateModelRoot;
 
 abstract public class Producer {
 
-  protected static String   producerDocRoot = MirConfig.getProp("Producer.DocRoot");
-  protected static String   producerStorageRoot = MirConfig.getProp("Producer.StorageRoot");
-  protected static String   producerProductionHost = MirConfig.getProp("Producer.ProductionHost");
-  protected static String   producerOpenAction = MirConfig.getProp("Producer.OpenAction");;
-
-  protected static String   actionRoot = MirConfig.getProp("RootUri") + "/Mir";
-
-  protected static Logfile theLog = Logfile.getInstance(MirConfig.getProp("Home") + "/" + MirConfig.getProp("Producer.Logfile"));
+  protected static MirPropertiesConfiguration configuration;
+  protected static String   producerDocRoot; 
+  protected static String   producerStorageRoot;
+  protected static String   producerProductionHost;
+  protected static String   producerOpenAction;
+  protected static String   actionRoot; 
+  protected static Logfile  theLog;
   protected static ModuleTopics         topicsModule;
   protected static ModuleLinksImcs      linksImcsModule;
   protected static ModuleSchwerpunkt    schwerpunktModule;
@@ -64,7 +79,13 @@ abstract public class Producer {
   static {
 		// init
     try {
-
+			configuration = MirPropertiesConfiguration.instance();
+      producerDocRoot = configuration.getString("Producer.DocRoot");
+      producerStorageRoot = configuration.getString("Producer.StorageRoot");
+      producerProductionHost = configuration.getString("Producer.ProductionHost");
+      producerOpenAction = configuration.getString("Producer.OpenAction");
+      actionRoot = configuration.getString("RootUri") + "/Mir";
+      theLog = Logfile.getInstance(configuration.getStringWithHome("Producer.Logfile"));
       contentModule = new ModuleContent(DatabaseContent.getInstance());
       topicsModule = new ModuleTopics(DatabaseTopics.getInstance());
       linksImcsModule = new ModuleLinksImcs(DatabaseLinksImcs.getInstance());
@@ -74,26 +95,26 @@ abstract public class Producer {
       uploadedMediaModule = new ModuleUploadedMedia(DatabaseImages.getInstance());
 
     }
-    catch(StorageObjectException e)
+    catch(Exception e)
     {
       System.err.println("*** failed to initialize Producer " + e.toString());
     }
   }
 
 	public void handle(PrintWriter htmlout, EntityUsers user)
-		throws StorageObjectException, ModuleException {
+		throws StorageObjectFailure, ModuleException {
 		handle(htmlout,user,false,false);
 	}
 
 	abstract public void handle(PrintWriter htmlout, EntityUsers user, boolean forced, boolean sync)
-		throws StorageObjectException, ModuleException;
+		throws StorageObjectFailure, ModuleException;
 
 //
 // Methods for producing files
 
 	public boolean produce(String template, String filename, TemplateModelRoot model, PrintWriter htmlout) {
 		return _produce(template, filename, model, htmlout, false,
-                    MirConfig.getProp("Mir.DefaultEncoding"));
+                    configuration.getString("Mir.DefaultEncoding"));
 	}
 
 	public boolean produce(String template, String filename, TemplateModelRoot model, PrintWriter htmlout, String encoding) {
@@ -102,7 +123,7 @@ abstract public class Producer {
 
 	public boolean produce_compressed(String template, String filename, TemplateModelRoot model, PrintWriter htmlout) {
 		return _produce(template, filename, model, htmlout, true,
-                    MirConfig.getProp("Mir.DefaultEncoding"));
+                    configuration.getString("Mir.DefaultEncoding"));
 	}
 
 	private boolean _produce(String template, String filename, TemplateModelRoot model, PrintWriter htmlout, boolean compressed, String encoding) {

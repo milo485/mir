@@ -31,12 +31,10 @@
 
 package  mir.media;
 
-import java.util.*;
 import java.io.InputStream;
 
+import mir.entity.Entity;
 import freemarker.template.SimpleList;
-
-import mir.entity.*;
 
 /**
  * Interface for Media handling in Mir. All media handlers
@@ -83,7 +81,7 @@ import mir.entity.*;
  * ) and just override the things that need to be specific. see MediaHandlerAudio
  * 
  * @author <mh@nadir.org>, the Mir-coders group
- * @version $Id: MirMedia.java,v 1.14 2002/11/27 08:22:03 mh Exp $
+ * @version $Id: MirMedia.java,v 1.15 2003/01/25 17:45:17 idfx Exp $
  */
 
 public interface  MirMedia{

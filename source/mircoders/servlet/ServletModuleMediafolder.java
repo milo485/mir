@@ -38,19 +38,20 @@ package mircoders.servlet;
  * @version      02
  */
 
-import java.util.*;
+import java.util.GregorianCalendar;
 
-import javax.servlet.http.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-import freemarker.template.*;
-
-import mir.servlet.*;
-import mir.misc.*;
-import mir.storage.*;
-import mir.log.*;
-
-import mircoders.storage.*;
-import mircoders.module.*;
+import mir.log.LoggerWrapper;
+import mir.misc.StringUtil;
+import mir.servlet.ServletModule;
+import mir.servlet.ServletModuleException;
+import mir.storage.StorageObjectFailure;
+import mircoders.module.ModuleMediafolder;
+import mircoders.storage.DatabaseMediafolder;
+import freemarker.template.SimpleHash;
+import freemarker.template.SimpleScalar;
 
 
 public class ServletModuleMediafolder extends ServletModule
@@ -59,16 +60,17 @@ public class ServletModuleMediafolder extends ServletModule
   private static ServletModuleMediafolder instance = new ServletModuleMediafolder();
 
   private ServletModuleMediafolder() {
+    super();
     logger = new LoggerWrapper("ServletModule.Mediafolder");
 
-    templateListString = MirConfig.getProp("ServletModule.Mediafolder.ListTemplate");
-    templateObjektString = MirConfig.getProp("ServletModule.Mediafolder.ObjektTemplate");
-    templateConfirmString = MirConfig.getProp("ServletModule.Mediafolder.ConfirmTemplate");
+    templateListString = configuration.getString("ServletModule.Mediafolder.ListTemplate");
+    templateObjektString = configuration.getString("ServletModule.Mediafolder.ObjektTemplate");
+    templateConfirmString = configuration.getString("ServletModule.Mediafolder.ConfirmTemplate");
 
     try {
       mainModule = new ModuleMediafolder(DatabaseMediafolder.getInstance());
     }
-    catch (StorageObjectException e) {
+    catch (StorageObjectFailure e) {
       logger.error("Failed to initialize ServletModuleMediafolder: " + e.getMessage());
     }
   }

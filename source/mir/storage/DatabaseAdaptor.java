@@ -31,17 +31,19 @@
 
 package  mir.storage;
 
-import java.util.*;
+import java.util.Properties;
+
+import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
 
 
 /**
- * Interfacedefinition für Datenbank-Adpatoren. Die Adaptoren legen
- * jeweils das Verhalten und die Befehlsmächtigkeit der Datenbank
+ * Interfacedefinition f?r Datenbank-Adpatoren. Die Adaptoren legen
+ * jeweils das Verhalten und die Befehlsm?chtigkeit der Datenbank
  * fest.
  *
  * @author <RK>
  *
- * @version $Id: DatabaseAdaptor.java,v 1.3 2002/12/14 01:37:43 zapata Exp $
+ * @version $Id: DatabaseAdaptor.java,v 1.4 2003/01/25 17:45:19 idfx Exp $
  */
 
 public interface  DatabaseAdaptor{
@@ -49,28 +51,29 @@ public interface  DatabaseAdaptor{
   /* Liefert den Namen der Adaptorklasse
    * @return Adaptorklasse als String
    */
-  public abstract String getDriver();
+  public abstract String getDriver() throws PropertiesConfigExc;
 
   /**
-   * Liefert die URL für JDBC zurück, in den die Parameter user, pass und host
-   * eingefügt werden. Die URL wird aus der Konfiguration geholt.
+   * Liefert die URL f?r JDBC zur?ck, in den die Parameter user, pass und host
+   * eingef?gt werden. Die URL wird aus der Konfiguration geholt.
    *
    * @param user user als String
    * @param pass passwort als String
    * @param host host als String
    * @return url als String
    */
-  public abstract String getURL(String user, String pass, String host);
+  public abstract String getURL(String user, String pass, String host)
+  	throws PropertiesConfigExc;
 
   /**
-   * Gibt zurück, ob das SQL der Datenbank den <code>limit</code>-Befehl beherrscht.
+   * Gibt zur?ck, ob das SQL der Datenbank den <code>limit</code>-Befehl beherrscht.
    * @return true wenn ja, sonst false
    */
   public abstract boolean hasLimit();
 
   /**
-       * Liefert zurück, ob der <code>limit</code>-Befehl erst start und dann offset
-       * hat (true), oder umgekehrt. Nur Relevant, wenn hasLimit true zurückliefert.
+       * Liefert zur?ck, ob der <code>limit</code>-Befehl erst start und dann offset
+       * hat (true), oder umgekehrt. Nur Relevant, wenn hasLimit true zur?ckliefert.
    *
    * @return true wenn erstes, sonst false
    */
@@ -85,11 +88,11 @@ public interface  DatabaseAdaptor{
   public abstract Properties getProperties(String user, String password);
 
   /**
-   * Gibt SQL-Stringfragment zurück, mit dem nach einem insert-Befehl ermittelt
-   * werden kann, wie man den primary-Key des eingefügten Datensatzes bekommt.
+   * Gibt SQL-Stringfragment zur?ck, mit dem nach einem insert-Befehl ermittelt
+   * werden kann, wie man den primary-Key des eingef?gten Datensatzes bekommt.
    *
    * @param theDB Database-Objekt, aus dem ggf. noetige Informationen geholt
-   * werden können, wie z.B. der Tabellenname
+   * werden k?nnen, wie z.B. der Tabellenname
    * @return SQL-Statement als String
    */
   public abstract String getLastInsertSQL(Database theDB);

@@ -31,40 +31,55 @@
 
 package mircoders.servlet;
 
-import java.io.*;
-import java.sql.*;
-import java.util.*;
-import java.net.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
+import java.io.IOException;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.apache.struts.util.MessageResources;
-import org.apache.lucene.index.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
-import freemarker.template.*;
-
-import mir.servlet.*;
-import mir.media.*;
-import mir.module.*;
-import mir.misc.*;
-import mir.storage.*;
-import mir.entity.*;
-import mir.util.*;
-import mir.entity.adapter.*;
-import mir.log.*;
-
-import mircoders.global.*;
-import mircoders.storage.*;
-import mircoders.module.*;
-import mircoders.entity.*;
-import mircoders.localizer.*;
+import mir.entity.EntityList;
+import mir.entity.adapter.EntityAdapterModel;
+import mir.entity.adapter.EntityIteratorAdapter;
+import mir.log.LoggerWrapper;
+import mir.misc.StringUtil;
+import mir.module.ModuleException;
+import mir.servlet.ServletModule;
+import mir.servlet.ServletModuleException;
+import mir.storage.StorageObjectFailure;
+import mir.util.CachingRewindableIterator;
+import mir.util.HTMLRoutines;
+import mir.util.JDBCStringRoutines;
+import mircoders.entity.EntityContent;
+import mircoders.entity.EntityUsers;
+import mircoders.global.MirGlobal;
+import mircoders.module.ModuleContent;
+import mircoders.module.ModuleImages;
+import mircoders.module.ModuleSchwerpunkt;
+import mircoders.module.ModuleTopics;
 import mircoders.search.IndexUtil;
+import mircoders.storage.DatabaseArticleType;
+import mircoders.storage.DatabaseComment;
+import mircoders.storage.DatabaseContent;
+import mircoders.storage.DatabaseContentToTopics;
+import mircoders.storage.DatabaseFeature;
+import mircoders.storage.DatabaseImages;
+import mircoders.storage.DatabaseLanguage;
+import mircoders.storage.DatabaseTopics;
+
+import org.apache.lucene.index.IndexReader;
+
+import freemarker.template.SimpleHash;
+import freemarker.template.SimpleScalar;
+import freemarker.template.TemplateModelRoot;
 
 /*
  *  ServletModuleContent -
  *  deliver html for the article admin form.
  *
- * @version $Id: ServletModuleContent.java,v 1.31 2003/01/18 15:55:14 john Exp $
+ * @version $Id: ServletModuleContent.java,v 1.32 2003/01/25 17:50:36 idfx Exp $
  * @author rk, mir-coders
  *
  */
@@ -83,18 +98,20 @@ public class ServletModuleContent extends ServletModule
   public static ServletModule getInstance() { return instance; }
 
   private ServletModuleContent() {
+    super();
     logger = new LoggerWrapper("ServletModule.Content");
     try {
-      templateListString = MirConfig.getProp("ServletModule.Content.ListTemplate");
-      templateObjektString = MirConfig.getProp("ServletModule.Content.ObjektTemplate");
-      templateConfirmString = MirConfig.getProp("ServletModule.Content.ConfirmTemplate");
+      
+      templateListString = configuration.getString("ServletModule.Content.ListTemplate");
+      templateObjektString = configuration.getString("ServletModule.Content.ObjektTemplate");
+      templateConfirmString = configuration.getString("ServletModule.Content.ConfirmTemplate");
 
       mainModule = new ModuleContent(DatabaseContent.getInstance());
       themenModule = new ModuleTopics(DatabaseTopics.getInstance());
       schwerpunktModule = new ModuleSchwerpunkt(DatabaseFeature.getInstance());
       imageModule = new ModuleImages(DatabaseImages.getInstance());
     }
-    catch (StorageObjectException e) {
+    catch (StorageObjectFailure e) {
       logger.error("servletmodulecontent konnte nicht initialisiert werden");
     }
   }
@@ -192,7 +209,7 @@ public class ServletModuleContent extends ServletModule
 
       _showObject(id, req, res);
     }
-    catch (StorageObjectException e) {
+    catch (StorageObjectFailure e) {
       throw new ServletModuleException(e.toString());
     }
     catch (ModuleException e) {
@@ -236,14 +253,14 @@ public class ServletModuleContent extends ServletModule
           //delete rows in the comment-table
           DatabaseComment.getInstance().deleteByContentId(idParam);
 	  //delete from lucene index, if any
-	  String index=MirConfig.getProp("IndexPath");
+	  String index = configuration.getString("IndexPath");
 	  if (IndexReader.indexExists(index)){
 	    IndexUtil.unindexID(idParam,index);
 	  }
 	  
         } catch (ModuleException e) {
           throw new ServletModuleException(e.toString());
-        } catch (StorageObjectException e) {
+        } catch (StorageObjectFailure e) {
           throw new ServletModuleException(e.toString());
         } catch (IOException e) {
 	  throw new ServletModuleException(e.toString());
@@ -278,7 +295,7 @@ public class ServletModuleContent extends ServletModule
     catch(ModuleException e) {
       logger.error("smod content :: attach :: could not get entityContent");
     }
-    catch(StorageObjectException e) {
+    catch(StorageObjectFailure e) {
       logger.error("smod content :: attach :: could not get entityContent");
     }
 
@@ -299,7 +316,7 @@ public class ServletModuleContent extends ServletModule
     catch(ModuleException e) {
       logger.error("smod content :: dettach :: could not get entityContent");
     }
-    catch(StorageObjectException e) {
+    catch(StorageObjectFailure e) {
       logger.error("smod content :: dettach :: could not get entityContent");
     }
 
@@ -317,7 +334,7 @@ public class ServletModuleContent extends ServletModule
     catch(ModuleException e) {
       logger.error("smod content :: newswire :: could not get entityContent");
     }
-    catch(StorageObjectException e) {
+    catch(StorageObjectFailure e) {
       logger.error("smod content :: dettach :: could not get entityContent");
     }
 
@@ -358,7 +375,7 @@ public class ServletModuleContent extends ServletModule
       else
         _showObject(idParam, req, res);
     }
-    catch (StorageObjectException e) {
+    catch (StorageObjectFailure e) {
       throw new ServletModuleException(e.toString());
     }
     catch (ModuleException e) {

@@ -31,16 +31,16 @@
 
 package mir.misc;
 
-import  java.lang.*;
-import  java.util.*;
-import  java.io.*;
-import  java.net.*;
-import  freemarker.template.*;
-import  mir.entity.*;
-import  mir.storage.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
 
-import javax.servlet.http.*;
-import javax.servlet.*;
+import mir.config.MirPropertiesConfiguration;
+import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
 
 /**
  * Hilfsklasse zum Mergen von Template und Daten
@@ -53,7 +53,12 @@ public final class FileUtil {
   // Initialisierung
 
   static {
-    producerStorageRoot = MirConfig.getProp("Producer.StorageRoot");
+    try {
+      producerStorageRoot = 
+      	MirPropertiesConfiguration.instance().getString("Producer.StorageRoot");
+    } catch (PropertiesConfigExc e) {
+      e.printStackTrace();
+    } 
   }
 
   /**

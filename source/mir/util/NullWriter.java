@@ -31,7 +31,7 @@
 
 package mir.util;
 
-import java.io.*;
+import java.io.Writer;
 
 public class NullWriter extends Writer {
 
