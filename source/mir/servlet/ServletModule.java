@@ -43,7 +43,7 @@ import javax.servlet.http.HttpSession;
 import freemarker.template.SimpleHash;
 import freemarker.template.TemplateModelRoot;
 import mir.config.MirPropertiesConfiguration;
-import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
+import mir.config.MirPropertiesConfiguration$PropertiesConfigExc;
 import mir.entity.EntityList;
 import mir.log.LoggerWrapper;
 import mir.misc.HTMLTemplateProcessor;
@@ -74,6 +74,7 @@ public abstract class ServletModule {
   protected LoggerWrapper logger;
   protected MirPropertiesConfiguration configuration;
   protected AbstractModule mainModule;
+  protected Locale fallbackLocale;
   protected String templateListString;
   protected String templateObjektString;
   protected String templateConfirmString;
@@ -86,6 +87,8 @@ public abstract class ServletModule {
     catch (PropertiesConfigExc e) {
       throw new RuntimeException("Can't get configuration: " + e.getMessage());
     }
+
+    fallbackLocale = new Locale(configuration.getString("Mir.Admin.FallbackLanguage", "en"), "");
   }
 
 
@@ -105,18 +108,6 @@ public abstract class ServletModule {
   }
 
   /**
-   * get the session binded language
-   */
-  public String getLanguage(HttpServletRequest req) {
-    HttpSession session = req.getSession(false);
-    String language = (String) session.getAttribute("language");
-    if (language == null) {
-      language = configuration.getString("StandardLanguage");
-    }
-    return language;
-  }
-
-  /**
    * get the locale either from the session or the accept-language header ot the request
    * this supersedes getLanguage for the new i18n
    */
@@ -132,6 +123,14 @@ public abstract class ServletModule {
       loc = req.getLocale();
     }
     return loc;
+  }
+
+  /**
+   * get the locale either from the session or the accept-language header ot the request
+   * this supersedes getLanguage for the new i18n
+   */
+  public Locale getFallbackLocale(HttpServletRequest req) {
+    return fallbackLocale;
   }
 
   public void redirect(HttpServletResponse aResponse, String aQuery) throws ServletModuleExc, ServletModuleFailure {
@@ -173,7 +172,7 @@ public abstract class ServletModule {
       }
       theList = mainModule.getByWhereClause(null, offset);
 
-      HTMLTemplateProcessor.process(res, templateListString, theList, out, getLocale(req));
+      HTMLTemplateProcessor.process(res, templateListString, theList, null, null, out, getLocale(req), getFallbackLocale(req));
     }
     catch (Throwable e) {
       throw new ServletModuleFailure(e);
@@ -355,7 +354,7 @@ public abstract class ServletModule {
 
     try {
       PrintWriter out = res.getWriter();
-      HTMLTemplateProcessor.process(res, templateFilename, rtm, popups, out, getLocale(req));
+      HTMLTemplateProcessor.process(res, templateFilename, rtm, popups, out, getLocale(req), getFallbackLocale(req));
 
       // we default to admin bundles here, which is not exactly beautiful...
       // but this whole producer stuff is going to be rewritten soon.
@@ -403,7 +402,7 @@ public abstract class ServletModule {
     try {
       PrintWriter out = new LineFilterWriter(res.getWriter());
       //PrintWriter out =  res.getWriter();
-      HTMLTemplateProcessor.process(res, templateFilename, rtm, out, getLocale(req));
+      HTMLTemplateProcessor.process(res, templateFilename, rtm, null, out, getLocale(req), getFallbackLocale(req));
       out.close();
     }
     catch (Throwable e) {
@@ -426,8 +425,7 @@ public abstract class ServletModule {
                        TemplateModelRoot rtm, String templateFilename)
       throws ServletModuleFailure {
     try {
-      HTMLTemplateProcessor.process(res, templateFilename, rtm, out,
-                                    getLocale(req));
+      HTMLTemplateProcessor.process(res, templateFilename, rtm, null, out, getLocale(req), getFallbackLocale(req));
     }
     catch (Throwable e) {
       throw new ServletModuleFailure(e);

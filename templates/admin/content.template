@@ -1,342 +1,238 @@
 <html>
-  <head>
-    <title>${lang("content.htmltitle")}</title>
-    <link rel="stylesheet" type="text/css" href="${config.docRoot}/style/admin.css"
-    <!-- this might one day need to be the lang of the article????? -->
-    <meta http-equiv="Content-Type" content="text/html; charset=${lang("htmlcharset")}">
-  </head>
+<head>
+	<title>${lang("content.htmltitle")}</title>
+	<link rel="stylesheet" type="text/css" href="${config.docRoot}/style/admin.css"
+</head>
 
 <body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
 
+<include "FUNCTIONS.template">
 <include "head.template">
 
-<form accept-charset="${lang("htmlcharset")}" method="post" action="${config.actionRoot}">
-  <input type="hidden" name="charset" value="${lang("htmlcharset")}">
-  <input type="hidden" name="module" value="Content">
-  <input type="hidden" name="id" value="${utility.encodeHTML(article.id)}">
-  <if new=="1">
-    <input type="hidden" name="do" value="insert">
-  <else>
-    <input type="hidden" name="do" value="update">
-  </if>
+<form method="post" action="${config.actionRoot}">
+	<input type="hidden" name="module" value="Content">
+	<input type="hidden" name="id" value="${utility.encodeHTML(article.id)}">
+	<if new=="1">
+		<input type="hidden" name="do" value="insert">
+	<else>
+		<input type="hidden" name="do" value="update">
+	</if>
 
-  <table border="0" width="80%" align="middle">
-    <tr>
-      <td colspan="1">&nbsp</td>
-      <td class="minorcommand" colspan="2">
-        <if new=="0">
-          <a href="${config.actionRoot}?module=Comment&do=articlecomments&articleid=${article.id}">${lang("content.comments")}</a>
-        </if>
-      </td>
-      <td colspan="2" align="right" valign="top">
-        ${lang("content.published")} 
-        <input type="checkbox" name="is_published" value="1"<if article.is_published!="0" && article.is_published!=""> checked</if>>
-        <if new=="1">
-          <input type="submit" name="save" value="${lang("insert")}">
-        <else>
-          <input type="submit" name="save" value="${lang("save")}">
-        </if>
-      </td>
-    </tr>
+<table width="90%" cellspacing="3" cellpadding="2">
+	<tr>
+		<td align="left" valign="top">
+			<if new=="0">
+				<a href="${config.actionRoot}?module=Comment&do=articlecomments&articleid=${article.id}&returnurl=${thisurl}">[ ${lang("content.comments")} ]</a>
+			</if>
+		</td>
+		<td align="right" valign="top">
+			${lang("content.published")} :
+			<input type="checkbox" name="is_published" value="1"<if article.is_published!="0" && article.is_published!=""> checked</if>>
+			<if new=="1">
+				<input type="submit" name="save" value="${lang("insert")}">
+			<else>
+				<input type="submit" name="save" value="${lang("save")}">
+			</if>
+		</td>
+	</tr>
 
-    <tr>
-      <td align="right" class="editfieldname">
-          ${lang("content.import_date")}:
-      </td>
-      <td>
-          ${article.date}
-      </td>
-      <td colspan="3">&nbsp;</td>
-    </tr>
-    <tr>
-      <td align="right" class="editfieldname">
-         ${lang("content.lastchange_date")}:
-      </td>
-      <td>
-        ${utility.encodeHTML(article.webdb_lastchange)}<br>
-      </td>
-      <td colspan="3">&nbsp;</td>
-    </tr>
-  
-    <tr>
-      <td align="right" valign="top" class="editfieldname">
-        ${lang("content.create_date")}:
-      </td>
-      <td colspan="3">
-        ${utility.encodeHTML(article.webdb_create)}<br><br>${lang("edit")} (yyyy-mm-dd [HH:mm]):
-        <input type="text" size="10" maxlength="16" name="webdb_create" value=""><br>
-      </td>
-      <td colspan="3">&nbsp;</td>
-    </tr>
-  
-    <tr>
-      <td align="right" valign="top" class="editfieldname">
-          ${lang("content.articletype")} /  
-          ${lang("content.language")}:
-      </td>
-      <td colspan="4">
-              <select name="to_article_type">
-                <list articletypes as a>
-                  <option value="${a.id}" <if (a.id == article.to_article_type)>selected</if>>${lang("articletypes."+a.name)}</option>
-                </list>
-              </select>
-              <select name="to_language">
-                <list languages as l>
-                  <option value="${l.id}" <if (l.id == article.to_language)>selected</if>>${l.name}</option>
-                </list>
-              </select>
-      </td>
-    </tr>
-    <tr>
-      <td align="right" valign="top" class="editfieldname">
-        ${lang("content.topic")}:
-      </td>
-      <td colspan="4">
-        <if config["Mir.Localizer.Admin.TopicListFlavor"]!="0">      
-          <table border=0 cellpadding="0" cellspacing="0">
-            <tr> 
-                <assign col=config["Mir.Localizer.Admin.TopicListColumns"]>
-                <list topics as t>
-                  <if col=="0">
-                    </tr><tr>
-                    <assign col=config["Mir.Localizer.Admin.TopicListColumns"]>
-                  </if>
-                  <td>
-                    <input type="checkbox" name="to_topic" value="${t.id}" <list article.to_topics as to><if (t.id == to["id"])>checked</if></list>>${t.title}
-                  </td>
-                  <assign col=utility.increment(col, "-1")>
-                </list>
-                
-                <if col!="0">
-                  <td colspan="${col}">
-                    &nbsp;
-                  </td>
-                </if>
-            </tr>
-          </table>
-        <else>
-          <select name="to_topic" size="5" multiple>
-            <list topics as t>
-              <option value="${t.id}" <list article.to_topics as to><if (t.id == to["id"])>selected</if></list>>${t.title}</option>
-            </list>
-          </select>
-        </if>        
-      </td>
-    </tr>
+	<tr>
+		<td align="right" class="table_left">
+			id # :
+		</td>
+		<td class="listrow2">
+			${article.id}
+		</td>
+	</tr>
+	
+	<tr>
+		<td align="right" class="table_left">
+			${lang("content.lastchange_date")}:
+		</td>
+		<td class="listrow2">
+			${utility.encodeHTML(article.webdb_lastchange)}<br>
+		</td>
+	</tr>
 
-    <tr>
-    <td align="right" valign="top" class="editfieldname">
-      ${lang("content.title")}:&nbsp;
-    </td>
-    <td colspan="4">
-      <input type="text" size="40" name="title" value="${utility.encodeHTML(article.title)}"><br>
-    </tr>
-    <tr>
-      <td align="right" valign="top" class="editfieldname">
-          ${lang("content.subtitle")}:&nbsp;<br> 
-      </td>
-      <td colspan="4">
-        <input type="text" size="20" name="subtitle" value="${utility.encodeHTML(article.subtitle)}">
-        <input type="text" size="20" name="edittitle" value="${utility.encodeHTML(article.edittitle)}">
-      </td>
-    </tr>
-    <tr>
-      <td align="right" valign="top" class="editfieldname">
-        ${lang("content.location")}:
-      </td>
-      <td colspan="4" >
-        <input type="text" size="40" name="source" value="${utility.encodeHTML(article.source)}">
-      </td>
-    </tr>
-    <tr>
-      <td align="right" valign="top" class="editfieldname">
-          ${lang("content.creator")}:
-      </td>
-      <td colspan="4">
-        <input type="text" size="40" name="creator" value="${utility.encodeHTML(article.creator)}"><br>
-      </td>
-    </tr>
-  
-    <tr>
-      <td align="right" valign="top" class="editfieldname">
-          ${lang("content.creator.email")}/${lang("content.creator.url")}:
-      </td>
-      <td colspan="4" >
-        <input type="text" size="20" name="creator_email" value="${utility.encodeHTML(article.creator_email)}">
-        <input type="text" size="20" name="creator_main_url" value="${utility.encodeHTML(article.creator_main_url)}">
-      </td>
-    </tr>
-    <tr>
-      <td align="right" valign="top" class="editfieldname">
-          ${lang("content.creator.address")}/${lang("content.creator.telephone")}:
-      </td>
-      <td colspan="4" >
-        <input type="text" size="20" name="creator_address" value="${utility.encodeHTML(article.creator_address)}">
-        <input type="text" size="20" name="creator_phone" value="${utility.encodeHTML(article.creator_phone)}">
-      </td>
-    </tr>
-    <tr>
-      <td align="right" valign="top" class="editfieldname">
-          ${lang("content.abstract")}:
-      </td>
-      <td colspan="4">
-        <textarea cols="70" rows="15" name="description" wrap=virtual>${utility.encodeHTML(article.description)}</textarea>
-      </td>
-    </tr>
-  
-    <tr>
-      <td align="right" valign="top" class="editfieldname">
-        ${lang("content.content")}: 
-        <br>
-        ${lang("content.html")}
-        <input type="checkbox" name="is_html" value="1"<if article.is_html=="1"> checked</if>>&nbsp;
-      </td>
-      <td colspan="4">
-        <textarea cols="70" rows="20" name="content_data" wrap=virtual>${utility.encodeHTML(article.content_data)}</textarea>
-      </td>
-    </tr>
-    <tr>
-      <td align="right" valign="top" class="editfieldname">
-          ${lang("content.comment")}:<br>
-          <i>${lang("content.internal")}</i>
-      </td>
-      <td colspan="4">
-        <textarea cols="70" rows="6" name="comment" wrap=virtual>${utility.encodeHTML(article.comment)}</textarea>
-      </td>
-    </tr>
-    <tr>
-      <td>&nbsp;</td>
-      <td>&nbsp;</td>
-      <td>&nbsp;</td>
-      <td colspan="2" align="right" valign="top">
-        <if new=="1">
-          <input type="submit" name="save" value="${lang("insert")}">
-        <else>
-          <input type="submit" name="save" value="${lang("save")}">
-        </if>
-      </td>
-    </tr>
-<if new=="0">    
-    <tr>
-      <td class="pink" colspan="5">
-        ${lang("content.family")}
-      </td>
-    </tr>
-    <tr>
-      <td align=right valign=top class="editfieldname">
-        ${lang("content.parent")}:
-      </td>
-      <td colspan="4" align="left" valign="top">
-  <if article.parent>
-        <b>${utility.encodeHTML(article.parent.title)}</b>
-        <a href="${config.actionRoot}?module=Content&do=edit&id=${article.parent.id}&returnurl=${utility.encodeURI(thisurl)}">${lang("content.viewparent")}</a> |
-        <a href="${config.actionRoot}?module=Content&do=clearparent&id=${article.id}&returnurl=${utility.encodeURI(thisurl)}">${lang("content.clearparent")}</a> |
-  </if>    
-        <a href="${config.actionRoot}?module=Content&do=selectparent&id=${article.id}&returnurl=${utility.encodeURI(thisurl)}">${lang("content.selectparent")}</a>
-      </td>
-    </tr>
-    <tr>
-      <td align=right valign=top class="editfieldname">
-        ${lang("content.children")}:
-      </td>
-      <td colspan="4" align="left" valign="top">
-        <a href="${config.actionRoot}?module=Content&do=listchildren&article_id=${article.id}">${lang("content.viewchildren")}</a>
-      </td>
-    </tr>
+	<tr>
+		<td align="right" valign="top" class="table_left">
+			${lang("content.create_date")}:
+		</td>
+		<td class="listrow2">
+			${utility.encodeHTML(article.webdb_create)}<br>${lang("edit")}:
+			<input type="text" size="10" maxlength="16" name="webdb_create" value=""> &nbsp; <span class="small">(yyyy-mm-dd [HH:mm])</span>
+		</td>
+	</tr>
 
-    <tr>
-      <td class="pink" colspan="5">
-        ${lang("content.attachments")}
-      </td>
-    </tr>
+	<tr>
+		<td align="right" valign="top" class="table_left">
+			${lang("content.articletype")}:
+		</td>
+		<td class="listrow2">
+				<select name="to_article_type">
+					<list articletypes as a>
+					<option value="${a.id}" <if (a.id == article.to_article_type)>selected</if>>${lang("articletypes."+a.name)}</option>
+					</list>
+				</select>
+		</td>
+	</tr>
+	
+	<tr>
+		<td align="right" class="table_left">
+			${lang("content.language")}
+		</td>
+		<td class="listrow2">
+			<select name="to_language">
+				<list languages as l>
+				<option value="${l.id}" <if (l.id == article.to_language)>selected</if>>${l.name}</option>
+				</list>
+			</select>
+		</td>
+	</tr>
+	
+	
+	
+	
+	<tr>
+		<td align="right" valign="top" class="table_left">
+			${lang("content.topic")}:
+		</td>
+		<td class="listrow2" >
+			<if config["Mir.Localizer.Admin.TopicListFlavor"]!="0">      
+			<table border=0 cellpadding="2" cellspacing="0">
+				<tr> 
+					<assign col=config["Mir.Localizer.Admin.TopicListColumns"]>
+					<list topics as t>
+						<if col=="0">
+				</tr>
+				<tr>
+					<assign col=config["Mir.Localizer.Admin.TopicListColumns"]>
+						</if>
+					<td>
+						<input type="checkbox" name="to_topic" value="${t.id}" <list article.to_topics as to><if (t.id == to["id"])>checked</if></list>>
+						<span class="small"> ${t.title}</span>
+					</td>
+					<assign col=utility.increment(col, "-1")>
+					</list>
+						<if col!="0">
+							<td colspan="${col}">
+								&nbsp;
+							</td>
+						</if>
+				</tr>
+			</table>
+			<else>
+			<select name="to_topic" size="5" multiple>
+				<list topics as t>
+					<option value="${t.id}" <list article.to_topics as to><if (t.id == to["id"])>selected</if></list>>${t.title}</option>
+				</list>
+			</select>
+			</if>        
+		</td>
+	</tr>
+	
+	<call TextInputTableRow      (lang("content.title"), 40, 255, "title", utility.encodeHTML(article.title))>
+	<call TextInputTableRowLight (lang("content.subtitle"), 20, 20, "subtitle", utility.encodeHTML(article.subtitle))>
+    <comment>
+		<call TextInputTableRowLight ("", 20, 20, "subtitle", utility.encodeHTML(article.edittitle))>
+	</comment>
+	<call TextInputTableRowLight (lang("content.location"), 40, 40, "source", utility.encodeHTML(article.source))>
+	<call TextInputTableRow      (lang("content.creator"), 40, 40, "creator", utility.encodeHTML(article.creator))>
+	<call TextInputTableRowLight (lang("content.creator.email"), 40, 60, "creator_email", utility.encodeHTML(article.creator_email))>
+	<call TextInputTableRowLight (lang("content.creator.url"), 40, 60, "creator_main_url", utility.encodeHTML(article.creator_main_url))>
+	<call TextInputTableRowLight (lang("content.creator.address"), 20, 40, "creator_address", utility.encodeHTML(article.creator_address))>
+	<call TextInputTableRowLight (lang("content.creator.telephone"), 20, 40, "creator_phone", utility.encodeHTML(article.creator_phone))>
 
-          <list article.to_media_images as m>
-            <tr>
-              <td align=right valign=top class="editfieldname">
-                  ${lang("content.images")}:
-              </td>
-              <td colspan="4" align="left" valign="top">
-                <a href="${config.actionRoot}?module=Images&do=edit&id=${m["id"]}"><img src="${config.actionRoot}?module=Images&do=getIcon&id=${m["id"]}" alt="edit" border="0"></a>
-                  <a href="${config.actionRoot}?module=Content&do=dettach&cid=${article.id}&mid=${m["id"]}">${lang("delete")}</a>
-              </td>
-            </tr>
-          </list>
-          <tr>
-            <td align=right valign=top class="editfieldname">
-                ${lang("content.images")}:
-            </td>
-            <td colspan="4" align="left" valign="top">
-                <a href="${config.actionRoot}?module=Images&do=list&cid=${article.id}">${lang("content.addimage")}</a> |
-                <a href="${config.actionRoot}?module=Images&do=add&articleid=${article.id}">${lang("content.uploadimage")}</a>
-            </td>
-          </tr>
+	<tr>
+		<td align="right" valign="top" class="table_left">
+			${lang("content.abstract")}:
+		</td>
+		<td class="listrow2">
+			<textarea cols="70" rows="15" name="description" wrap=virtual>${utility.encodeHTML(article.description)}</textarea>
+		</td>
+	</tr>
 
-          <list article.to_media_audio as m>
-            <tr>
-              <td align=right valign=top class="editfieldname">
-                ${lang("content.audio")}:
-              </td>
-              <td colspan="4" align="left" valign="top">
-                <a href="${config.actionRoot}?module=Audio&do=edit&id=${m["id"]}"><img src="${config.docRoot}/img/${m["big_icon"]}" alt="edit" border="0"></a>
-                  <a href="${config.actionRoot}?module=Content&do=dettach&cid=${article.id}&mid=${m["id"]}">${lang("delete")}</a>
-              </td>
-            </tr>
-          </list>
-          <tr>
-            <td align=right valign=top class="editfieldname">
-              ${lang("content.audio")}:
-            </td>
-            <td colspan="4" align="left" valign="top">
-                <a href="${config.actionRoot}?module=Audio&do=list&cid=${article.id}">${lang("content.addaudio")}</a> |
-                <a href="${config.actionRoot}?module=Audio&do=add&articleid=${article.id}">${lang("content.uploadaudio")}</a>
-            </td>
-          </tr>
+	<tr>
+		<td align="right" valign="top" class="table_left">
+			${lang("content.content")}: 
+			<br>
+			${lang("content.html")}&nbsp;
+			<input type="checkbox" name="is_html" value="1"<if article.is_html=="1"> checked</if>>&nbsp;&nbsp;
+		</td>
+		<td class="listrow2">
+			<textarea cols="70" rows="20" name="content_data" wrap=virtual>${utility.encodeHTML(article.content_data)}</textarea>
+		</td>
+	</tr>
+	
+	<tr>
+		<td align="right" valign="top" class="table_left">
+			${lang("content.comment")}:<br>
+			<span class="small">${lang("content.internal")}</span>
+		</td>
+		<td class="listrow2">
+			<textarea cols="70" rows="6" name="comment" wrap=virtual>${utility.encodeHTML(article.comment)}</textarea>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2" align="right" valign="top">
+			<if new=="1">
+				<input type="submit" name="save" value="${lang("insert")}">
+			<else>
+				<input type="submit" name="save" value="${lang("save")}">
+			</if>
+		</td>
+	</tr>
+</table>
+	
+<if new=="0">
 
-          <list article.to_media_video as m>
-            <tr>
-              <td align=right valign=top class="editfieldname">
-                  ${lang("content.video")}:
-              </td>
-              <td colspan="4" align="left" valign="top">
-                <a href="${config.actionRoot}?module=Video&do=edit&id=${m["id"]}"><img src="${config.docRoot}/img/${m["big_icon"]}" alt="edit" border="0"></a>
-                  <a href="${config.actionRoot}?module=Content&do=dettach&cid=${article.id}&mid=${m["id"]}">${lang("delete")}</a>
-              </td>
-            </tr>
-          </list>
-          <tr>
-            <td align=right valign=top class="editfieldname">
-                ${lang("content.video")}:
-            </td>
-            <td colspan="4" align="left" valign="top">
-                <a href="${config.actionRoot}?module=Video&do=list&cid=${article.id}">${lang("content.addvideo")}</a> |
-                <a href="${config.actionRoot}?module=Video&do=add&articleid=${article.id}">${lang("content.uploadvideo")}</a>
-            </td>
-          </tr>
-          <list article.to_media_other as m>
-            <tr>
-              <td align=right valign=top class="editfieldname">
-                  ${lang("content.other")}:
-              </td>
-              <td colspan="4" align="left" valign="top">
-                <a href="${config.actionRoot}?module=Video&do=edit&id=${m["id"]}"><img src="${config.docRoot}/img/${m["big_icon"]}" alt="edit" border="0"></a>
-                <a href="${config.actionRoot}?module=Content&do=dettach&cid=${article.id}&mid=${m["id"]}">${lang("delete")}</a>
-              </td>
-            </tr>
-          </list>
-          <tr>
-            <td align=right valign=top class="editfieldname">
-                ${lang("content.other")}:
-            </td>
-            <td colspan="4" align="left" valign="top">
-              <a href="${config.actionRoot}?module=OtherMedia&do=list&cid=${article.id}">${lang("content.addother")}</a> |
-              <a href="${config.actionRoot}?module=OtherMedia&do=add&articleid=${article.id}">${lang("content.uploadother")}</a>
-            </td>
-          </tr>
-          
+<table width="90%" cellspacing="0" cellpadding="0">
+
+<tr>
+<td align="left" valign="top">
+
+<table cellspacing="3" cellpadding="2">
+	<tr>
+		<td class="table_head" colspan="2">
+			${lang("content.family")}
+		</td>
+	</tr>
+		
+	<tr>
+		<td align=right valign=top class="table_left">
+			${lang("content.parent")}:
+		</td>
+		<td align="left" valign="top" class="listrow2">
+			<if article.parent>
+				<b>${utility.encodeHTML(article.parent.title)}</b><br>
+				<a href="${config.actionRoot}?module=Content&do=edit&id=${article.parent.id}&returnurl=${utility.encodeURI(thisurl)}">${lang("content.viewparent")}</a> |
+				<a href="${config.actionRoot}?module=Content&do=clearparent&id=${article.id}&returnurl=${utility.encodeURI(thisurl)}">${lang("content.clearparent")}</a> |
+			</if>    
+				&nbsp;<a href="${config.actionRoot}?module=Content&do=selectparent&id=${article.id}&returnurl=${utility.encodeURI(thisurl)}">${lang("content.selectparent")}</a>
+		</td>
+	</tr>
+		
+	<tr>
+		<td align=right valign=top class="table_left">
+			${lang("content.children")}:
+		</td>
+		<td align="left" valign="top" class="listrow2">
+			<a href="${config.actionRoot}?module=Content&do=listchildren&article_id=${article.id}">${lang("content.viewchildren")}</a>
+		</td>
+	</tr>
+</table>
+
+</td>
+<td align="right" valign="top">
+<call showArticleAttachments(article)>
+</td>
+</tr>
+</table>
+
 </if>          
-        </table>
-      </form>
-      
-    <include "foot.template">
-  </body>
+
+</form>
+
+	<include "foot.template">
+</body>
 </html>

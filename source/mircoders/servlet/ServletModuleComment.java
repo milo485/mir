@@ -31,8 +31,11 @@
 
 package mircoders.servlet;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -48,36 +51,29 @@ import mir.util.HTTPRequestParser;
 import mir.util.JDBCStringRoutines;
 import mir.util.SQLQueryBuilder;
 import mir.util.URLBuilder;
+import mircoders.entity.EntityComment;
 import mircoders.global.MirGlobal;
 import mircoders.module.ModuleComment;
 import mircoders.module.ModuleContent;
 import mircoders.storage.DatabaseComment;
-import mircoders.storage.DatabaseCommentStatus;
 import mircoders.storage.DatabaseContent;
-import mircoders.storage.DatabaseLanguage;
-import freemarker.template.SimpleHash;
-import freemarker.template.TemplateModelRoot;
 
 /*
  *  ServletModuleComment - controls navigation for Comments
  *
  *
- * @author RK
+ *  @author RK
  */
 
 public class ServletModuleComment extends ServletModule
 {
-
   private ModuleContent     moduleContent;
 
-  // Singelton / Kontruktor
   private static ServletModuleComment instance = new ServletModuleComment();
   public static ServletModule getInstance() { return instance; }
 
   private ServletModuleComment() {
     logger = new LoggerWrapper("ServletModule.Comment");
-
-
     try {
       configuration = MirPropertiesConfiguration.instance();
       templateListString = configuration.getString("ServletModule.Comment.ListTemplate");
@@ -104,19 +100,80 @@ public class ServletModuleComment extends ServletModule
 
   public void showComment(String anId, HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc {
     try {
-      SimpleHash extraInfo = new SimpleHash();
-      TemplateModelRoot data;
+      HTTPRequestParser requestParser = new HTTPRequestParser(aRequest);
+      Map responseData = ServletHelper.makeGenerationData(new Locale[] {getLocale(aRequest), getFallbackLocale(aRequest)});
+      EntityAdapterModel model = MirGlobal.localizer().dataModel().adapterModel();
+      Map comment;
+      URLBuilder urlBuilder = new URLBuilder();
 
-      data = (TemplateModelRoot) mainModule.getById(anId);
+      urlBuilder.setValue("module", "Comment");
+      urlBuilder.setValue("do", "edit");
+      urlBuilder.setValue("id", anId);
+      urlBuilder.setValue("returnurl", requestParser.getParameter("returnurl"));
 
-      extraInfo.put("languages", DatabaseLanguage.getInstance().getPopupData());
-      extraInfo.put("comment_status_values", DatabaseCommentStatus.getInstance().getPopupData());
+      if (anId != null) {
+        responseData.put("new", Boolean.FALSE);
+        comment = model.makeEntityAdapter("comment", mainModule.getById(anId));
+      }
+      else {
+        List fields = DatabaseComment.getInstance().getFields();
+        responseData.put("new", Boolean.TRUE);
+        comment = new HashMap();
+        Iterator i = fields.iterator();
+        while (i.hasNext()) {
+          comment.put(i.next(), null);
+        }
 
-      deliver(aRequest, aResponse, data, extraInfo, templateObjektString);
+//        MirGlobal.localizer().adminInterface().initializeArticle(article);
+      }
+      responseData.put("comment", comment);
+
+      responseData.put("returnurl", requestParser.getParameter("returnurl"));
+      responseData.put("thisurl", urlBuilder.getQuery());
+
+      ServletHelper.generateResponse(aResponse.getWriter(), responseData, templateObjektString);
     }
     catch (Throwable e) {
       throw new ServletModuleFailure(e);
     }
+  }
+
+  public void attach(HttpServletRequest req, HttpServletResponse res) throws ServletModuleExc
+  {
+    String  mediaIdParam = req.getParameter("mid");
+    String  commentId = req.getParameter("commentid");
+
+    if (commentId == null || mediaIdParam==null) throw new ServletModuleExc("smod comment :: attach :: commentid/mid missing");
+
+    try {
+      EntityComment comment = (EntityComment) mainModule.getById(commentId);
+      comment.attach(mediaIdParam);
+    }
+    catch(Throwable e) {
+      throw new ServletModuleFailure(e);
+    }
+
+    showComment(commentId, req, res);
+  }
+
+  public void dettach(HttpServletRequest req, HttpServletResponse res) throws ServletModuleExc
+  {
+    String  commentId = req.getParameter("commentid");
+    String  midParam = req.getParameter("mid");
+    if (commentId == null)
+      throw new ServletModuleExc("smod comment :: dettach :: commentid missing");
+    if (midParam == null)
+      throw new ServletModuleExc("smod comment :: dettach :: mid missing");
+
+    try {
+      EntityComment comment = (EntityComment)mainModule.getById(commentId);
+      comment.dettach(commentId, midParam);
+    }
+    catch(Throwable e) {
+      throw new ServletModuleFailure(e);
+    }
+
+    showComment(commentId, req, res);
   }
 
 
@@ -191,8 +248,6 @@ public class ServletModuleComment extends ServletModule
 
   public void returnCommentList(HttpServletRequest aRequest, HttpServletResponse aResponse,
      String aWhereClause, String anOrderByClause, int anOffset) throws ServletModuleExc {
-    // ML: experiment in using the producer's generation system instead of the
-    //     old one...
 
     HTTPRequestParser requestParser = new HTTPRequestParser(aRequest);
     URLBuilder urlBuilder = new URLBuilder();
@@ -201,7 +256,7 @@ public class ServletModuleComment extends ServletModule
     int count;
 
     try {
-      Map responseData = ServletHelper.makeGenerationData(getLocale(aRequest));
+      Map responseData = ServletHelper.makeGenerationData(new Locale[] { getLocale(aRequest), getFallbackLocale(aRequest)});
       model = MirGlobal.localizer().dataModel().adapterModel();
 
       Object commentList =

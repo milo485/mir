@@ -32,10 +32,10 @@
 package mircoders.servlet;
 
 import java.net.URLEncoder;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import freemarker.template.SimpleHash;
 import mir.entity.EntityList;
 import mir.log.LoggerWrapper;
 import mir.misc.HTMLTemplateProcessor;
@@ -45,7 +45,6 @@ import mir.servlet.ServletModuleFailure;
 import mir.storage.StorageObjectFailure;
 import mircoders.module.ModuleMessage;
 import mircoders.storage.DatabaseMessages;
-import freemarker.template.SimpleHash;
 
 /**
  * Title:       ServletModuleMessage
@@ -105,7 +104,7 @@ public class ServletModuleMessage extends ServletModule
       if (theList.hasPrevBatch())
         mergeData.put("prev", (new Integer(theList.getPrevBatch())).toString());
 
-      HTMLTemplateProcessor.process(res, templateListString, mergeData, res.getWriter(), getLocale(req));
+      HTMLTemplateProcessor.process(res, templateListString, mergeData, res.getWriter(), getLocale(req), getFallbackLocale(req));
 
     }
     catch (Throwable e) {

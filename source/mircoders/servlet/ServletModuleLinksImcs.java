@@ -100,7 +100,7 @@ public class ServletModuleLinksImcs extends ServletModule {
       modelRoot.put("languagelist", theLanguageList);
 
       if (theParentList == null || theParentList.getCount() == 0 || theParentList.getCount() > 1) {
-        HTMLTemplateProcessor.process(res, templateObjektString, modelRoot, res.getWriter(), getLocale(req));
+        HTMLTemplateProcessor.process(res, templateObjektString, modelRoot, res.getWriter(), getLocale(req), getFallbackLocale(req));
       }
       else {
         deliver(req, res, modelRoot, templateObjektString);
@@ -134,7 +134,6 @@ public class ServletModuleLinksImcs extends ServletModule {
       modelRoot.put("to_parent_id", parent);
       String language = req.getParameter("to_language");
       modelRoot.put("to_language", language);
-      modelRoot.put("language", getLanguage(req));
 
       String whereClause = "";
       boolean isFirst = true;
@@ -184,7 +183,7 @@ public class ServletModuleLinksImcs extends ServletModule {
       if (theImcsList.hasPrevBatch())
         modelRoot.put("prev", (new Integer(theImcsList.getPrevBatch())).toString());
 
-      HTMLTemplateProcessor.process(res, templateListString, modelRoot, res.getWriter(), getLocale(req));
+      HTMLTemplateProcessor.process(res, templateListString, modelRoot, res.getWriter(), getLocale(req), getFallbackLocale(req));
 
     }
     catch (Throwable e) {

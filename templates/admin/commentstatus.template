@@ -4,7 +4,7 @@
     <link rel="stylesheet" type="text/css" href="${config.docRoot}/style/admin.css">
   <head>
   <body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
-  
+	<include "FUNCTIONS.template">
     <include "head.template">
     <form action="${config.actionRoot}" method="post">
 
@@ -18,21 +18,16 @@
     
       <table border="0">
         <tr>
-          <td align="right" class="darkgrey"><span class="witesmall">
-      		<B>${lang("commentstatus.id")}:</B></span></td>
-          <td>
+          <td align="right" class="table_left">
+      		<B>${lang("commentstatus.id")}:</B></td>
+          <td class="listrow2">
             ${data.id}
           </td>
         </tr>
+        
+		<call TextInputTableRow (lang("commentstatus.name"), 40, 255, "name", data.name)>
         <tr>
-          <td align="right" class="darkgrey"><span class="witesmall">
-      		<B>${lang("commentstatus.name")}:</B></span></td>
-          <td>
-            <input type="text" size="40" name="name" value="${data.name}">
-          </td>
-        </tr>
-        <tr>
-          <td colspan="2" align="right">
+          <td colspan="2" align="right" class="table_foot">
             <span class="witetext">
               <if data.new>
                 <input type="submit" name="save" value="${lang("insert")}">
@@ -45,7 +40,7 @@
       </table>
 
     </form>
-
+	<p><a class="link_box" href="${config.actionRoot}?module=CommentStatus&do=list">[&lt;] ${lang("back")} </a> &nbsp;</p>
     <include "foot.template">
   </body>
 </html>

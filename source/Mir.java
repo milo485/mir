@@ -62,6 +62,9 @@ import mir.servlet.ServletModuleExc;
 import mir.servlet.ServletModuleUserExc;
 import mir.util.ExceptionFunctions;
 import mir.util.StringRoutines;
+import mir.util.*;
+import mir.entity.*;
+import mir.entity.adapter.*;
 import mircoders.entity.EntityUsers;
 import mircoders.global.MirGlobal;
 import mircoders.module.ModuleMessage;
@@ -69,6 +72,7 @@ import mircoders.module.ModuleUsers;
 import mircoders.storage.DatabaseArticleType;
 import mircoders.storage.DatabaseMessages;
 import mircoders.storage.DatabaseUsers;
+import mircoders.servlet.*;
 
 
 
@@ -77,27 +81,28 @@ import mircoders.storage.DatabaseUsers;
  * Mir.java - main servlet, that dispatches to servletmodules
  *
  * @author $Author: zapata $
- * @version $Id: Mir.java,v 1.41 2003/03/17 20:47:03 zapata Exp $
+ * @version $Id: Mir.java,v 1.43 2003/04/12 15:29:43 zapata Exp $
  *
  */
 public class Mir extends AbstractServlet {
   private static ModuleUsers usersModule = null;
   private static ModuleMessage messageModule = null;
   private final static Map servletModuleInstanceHash = new HashMap();
+  private static Locale fallbackLocale = null;
 
   //I don't know about making this static cause it removes the
   //possibility to change the config on the fly.. -mh
   private static List loginLanguages = null;
-  public HttpSession session;
 
   protected TemplateModel getLoginLanguages() throws ServletException {
     synchronized (Mir.class) {
       try {
         if (loginLanguages == null) {
-          MessageResources messageResources2 =
-            MessageResources.getMessageResources("bundles.admin");
           MessageResources messageResources =
             MessageResources.getMessageResources("bundles.adminlocal");
+          MessageResources messageResources2 =
+            MessageResources.getMessageResources("bundles.admin");
+
           List languages =
             StringRoutines.splitString(MirGlobal.config().getString("Mir.Login.Languages", "en"), ";");
 
@@ -147,11 +152,25 @@ public class Mir extends AbstractServlet {
     return defaultlanguage;
   }
 
+  protected synchronized Locale getFallbackLocale() throws ServletException {
+    try {
+      if (fallbackLocale == null) {
+        fallbackLocale = new Locale(MirPropertiesConfiguration.instance().getString("Mir.Admin.FallbackLanguage", "en"), "");
+      }
+    }
+    catch (Throwable t) {
+      throw new ServletException(t.getMessage());
+    }
+
+    return fallbackLocale;
+  }
+
   public void process(HttpServletRequest aRequest, HttpServletResponse aResponse)
     throws ServletException, IOException, UnavailableException {
     long startTime = System.currentTimeMillis();
     long sessionConnectTime = 0;
     EntityUsers userEntity;
+    HttpSession session;
     String http = "";
 
     configuration.addProperty("ServletName", getServletName());
@@ -171,20 +190,19 @@ public class Mir extends AbstractServlet {
     //FIXME: this seems kind of hackish and only here because we can have
     // default other than the one that the browser is set to.
     Locale locale = new Locale(getDefaultLanguage(aRequest), "");
-    MessageResources messageResources =
-      MessageResources.getMessageResources("bundles.admin");
-    String htmlcharset = messageResources.getMessage(locale, "htmlcharset");
+    String htmlcharset = "UTF-8";
+    try {
+      htmlcharset = MirPropertiesConfiguration.instance().getString("Mir.DefaultHTMLCharset");
+    }
+    catch (Throwable t) {
+    }
 
     aResponse.setContentType("text/html; charset=" + htmlcharset);
 
     String moduleName = aRequest.getParameter("module");
     checkLanguage(session, aRequest);
 
-    /** @todo for cleanup and readability this should be moved to
-     *  method loginIfNecessary() */
-    if ((moduleName != null) && moduleName.equals("direct")) {
-      //...
-    }
+
 
     // Authentication
     if (((moduleName != null) && moduleName.equals("login")) ||
@@ -200,7 +218,8 @@ public class Mir extends AbstractServlet {
         _sendLoginPage(aResponse, aRequest, aResponse.getWriter());
 
         return;
-      } else if ((moduleName != null) && moduleName.equals("login")) {
+      }
+      else if ((moduleName != null) && moduleName.equals("login")) {
         // login successful
         logger.info("--login: successful! setting uid: " + userEntity.getId());
         session.setAttribute("login.uid", userEntity);
@@ -359,8 +378,13 @@ public class Mir extends AbstractServlet {
           ));
       modelRoot.put("date", new SimpleScalar(StringUtil.date2readableDateTime(new GregorianCalendar())));
       HTMLTemplateProcessor.process(
-          aResponse,MirPropertiesConfiguration.instance().getString("Mir.UserErrorTemplate"),
-          modelRoot, out, getLocale(aRequest));
+          aResponse,
+          MirPropertiesConfiguration.instance().getString("Mir.UserErrorTemplate"),
+          modelRoot,
+          null,
+          out,
+          getLocale(aRequest),
+          fallbackLocale);
       out.close();
     }
     catch (Exception e) {
@@ -377,8 +401,9 @@ public class Mir extends AbstractServlet {
       modelRoot.put("errorstring", new SimpleScalar(anException.getMessage()));
       modelRoot.put("date", new SimpleScalar(StringUtil.date2readableDateTime(
                                                new GregorianCalendar())));
-      HTMLTemplateProcessor.process(aResponse,MirPropertiesConfiguration.instance().getString("Mir.ErrorTemplate"),
-                                    modelRoot,out, getLocale(aRequest));
+      HTMLTemplateProcessor.process(
+          aResponse,MirPropertiesConfiguration.instance().getString("Mir.ErrorTemplate"),
+          modelRoot,null,out, getLocale(aRequest), getFallbackLocale());
       out.close();
     }
     catch (Exception e) {
@@ -420,8 +445,7 @@ public class Mir extends AbstractServlet {
       mergeData.put("defaultlanguage", getDefaultLanguage(aRequest));
       mergeData.put("languages", getLoginLanguages());
 
-      HTMLTemplateProcessor.process(aResponse, loginTemplate, mergeData, out,
-        getLocale(aRequest));
+      HTMLTemplateProcessor.process(aResponse, loginTemplate, mergeData, null, out, getLocale(aRequest), getFallbackLocale());
     }
     catch (Throwable e) {
       handleError(aRequest, aResponse, out, e);
@@ -430,27 +454,23 @@ public class Mir extends AbstractServlet {
 
   private void _sendStartPage(HttpServletResponse aResponse, HttpServletRequest aRequest,
     PrintWriter out, EntityUsers userEntity) {
-    String startTemplate = "start_admin.template";
+    String startTemplate = configuration.getString("Mir.StartTemplate");
     String sessionUrl = aResponse.encodeURL("");
 
     try {
-      // merge with logged in user and messages
-      SimpleHash mergeData = new SimpleHash();
-      mergeData.put("session", sessionUrl);
-      mergeData.put("login_user", userEntity);
-
-      if (messageModule == null) {
-        messageModule = new ModuleMessage(DatabaseMessages.getInstance());
-      }
-
+      Map mergeData = ServletHelper.makeGenerationData(new Locale[] {getLocale(aRequest), getFallbackLocale()}, "bundles.admin", "bundles.adminlocal");
       mergeData.put("messages",
-        messageModule.getByWhereClause(null, "webdb_create desc", 0, 10));
+             new CachingRewindableIterator(
+               new EntityIteratorAdapter( "", "webdb_create desc", 10,
+                 MirGlobal.localizer().dataModel().adapterModel(), "internalMessage", 10, 0)));
+      mergeData.put("searchvalue", null);
+      mergeData.put("searchfield", null);
+      mergeData.put("searchispublished", null);
+      mergeData.put("searcharticletype", null);
+      mergeData.put("searchorder", null);
+      mergeData.put("selectarticleurl", null);
 
-      mergeData.put("articletypes",
-        DatabaseArticleType.getInstance().selectByWhereClause("", "id", 0, 20));
-
-      HTMLTemplateProcessor.process(aResponse, startTemplate, mergeData, out,
-        getLocale(aRequest));
+      ServletHelper.generateResponse(aResponse.getWriter(), mergeData, startTemplate);
     }
     catch (Exception e) {
       e.printStackTrace(logger.asPrintWriter(LoggerWrapper.DEBUG_MESSAGE));

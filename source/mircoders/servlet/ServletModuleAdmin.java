@@ -31,8 +31,8 @@
 
 package mircoders.servlet;
 
+import java.util.Locale;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -56,7 +56,7 @@ public class ServletModuleAdmin extends ServletModule
     int count;
 
     try {
-      Map responseData = ServletHelper.makeGenerationData(getLocale(aRequest));
+      Map responseData = ServletHelper.makeGenerationData(new Locale[] { getLocale(aRequest), getFallbackLocale(aRequest)});
       urlBuilder.setValue("module", "Admin");
       urlBuilder.setValue("do", "superusermenu");
 

@@ -54,8 +54,25 @@ import mircoders.storage.DatabaseUploadedMedia;
 
 public class MediaHandlerImagesExtern extends MediaHandlerGeneric
 {
+  private int maxIconSize;
+  private float minDescaleRatio;
+  private int minDescaleReduction;
+
   public MediaHandlerImagesExtern() {
+
     logger = new LoggerWrapper("Media.Images.Extern");
+    try {
+      MirPropertiesConfiguration configuration = MirPropertiesConfiguration.instance();
+    }
+    catch (Throwable t) {
+      logger.fatal("MediaHandlerImagesExtern: can't get configuration");
+
+      throw new RuntimeException(t.toString());
+    }
+
+    maxIconSize = configuration.getInt("Producer.Image.MaxIconSize");
+    minDescaleRatio = configuration.getFloat("Producer.Image.MinDescalePercentage")/100;
+    minDescaleReduction = configuration.getInt("Producer.Image.MinDescaleReduction");
   }
 
   public void produce(Entity anImageEntity, Entity mediaTypeEnt) throws MediaExc, MediaFailure {
@@ -66,7 +83,6 @@ public class MediaHandlerImagesExtern extends MediaHandlerGeneric
       String filePath = datePath + anImageEntity.getId() + ext;
       String iconFilePath = MirPropertiesConfiguration.instance().getString("Producer.StorageRoot") + getIconStoragePath() + filePath;
       String imageFilePath = getStoragePath() + File.separator + filePath;
-      int maxIconSize = MirPropertiesConfiguration.instance().getInt("Producer.Image.MaxIconSize");
 
       File imageFile = new File(imageFilePath);
       File iconFile = new File(iconFilePath);
@@ -77,7 +93,7 @@ public class MediaHandlerImagesExtern extends MediaHandlerGeneric
       else {
         ImageProcessor processor = new ImageProcessor(imageFile, "JPEG");
 
-        processor.descaleImage(maxIconSize, 0.2F);
+        processor.descaleImage(maxIconSize, minDescaleRatio, minDescaleReduction);
         File dir = new File(iconFile.getParent());
           if (dir!=null && !dir.exists()){
             dir.mkdirs();

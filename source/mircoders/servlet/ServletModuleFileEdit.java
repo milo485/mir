@@ -41,6 +41,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
+import java.util.Locale;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -58,7 +59,7 @@ import mir.util.URLBuilder;
  *  in the config file.
  *
  * @author $Author: zapata $
- * @version $Revision: 1.8 $ $Date: 2003/03/17 20:47:04 $
+ * @version $Revision: 1.9 $ $Date: 2003/04/09 02:06:09 $
  *
  */
 
@@ -156,7 +157,7 @@ public class ServletModuleFileEdit extends ServletModule
   public void listSubDirectory(String aSubDirectory, HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc
   {
     try {
-      Map responseData = ServletHelper.makeGenerationData(getLocale(aRequest));
+      Map responseData = ServletHelper.makeGenerationData(new Locale[] { getLocale(aRequest), getFallbackLocale(aRequest)});
       File dir = new File(rootDirectory, aSubDirectory);
 
       if (!validateDirectory(dir) || !dir.isDirectory()) {
@@ -198,7 +199,7 @@ public class ServletModuleFileEdit extends ServletModule
         listSubDirectory("", aRequest, aResponse);
       }
       else {
-        Map responseData = ServletHelper.makeGenerationData(getLocale(aRequest));
+        Map responseData = ServletHelper.makeGenerationData(new Locale[] { getLocale(aRequest), getFallbackLocale(aRequest)});
         URLBuilder urlBuilder = new URLBuilder();
 
         urlBuilder.setValue("module", "FileEdit");

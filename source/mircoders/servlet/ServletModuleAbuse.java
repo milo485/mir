@@ -1,16 +1,16 @@
 package mircoders.servlet;
 
+import java.util.Locale;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import mir.log.LoggerWrapper;
 import mir.servlet.ServletModule;
 import mir.servlet.ServletModuleFailure;
-import mir.util.URLBuilder;
 import mir.util.HTTPRequestParser;
-import mircoders.global.*;
+import mir.util.URLBuilder;
+import mircoders.global.MirGlobal;
 
 public class ServletModuleAbuse extends ServletModule {
   private static ServletModuleAbuse instance = new ServletModuleAbuse();
@@ -55,7 +55,7 @@ public class ServletModuleAbuse extends ServletModule {
     URLBuilder urlBuilder = new URLBuilder();
 
     try {
-      Map responseData = ServletHelper.makeGenerationData(getLocale(aRequest));
+      Map responseData = ServletHelper.makeGenerationData(new Locale[] { getLocale(aRequest), getFallbackLocale(aRequest)});
 
       urlBuilder.setValue("module", "Abuse");
       urlBuilder.setValue("do", "showfilters");
@@ -76,7 +76,7 @@ public class ServletModuleAbuse extends ServletModule {
     URLBuilder urlBuilder = new URLBuilder();
 
     try {
-      Map responseData = ServletHelper.makeGenerationData(getLocale(aRequest));
+      Map responseData = ServletHelper.makeGenerationData(new Locale[] { getLocale(aRequest), getFallbackLocale(aRequest)});
 
       urlBuilder.setValue("module", "Abuse");
       urlBuilder.setValue("do", "showsettings");
@@ -134,7 +134,7 @@ public class ServletModuleAbuse extends ServletModule {
     int count;
 
     try {
-      Map responseData = ServletHelper.makeGenerationData(getLocale(aRequest));
+      Map responseData = ServletHelper.makeGenerationData(new Locale[] { getLocale(aRequest), getFallbackLocale(aRequest)});
       urlBuilder.setValue("module", "Abuse");
       urlBuilder.setValue("do", "showlog");
       responseData.put("thisurl", urlBuilder.getQuery());

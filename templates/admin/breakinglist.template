@@ -6,43 +6,44 @@
 
 <body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
 
-<include "head.template">
-<if data.contentlist>
-<table border="0" cellpadding="2" cellspacing="1">
-  <tr class="darkgrey">
-    <td><span class="witesmall"><b>${lang("breaking.date")}</b></span></td>
-    <td><span class="witesmall"><b>${lang("breaking.text")}</b></span></td>
-    <td>&nbsp;</td>
-  </tr>
+  	<include "FUNCTIONS.template">
+  
+    <include "head.template">
 
-  <list data.contentlist as entry>
-  <tr
-       <if grey=="1"><assign grey="0">class="list1"<else>class="list2"<assign grey="1"> </if>>
-  <td>${entry.webdb_create_formatted}&nbsp;</td>
-  <td>${entry.text}&nbsp;</td>
-  <td><span class="text">&nbsp;<a href="${config.actionRoot}?module=Breaking&do=delete&id=${entry.id}">${lang("delete")}</a>
-    | <a href="${config.actionRoot}?module=Breaking&do=edit&id=${entry.id}">${lang("edit")}</a></span></td>
-  </tr>
-  </list>
-  <tr>
-    <td colspan="3" class="darkgrey"><span class="witetext">${data.count} ${lang("records")}
-      /  ${lang("show_from_to", data.from, data.to)}</span></td>
-    <td>&nbsp;</td>
-  </tr>
-</table>
+		<comment>configure this template here</comment>
+		<assign contentlist =
+		 data.contentlist>
+		<assign column_nr = 3>
+		<assign column_head_texts = [lang("breaking.date"), lang("breaking.text")]>
+		<assign data_keys = ["webdb_create_formatted", "text",]>
+		<assign column_head_CSS = "table_head">
+		<assign listrow1CSS = "listrow1">
+		<assign listrow2CSS = "listrow2">
+		<assign footer_css = "table_foot">
+		<assign module_name = "Breaking">
+		<assign module_jumpback = "Admin">
+		<assign do_jumpback = "">
 
-      <P>
-<if data.prev>
-	<a href="${config.actionRoot}?module=Breaking&do=list&where=${data.where}&prevoffset=${data.prev}&prev=zur&uuml;ck">${lang("list.previous")}</a>&nbsp;
-</if>
-<if data.next>
-<a href="${config.actionRoot}?module=Breaking&do=list&where=${data.where}&nextoffset=${data.next}&next=weiter">${lang("list.next")}</a>
-</if>
+    <if data.contentlist>
+	
+	<p>
+      <a class="link_box" href="${config.actionRoot}?module=Breaking&do=add">[+] ${lang("add")}</a> &nbsp;
+      <a class="link_box" href="${config.actionRoot}">[&lt;&lt;&lt;] ${lang("head.start")}</a>
+	</p>
+		
+		<call ListTable(contentlist, data_keys, column_head_texts, column_head_CSS, listrow1CSS, listrow2CSS, footer_css, module_name)>	  
+		<call PrevNextPage(module_name)>	  
+   <else>
+		<P align="center" class="box">${lang("no_matches_found")}</p>
+    </if>
+    
+	 <p>
+      <a class="link_box" href="${config.actionRoot}?module=Breaking&do=add">[+] ${lang("add")}</a> &nbsp;
+      <a class="link_box" href="${config.actionRoot}">[&lt;&lt;&lt;] ${lang("head.start")}</a>
+	</p>
 
-<else>
-  <P align="center">${lang("no_matches_found")}</p>
-</if>
-<include "foot.template">
+
+    <include "foot.template">
 </body>
 </html>
 

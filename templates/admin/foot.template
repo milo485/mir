@@ -1,11 +1,23 @@
-<table width="100%" cellspacing="0" cellpadding="0">
-<tr>
-	<td colspan=2><hr></td>
-</tr>
-<tr>
-	<td align="left" class="darkgrey"><span class="small">
-	<a href="#top"><span class="whitetext"><b>${lang("foot.top")}</b></span></a></span></td>
-	<td align="right"><span class="small">
-	<a href="mailto:${lang("Mir.Contact-email.address")}"><span class="spezialtext"><b>${config["Mir.Shortname"]}</b></span></a> - ${config["Mir.Version"]}</span></td>
-</tr>
+<hr>	
+<table width="99%" cellspacing="0">
+	<tbody>
+	<tr>
+		<td align="left" class="table_head">
+			<a href="#top"><span class="table_head"> ${lang("foot.top")}</span></a>
+			<if returnurl>
+				<a href="${config.actionRoot}?${returnurl}"><span class="table_head"> | &nbsp;&nbsp;${lang("back")} [ &lt; ]</span></a>&nbsp;&nbsp;
+			</if>
+		</td>
+		<td align="right" class="table_head">
+			<a href="mailto:${config["Mir.Contact-email.address"]}"><span class="table_head">${config["Mir.Shortname"]}</span></a> - ${config["Mir.Version"]}
+		</td>
+	</tr>
+</tbody>
 </table>
+
+
+	
+	
+	
+
+

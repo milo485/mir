@@ -41,7 +41,7 @@ import mir.storage.StorageObjectFailure;
  * This class handles storage of audio data and meta data
  *
  * @author mh
- * @version $Id: EntityAudio.java,v 1.9 2003/03/16 19:54:45 zapata Exp $
+ * @version $Id: EntityAudio.java,v 1.10 2003/04/09 02:06:08 zapata Exp $
  */
 
 

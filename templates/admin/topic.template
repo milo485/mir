@@ -5,7 +5,9 @@
   <head>
 
   <body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
-    <include "head.template">
+    <include "FUNCTIONS.template">
+	
+	<include "head.template">
 
     <form action="${config.actionRoot}" method="post">
       <input type=hidden name=module value=Topics>
@@ -17,54 +19,23 @@
       </if>
 
       <table border="0">
-        <tr>
-          <td align="right" class="darkgrey">
-            <span class="witesmall">
-              <b>${lang("topic.title")}:</b>
-            </span>
-          </td>
-          <td>
-            <input type="text" size="40" name="title" value="${data.title}">
-          </td>
-        </tr>
-        <tr>
-          <td align="right" valign="top" class="darkgrey">
-            <span class="witetext"><b>${lang("topic.description")}:</b></span>
-          </td>
-          <td>
-              <textarea cols="40" rows="3" name="description">${data.description}</textarea>
-            </td>
-        </tr>
-        <tr>
-          <td align="right" class="darkgrey"><span class="witetext"><B>${lang("topic.filename")}:</B></span></td>
-          <td>
-            <input type="text" size="20" name="filename" value="${data.filename}">
-          </td>
-        </tr>
-        <tr>
-          <td align="right" class="darkgrey"><span class="witetext"><B>${lang("topic.main_url")}
-            </B></span></td>
-          <td>
-            <input type="text" size="40" name="main_url" value="${data.main_url}">
-          </td>
-        </tr>
-        <tr>
-          <td align="right" class="darkgrey"><span class="witetext"><B>${lang("topic.archive_url")}:</B></span></td>
-          <td>
-            <input type="text" size="40" name="archiv_url" value="${data.archiv_url}">
-          </td>
-        </tr>
-        <tr>
-          <td colspan="2" align="right"> <span class="witetext">
+		<call TextInputTableRow (lang("topic.title"), 40, 255, "title", data.title)>
+		<call TextAreaTableRow (lang("topic.description"), 40, 3, "description", data.description)>
+		<call TextInputTableRow (lang("topic.filename"), 20, 255, "filename", data.filename)>
+		<call TextInputTableRow (lang("topic.main_url"), 40, 255, "main_url", data.main_url)>
+		<call TextInputTableRow (lang("topic.archive_url"), 40, 255, "archiv_url", data.archiv_url)>
+
+          <td class="table_foot" colspan="2" align="right"> 
           <if data.new>
             <input type="submit" name="save" value="${lang("insert")}">
           <else>
             <input type="submit" name="save" value="${lang("save")}">
-          </if> </span>
+          </if> 
           </td>
         </tr>
-      </table>
+      </table>	  
     </form>
+	<p><a class="link_box" href="${config.actionRoot}?module=Topics&do=list">[&lt;] ${lang("back")} </a> &nbsp;</p>
     <include "foot.template">
   </body>
 </html>

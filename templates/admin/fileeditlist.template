@@ -1,82 +1,86 @@
 <html>
 <head>
 	<title>${config["Mir.Name"]} | ${lang("fileeditlist.htmltitle")}</title>
-        <link rel="stylesheet" type="text/css" href="${config.docRoot}/style/admin.css">
+		<link rel="stylesheet" type="text/css" href="${config.docRoot}/style/admin.css">
 </head>
 
 <body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
+
 <include "head.template">
 
-<if dirlist || updir>
+<table cellpadding="16"><tr><td valign="top">
 
-  <table border="0" cellpadding="2" cellspacing="1">
-  
-    <tr class="dark">
-      <td><span class="witesmall"><b>${lang("fileeditlist.dirname")}</b></span></td>
-    	<td>&nbsp;</td>
-    </tr>
-    
-    <assign grey="0">
-    
-    <if updir>
-          <tr class="list1">
-            <td>..&nbsp;</td>
-            <td><span class="small"><a href="${config.actionRoot}?module=FileEdit&do=enter&subdirectory=${utility.encodeURI(updir)}&directory=">${lang("edit")}</a></span></td>
-          </tr>
-    </if>
-  
-    <if dirlist>
-      <list dirlist as entry>
-            <if grey=="1">
-              <assign grey="0">
-              <tr class="list1">
-            <else>
-              <tr class="list2">
-              <assign grey="1"> 
-            </if>
-                <td>${entry}&nbsp;</td>
-                <td><span class="small"><a href="${config.actionRoot}?module=FileEdit&do=enter&subdirectory=${utility.encodeURI(subdirectory)}&directory=${utility.encodeURI(entry)}">${lang("edit")}</a></span></td>
-              </tr>
-      </list>
-    </if>
-  
-  </table>
+
+<if dirlist || updir>
+<table border="0" cellpadding="2" cellspacing="2">
+
+	<tr>
+		<td class="table_head"><b>${lang("fileeditlist.dirname")}</b></td>
+		<td class="table_head">&nbsp;</td>
+	</tr>
+	<assign grey="0">
+
+<if updir>
+	<tr class="list1">
+		<td>&nbsp;..&nbsp;</td>
+		<td><a class="tablecommand" href="${config.actionRoot}?module=FileEdit&do=enter&subdirectory=${utility.encodeURI(updir)}&directory=">${lang("edit")}</a></td>
+	</tr>
 </if>
 
+<if dirlist>
+	<list dirlist as entry>
+		<if grey=="1">
+			<assign grey="0">
+			<tr class="listrow1">
+		<else>
+			<tr class="listrow2">
+			<assign grey="1"> 
+		</if>
+				<td> ${entry}&nbsp;</td>
+				<td class="tablecommand"><a href="${config.actionRoot}?module=FileEdit&do=enter&subdirectory=${utility.encodeURI(subdirectory)}&directory=${utility.encodeURI(entry)}">${lang("edit")}</a></td>
+			</tr>
+	</list>
+	</if>
+
+</table>
+</if>
+
+
+</td>
+<td valign="top">
+
+
 <if filelist || updir || dirlist>
-<p></p>
+
 </if>
 
 <if filelist>
 
-<table border="0" cellpadding="2" cellspacing="1">
+<table border="0" cellpadding="2" cellspacing="2">
 
-  <tr class="dark">
-    <td><span class="witesmall"><b>${lang("fileeditlist.filename")}</b></span></td>
-  	<td>&nbsp;</td>
-  </tr>
-
-  <assign grey="0">
-
-  <list filelist as entry>
-        <if grey=="1">
-          <assign grey="0">
-          <tr class="list1">
-        <else>
-          <tr class="list2">
-          <assign grey="1"> 
-        </if>
-            <td>${entry}&nbsp;</td>
-            <td><span class="small"><a href="${config.actionRoot}?module=FileEdit&do=edit&subdirectory=${utility.encodeURI(subdirectory)}&filename=${utility.encodeURI(entry)}">${lang("edit")}</a></span></td>
-          </tr>
-  </list>
-
+	<tr>
+		<td class="table_head"><b>${lang("fileeditlist.filename")}</b></td>
+		<td class="table_head">&nbsp;</td>
+	</tr>
+<assign grey="0">
+<list filelist as entry>
+	<if grey=="1">
+		<assign grey="0"><tr class="listrow1">
+	<else><tr class="listrow2">
+		<assign grey="1">
+	</if>
+			<td>${entry}&nbsp;</td>
+			<td class="tablecommand"><a href="${config.actionRoot}?module=FileEdit&do=edit&subdirectory=${utility.encodeURI(subdirectory)}&filename=${utility.encodeURI(entry)}">${lang("edit")}</a></td>
+		</tr>
+</list>
 </table>
 
-<P>
+</td></tr></table>
 
+
+<P>
 <else>
-  <P align="center">${lang("no_matches_found")}</p>
+	<P align="center" class="box">${lang("no_matches_found")}</p>
 </if>
 <include "foot.template">
 </body>

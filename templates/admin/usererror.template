@@ -3,7 +3,7 @@
 <title>${lang("usererror.htmltitle")}</title>
 </head>
 <body>
-<include "head_nonavi.template">
+<include "templates/admin/head_nonavi.template">
 <table width="100%" border="0" align="center">
 	<tr bgcolor="#006600">
 		<td>

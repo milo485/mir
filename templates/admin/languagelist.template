@@ -4,56 +4,33 @@
     <link rel="stylesheet" type="text/css" href="${config.docRoot}/style/admin.css">
   </head>
   <body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
+
+  	<include "FUNCTIONS.template">
+  
     <include "head.template">
 
-    <p>
-      <a class="majorcommand" href="${config.actionRoot}?module=Language&do=add">${lang("add")}</a> |
-      <a class="majorcommand" href="${config.actionRoot}?module=Admin&do=superusermenu">${lang("back")}</a>
-    </p>
+		<comment>configure this template here</comment>
+		<assign contentlist = data.contentlist>
+		<assign column_nr = 3>
+		<assign data_keys = ["name","code"]>
+		<assign column_head_texts = [lang("language.name"), lang("language.code")]>
+		<assign column_head_CSS = "table_head">
+		<assign listrow1CSS = "listrow1">
+		<assign listrow2CSS = "listrow2">
+		<assign footer_css = "table_foot">
+		<assign module_name = "Language">
+		<assign module_jumpback = "Admin">
+		<assign do_jumpback = "superusermenu">
 
     <if data.contentlist>
-      <table border="0" cellpadding="2" cellspacing="1">
-        <tr class="darkgrey">
-          <td><span class="witesmall"><b>${lang("language.name")}</b></span></td>
-          <td><span class="witesmall"><b>${lang("language.code")}</b></span></td>
-        	<td>&nbsp;</td>
-        </tr>
-      
-        <list data.contentlist as entry>
-          <if grey=="1"><assign grey="0"><tr class="list1"><else><tr class="list2"><assign grey="1"></if>
-            <td>${entry.name}&nbsp;</td>
-            <td>${entry.code}&nbsp;</td>
-            <td>
-              <span class="text">&nbsp;
-                <a href="${config.actionRoot}?module=Language&do=delete&id=${entry.id}">${lang("delete")}</a> | 
-                <a href="${config.actionRoot}?module=Language&do=edit&id=${entry.id}">${lang("edit")}</a>
-              </span>
-            </td>
-          </tr>
-        </list>
-        <tr>
-          <td colspan="3" class="darkgrey"><span class="witetext">${data.count} ${lang("records")}
-            / ${lang("show_from_to", data.from, data.to)}</span></td>
-          <td>&nbsp;</td>
-        </tr>
-      </table>
-      
-      <p>
-      <if data.prev>
-    	  <a href="${config.actionRoot}?module=Language&do=list&where=${data.where}&prevoffset=${data.prev}&prev=zur&uuml;ck">${lang("list.previous")}</a>&nbsp;
-      </if>
-      <if data.next>
-      <a href="${config.actionRoot}?module=Language&do=list&where=${data.where}&nextoffset=${data.next}&next=weiter">${lang("list.next")}</a>
-      </if>
-    <else>
-      <P align="center">${lang("no_matches_found")}</p>
+		<call AddOrBack(module_name, module_jumpback, do_jumpback)>
+		<call ListTable(contentlist, data_keys, column_head_texts, column_head_CSS, listrow1CSS, listrow2CSS, footer_css, module_name)>	  
+		<call PrevNextPage(module_name)>	  
+   <else>
+		<P align="center">${lang("no_matches_found")}</p>
     </if>
-
-    <p>
-      <a class="majorcommand" href="${config.actionRoot}?module=Language&do=add">${lang("add")}</a> |
-      <a class="majorcommand" href="${config.actionRoot}?module=Admin&do=superusermenu">${lang("back")}</a>
-    </p>
-
+    
+	<call AddOrBack(module_name, module_jumpback, do_jumpback)>
     <include "foot.template">
   </body>
 </html>

@@ -77,7 +77,7 @@ import freemarker.template.SimpleList;
  * Treiber, Host, User und Passwort, ueber den der Zugriff auf die
  * Datenbank erfolgt.
  *
- * @version $Id: Database.java,v 1.36 2003/03/05 19:23:15 idfx Exp $
+ * @version $Id: Database.java,v 1.37 2003/04/09 02:06:07 zapata Exp $
  * @author rk
  *
  */

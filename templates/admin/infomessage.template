@@ -11,6 +11,12 @@
 			<p>
 			  <b>${lang("infomessage."+message, argument1, argument2)}<b>
 			<p>
+			<p>
+				<br>
+				<a class="link_box" href="${config.actionRoot}">[&lt;&lt;&lt;] ${lang("head.start")}</a>&nbsp;&nbsp;&nbsp;
+				
+			</p>
+			
 		</td>
 	</tr>
 </table>

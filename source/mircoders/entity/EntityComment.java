@@ -35,12 +35,15 @@ import java.util.Map;
 
 import mir.entity.Entity;
 import mir.storage.StorageObject;
+import mir.storage.StorageObjectFailure;
+import mircoders.storage.DatabaseCommentToMedia;
+import mircoders.storage.DatabaseContent;
 
 /**
  * This class maps one line of the comment-table to a java-object.
  *
  * @author $Author: zapata $
- * @version $Revision: 1.14 $ $Date: 2003/03/04 22:00:52 $
+ * @version $Revision: 1.15 $ $Date: 2003/04/10 03:31:46 $
  */
 
 
@@ -80,5 +83,49 @@ public class EntityComment extends Entity
 
     }
     super.setValues(theStringValues);
+  }
+
+  /**
+   * Deattaches media from a comment
+   *
+   * @param aCommentId
+   * @param aMediaId
+   * @throws StorageObjectFailure
+   */
+  public void dettach(String aCommentId,String aMediaId) throws StorageObjectFailure
+  {
+    if (aMediaId!=null){
+      try{
+        DatabaseCommentToMedia.getInstance().delete(aCommentId, aMediaId);
+      }
+      catch (Exception e){
+        throwStorageObjectFailure(e, "dettach: failed to get instance");
+      }
+
+      DatabaseContent.getInstance().setUnproduced("id="+getValue("to_media"));
+    }
+  }
+
+  /**
+   *
+   * @param aMediaId
+   * @throws StorageObjectFailure
+   */
+
+  public void attach(String aMediaId) throws StorageObjectFailure
+  {
+    if (aMediaId!=null) {
+      try{
+        DatabaseCommentToMedia.getInstance().addMedia(getId(), aMediaId);
+      }
+      catch(StorageObjectFailure e){
+        throwStorageObjectFailure(e, "attach: could not get the instance");
+      }
+
+      DatabaseContent.getInstance().setUnproduced("id="+getValue("to_media"));
+    }
+    else {
+      logger.error("EntityContent: attach without mid");
+    }
   }
 }

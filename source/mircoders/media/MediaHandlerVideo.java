@@ -42,7 +42,7 @@ import mir.media.MirMedia;
  * @see mir.media.MediaHandlerGeneric
  * @see mir.media.MirMedia
  * @author john <john@manifestor.org>
- * @version $Id: MediaHandlerVideo.java,v 1.7 2003/02/23 05:00:14 zapata Exp $
+ * @version $Id: MediaHandlerVideo.java,v 1.8 2003/04/09 02:06:09 zapata Exp $
  */
 
 public class MediaHandlerVideo extends MediaHandlerGeneric implements MirMedia

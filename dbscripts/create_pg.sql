@@ -261,6 +261,7 @@ CREATE TABLE "comment" (
 	"address" character varying(80),
 	"phone" character varying(20),
 	"webdb_create" timestamp with time zone NOT NULL,
+	"webdb_lastchange" timestamp with time zone,
 	"is_published" boolean DEFAULT '1' NOT NULL,
 	"to_language" integer DEFAULT '0' NOT NULL,
 	"to_media" integer NOT NULL,
@@ -697,3 +698,10 @@ CREATE  INDEX "idx_comment_tomedia_ispublished" on "comment" using btree ( "to_m
 
 CREATE UNIQUE INDEX "idx_comment_id" on "comment" using btree ( "id" "int4_ops" );
 
+CREATE TABLE "comment_x_media" (
+   "comment_id" integer,
+   "media_id" integer
+);
+
+CREATE UNIQUE INDEX idx_comment_media on comment_x_media (comment_id, media_id);
+CREATE UNIQUE INDEX idx_media_comment on comment_x_media (media_id, comment_id);

@@ -52,6 +52,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.Vector;
+import java.util.Locale;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -117,7 +118,7 @@ import mircoders.storage.DatabaseTopics;
  *    open-postings to the newswire
  *
  * @author mir-coders group
- * @version $Id: ServletModuleOpenIndy.java,v 1.70 2003/04/02 22:15:03 zapata Exp $
+ * @version $Id: ServletModuleOpenIndy.java,v 1.72 2003/04/10 03:31:47 zapata Exp $
  *
  */
 
@@ -1034,7 +1035,7 @@ public class ServletModuleOpenIndy extends ServletModule
   public void deliver(PrintWriter anOutputWriter, HttpServletRequest aRequest, HttpServletResponse aResponse, Map aData, Map anExtra, String aGenerator)
       throws ServletModuleFailure {
     try {
-      Map responseData = ServletHelper.makeGenerationData(getLocale(aRequest), "bundles.open");
+      Map responseData = ServletHelper.makeGenerationData(new Locale[] { getLocale(aRequest), getFallbackLocale(aRequest)}, "bundles.open");
       responseData.put("data", aData);
       responseData.put("extra", anExtra);
 
@@ -1084,9 +1085,4 @@ public class ServletModuleOpenIndy extends ServletModule
       throw new ServletModuleFailure(e);
     }
   }
-
-
 }
-
-
-

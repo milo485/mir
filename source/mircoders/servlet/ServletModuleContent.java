@@ -35,6 +35,7 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -54,7 +55,6 @@ import mir.util.HTTPRequestParser;
 import mir.util.JDBCStringRoutines;
 import mir.util.SQLQueryBuilder;
 import mir.util.URLBuilder;
-
 import mircoders.entity.EntityContent;
 import mircoders.entity.EntityUsers;
 import mircoders.global.MirGlobal;
@@ -62,14 +62,14 @@ import mircoders.module.ModuleContent;
 import mircoders.search.IndexUtil;
 import mircoders.storage.DatabaseComment;
 import mircoders.storage.DatabaseContent;
-import mircoders.storage.DatabaseContentToTopics;
 import mircoders.storage.DatabaseContentToMedia;
+import mircoders.storage.DatabaseContentToTopics;
 
 /*
  *  ServletModuleContent -
  *  deliver html for the article admin form.
  *
- * @version $Id: ServletModuleContent.java,v 1.46 2003/03/27 20:11:35 zapata Exp $
+ * @version $Id: ServletModuleContent.java,v 1.48 2003/04/10 03:31:47 zapata Exp $
  * @author rk, mir-coders
  *
  */
@@ -262,38 +262,40 @@ public class ServletModuleContent extends ServletModule
   public void attach(HttpServletRequest req, HttpServletResponse res) throws ServletModuleExc
   {
     String  mediaIdParam = req.getParameter("mid");
-    String  idParam = req.getParameter("cid");
-    if (idParam == null||mediaIdParam==null) throw new ServletModuleExc("smod content :: attach :: cid/mid missing");
+    String  articleId = req.getParameter("articleid");
+
+    if (articleId == null || mediaIdParam==null)
+      throw new ServletModuleExc("smod content :: attach :: articleid/mid missing");
 
     try {
-      EntityContent entContent = (EntityContent)mainModule.getById(idParam);
+      EntityContent entContent = (EntityContent) mainModule.getById(articleId);
       entContent.attach(mediaIdParam);
     }
     catch(Throwable e) {
-      logger.error("smod content :: attach :: could not get entityContent");
+      throw new ServletModuleFailure(e);
     }
 
-    _showObject(idParam, req, res);
+    _showObject(articleId, req, res);
   }
 
   public void dettach(HttpServletRequest req, HttpServletResponse res) throws ServletModuleExc
   {
-    String  cidParam = req.getParameter("cid");
+    String  articleId = req.getParameter("articleid");
     String  midParam = req.getParameter("mid");
-    if (cidParam == null)
-      throw new ServletModuleExc("smod content :: dettach :: cid missing");
+    if (articleId == null)
+      throw new ServletModuleExc("smod content :: dettach :: articleid missing");
     if (midParam == null)
       throw new ServletModuleExc("smod content :: dettach :: mid missing");
 
     try {
-      EntityContent entContent = (EntityContent)mainModule.getById(cidParam);
-      entContent.dettach(cidParam,midParam);
+      EntityContent entContent = (EntityContent)mainModule.getById(articleId);
+      entContent.dettach(articleId, midParam);
     }
     catch(Throwable e) {
-      logger.error("smod content :: dettach :: could not get entityContent");
+      throw new ServletModuleFailure(e);
     }
 
-    _showObject(cidParam, req, res);
+    _showObject(articleId, req, res);
   }
 
   public void update(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc
@@ -344,7 +346,7 @@ public class ServletModuleContent extends ServletModule
       throws ServletModuleExc {
     try {
       HTTPRequestParser requestParser = new HTTPRequestParser(aRequest);
-      Map responseData = ServletHelper.makeGenerationData(getLocale(aRequest));
+      Map responseData = ServletHelper.makeGenerationData(new Locale[] { getLocale(aRequest), getFallbackLocale(aRequest)});
       EntityAdapterModel model = MirGlobal.localizer().dataModel().adapterModel();
       Map article;
       URLBuilder urlBuilder = new URLBuilder();
@@ -404,7 +406,7 @@ public class ServletModuleContent extends ServletModule
     int count;
 
     try {
-      Map responseData = ServletHelper.makeGenerationData(getLocale(aRequest));
+      Map responseData = ServletHelper.makeGenerationData(new Locale[] { getLocale(aRequest), getFallbackLocale(aRequest)});
       model = MirGlobal.localizer().dataModel().adapterModel();
 
       Object articleList =

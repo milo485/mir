@@ -47,7 +47,7 @@ import mircoders.servlet.ServletModuleOpenIndy;
  *  OpenMir.java - main servlet for open posting and comment feature to articles
  *
  *  @author RK 1999-2001, the mir-coders group
- *  @version $Id: OpenMir.java,v 1.30 2003/03/17 20:47:03 zapata Exp $
+ *  @version $Id: OpenMir.java,v 1.31 2003/04/09 02:06:06 zapata Exp $
  *
  */
 

@@ -115,7 +115,7 @@ public class ServletModuleHidden extends ServletModule
         }
       }
 // raus damit
-      HTMLTemplateProcessor.process(res, templateListString, mergeData, res.getWriter(), getLocale(req));
+      HTMLTemplateProcessor.process(res, templateListString, mergeData, res.getWriter(), getLocale(req), getFallbackLocale(req));
     }
     catch (Throwable e) {
       throw new ServletModuleFailure(e);

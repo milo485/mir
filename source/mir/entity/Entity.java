@@ -57,7 +57,7 @@ import freemarker.template.TemplateModelRoot;
  * Base Class of Entities
  * Interfacing TemplateHashModel and TemplateModelRoot to be freemarker compliant
  *
- * @version $Id: Entity.java,v 1.18 2003/03/05 19:23:14 idfx Exp $
+ * @version $Id: Entity.java,v 1.19 2003/04/09 02:06:06 zapata Exp $
  * @author rk
  *
  */

@@ -47,12 +47,8 @@ import mir.storage.StorageObject;
 
 
 public class DatabaseMessages extends Database implements StorageObject{
-
   private static DatabaseMessages instance;
 
-  // the following *has* to be sychronized cause this static method
-  // could get preemted and we could end up with 2 instances of DatabaseFoo..
-  // see the "Singletons with needles and thread" article at JavaWorld -mh
   public synchronized static DatabaseMessages getInstance() {
     if (instance == null) {
       instance = new DatabaseMessages();

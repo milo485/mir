@@ -54,7 +54,7 @@ import freemarker.template.TemplateModelException;
  * this class implements mapping of one line of the database table content
  * to a java object
  *
- * @version $Id: EntityContent.java,v 1.17 2003/03/05 19:23:15 idfx Exp $
+ * @version $Id: EntityContent.java,v 1.18 2003/04/10 03:31:47 zapata Exp $
  * @author mir-coders group
  *
  */
@@ -85,6 +85,7 @@ public class EntityContent extends Entity
 
   public EntityContent(StorageObject theStorage) {
     this();
+
     setStorage(theStorage);
   }
 
@@ -119,56 +120,43 @@ public class EntityContent extends Entity
     }
   }
 
-
   /**
-   * make openposting to newswire
+   * Deattaches media from an article
+   *
+   * @param anArticleId
+   * @param aMediaId
+   * @throws StorageObjectFailure
    */
-
-  public void newswire() throws StorageObjectFailure
+  public void dettach(String anArticleId, String aMediaId) throws StorageObjectFailure
   {
-    String sql = "update content set to_article_type='1', is_produced='0' where id='" + getId()+"'";
-    try {
-      theStorageObject.executeUpdate(sql);
-    } catch (StorageObjectFailure e) {
-      throwStorageObjectFailure(e, "\n -- newswire failed");
-    } catch (SQLException e) {
-      throwStorageObjectFailure(e, "\n -- newswire failed");
-    }
-  }
-
-
-  /**
-   * dettach from media
-   */
-  public void dettach(String cid,String mid) throws StorageObjectFailure
-  {
-    if (mid!=null){
+    if (aMediaId!=null){
       try{
-        DatabaseContentToMedia.getInstance().delete(cid,mid);
+        DatabaseContentToMedia.getInstance().delete(anArticleId, aMediaId);
       }
       catch (Exception e){
         throwStorageObjectFailure(e, "\n -- failed to get instance");
       }
 
-      //set Content to unproduced
       setProduced(false);
     }
   }
 
   /**
-   * attach to media
+   * Attaches media to an article
+   *
+   * @param mid
+   * @throws StorageObjectFailure
    */
 
-  public void attach(String mid) throws StorageObjectFailure
+  public void attach(String aMediaId) throws StorageObjectFailure
   {
-    if (mid!=null) {
-      //write media-id mid and content-id in table content_x_media
+    if (aMediaId!=null) {
       try{
-        DatabaseContentToMedia.getInstance().addMedia(getId(),mid);
-      } catch(StorageObjectFailure e){
+        DatabaseContentToMedia.getInstance().addMedia(getId(),aMediaId);
+      }
+      catch(StorageObjectFailure e){
         throwStorageObjectFailure(e, "attach: could not get the instance");
       }
-      //set Content to unproduced
       setProduced(false);
     }
     else {

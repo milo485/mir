@@ -1,52 +1,68 @@
 <html>
 <head>
 	<title>${config["Mir.Name"]} | ${lang("messagelist.htmltitle")}</title>
-        <link rel="stylesheet" type="text/css" href="${config.docRoot}/style/admin.css">
+	<link rel="stylesheet" type="text/css" href="${config.docRoot}/style/admin.css">
 </head>
 
 <body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
 
 <include "head.template">
+
+<p>
+	<a class="link_box" href="${config.actionRoot}?module=Message&do=add">[+] ${lang("add")}</a> &nbsp;
+	<a class="link_box" href="${config.actionRoot}">[&lt;&lt;&lt;] ${lang("head.start")}</a>
+</p>
+
 <if data.contentlist>
-<table border="0" cellpadding="2" cellspacing="1">
-  <tr class="darkgrey">
-    <td><span class="witesmall">
-		<b>${lang("message.date")}</b></span></td>
-    <td><span class="witesmall">
-	 	<b>${lang("message.title")}<br>${lang("message.creator")}</b></span></td>
-    <td><span class="witesmall">
-		<b>${lang("message.text")}</b></span></td>
+
+<table border="0" cellpadding="2" cellspacing="1" width="70%">
+  <tr>
+    <td class="table_head">
+		${lang("message.date")}</td>
+    <td class="table_head">
+	 	${lang("message.title")} /<br>${lang("message.creator")}</td>
+    <td colspan="2" class="table_head">
+		${lang("message.text")}</td>
   </tr>
 
   <list data.contentlist as entry>
   <tr
-       <if grey=="1"><assign grey="0">class="list1"<else>class="list2"<assign grey="1"> </if>>
-  <td>${entry.webdb_create}&nbsp;</td>
-  <td><b>${entry.title}</b><br>
-      <i>${entry.creator}</i></td>
-  <td class="pink">${entry.description}&nbsp;</td>
-  <td><span class="text">&nbsp;<a href="${config.actionRoot}?module=Message&do=delete&id=${entry.id}">${lang("delete")}</a>
-    | <a href="${config.actionRoot}?module=Message&do=edit&id=${entry.id}">${lang("edit")}</a></span></td>
+		<if grey=="1">
+			<assign grey="0">class="listrow1"
+		<else>class="listrow2"
+			<assign grey="1"> 
+		</if> >
+  <td class="x-small" valign="top">${entry.webdb_create}&nbsp;</td>
+  <td valign="top"><span class="small"><b>${entry.title}</b></span><br>
+     <span class="x-small">${lang("by")}: ${entry.creator}</span></td>
+  <td>${entry.description}&nbsp;</td>
+  <td valign="top">
+  		<a class="listcommand" href="${config.actionRoot}?module=Message&do=delete&id=${entry.id}">[&nbsp;${lang("delete")}&nbsp;]</a><br>
+		<a class="listcommand" href="${config.actionRoot}?module=Message&do=edit&id=${entry.id}">[&nbsp;${lang("edit")}&nbsp;]</a>
+	</td>
   </tr>
   </list>
+  
   <tr>
-    <td colspan="3" class="darkgrey"><span class="witetext">${data.count} ${lang("records")} /
-        ${lang("show_from_to", data.from, data.to)}</span></td>
-    <td>&nbsp;</td>
+    <td colspan="4" class="table_foot">${data.count} ${lang("records")} /
+        ${lang("show_from_to", data.from, data.to)}</td>
+    
   </tr>
+
 </table>
 
       <P>
 <if data.prev>
-	<a href="${config.actionRoot}?module=Message&do=list&where=${data.where}&prevoffset=${data.prev}&prev=zur&uuml;ck">${lang("list.previous")}</a>&nbsp;
+	<a class="majorcommand" href="${config.actionRoot}?module=Message&do=list&where=${data.where}&offset=${data.prev}&prev=zurück">[&nbsp;${lang("list.previous")}&nbsp;]</a>&nbsp;
 </if>
 <if data.next>
-<a href="${config.actionRoot}?module=Message&do=list&where=${data.where}&nextoffset=${data.next}&next=weiter">${lang("list.next")}</a>
+	<a class="majorcommand" href="${config.actionRoot}?module=Message&do=list&where=${data.where}&offset=${data.next}&next=weiter">[&nbsp;${lang("list.next")}&nbsp;]</a>
 </if>
 
 <else>
   <P align="center">${lang("no_matches_found")}</p>
 </if>
+
 <include "foot.template">
 </body>
 </html>

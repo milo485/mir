@@ -41,16 +41,6 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
-import mir.config.MirPropertiesConfiguration;
-import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
-import mir.entity.Entity;
-import mir.entity.EntityList;
-import mir.generator.FreemarkerGenerator;
-import mir.log.LoggerWrapper;
-import mir.storage.StorageObjectFailure;
-import mir.util.GeneratorHTMLFunctions;
-import mir.util.GeneratorIntegerFunctions;
-
 import org.apache.struts.util.MessageResources;
 
 import freemarker.template.FileTemplateCache;
@@ -60,12 +50,24 @@ import freemarker.template.SimpleScalar;
 import freemarker.template.Template;
 import freemarker.template.TemplateModelRoot;
 
+import mir.config.MirPropertiesConfiguration;
+import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
+import mir.entity.Entity;
+import mir.entity.EntityList;
+import mir.generator.FreemarkerGenerator;
+import mir.log.LoggerWrapper;
+import mir.storage.StorageObjectFailure;
+import mir.util.GeneratorHTMLFunctions;
+import mir.util.GeneratorIntegerFunctions;
+import mir.util.*;
+
 /**
  * Hilfsklasse zum Mergen von Template und Daten
  */
 public final class HTMLTemplateProcessor {
 
   public static String templateDir;
+  private static final String[] bundles = { "bundles.adminlocal", "bundles.admin" };
   private static MirPropertiesConfiguration configuration;
   private static FileTemplateCache templateCache;
   private static String docRoot;
@@ -108,28 +110,6 @@ public final class HTMLTemplateProcessor {
   private HTMLTemplateProcessor() {
   }
 
-  // process-methods to merge different datastructures
-  // with freemarker templates
-
-  /**
-   * Wandelt <code>anEntity</code> in freemarker-Struktur um, mischt die Daten mit
-   * Template <code>templateFilename</code> und gibt das Ergebnis an den PrintWriter
-   * <code>out</code>
-   *
-   * @param templateFilename
-   * @param anEntity
-   * @param out
-   * @exception HTMLParseException
-   */
-
-  public static void process(String templateFilename, Entity anEntity,
-                             PrintWriter out) throws HTMLParseException {
-    if (anEntity == null)
-      throw new HTMLParseException("entity is empty!");
-    else
-      process(templateFilename, anEntity, out);
-  }
-
   /**
    * Wandelt Liste mit Entities <code>entList</code> in freemarker-Struktur um, mischt die Daten mit
    * Template <code>templateFilename</code> und gibt das Ergebnis an den PrintWriter
@@ -140,10 +120,9 @@ public final class HTMLTemplateProcessor {
    * @param out
    * @exception HTMLParseException
    */
-  public static void process(HttpServletResponse res, String templateFilename,
-   EntityList entList, PrintWriter out, Locale locale) throws HTMLParseException {
-    process(res, templateFilename, entList, (String)null, (TemplateModelRoot)null,
-            out, locale);
+
+  public static void process(HttpServletResponse res, String templateFilename, EntityList entList, PrintWriter out, Locale locale, Locale aFallbackLocale) throws HTMLParseException {
+    process(res, templateFilename, entList, (String)null, (TemplateModelRoot) null, out, locale, aFallbackLocale);
   }
 
   /**
@@ -163,12 +142,12 @@ public final class HTMLTemplateProcessor {
   public static void process(HttpServletResponse res, String templateFilename,
                              EntityList entList, String additionalModelName,
                              TemplateModelRoot additionalModel, PrintWriter out,
-                             Locale locale) throws HTMLParseException {
+                             Locale locale, Locale aFallbackLocale) throws HTMLParseException {
 
     SimpleHash modelRoot = new SimpleHash();
 
     if (entList == null) {
-      process(null, templateFilename, modelRoot, out, locale);
+      process(null, templateFilename, modelRoot, null, out, locale, aFallbackLocale);
     }
     else {
       try {
@@ -178,7 +157,7 @@ public final class HTMLTemplateProcessor {
         if (additionalModelName != null && additionalModel != null)
           modelRoot.put(additionalModelName, additionalModel);
 
-        process(res, templateFilename, modelRoot, out, locale);
+        process(res, templateFilename, modelRoot, null, out, locale, aFallbackLocale);
       }
       catch (StorageObjectFailure e) {
         throw new HTMLParseException(e.toString());
@@ -186,20 +165,6 @@ public final class HTMLTemplateProcessor {
     }
   }
 
-
-  /**
-   * Gibt Template <code>templateFilename</code> an den PrintWriter
-   * <code>out</code>
-   *
-   * @param templateFilename
-   * @param mergeData
-   * @param out
-   * @exception HTMLParseException
-   */
-  public static void process(String templateFilename, PrintWriter out,
-                             Locale locale) throws HTMLParseException {
-    process(null, templateFilename, (TemplateModelRoot)null, out, locale);
-  }
 
   /**
    * Mischt die freemarker-Struktur <code>tmr</code> mit
@@ -213,20 +178,8 @@ public final class HTMLTemplateProcessor {
    */
   public static void process(HttpServletResponse res, String templateFilename,
                              TemplateModelRoot tmr, PrintWriter out,
-                             Locale locale) throws HTMLParseException {
-    process(res, templateFilename, tmr, null, out, locale);
-  }
-
-  public static void process(HttpServletResponse res, String templateFilename,
-                             TemplateModelRoot tmr, TemplateModelRoot extra,
-                             PrintWriter out, Locale locale) throws HTMLParseException {
-    process(res, templateFilename, tmr, extra, out, locale, "bundles.adminlocal", "bundles.admin");
-  }
-
-  public static void process(HttpServletResponse res, String templateFilename,
-       TemplateModelRoot tmr, TemplateModelRoot extra, PrintWriter out,
-       Locale locale, String bundles) throws HTMLParseException {
-    process(res, templateFilename, tmr, extra, out, locale, bundles, null);
+                             Locale locale, Locale aFallbackLocale) throws HTMLParseException {
+    process(res, templateFilename, tmr, null, out, locale, aFallbackLocale);
   }
 
   /**
@@ -241,8 +194,8 @@ public final class HTMLTemplateProcessor {
    */
   public static void process(HttpServletResponse res, String templateFilename,
                              TemplateModelRoot tmr, TemplateModelRoot extra,
-                             PrintWriter out, Locale locale, String bundles,
-                             String bundles2) throws HTMLParseException {
+                             PrintWriter out, Locale locale, Locale aFallbackLocale) throws HTMLParseException {
+
     if (out == null)
       throw new HTMLParseException("no outputstream");
     Template tmpl = getTemplateFor(templateFilename);
@@ -309,12 +262,17 @@ public final class HTMLTemplateProcessor {
     outPutHash.put("config", configHash);
     outPutHash.put("utility", utilityHash);
 
-    MessageResources messages = MessageResources.getMessageResources(bundles);
-    if (bundles2!=null) {
-      outPutHash.put("lang", new MessageMethodModel(locale, MessageResources.getMessageResources(bundles), MessageResources.getMessageResources(bundles2)));
+    MessageResources messages[] = new MessageResources[bundles.length];
+
+    for (int i=0; i<bundles.length; i++) {
+      messages[i] = MessageResources.getMessageResources(bundles[i]);
     }
-    else {
-      outPutHash.put("lang", new MessageMethodModel(locale, MessageResources.getMessageResources(bundles)));
+
+    try {
+      outPutHash.put("lang", FreemarkerGenerator.makeAdapter(new ResourceBundleGeneratorFunction(new Locale[] {locale, aFallbackLocale}, messages)));
+    }
+    catch (Throwable t) {
+      throw new HTMLParseException(t.toString());
     }
 
     tmpl.process(outPutHash, out);
@@ -444,10 +402,4 @@ public final class HTMLTemplateProcessor {
 
     return returnTemplate;
   }
-
-  public static void stopAutoUpdate() {
-    templateCache.stopAutoUpdate();
-    templateCache = null;
-  }
-
 }

@@ -1,108 +1,131 @@
 <html>
-  <head>
-    <title>${config["Mir.Name"]} | ${lang("userlist.htmltitle")}</title>
-    <link rel="stylesheet" type="text/css" href="${config.docRoot}/style/admin.css">
-  </head>
+<head>
+	<title>${config["Mir.Name"]} | ${lang("abuse.htmltitle")}</title>
+	<link rel="stylesheet" type="text/css" href="${config.docRoot}/style/admin.css">
+</head>
 
-  <body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
-    <include "head.template">
-    <p>
-      <a class="majorcommand" href="${config.actionRoot}?module=Admin&do=superusermenu">${lang("back")}</a>
-    </p>
-    <p>
-      <a class="majorcommand" href="${config.actionRoot}?module=Abuse&do=showlog">${lang("abuse.showlog")}</a>
-    </p>
-    <p>
-      <a class="majorcommand" href="${config.actionRoot}?module=Abuse&do=showfilters">${lang("abuse.showfilters")}</a>
-    </p>
-    <p>
-      <form method="post" action="${config.actionRoot}">
-        <input type="hidden" name="module" value="Abuse">
-        <input type="hidden" name="do" value="savesettings">
-        
-        <table border="0" cellpadding="2" cellspacing="1">
-          <tr class="darkgrey">
-            <td><span class="witesmall"><b>${lang("abuse.setting")}</b></span></td>
-            <td><span class="witesmall"><b>${lang("abuse.value")}</b></span></td>
-          </tr>
-          <tr class="list1">
-            <td>
-              ${lang("abuse.disableopenpostings")}
-            </td>
-            <td>
-              <input type="checkbox" name="disableop" value="1" <if disableop=="1">checked="1"</if>>
-            </td>
-          </tr>
-          <tr class="list1">
-            <td>
-              ${lang("abuse.openpostingpassword")}
-            </td>
-            <td>
-              <input type="checkbox" name="passwordop" value="1" <if passwordop=="1">checked="1"</if>>
-            </td>
-          </tr>
-          <tr class="list2">
-            <td>
-              ${lang("abuse.logpostings")}
-            </td>
-            <td>
-              <input type="checkbox" name="logenabled" value="1" <if logenabled=="1">checked="1"</if>>
-            </td>
-          </tr>
-          <tr class="list2">
-            <td>
-              ${lang("abuse.logsize")}'
-            </td>
-            <td>
-              <input type="text" size="10" name="logsize" value="${logsize}">
-            </td>
-          </tr>
-          <tr class="list1">
-            <td>
-              ${lang("abuse.cookies")}
-            </td>
-            <td>
-              <input type="checkbox" name="usecookies" value="1" <if usecookies=="1">checked="1"</if>>
-            </td>
-          </tr>
-          <tr class="list1">
-            <td>
-              ${lang("abuse.articleaction")}
-            </td>
-            <td>
-              <select name="articleaction">
-                <list articleactions as a>
-                  <option value="${a.identifier}" <if articleaction==a.identifier>selected="1"</if>>${utility.encodeHTML(lang(a.resource))}</option>
-                </list>
-              </select>
-            </td>
-          </tr>
-          <tr class="list1">
-            <td>
-              ${lang("abuse.commentaction")}
-            </td>
-            <td>
-              <select name="commentaction">
-                <list commentactions as a>
-                  <option value="${a.identifier}" <if commentaction==a.identifier>selected="1"</if>>${utility.encodeHTML(lang(a.resource))}</option>
-                </list>
-              </select>
-            </td>
-          </tr>
-        </table>
-        <p>
-          <input class="majorbutton" type="submit" name="submit" value="${lang("save")}">
-      </form>
+<body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
 
-      <a class="majorcommand" href="${config.actionRoot}?module=Abuse&do=showfilters">${lang("abuse.showfilters")}</a>
-    </p>
+<include "FUNCTIONS.template">
+<include "head.template">
+<p>
+	<a class="link_box"  href="${config.actionRoot}?module=Admin&do=superusermenu">[ &lt; ] ${lang("back")}</a>
+</p>
 
-    <p>
-      <a class="majorcommand" href="${config.actionRoot}?module=Admin&do=superusermenu">${lang("back")}</a>
-    </p>
+<table cellspacing="15">
+<tr>
+<td valign="top">
 
-    <include "foot.template">
-  </body>
+<form method="post" action="${config.actionRoot}">
+	<input type="hidden" name="module" value="Abuse">
+	<input type="hidden" name="do" value="savesettings">
+
+	<table border="0" cellpadding="2" cellspacing="3">
+		<tr>
+			<td class="table_head"><b>${lang("abuse.setting")}</b></td>
+			<td class="table_head"><b>${lang("abuse.value")}</b></td>
+		</tr>
+		<tr>
+			<td class="table_left">
+				${lang("abuse.disableopenpostings")}
+			</td>
+			<td class="listrow2">
+				<input type="checkbox" name="disableop" value="1" <if disableop=="1">checked="1"</if>>
+			</td>
+		</tr>
+		<tr>
+			<td class="table_left">
+				${lang("abuse.openpostingpassword")}
+			</td>
+			<td class="listrow2">
+				<input type="checkbox" name="passwordop" value="1" <if passwordop=="1">checked="1"</if>>
+			</td>
+		</tr>
+		
+		<tr class="x-small"><td colspan="2">&nbsp;</td></tr>
+		
+		<tr>
+			<td class="table_left">
+				${lang("abuse.logpostings")}
+			</td>
+			<td class="listrow2">
+				<input type="checkbox" name="logenabled" value="1" <if logenabled=="1">checked="1"</if>>
+			</td>
+		</tr>
+		<tr>
+			<td class="table_left">
+				${lang("abuse.logsize")}
+			</td>
+			<td class="listrow2">
+				<input type="text" size="10" name="logsize" value="${logsize}">
+			</td>
+		</tr>
+		
+		<tr class="x-small"><td colspan="2">&nbsp;</td></tr>		
+		
+		<tr>
+			<td class="table_left">
+				${lang("abuse.cookies")}
+			</td>
+			<td class="listrow2">
+				<input type="checkbox" name="usecookies" value="1" <if usecookies=="1">checked="1"</if>>
+			</td>
+		</tr>
+		
+		<tr class="x-small"><td colspan="2">&nbsp;</td></tr>		
+		
+		<tr>
+			<td class="table_left">
+				${lang("abuse.articleaction")}
+			</td>
+			<td class="listrow2">
+			<select name="articleaction">
+				<list articleactions as a>
+				<option value="${a.identifier}" <if articleaction==a.identifier>selected="1"</if>>${utility.encodeHTML(lang(a.resource))}</option>
+				</list>
+			</select>
+			</td>
+		</tr>
+		<tr>
+			<td class="table_left">
+				${lang("abuse.commentaction")}
+			</td>
+			<td class="listrow2">
+			<select name="commentaction">
+				<list commentactions as a>
+				<option value="${a.identifier}" <if commentaction==a.identifier>selected="1"</if>>${utility.encodeHTML(lang(a.resource))}</option>
+				</list>
+			</select>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2" class="table_foot">
+				<input class="majorbutton" type="submit" name="submit" value="${lang("save")}">
+			</td>
+		</tr>
+	</table>
+</form>
+
+</td>
+<td valign="top">
+
+<p class="box">
+	&gt; <a href="${config.actionRoot}?module=Abuse&do=showlog">${lang("abuse.showlog")}</a><br>
+	&gt; <a href="${config.actionRoot}?module=Abuse&do=showfilters">${lang("abuse.showfilters")}</a>
+</p>
+
+</td>
+</tr>
+</table>
+
+
+
+<p>
+	<a class="link_box"  href="${config.actionRoot}?module=Admin&do=superusermenu">[ &lt; ] ${lang("back")}</a>
+</p>
+
+	<include "foot.template">
+</body>
 </html>
 
 

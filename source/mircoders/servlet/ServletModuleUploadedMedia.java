@@ -34,13 +34,14 @@ package mircoders.servlet;
 import java.io.InputStream;
 import java.net.URLEncoder;
 import java.util.Map;
-
 import javax.servlet.ServletContext;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import freemarker.template.SimpleHash;
+import freemarker.template.SimpleList;
 import mir.config.MirPropertiesConfiguration;
 import mir.entity.Entity;
 import mir.entity.EntityList;
@@ -54,21 +55,21 @@ import mir.servlet.ServletModuleExc;
 import mir.servlet.ServletModuleFailure;
 import mir.servlet.ServletModuleUserExc;
 import mir.util.ExceptionFunctions;
+import mircoders.entity.EntityComment;
 import mircoders.entity.EntityContent;
 import mircoders.entity.EntityUploadedMedia;
 import mircoders.entity.EntityUsers;
 import mircoders.media.MediaRequest;
 import mircoders.media.UnsupportedMediaFormatExc;
+import mircoders.storage.DatabaseComment;
 import mircoders.storage.DatabaseContent;
 import mircoders.storage.DatabaseMediafolder;
-import freemarker.template.SimpleHash;
-import freemarker.template.SimpleList;
 
 /*
  *  ServletModuleBilder -
  *  liefert HTML fuer Bilder
  *
- * @version $Id: ServletModuleUploadedMedia.java,v 1.23 2003/03/09 19:14:21 idfx Exp $
+ * @version $Id: ServletModuleUploadedMedia.java,v 1.24 2003/04/10 03:31:47 zapata Exp $
  * @author RK, the mir-coders group
  */
 
@@ -94,6 +95,7 @@ public abstract class ServletModuleUploadedMedia
       WebdbMultipartRequest mp = new WebdbMultipartRequest(req, (FileHandler)mediaReq);
       EntityList mediaList = mediaReq.getEntityList();
       String articleid = (String) mp.getParameters().get("articleid");
+      String commentid = (String) mp.getParameters().get("commentid");
 
       if (articleid!=null) {
         EntityContent entContent = (EntityContent) DatabaseContent.getInstance().selectById(articleid);
@@ -106,6 +108,21 @@ public abstract class ServletModuleUploadedMedia
         mediaList.rewind();
 
         ((ServletModuleContent) ServletModuleContent.getInstance())._showObject(articleid, req, res);
+
+        return;
+      }
+
+      if (commentid!=null) {
+        EntityComment comment = (EntityComment) DatabaseComment.getInstance().selectById(commentid);
+
+        mediaList.rewind();
+
+        while (mediaList.hasNext()) {
+          comment.attach( ( (EntityUploadedMedia) mediaList.next()).getId());
+        }
+        mediaList.rewind();
+
+        ((ServletModuleComment) ServletModuleComment.getInstance()).showComment(commentid, req, res);
 
         return;
       }
@@ -184,8 +201,8 @@ public abstract class ServletModuleUploadedMedia
     if (order == null || order.equals("")) order = "webdb_lastchange desc";
 
     // if in connection mode to content
-    String cid = req.getParameter("cid");
-    mergeData.put("cid", cid);
+    mergeData.put("articleid", req.getParameter("articleid"));
+    mergeData.put("commentid", req.getParameter("commentid"));
 
 
     // sql basteln
@@ -244,6 +261,7 @@ public abstract class ServletModuleUploadedMedia
 
       mergeData.put("new", "1");
       mergeData.put("articleid", req.getParameter("articleid"));
+      mergeData.put("commentid", req.getParameter("commentid"));
 
       popups.put("mediafolderPopupData", DatabaseMediafolder.getInstance().getPopupData());
 

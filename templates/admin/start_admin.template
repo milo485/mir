@@ -2,219 +2,165 @@
   <head>
     <title>${config["Mir.Name"]} | ${lang("start.htmltitle")}</title>
     <link rel="stylesheet" type="text/css" href="${config.docRoot}/style/admin.css"
-    <meta http-equiv="Content-Type" content="text/html; charset=${lang("htmlcharset")}">
   </head>
 
 <body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
 
+  <include "FUNCTIONS.template">
   <include "head.template">
-  <table border="0" width="100%">
+
+<table border="0" width="100%">
 	<tr>
-		<td valign="top" width="40%" class="grey">
-
-
-		<span class="spezialtext">
-		<b>${lang("start.openpostings.title")}</b></span>
-
-	 <p>
-	 	<a href="${config.actionRoot}?module=Content&do=list&to_article_type%3D1&order=webdb_create+desc">
-		<img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp;${lang("edit")}</a>
-
-		<p>
-			<span class="spezialtext">
-			<b>${lang("start.comments.title")}</b></span>
-		<p>
-			<a href="${config.actionRoot}?module=Comment&do=list">
-			<img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp;${lang("edit")}</a>
-	    <p>
-			<span class="spezialtext">
-			<b>${lang("start.breaking.title")}</b></span>
-		<p>
-      <img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp;
-			  <a href="${config.actionRoot}?module=Breaking&do=list">${lang("edit")}</a>
-      <img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp;
-			  <a href="${config.actionRoot}?module=Breaking&do=add">${lang("start.breaking.new")}</a>
-
-			<table width="100%" border="0">
-		<tr><td bgcolor="white">&nbsp;</td></tr>
-		</table>
-
-	    <span class="spezialtext">
-			<b>${lang("start.content.title")}</b></span>
-
-  		<p>
-			<img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp;
-			<a href="${config.actionRoot}?module=Content&do=add&where=aktuell">${lang("start.content.new")}</a>
-	    <p>
-			<b>${lang("start.show")}:</b><br>
-      <list data.articletypes as a>
-    			<img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp;
-    			<a href="${config.actionRoot}?module=Content&do=list&where=is_published%3d'1'%20and%20to_article_type%3D${a.id}&order=webdb_create%20desc">${lang("start.allarticlesoftype", lang("articletypes."+a.name))}</a><br>
-      </list>
-
-      <br>
-			<img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp;
-			<a href="${config.actionRoot}?module=Content&do=list&where=&order=${utility.encodeURI("webdb_create desc")}">${lang("start.content.all")}</a><br>
-
-      <br>
-	    <img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp;
-			<a href="${config.actionRoot}?module=Content&do=list&where=${utility.encodeURI("is_published='f'")}&order=${utility.encodeURI("webdb_create desc")}" >${lang("start.content.not_published")}</a><br>
-			<img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp;
-			<a href="${config.actionRoot}?module=Content&do=list&where=${utility.encodeURI("id in (select content_id from content_x_media, media where media.id=media_id)")}&order=${utility.encodeURI("webdb_create desc")}">${lang("start.content.with_media")}</a><br>
-			<img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp;
-			<a href="${config.actionRoot}?module=Content&do=list&where=&order=${utility.encodeURI("webdb_lastchange desc")}">${lang("start.content.last_changes")}</a><br>
-			<img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp;
-			<a href="${config.actionRoot}?module=Content&do=list&where=${utility.encodeURI("not (comment is null or comment like '')")}&order=${utility.encodeURI("webdb_create desc")}">${lang("start.content.with_comments")}</a><br>
-
-      <br>
-      <img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp;
-      <a href="${config.actionRoot}?module=Hidden&do=list">${lang("start.content.hidden")}</a>
-      <br>
-      <br>
-      <span class="spezialtext"><b>
-        ${lang("start.editfiles.title")}
-      </b></span>
-      <br />
-
-			<img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp;<a href="${config.actionRoot}?module=FileEdit&do=list">${lang("start.editfiles.include")}</a>
-
-			<br><br>
-
-     <form action="${config.actionRoot}" method="post">
-	     <input type="hidden" name="module" value="Content">
-       <input type="hidden" name="do" value="search">
-       <input type="hidden" name="order" value="datedesc">
-		    ${lang("start.content.search")}: <span class="small">
-       <input type="text" name="searchvalue" size="15">
-       <select name="searchfield">
-       	<option value="id">${lang("content.id")}</option>
-       	<option value="title">${lang("content.title")}</option>
-        <option value="creator">${lang("content.creator")}</option>
-        <option value="source">${lang("content.location")}</option>
-				<option value="comment">${lang("content.comment")}</option>
-        <option value="contents">${lang("content.content")}</option>
-       </select></span>
-      </form>
-
-		<table width="100%" border="0">
-		<tr><td bgcolor="white">&nbsp;</td></tr>
-		</table>
-
-		<span class="spezialtext">
-		<b>${lang("start.producers.title")}</b></span>
-    <p>
-      <a href="${config.actionRoot}?module=Producer&do=produceAllNew">${lang("start.producers.produceAllNew")}</a><br>
-      <a href="${config.actionRoot}?module=Producer&do=showProducerQueueStatus">${lang("start.producers.advanced")}</a>
-      
-        
-      <table width="100%" border="0"><tr><td bgcolor="white">&nbsp;</td></tr></table>
-
-      <a class="menucommand" href="${config.actionRoot}?module=Admin&do=superusermenu">${lang("start.superusermenu")}</a>
-
-    </td>
-			<td bgcolor="white" width="5%">&nbsp;
-			</td>
+		<td valign="top" width="40%">
+		<!-- ###### left column ###### -->
+		<p class="box_head"><b>${lang("start.administer.title")}</b></p>
+		<p class="box"> 
 			
+			<a href="${config.actionRoot}?module=Content&do=list&where=is_published%3d'1'%20and%20to_article_type%3D0&order=webdb_create%20desc">&gt; ${lang("start.allarticlesoftype", lang("articletypes.openposting"))}</a>	
+			<br>
+			<a href="${config.actionRoot}?module=Comment&do=list">
+				&gt; ${lang("start.content.comments")}
+			</a>
+		</p>
+
+	 	<p class="box_head"><b>${lang("start.list.title")}</b></p>	
+		<p class="box">
+      <list articletypes as a>
+    			<a href="${config.actionRoot}?module=Content&do=list&where=is_published%3d'1'%20and%20to_article_type%3D${a.id}&order=webdb_create%20desc">&gt; ${lang("start.allarticlesoftype", lang("articletypes."+a.name))}</a><br>
+      </list>
+			<br>	
+			<a href="${config.actionRoot}?module=Content&do=list&where=${utility.encodeURI("is_published='f'")}&order=${utility.encodeURI("webdb_create desc")}" >&gt; ${lang("start.content.not_published")}</a><br>
+			<a href="${config.actionRoot}?module=Content&do=list&where=${utility.encodeURI("id in (select content_id from content_x_media, media where media.id=media_id)")}&order=${utility.encodeURI("webdb_create desc")}">&gt; ${lang("start.content.with_media")}</a><br>
+			<a href="${config.actionRoot}?module=Content&do=list&where=&order=${utility.encodeURI("webdb_lastchange desc")}">&gt; ${lang("start.content.last_changes")}</a><br>
+			<a href="${config.actionRoot}?module=Content&do=list&where=${utility.encodeURI("not (comment is null or comment like '')")}&order=${utility.encodeURI("webdb_create desc")}">&gt; ${lang("start.content.with_comments")}</a><br>
+			<br>
+			<a href="${config.actionRoot}?module=Content&do=list&where=&order=${utility.encodeURI("webdb_create desc")}">&gt; ${lang("start.content.all")}</a><br>
+		</p>
+
+		<p class="box_head"><b>${lang("start.extra.title")}</b></p>		
+		<p class="box">	
+			<a href="${config.actionRoot}?module=Hidden&do=list">&gt; ${lang("start.content.hidden")}</a><br>
+			<a href="${config.actionRoot}?module=FileEdit&do=list">&gt; ${lang("start.fileedit.title")}</a>
+		</p>
+</td>
+
+<!-- ###### end left column ###### -->
+
+<td width="2%">&nbsp;</td>
+<!-- ###### Spacer-column ###### -->
+
 <comment> Middle column </comment>
 			
-    <td valign="top" width="30%" class="grey">
+    <td valign="top" width="30%">
+		
+		<p class="box_head"><b>${lang("start.addandedit.title")}</b></p>
+		<div class="box">
+			<a href="${config.actionRoot}?module=Content&do=add&where=aktuell">&gt; ${lang("start.content.new")}</a>
+			<br>
+			
+			<a href="${config.actionRoot}?module=Breaking&do=list">&gt; ${lang("start.breaking.title")}</a>&nbsp;
+			<a href="${config.actionRoot}?module=Breaking&do=add">[+]</a>
+			<form>
+				<input type="hidden" name="module" value="Content">
+				<input type="hidden" name="do" value="edit">
+				${lang("start.open_by_id")}: 
+				<input type="text" name="id" value="" size="7">
+				<input type="submit" value=" &gt; ">
+			</form>
+			
+			
+		</div>
+		
+		<p class="box_head"><b>${lang("start.media.title")}</b></p>	
+		<div class="box">
+			
+			<a href="${config.actionRoot}?module=Images&do=list">&gt; ${lang("start.images.title")}</a>&nbsp;
+			<a href="${config.actionRoot}?module=Images&do=add">[+]</a><br>
 
-        <span class="spezialtext">
-  		    <b>${lang("start.images.title")}</b>
-  		  </span>
+			<a href="${config.actionRoot}?module=Audio&do=list">&gt; ${lang("start.audio.title")}</a>&nbsp;
+			<a href="${config.actionRoot}?module=Audio&do=add">[+]</a><br>
 
-      <p>
-        <a href="${config.actionRoot}?module=Images&do=list">
-          <img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp; ${lang("edit")}</a><br>
-        <a href="${config.actionRoot}?module=Images&do=add">
-          <img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp; ${lang("add")}</a>
+			
+			<a href="${config.actionRoot}?module=Video&do=list">&gt; ${lang("start.video.title")}</a>&nbsp;
+			<a href="${config.actionRoot}?module=Video&do=add">[+]</a><br>
 
-      <p>
-        <span class="spezialtext">
-          <b>${lang("start.audio.title")}</b>
-        </span>
+			
+			<a href="${config.actionRoot}?module=OtherMedia&do=list">&gt; ${lang("start.other_media.title")}</a>&nbsp;
+			<a href="${config.actionRoot}?module=OtherMedia&do=add" >[+]</a><br>
 
-      <p>
-        <a href="${config.actionRoot}?module=Audio&do=list">
-            <img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp; ${lang("edit")}
-        </a><br>
+			<br>
+			<a href="${config.actionRoot}?module=Mediafolder&do=list">&gt; ${lang("start.mediafolder.title")}</a>&nbsp;
+			<a href="${config.actionRoot}?module=Mediafolder&do=add">[+]</a><br>
+		</div>
+		
+		
+		
+		<p class="box_head"><b>${lang("start.producers.title")}</b></p>
+		<p class="box">
+			<a href="${config.actionRoot}?module=Producer&do=produceAllNew">&gt; ${lang("start.producers.produceAllNew")}</a><br>
+			<a href="${config.actionRoot}?module=Producer&do=showProducerQueueStatus">&gt; ${lang("start.producers.advanced")}</a>
+		</p>
+		
+		<p class="box bg_neutral">
+			<a href="${config.actionRoot}?module=Admin&do=superusermenu">${lang("start.superusermenu")}</a>		
+		</p>
 
-        <a href="${config.actionRoot}?module=Audio&do=add">
-          <img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp; ${lang("add")}
-        </a>
+	</td>
 
-      <p>
-        <span class="spezialtext">
-          <b>${lang("start.video.title")}</b>
-        </span>
-
-      <p>
-        <a href="${config.actionRoot}?module=Video&do=list">
-          <img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp; ${lang("edit")}
-        </a><br>
-      
-        <a href="${config.actionRoot}?module=Video&do=add">
-          <img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp; ${lang("add")}
-        </a>
-
-      <p>
-        <span class="spezialtext">
-          <b>${lang("start.other_media.title")}</b>
-        </span>
-
-      <p>
-        <a href="${config.actionRoot}?module=OtherMedia&do=list">
-          <img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp; ${lang("edit")}
-        </a><br>
-
-        <a href="${config.actionRoot}?module=OtherMedia&do=add" >
-          <img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp; ${lang("add")}
-        </a>
-
-      <p>
-			  <span class="spezialtext">
-		      <b>${lang("start.mediafolder.title")}</b>
-		    </span>
-
-      <p>
-        <a href="${config.actionRoot}?module=Mediafolder&do=list">
-          <img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp; ${lang("edit")}
-        </a><br>
-        
-        <a href="${config.actionRoot}?module=Mediafolder&do=add">
-          <img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp; ${lang("add")}
-        </a>
-    </td>
-
-    <td bgcolor="white" width="5%">&nbsp;
-    </td>
+    <td width="2%">&nbsp;</td>
 
 <comment> RIGHT COLUMN </comment>
 
-			<td valign="top" width="20%" class="pink">
+	<td valign="top" width="26%" rowspan="2">
 
 	<comment>internal messageboard</comment>
 
-		<span class="spezialtext">
-		<b>${lang("start.messageboard.title")}</b>
-		<span class="small"><br><a href="${config.actionRoot}?module=Message&do=add">${lang("add")}</a>
-		<a href="${config.actionRoot}?module=Message&do=list">${lang("edit")}</a></span>
-		<if data.messages>
-			<list data.messages as m>
-				<p>
-				<if m.title><b>${m.title}</b><br></if>
-				${m.description}<br>
-				<span class="x-small">
-				<if m.creator><i>von: ${m.creator}</i> / </if>${m.webdb_create}<br>
-				</span>
-			</list>
-		<else>
-			<p><i>${lang("start.messageboard.no_messages")}</i>
-		</if></span>
+
+		<p class="box_head"><b>${lang("start.messageboard.title")}</b></p>
+		<div class="box_bg">
+			<span class="small">
+				<a href="${config.actionRoot}?module=Message&do=add">[ + ${lang("add")}]</a> 
+				<a href="${config.actionRoot}?module=Message&do=list">[${lang("edit")}]</a>
+			</span>
+			<if messages>
+				<list messages as m>
+					<p class="x-small">
+						<if m.title><b>${m.title}</b><br></if>
+						${m.description}<br>
+						<span class="x-small">
+							<if m.creator><i>by: ${m.creator}</i> / </if>${m.webdb_create}<br>
+						</span>
+					</p>
+				</list>
+			<else>
+				<p><i>${lang("start.messageboard.no_messages")}</i>
+			</if></span>
+		</div>
 	</td>
 
  	</tr>
-	</table>
+	
+	<comment> BOTTOM ROW FOR SEARCH </comment>
+	<tr>
+		<td colspan="3" valign="top">
+			<p class="box_head"><b>${lang("start.search.title")}</b></p>
+			<div class="box">
+				<call ContentSearch ("")>
+			</div>
+			
+			<!-- HELP -DEMO -->
+			<p class="box">
+				<b>HELP-Demo:</b><br>
+				popup small-link: <call Help ("../help/content_datum.html", "1", "" )>&nbsp;&nbsp;  popup big-link: <call Help ("../help/content_datum.html", "1", "1" )><br><br>
+				newwin small-link: <call Help ("../help/content_datum.html", "", "" )>&nbsp;&nbsp; newwin big-link: <call Help ("../help/content_datum.html", "", "1" )>
+			</p>
+			
+			
+		</td>
+		<td>&nbsp;</td>
+	</tr>
+	
+</table>
 
 	<include "foot.template">
 

@@ -5,7 +5,7 @@
         <if anId>
           <input type="hidden" name="id" value="${anId}">
         </if>
-        <if grey=="1"><assign grey="0"><tr class="list1"><else><tr class="list2"><assign grey="1"> </if>
+        <if grey=="1"><assign grey="0"><tr class="listrow1"><else><tr class="listrow2"><assign grey="1"> </if>
           <td>
             <select name="type">
               <list filtertypes as t>
@@ -16,10 +16,10 @@
           <td><input type="text" name="expression" size="30" value="${utility.encodeHTML(anExpression)}"></td>
           <if anId>
             <td>
-              <input class="majorbutton" type="submit" name="save" value="${lang("save")}">
+              <input type="submit" name="save" value="${lang("save")}">
             </td>
             <td>
-                <a href="${config.actionRoot}?module=Abuse&do=deletefilter&id=${anId}">${lang("delete")}</a>
+                <a class="listcommand" href="${config.actionRoot}?module=Abuse&do=deletefilter&id=${anId}">[${lang("delete")}]</a>
                 &nbsp;
             </td>
           <else>
@@ -30,36 +30,44 @@
         </tr>
       </form>
 </function>
+
+
 <html>
-  <head>
-    <title>${config["Mir.Name"]} | ${lang("userlist.htmltitle")}</title>
-    <link rel="stylesheet" type="text/css" href="${config.docRoot}/style/admin.css">
-  </head>
+<head>
+	<title>${config["Mir.Name"]} | ${lang("userlist.htmltitle")}</title>
+	<link rel="stylesheet" type="text/css" href="${config.docRoot}/style/admin.css">
+</head>
 
-  <body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
-    <include "head.template">
-    <p>
-      <a class="majorcommand" href="${config.actionRoot}?module=Abuse">${lang("back")}</a>
-    </p>
-    <table border="0" cellpadding="2" cellspacing="1">
-      <tr class="darkgrey">
-        <td><span class="witesmall"><b>${lang("abuse.filter.type")}</b></span></td>
-        <td><span class="witesmall"><b>${lang("abuse.filter.expression")}</b></span></td>
-        <td><span class="witesmall"><b>&nbsp;</b></span></td>
-      </tr>
-      
-      <assign grey="0">      
-      <list filters as i>
-        <call showFilterEntry(i.type, i.expression, i.id)>
-      </list>
-      
-      <call showFilterEntry("", "", "")>
-    </table>
+<body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
+<include "head.template">
+<p>
+	<a class="link_box" href="${config.actionRoot}?module=Abuse">[ &lt; ] ${lang("back")}</a>&nbsp;&nbsp;
+	<a class="link_box" href="${config.actionRoot}?module=Abuse&do=showlog">${lang("abuse.showlog")}</a>
+	<br><br>
+</p>
+<table border="0" cellpadding="2" cellspacing="1">
+	<tr>
+		<td class="table_head"><b>${lang("abuse.filter.type")}</b></td>
+		<td class="table_head"><b>${lang("abuse.filter.expression")}</b></td>
+		<td class="table_head"><b>&nbsp;</b></td>
+		<td class="table_head"><b>&nbsp;</b></td>
+	</tr>
 
-    <p>
-      <a class="majorcommand" href="${config.actionRoot}?module=Abuse">${lang("back")}</a>
-    </p>
+	<assign grey="0">      
+	<list filters as i>
+		<call showFilterEntry(i.type, i.expression, i.id)>
+	</list>
 
+	<call showFilterEntry("", "", "")>
+	</table>
+
+	
+<p>
+	<a class="link_box" href="${config.actionRoot}?module=Abuse">[ &lt; ] ${lang("back")}</a>&nbsp;&nbsp;
+	<a class="link_box" href="${config.actionRoot}?module=Abuse&do=showlog">${lang("abuse.showlog")}</a>
+</p>
+ 
+ 
     <include "foot.template">
   </body>
 </html>

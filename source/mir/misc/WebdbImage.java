@@ -35,8 +35,8 @@ package mir.misc;
  * Title:
  * Description:
  * Copyright:    Copyright (c) 2002 Mir-coders
- * @author $Author: idfx $
- * @version $Id: WebdbImage.java,v 1.12 2003/03/05 19:23:14 idfx Exp $
+ * @author $Author: zapata $
+ * @version $Id: WebdbImage.java,v 1.13 2003/04/09 02:06:07 zapata Exp $
  */
 
 import java.io.File;

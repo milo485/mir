@@ -36,29 +36,28 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Vector;
 
+import org.apache.struts.util.MessageResources;
 import mir.generator.Generator;
 import mir.generator.GeneratorExc;
 
-import org.apache.struts.util.MessageResources;
-
 public class ResourceBundleGeneratorFunction implements Generator.GeneratorFunction {
   private List messages;
-  private Locale locale;
+  private List locales;
 
   public ResourceBundleGeneratorFunction(Locale aLocale, MessageResources aMessages) {
-    this(aLocale, new MessageResources[] {aMessages} );
+    this(new Locale[] { aLocale}, new MessageResources[] {aMessages} );
   }
 
-  public ResourceBundleGeneratorFunction(Locale aLocale, MessageResources aMessages1, MessageResources aMessages2) {
-    this(aLocale, new MessageResources[] {aMessages1, aMessages2} );
-  }
-
-  public ResourceBundleGeneratorFunction(Locale aLocale, MessageResources[] aMessages) {
-    locale = aLocale;
+  public ResourceBundleGeneratorFunction(Locale[] aLocales, MessageResources[] aMessages) {
+    locales = new Vector();
     messages = new Vector();
 
     for(int i=0; i<aMessages.length; i++) {
-      this.messages.add(aMessages[i]);
+      messages.add(aMessages[i]);
+    }
+
+    for(int i=0; i<aLocales.length; i++) {
+      locales.add(aLocales[i]);
     }
   }
 
@@ -75,9 +74,15 @@ public class ResourceBundleGeneratorFunction implements Generator.GeneratorFunct
     extraParameters.remove(0);
 
     String message=null;
-    Iterator i = messages.iterator();
-    while (i.hasNext() && message==null)
-      message = ((MessageResources) i.next()).getMessage(locale, key, extraParameters.toArray());
+    Iterator j = locales.iterator();
+    while (j.hasNext() && (message == null || message.trim().length()==0)) {
+      Locale locale = (Locale) j.next();
+
+      Iterator i = messages.iterator();
+      while (i.hasNext() && (message == null || message.trim().length()==0)) {
+        message = ( (MessageResources) i.next()).getMessage(locale, key, extraParameters.toArray());
+      }
+    }
 
     if (message == null) {
       return new String("??" + key + "??");

@@ -8,168 +8,186 @@
 <body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
 
 <include "head.template">
+
 <assign grey="0">
 
 <form method="post" action="${config.actionRoot}">
-  <input type="hidden" name="module" value="Comment">
-  <input type="hidden" name="do" value="search">
+	<input type="hidden" name="module" value="Comment">
+	<input type="hidden" name="do" value="search">
    
-  <table border="0" cellpadding="2" cellspacing="1">
-    <tr class="pink">
-      <td>${lang("commentsearch.field")}</td>
-      <td>${lang("commentsearch.value")}</td>
-      <td>${lang("commentsearch.publishedstate")}</td>
-      <td>${lang("commentsearch.status")}</td>
-      <td>${lang("commentsearch.order")}</td>
-    </tr>
-    <tr>
-      <td>
-          <input type="text"   size="10" maxlength="20" name="searchtext" value="${searchtext}">
-      </td>
+	<table border="0" cellpadding="2" cellspacing="3">
+	<tr>
+		<td class="table_head">${lang("commentsearch.field")}</td>
+		<td class="table_head">${lang("commentsearch.value")}</td>
+		<td class="table_head">${lang("commentsearch.publishedstate")}</td>
+		<td class="table_head">${lang("commentsearch.status")}</td>
+		<td class="table_head">${lang("commentsearch.order")}</td>
+		<td class="table_head">&nbsp;</td>
+	</tr>
 
-      <td>
-  	      <select name="searchfield">
-            <option value="title"<if searchfield=="title"> selected</if>>${lang("commentsearch.field.title")}</option>
-            <option value="creator"<if searchfield=="creator"> selected</if>>${lang("commentsearch.field.creator")}</option>
-            <option value="description"<if searchfield=="description"> selected</if>>${lang("commentsearch.field.description")}</option>
-          </select>
-      </td>
-      <td>
-          <select name="searchispublished">
-            <option value="">--</option>
-            <option value="0" <if searchispublished=="0"> selected</if>>${lang("commentsearch.publishedstate.hidden")}</option>
-            <option value="1" <if searchispublished=="1"> selected</if>>${lang("commentsearch.publishedstate.published")}</option>
-          </select>
-      </td>
-      <td>
-          <select name="searchstatus">
-            <option value="">--</option>
-            <list commentstatuses as cs>
-              <option value="${cs.id}" <if searchstatus==cs.id> selected</if>>${lang("commentstatus." + cs.name)}</option>
-            </list>
-          </select>
-      </td>
-      <td>
-          <select name="searchorder">
-            <option value="datedesc" <if searchorder=="datedesc"> selected</if>>${lang("commentsearch.order.datedesc")}</option>
-            <option value="dateasc" <if searchorder=="dateasc"> selected</if>>${lang("commentsearch.order.dateasc")}</option>
-            <option value="articletitle" <if searchorder=="articletitle"> selected</if>>${lang("commentsearch.order.articletitle")}</option>
-          </select>
-      </td>
-      <td>
-          <input class="majorbutton" type="submit" name="search" value="${lang("commentsearch.searchbutton")}">
-      </td>
-    </tr>
-  </table>
+	<tr>
+		<td class="listrow2">
+			<input type="text"   size="10" maxlength="20" name="searchtext" value="${searchtext}">
+		</td>
+		<td class="listrow2">
+			<select name="searchfield">
+				<option value="title"<if searchfield=="title"> selected</if>>${lang("commentsearch.field.title")}</option>
+				<option value="creator"<if searchfield=="creator"> selected</if>>${lang("commentsearch.field.creator")}</option>
+				<option value="description"<if searchfield=="description"> selected</if>>${lang("commentsearch.field.description")}</option>
+			</select>
+		</td>
+		<td class="listrow2">
+			<select name="searchispublished">
+				<option value="">--</option>
+				<option value="0" <if searchispublished=="0"> selected</if>>${lang("commentsearch.publishedstate.hidden")}</option>
+				<option value="1" <if searchispublished=="1"> selected</if>>${lang("commentsearch.publishedstate.published")}</option>
+			</select>
+		</td>
+		<td class="listrow2">
+			<select name="searchstatus">
+				<option value="">--</option>
+				<list commentstatuses as cs>
+					<option value="${cs.id}" <if searchstatus==cs.id> selected</if>>${lang("commentstatus." + cs.name)}</option>
+				</list>
+			</select>
+		</td>
+		<td class="listrow2">
+			<select name="searchorder">
+				<option value="datedesc" <if searchorder=="datedesc"> selected</if>>${lang("commentsearch.order.datedesc")}</option>
+				<option value="dateasc" <if searchorder=="dateasc"> selected</if>>${lang("commentsearch.order.dateasc")}</option>
+				<option value="articletitle" <if searchorder=="articletitle"> selected</if>>${lang("commentsearch.order.articletitle")}</option>
+			</select>
+		</td>
+		<td class="listrow2">
+			<input class="majorbutton" type="submit" name="search" value="${lang("commentsearch.searchbutton")}">
+		</td>
+	</tr>
+</table>
 </form>
 
 <if comments>
- <if config["Mir.Localizer.Admin.ListOperationsFlavor"]!="0">
-  <form method="post" action="${config.actionRoot}">
-    <input type="hidden" name="module" value="Localizer">
-    <input type="hidden" name="do" value="commentoperationbatch">
-    <input type="hidden" name="returnurl" value="${utility.encodeHTML(thisurl)}">
+<if config["Mir.Localizer.Admin.ListOperationsFlavor"]!="0">
+	<form method="post" action="${config.actionRoot}">
+		<input type="hidden" name="module" value="Localizer">
+		<input type="hidden" name="do" value="commentoperationbatch">
+		<input type="hidden" name="returnurl" value="${utility.encodeHTML(thisurl)}">
+		<p class="box">
+			<input class="majorbutton" type="submit" name="save" value="${lang("save")}">&nbsp; (${lang("commentlist.activate")})
+		</p>
+</if>    
 
-    <p>
-      <input class="majorbutton" type="submit" name="save" value="${lang("save")}">
-    </p>
- </if>    
+<table border="0" cellpadding="2" cellspacing="3">  
+	<if comments>
+		<tr>
+			<td>
+				<if prevurl>
+					<a href="${config.actionRoot}?${prevurl}">[ ${lang("list.previous")} ]</a>&nbsp;
+				</if>
+				<if nexturl>
+					<a href="${config.actionRoot}?${nexturl}">[ ${lang("list.next")} ]</a>&nbsp;
+				</if>
+			</td>
+		</tr>
+	</if>
 
-    <table border="0" cellpadding="2" cellspacing="1">  
-      <if comments>
-        <tr><td>
-          <if prevurl>
-            <a href="${config.actionRoot}?${prevurl}">${lang("list.previous")}</a>&nbsp;
-          </if>
-          <if nexturl>
-            <a href="${config.actionRoot}?${nexturl}">${lang("list.next")}</a>&nbsp;
-          </if>
-        </td></tr>
-      </if>
-      <tr class="darkgrey">
-        <td><p class="witesmall">${lang("comment.date")}</p></td>
-        <td><p class="witesmall">${lang("comment.title")}/ ${lang("comment.creator")}<br>
-            ${lang("comment.text")}</p></td>
-        <td>&nbsp;</td>
-      </tr>
+	<tr class="table_head">
+		<td valign="top">
+			${lang("comment.date")}
+		</td>
+		<td>
+			${lang("comment.title")}/ ${lang("comment.creator")}<br>
+			${lang("comment.text")}
+		</td>
+		<td>
+			&nbsp;
+		</td>
+	</tr>
     
-        <list comments as entry>
-          <tr <if grey=="1"><assign grey="0">class="list1"<else><assign grey="1">class="list2"</if>>
+<list comments as entry>
+	<tr <if grey=="1"><assign grey="0">class="listrow1"<else><assign grey="1">class="listrow2"</if>>
+		<td valign="top" class="small">
+			${entry.creationdate.formatted["dd.MM.yyyy HH:mm"]}<br>
+			<if entry.is_published=="0"><b>${lang("commentlist.hidden")}</b><else>-</if>
+		</td>
         
-        		<td>${entry.creationdate.formatted["dd.MM.yyyy HH:mm"]}<br>
-          	  <if entry.is_published=="0"><span class="spezialtext">${lang("comment.hidden")}</span><else>-</if>
-        		</td>
-        
-            <td><if entry.to_content>
-                  ${lang("comment.article")}
-                  <a href="${config.actionRoot}?module=Content&do=edit&id=${entry.to_content.id}">
-                    ${utility.encodeHTML(entry.to_content.title)}
-                  </a>
-                  (${lang("articletypes."+entry.to_content.article_type.name)})
-                </if><br>
-                [<a href="${config.actionRoot}?module=Comment&do=articlecomments&articleid=${entry.to_content.id}">${lang("commentlist.allcomments")}</a>]
-                <br>
-                  <a name="${entry.id}"></a>
-                    <if entry.status>${lang("commentstatus." + entry.status.name)} - </if> 
-                    <b>${entry.title}</b><br>
+		<td>
+			
+			<a name="${entry.id}"></a>
+			<if entry.to_content>
+  			${lang("comment.article")}:
+  			<a href="${config.actionRoot}?module=Content&do=edit&id=${entry.to_content.id}">
+  				${utility.encodeHTML(entry.to_content.title)}
+  			</a>
+        (${lang("articletypes."+entry.to_content.article_type.name)})<br> 
+        [<a href="${config.actionRoot}?module=Comment&do=articlecomments&articleid=${entry.to_content.id}">${lang("commentlist.allcomments")}</a>]<br>
+      </if>
+			
+			<b>${entry.title}</b> &nbsp;
+			<if entry.creator>
+				${lang("by")}: ${entry.creator}
+			</if>
+			<br>
+			${utility.encodeHTML(entry.description)}
+			
+			<if entry.main_url><br>URL: ${entry.main_url}</if>
+			<br><if entry.status>${lang("commentstatus." + entry.status.name)}<else> - </if> &nbsp;
+			<br>
+			<if config["Mir.Localizer.Admin.ListOperationsFlavor"]=="0">
+				<list entry.operations as op>
+					[ <a href="${config.actionRoot}?module=Localizer&do=commentoperation&operation=${op}&id=${entry.id}&returnurl=${utility.encodeURI(thisurl + "#" + entry.id)}">${lang("comment.operation."+op)}</a> ]
+				</list>
+			</if>
+			<if config["Mir.Localizer.Admin.ListOperationsFlavor"]=="1">
+				<list entry.operations as op>
+					[ <input type="checkbox" name="operation" value="${entry.id};${op}">${lang("comment.operation."+op)} ]
+				</list>
+			</if>
+			<if config["Mir.Localizer.Admin.ListOperationsFlavor"]=="2">
+				<select name="operation">
+					<option value="" selected>&nbsp;</option>
+					<list entry.operations as op>
+						<option value="${entry.id};${op}">${lang("comment.operation."+op)}</option>
+					</list>
+				</select>
+			</if>
+			<if entry.operations>|</if>
+			<a href="${config.actionRoot}?module=Comment&do=edit&id=${entry.id}">${lang("edit")}</a>                
+		</td>
       
-                <if entry.creator>${lang("comment.creator")}: ${entry.creator}<br></if>
-                <span>${utility.encodeHTML(entry.description)}</span>
-                <if entry.main_url><br>URL: ${entry.main_url}</if>
-                <br>
-                <if config["Mir.Localizer.Admin.ListOperationsFlavor"]=="0">
-       			      <list entry.operations as op>
-      			        [<a href="${config.actionRoot}?module=Localizer&do=commentoperation&operation=${op}&id=${entry.id}&returnurl=${utility.encodeURI(thisurl + "#" + entry.id)}">${lang("comment.operation."+op)}</a>]
-      			      </list>
-      			    </if>
-                <if config["Mir.Localizer.Admin.ListOperationsFlavor"]=="1">
-       			      <list entry.operations as op>
-  			            [<input type="checkbox" name="operation" value="${entry.id};${op}">${lang("comment.operation."+op)}]
-      			      </list>
-      			    </if>
-                <if config["Mir.Localizer.Admin.ListOperationsFlavor"]=="2">
-  	              <select name="operation">
-                    <option value="" selected>&nbsp;</option>
-       			        <list entry.operations as op>
-                      <option value="${entry.id};${op}">${lang("comment.operation."+op)}</option>
-      			        </list>
-                  </select>
-      			    </if>
-                <if entry.operations>|</if>
-                <a href="${config.actionRoot}?module=Comment&do=edit&id=${entry.id}">${lang("edit")}</a>                
-            </td>
+		<td valign="top">
+			&nbsp;
+			<a class="small" href="${config.actionRoot}?module=Comment&do=delete&id=${entry.id}&searchtext=${utility.encodeHTML(searchtext)}&searchfield=${utility.encodeHTML(searchfield)}&searchispublished=${searchispublished}&searchorder=${searchorder}&offset=${offset}">[${lang("delete")}]</a>
+		</td>    
+	</tr>
+</list>
       
-            <td>
-              <span class="text">&nbsp;
-                <a href="${config.actionRoot}?module=Comment&do=delete&id=${entry.id}&searchtext=${utility.encodeHTML(searchtext)}&searchfield=${utility.encodeHTML(searchfield)}&searchispublished=${searchispublished}&searchorder=${searchorder}&offset=${offset}">${lang("delete")}</a>
-              </span>
-            </td>
-        
-        	</tr>
-        </list>
-      
-        <tr class="darkgrey">
-          <td colspan="3"><span class="witesmall">${count} ${lang("records")} / ${lang("show_from_to", from, to)}</span></td>
-        </tr>
-        <tr><td>
-          <if prevurl>
-            <a href="${config.actionRoot}?${prevurl}">${lang("list.previous")}</a>&nbsp;
-          </if>
-          <if nexturl>
-            <a href="${config.actionRoot}?${nexturl}">${lang("list.next")}</a>&nbsp;
-          </if>
-        </td></tr>
-    </table>
+	<tr>
+		<td colspan="3" class="table_foot">
+			${count} ${lang("records")} / ${lang("show_from_to", from, to)}
+		</td>
+	</tr>
 
-  <if config["Mir.Localizer.Admin.ListOperationsFlavor"]!="0">
-      <p>
-        <input class="majorbutton" type="submit" name="save" value="${lang("save")}">
-      </p>
-    </form>	
-  </if>  
+	<tr>
+		<td>
+			<if prevurl>
+				<a href="${config.actionRoot}?${prevurl}">[ ${lang("list.previous")} ]</a>&nbsp;
+			</if>
+			<if nexturl>
+				<a href="${config.actionRoot}?${nexturl}">[ ${lang("list.next")} ]</a>&nbsp;
+			</if>
+		</td>
+	</tr>
+</table>
+
+<if config["Mir.Localizer.Admin.ListOperationsFlavor"]!="0">
+	<p class="box">
+		<input class="majorbutton" type="submit" name="save" value="${lang("save")}"> &nbsp; (${lang("commentlist.activate")})
+	</p>
+	</form>	
+</if>  
   
 <else>
-  <P align="center">${lang("no_matches_found")}</p>
+<P align="center" class="box">${lang("no_matches_found")}</p>
 </if>
 
 <include "foot.template">

@@ -6,7 +6,6 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.apache.struts.util.MessageResources;
-
 import mir.entity.adapter.EntityIteratorAdapter;
 import mir.generator.Generator;
 import mir.servlet.ServletModuleExc;
@@ -14,21 +13,20 @@ import mir.servlet.ServletModuleFailure;
 import mir.util.CachingRewindableIterator;
 import mir.util.NullWriter;
 import mir.util.ResourceBundleGeneratorFunction;
-
 import mircoders.global.MirGlobal;
 
 
 
 public class ServletHelper {
-  static Map makeGenerationData(Locale aLocale) throws ServletModuleExc {
-    return makeGenerationData(aLocale, "bundles.adminlocal", "bundles.admin");
+  public static Map makeGenerationData(Locale[] aLocales) throws ServletModuleExc {
+    return makeGenerationData(aLocales, "bundles.adminlocal", "bundles.admin");
   }
 
-  static Map makeGenerationData(Locale aLocale, String aBundle) throws ServletModuleExc {
-    return makeGenerationData(aLocale, aBundle, aBundle);
+  public static Map makeGenerationData(Locale[] aLocales, String aBundle) throws ServletModuleExc {
+    return makeGenerationData(aLocales, aBundle, aBundle);
   }
 
-  static Map makeGenerationData(Locale aLocale, String aBundle, String aDefaultBundle) throws ServletModuleExc {
+  public static Map makeGenerationData(Locale[] aLocales, String aBundle, String aDefaultBundle) throws ServletModuleExc {
 
     try {
       Map result = new HashMap();
@@ -62,9 +60,9 @@ public class ServletHelper {
       result.put("topics", topics);
 
       result.put( "lang",
-          new ResourceBundleGeneratorFunction( aLocale,
-                  MessageResources.getMessageResources(aBundle),
-                  MessageResources.getMessageResources(aDefaultBundle)));
+          new ResourceBundleGeneratorFunction( aLocales,
+             new MessageResources[] { MessageResources.getMessageResources(aBundle),
+                                   MessageResources.getMessageResources(aDefaultBundle)}));
 
       return result;
     }
@@ -73,7 +71,7 @@ public class ServletHelper {
     }
   }
 
-  static void generateResponse(PrintWriter aWriter, Map aGenerationData, String aGenerator) throws ServletModuleExc {
+  public static void generateResponse(PrintWriter aWriter, Map aGenerationData, String aGenerator) throws ServletModuleExc {
     Generator generator;
 
     try {
@@ -86,7 +84,7 @@ public class ServletHelper {
     }
   }
 
-  static void generateOpenPostingResponse(PrintWriter aWriter, Map aGenerationData, String aGenerator) throws ServletModuleExc {
+  public static void generateOpenPostingResponse(PrintWriter aWriter, Map aGenerationData, String aGenerator) throws ServletModuleExc {
     Generator generator;
 
     try {

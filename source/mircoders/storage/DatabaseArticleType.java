@@ -40,11 +40,11 @@ package mircoders.storage;
  * @version 1.0
  */
 
+import freemarker.template.SimpleList;
 import mir.log.LoggerWrapper;
 import mir.storage.Database;
 import mir.storage.StorageObject;
 import mir.storage.StorageObjectFailure;
-import freemarker.template.SimpleList;
 
 
 public class DatabaseArticleType extends Database implements StorageObject{
@@ -52,11 +52,7 @@ public class DatabaseArticleType extends Database implements StorageObject{
   private static DatabaseArticleType instance;
   private static SimpleList articletypePopupData;
 
-  // the following *has* to be sychronized cause this static method
-  // could get preemted and we could end up with 2 instances of DatabaseFoo..
-  // see the "Singletons with needles and thread" article at JavaWorld -mh
-  public synchronized static DatabaseArticleType getInstance() throws
-      StorageObjectFailure {
+  public synchronized static DatabaseArticleType getInstance() throws StorageObjectFailure {
     if (instance == null) {
       instance = new DatabaseArticleType();
       instance.myselfDatabase = instance;
@@ -74,6 +70,4 @@ public class DatabaseArticleType extends Database implements StorageObject{
   public SimpleList getPopupData() throws StorageObjectFailure {
     return getPopupData("name", false);
   }
-
-
 }

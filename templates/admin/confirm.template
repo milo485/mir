@@ -5,18 +5,12 @@
   </head>
 
 <body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
-
+<center>
   <include "head_nonavi.template">
-<table width="100%" border="0" align="center">
-  <tr class="darkgrey">
-    <td colspan="2"> 
-      <h2 align="center"><span class="litetitel">${lang("confirm.really_delete")}</span></h2>
-    </td>
-  </tr>
-  <tr> 
-    <td colspan="2">
       <form method="post" action="${config.actionRoot}">
-        <div align="center">
+      <table><tr><td>
+	  <p class="box_head" align="center"><b>${lang("confirm.really_delete")}</b></p>
+        <p class="box" align="center">
           <input type="hidden" name="module" value="${data.module}">
           <input type="hidden" name="do" value="delete">
           <input type="hidden" name="id" value="${data.id}">
@@ -28,12 +22,14 @@
           <input type="hidden" name="query_media_folder" value="${data.query_media_folder}">
           <input type="hidden" name="offset" value="${data.offset}">
           <input type="submit" name="cancel" value="${lang("cancel")}">
-          <input type="submit" name="confirm" value="${lang("delete")}">
-        </div>
-      </form>
-    </td>
-  </tr>
-</table>
+          <input type="submit" name="confirm" value="${lang("delete")}"><br>
+		  <br>
+		  <b><span class="text_alert">${lang("confirm.text")}</span></b>
+        </p>
+		
+      </td></tr></table>
+	  </form>
+</center>
 <include "foot.template">
   </body>
 </html>

@@ -97,11 +97,16 @@ public class MirBasicDataModelLocalizer implements MirDataModelLocalizer {
       anEntityAdapterDefinition.addCalculatedField("commentcount", new ContentCommentCountField(" and is_published='1'"));
       anEntityAdapterDefinition.addCalculatedField("fullcommentcount", new ContentCommentCountField(""));
 
-      anEntityAdapterDefinition.addCalculatedField("to_media_images",  new ContentToMediaField( "image" ));
       anEntityAdapterDefinition.addCalculatedField("to_uploaded_media", new ContentToMediaField( "uploadedMedia" ));
+      anEntityAdapterDefinition.addCalculatedField("to_media_images",  new ContentToMediaField( "image" ));
       anEntityAdapterDefinition.addCalculatedField("to_media_audio", new ContentToMediaField( "audio" ));
       anEntityAdapterDefinition.addCalculatedField("to_media_video", new ContentToMediaField( "video" ));
       anEntityAdapterDefinition.addCalculatedField("to_media_other", new ContentToMediaField( "otherMedia" ));
+      anEntityAdapterDefinition.addCalculatedField("to_all_uploaded_media", new ContentToMediaField( "uploadedMedia", false));
+      anEntityAdapterDefinition.addCalculatedField("to_all_media_images",  new ContentToMediaField( "image", false));
+      anEntityAdapterDefinition.addCalculatedField("to_all_media_audio", new ContentToMediaField( "audio", false));
+      anEntityAdapterDefinition.addCalculatedField("to_all_media_video", new ContentToMediaField( "video", false));
+      anEntityAdapterDefinition.addCalculatedField("to_all_media_other", new ContentToMediaField( "otherMedia", false));
       anEntityAdapterDefinition.addCalculatedField("to_media_icon", new ContentToIconField());
 
       anEntityAdapterDefinition.addCalculatedField("article_type", new ContentToArticleTypeField());
@@ -125,6 +130,17 @@ public class MirBasicDataModelLocalizer implements MirDataModelLocalizer {
       anEntityAdapterDefinition.addDBDateField("creationdate", "webdb_create");
       anEntityAdapterDefinition.addCalculatedField("to_content", new CommentToContentField());
       anEntityAdapterDefinition.addCalculatedField("status", new CommentToStatusField());
+
+      anEntityAdapterDefinition.addCalculatedField("to_uploaded_media", new CommentToMediaField( "uploadedMedia" ));
+      anEntityAdapterDefinition.addCalculatedField("to_media_images",  new CommentToMediaField( "image" ));
+      anEntityAdapterDefinition.addCalculatedField("to_media_audio", new CommentToMediaField( "audio" ));
+      anEntityAdapterDefinition.addCalculatedField("to_media_video", new CommentToMediaField( "video" ));
+      anEntityAdapterDefinition.addCalculatedField("to_media_other", new CommentToMediaField( "otherMedia" ));
+      anEntityAdapterDefinition.addCalculatedField("to_all_uploaded_media", new CommentToMediaField( "uploadedMedia", false));
+      anEntityAdapterDefinition.addCalculatedField("to_all_media_images",  new CommentToMediaField( "image", false));
+      anEntityAdapterDefinition.addCalculatedField("to_all_media_audio", new CommentToMediaField( "audio", false));
+      anEntityAdapterDefinition.addCalculatedField("to_all_media_video", new CommentToMediaField( "video", false));
+      anEntityAdapterDefinition.addCalculatedField("to_all_media_other", new CommentToMediaField( "otherMedia", false));
 
       anEntityAdapterDefinition.addCalculatedField("description_parsed", new FilteredField("description"));
       anEntityAdapterDefinition.addCalculatedField("operations",
@@ -342,16 +358,54 @@ public class MirBasicDataModelLocalizer implements MirDataModelLocalizer {
   }
 
   protected class ContentToMediaField implements EntityAdapterDefinition.CalculatedField {
-    String definition;
+    private String definition;
+    private boolean published;
+
+    public ContentToMediaField(String aDefinition, boolean anOnlyPublished) {
+      definition = aDefinition;
+      published = anOnlyPublished;
+    }
 
     public ContentToMediaField(String aDefinition) {
-      definition = aDefinition;
+      this(aDefinition, true);
     }
 
     public Object getValue(EntityAdapter anEntityAdapter) {
       try {
+        String condition = "exists (select * from content_x_media where content_id="+anEntityAdapter.get("id")+" and media_id=id)";
+        if (published)
+          condition = "is_published='t' and " + condition;
         return anEntityAdapter.getRelation(
-          "is_published='t' and exists (select * from content_x_media where content_id="+anEntityAdapter.get("id")+" and media_id=id)",
+           condition,
+          "id",
+          definition);
+      }
+      catch (Throwable t) {
+        throw new RuntimeException(t.getMessage());
+      }
+    }
+  }
+
+  protected class CommentToMediaField implements EntityAdapterDefinition.CalculatedField {
+    private String definition;
+    private boolean published;
+
+    public CommentToMediaField(String aDefinition, boolean anOnlyPublished) {
+      definition = aDefinition;
+      published = anOnlyPublished;
+    }
+
+    public CommentToMediaField(String aDefinition) {
+      this(aDefinition, true);
+    }
+
+    public Object getValue(EntityAdapter anEntityAdapter) {
+      try {
+        String condition = "exists (select * from comment_x_media where comment_id="+anEntityAdapter.get("id")+" and media_id=id)";
+        if (published)
+          condition = "is_published='t' and " + condition;
+        return anEntityAdapter.getRelation(
+           condition,
           "id",
           definition);
       }

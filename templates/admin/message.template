@@ -5,54 +5,59 @@
 <head>
 
 <body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
-
+<include "FUNCTIONS.template">
 <include "head.template">
+
+
 <form action="${config.actionRoot}" method="post">
 	<input type="hidden" name="module" value="Message">
 	<input type="hidden" name="id" value="${data.id}">
-	<if data.new><input type="hidden" name="do" value="insert">
-	<else><input type="hidden" name="do" value="update"></if>
+	<if data.new>
+		<input type="hidden" name="do" value="insert">
+	<else>
+		<input type="hidden" name="do" value="update">
+	</if>
+	
 <table border="0">
+  
   <tr>
-    <td align="right" class="darkgrey"><span class="witesmall">
-	<B>${lang("message.date")}:</B></span></td>
+    <td align="right" class="table_left">
+	${lang("message.date")}:</td>
     <td>
       ${data.date}
     </td>
   </tr>
 
-  <tr>
-    <td align="right" class="darkgrey"><span class="witesmall">
-	<B>${lang("message.title")}:</B></td>
-    <td>
-	 <input type=text name="title" maxlength=40 value="${data.title}">
-    </td>
-  </tr>
+  
+  <call TextInputTableRow (lang("message.title"), 30, 30, "title", data.title)> 
+  <call TextInputTableRow (lang("message.creator"), 12, 30, "creator", data.creator)> 
+  <call TextAreaTableRow  (lang("message.text"), 50, 5, "description", data.description)> 
+  
+
 
   <tr>
-    <td align="right" class="darkgrey"><span class="witesmall">
-	<B>${lang("message.creator")}:</B></td>
-    <td>
-	 <input type=text name="creator" maxlength=40 value="${data.creator}">
-    </td>
-  </tr>
-
-  <tr>
-    <td align="right" class="darkgrey"><span class="witesmall">
-	<B>${lang("message.text")}:</B> ${lang("message.textinfo")}</span></td>
-    <td>
-	 <textarea cols="50" rows="3" name="description" wrap=virtual>${data.description}</textarea>
-    </td>
-  </tr>
-
-  <tr>
-    <td colspan="2" align="right"> <span class="witetext"><if new>
-      <input type="submit" name="save" value="${lang("insert")}">
+    <td class="table_foot">
+	${lang("message.textinfo")}
+	</td>
+	
+	<td align="right" class="table_foot"> 
+	<if new>
+		<input type="submit" name="save" value="${lang("insert")}">
     <else>
-    <input type="submit" name="save" value="${lang("save")}">
-    </if> </span></form></span>
+		<input type="submit" name="save" value="${lang("save")}">
+    </if> 
     </td>
+  </tr>
 </table>
+
+</form>
+    <p>
+      
+      <a class="link_box" href="${config.actionRoot}?module=Message&do=list">[&lt;] ${lang("back")} </a> &nbsp;
+      <a class="link_box" href="${config.actionRoot}">[&lt;&lt;&lt;] ${lang("head.start")}</a>
+	</p>
+
+
 <include "foot.template">
 </body>
 </html>

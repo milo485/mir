@@ -5,53 +5,34 @@
   </head>
 
   <body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
-    <include "head.template">
-    <p>
-      <a class="majorcommand" href="${config.actionRoot}?module=Users&do=add">${lang("add")}</a> | 
-      <a class="majorcommand" href="${config.actionRoot}?module=Admin&do=superusermenu">${lang("back")}</a>
-    </p>
+        
+		<include "FUNCTIONS.template">
+		<include "head.template">
+		
+		<assign contentlist = data.contentlist>
+		<assign column_nr = 3>
+		
+		<assign column_head_texts = [lang("user.login"), lang("user.admin")]>		
+		<assign data_keys = ["login","is_admin"]>
+		<assign column_head_CSS = "table_head">
+		<assign listrow1CSS = "listrow1">
+		<assign listrow2CSS = "listrow2">
+		<assign footer_css = "table_foot">
+		<assign module_name = "Users">
+		<assign module_jumpback = "Admin">
+		<assign do_jumpback = "superusermenu">
+	
+
+	
+	<call AddOrBack(module_name, module_jumpback, do_jumpback)>
 
     <if data.contentlist>
-      <table border="0" cellpadding="2" cellspacing="1">
-        <tr class="darkgrey">
-          <td><span class="witesmall"><b>${lang("user.login")}</b></span></td>
-          <td><span class="witesmall"><b>${lang("user.admin")}</b></span></td>
-        </tr>
-
-        <list data.contentlist as entry>
-          <if grey=="1"><assign grey="0"><tr class="list1"><else><tr class="list2"><assign grey="1"> </if>
-            <td>${entry.login}&nbsp;</td>
-            <td>${entry.is_admin}&nbsp;</td>
-            <td><span class="text">
-                   <a href="${config.actionRoot}?module=Users&do=delete&id=${entry.id}">${lang("delete")}</a>
-                 | <a href="${config.actionRoot}?module=Users&do=edit&id=${entry.id}">${lang("edit")}</a>
-            </span></td>
-          </tr>
-        </list>
-        <tr>
-          <td colspan="3" class="darkgrey"><span class="witetext">
-            ${data.count} ${lang("records")} /  ${lang("show_from_to", data.from, data.to)}
-          </span></td>
-          <td>&nbsp;</td>
-        </tr>
-      </table>
-      <p>
-
-      <if data.prev>
-        <a href="${actionRoot}?module=Users&do=list&where=${where}&prevoffset=${prev}&prev=zur&uuml;ck">${lang("list.previous")}</a>&nbsp;
-      </if>
-      <if data.next>
-        <a href="${actionRoot}?module=Users&do=list&where=${where}&nextoffset=${next}&next=weiter">${lang("list.next")}</a>
-      </if>
-      </p>
-    <else>
-      <p align="center">${lang("no_matches_found")}</p>
+		<call ListTable(contentlist, data_keys, column_head_texts, column_head_CSS, listrow1CSS, listrow2CSS, footer_css, module_name)>
+		<call AddOrBack(module_name, module_jumpback, do_jumpback)>
+	<else>
+      <P align="center">${lang("no_matches_found")}</p>
     </if>
-
-    <p>
-      <a class="majorcommand" href="${config.actionRoot}?module=Users&do=add">${lang("add")}</a> |
-      <a class="majorcommand" href="${config.actionRoot}?module=Admin&do=superusermenu">${lang("back")}</a>
-    </p>
+    
 
     <include "foot.template">
   </body>

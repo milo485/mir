@@ -101,6 +101,7 @@ public class BundleTool {
 
     result = new PropertiesManipulator();
 
+    // skip past the header in the slave bundle
     Iterator i = slave.getEntries();
     while (i.hasNext()) {
       Object e = i.next();
@@ -130,6 +131,11 @@ public class BundleTool {
       else if (e instanceof PropertiesManipulator.Entry) {
         String key = ( (PropertiesManipulator.Entry) e).getKey();
         String value = slave.get(key);
+
+        if (value==null || value.length()==0) {
+          result.addComment("# missing (master value = \"" +master.get(key)+"\")");
+        }
+
         result.addEntry(key, value);
       }
 
@@ -164,11 +170,18 @@ public class BundleTool {
 
     try {
       bundle = PropertiesManipulator.readProperties(new FileInputStream(new File(aSourceFile)), anEncoding);
+    }
+    catch (Throwable t) {
+      Throwable s = ExceptionFunctions.traceCauseException(t);
 
+      System.out.println("Unable to read sourcefile: " + s.toString());
+      return;
+    }
+    try {
       PropertiesManipulator.writeProperties(bundle, new FileOutputStream(aBundle));
     }
     catch (Throwable t) {
-      System.out.println("Unable to read master properties: " + t.getMessage());
+      System.out.println("Unable to write bundle: " + t.toString());
       return;
     }
   }

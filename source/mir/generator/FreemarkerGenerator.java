@@ -38,8 +38,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-import mir.misc.MessageMethodModel;
 import mir.util.RewindableIterator;
+import mir.util.*;
 
 import org.apache.struts.util.MessageResources;
 
@@ -100,8 +100,6 @@ public class FreemarkerGenerator implements Generator {
       return (TemplateModel) anObject;
     else if (anObject instanceof Generator.GeneratorFunction)
       return makeFunctionAdapter((Generator.GeneratorFunction) anObject);
-    else if (anObject instanceof MessageResources)
-      return new MessageMethodModel((MessageResources) anObject);
     else if (anObject instanceof Integer)
       return makeStringAdapter(((Integer) anObject).toString());
     else if (anObject instanceof Boolean) {

@@ -31,29 +31,26 @@
 
 package mircoders.entity;
 
-import java.util.Map;
 import java.sql.SQLException;
+import java.util.Map;
 
 import freemarker.template.SimpleList;
 import freemarker.template.SimpleScalar;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
-
 import mir.entity.Entity;
-import mir.entity.EntityList;
 import mir.log.LoggerWrapper;
 import mir.media.MediaHelper;
 import mir.media.MirMedia;
 import mir.misc.NumberUtils;
 import mir.storage.StorageObject;
 import mir.storage.StorageObjectFailure;
-import mircoders.storage.DatabaseContentToMedia;
 import mircoders.storage.DatabaseUploadedMedia;
 
 /**
  *
  * @author mh, mir-coders group
- * @version $Id: EntityUploadedMedia.java,v 1.24 2003/03/16 19:54:45 zapata Exp $
+ * @version $Id: EntityUploadedMedia.java,v 1.25 2003/04/10 03:31:47 zapata Exp $
  */
 
 

@@ -5,40 +5,29 @@
 <head>
 
 <body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
-
+<include "FUNCTIONS.template">
 <include "head.template">
+
 <form action="${config.actionRoot}" method="post">
 	<input type="hidden" name="module" value="Language">
 	<input type="hidden" name="id" value="${data.id}">
 	<if data.new><input type="hidden" name="do" value="insert">
 	<else><input type="hidden" name="do" value="update"></if>
 <table border="0">
-
+		<call TextInputTableRow (lang("language.name"), 30, 255, "name", data.name)>
+		<call TextInputTableRow (lang("language.code"), 2, 2,"code", data.code)>
   <tr>
-    <td align="right" class="darkgrey"><span class="witesmall">
-	  <B>${lang("language.name")}:</B></span></td>
-    <td>
-	  <input type="text" name="name" size="30" value="${data.name}">
-    </td>
-  </tr>
-
-  <tr>
-    <td align="right" class="darkgrey"><span class="witesmall">
-	  <B>${lang("language.code")}:</B></span></td>
-    <td>
-	  <input type="text" name="code" size="2" maxlength="2" value="${data.code}">
-    </td>
-  </tr>
-
-
-  <tr>
-    <td colspan="2" align="right"> <span class="witetext"><if data.new>
+    <td class="table_foot" colspan="2" align="right"> 
+	<if data.new>
       <input type="submit" name="save" value="${lang("insert")}">
     <else>
       <input type="submit" name="save" value="${lang("save")}">
-    </if> </span></form></span>
-    </td>
+    </if>
+	</td>
+	</tr>
 </table>
+</form>
+<p><a class="link_box" href="${config.actionRoot}?module=Language&do=list">[&lt;] ${lang("back")} </a> &nbsp;</p>
 <include "foot.template">
 </body>
 </html>

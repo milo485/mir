@@ -90,14 +90,34 @@ public class ImageProcessor {
   }
 
   public void descaleImage(int aMaxSize, float aMinDescale) throws java.io.IOException {
-    descaleImage(aMaxSize, aMaxSize, aMinDescale);
+    descaleImage(aMaxSize, aMaxSize, aMinDescale, 0);
   }
 
-  public void descaleImage(int aMaxWidth, int aMaxHeight, float aMinDescale) throws java.io.IOException {
+  public void descaleImage(int aMaxSize, int aMinResize) throws java.io.IOException {
+    descaleImage(aMaxSize, aMaxSize, 0, aMinResize);
+  }
+
+  public void descaleImage(int aMaxSize, float aMinDescale, int aMinResize) throws java.io.IOException {
+    descaleImage(aMaxSize, aMaxSize, aMinDescale, aMinResize);
+  }
+
+  /**
+   *
+   * Resizes an image to fit inside <code>aMaxWidth</code> and <code>aMaxHeight</code>, provided
+   *    this requires at least <code>aMinResize</code> pixels will be removed from either the width or
+   *    the height
+   *
+   * @param aMaxWidth
+   * @param aMaxHeight
+   * @param aMinDescale
+   * @param aMinResize
+   * @throws java.io.IOException
+   */
+  public void descaleImage(int aMaxWidth, int aMaxHeight, float aMinDescale, int aMinResize) throws java.io.IOException {
     float scale;
     scaledImage = image;
 
-    if ((aMaxWidth>0 && image.getWidth()>aMaxWidth) || (aMaxHeight>0 && image.getHeight()>aMaxHeight))
+    if ((aMaxWidth>0 && image.getWidth()>aMaxWidth+aMinResize-1) || (aMaxHeight>0 && image.getHeight()>aMaxHeight+aMinResize-1))
     {
       logger.info("Scaling image");
 

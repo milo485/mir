@@ -41,26 +41,26 @@ import mir.storage.Database;
 import mir.storage.StorageObject;
 import mir.storage.StorageObjectExc;
 import mir.storage.StorageObjectFailure;
-import mircoders.entity.EntityContent;
+import mircoders.entity.EntityComment;
 import mircoders.entity.EntityUploadedMedia;
 
 /**
- * <b>implements abstract DB connection to the content_x_media SQL table
+ * <b>implements abstract DB connection to the comment_x_media SQL table
  *
  * @author RK, mir-coders group
- * @version $Id: DatabaseContentToMedia.java,v 1.17 2003/04/09 02:06:10 zapata Exp $
+ * @version $Id: DatabaseCommentToMedia.java,v 1.1 2003/04/10 03:31:47 zapata Exp $
  *
  */
 
-public class DatabaseContentToMedia extends Database implements StorageObject{
+public class DatabaseCommentToMedia extends Database implements StorageObject{
 
-  private static DatabaseContentToMedia instance;
+  private static DatabaseCommentToMedia instance;
 
-  public static DatabaseContentToMedia getInstance() {
+  public static DatabaseCommentToMedia getInstance() {
     if (instance == null) {
-      synchronized (DatabaseContentToMedia.class) {
+      synchronized (DatabaseCommentToMedia.class) {
         if (instance == null) {
-          instance = new DatabaseContentToMedia();
+          instance = new DatabaseCommentToMedia();
           instance.myselfDatabase = instance;
         }
       }
@@ -68,27 +68,27 @@ public class DatabaseContentToMedia extends Database implements StorageObject{
     return instance;
   }
 
-  private DatabaseContentToMedia() {
+  private DatabaseCommentToMedia() {
     super();
 
-    logger = new LoggerWrapper("Database.ContentToMedia");
+    logger = new LoggerWrapper("Database.CommentToMedia");
 
     hasTimestamp = false;
-    theTable = "content_x_media";
+    theTable = "comment_x_media";
     theEntityClass = mir.entity.GenericEntity.class;
   }
 
   /**
-   * get all the media-files belonging to a content entity
+   * get all the media-files belonging to a comment entity
    *
    */
-  public EntityList getMedia(EntityContent content) throws StorageObjectFailure {
+  public EntityList getMedia(EntityComment comment) throws StorageObjectFailure {
     EntityList returnList = null;
-    if (content != null) {
+    if (comment != null) {
       // get all to_topic from media_x_topic
-      String id = content.getId();
+      String id = comment.getId();
       String subselect = "id in (select media_id from " + theTable +
-          " where content_id=" + id + ")";
+          " where comment_id=" + id + ")";
 
       try {
         // media should stay in uploaded order. this is especially important
@@ -105,41 +105,41 @@ public class DatabaseContentToMedia extends Database implements StorageObject{
     return returnList;
   }
 
-  public boolean hasMedia(EntityContent content) throws StorageObjectFailure,
+  public boolean hasMedia(EntityComment comment) throws StorageObjectFailure,
       StorageObjectExc {
-    if (content != null) {
+    if (comment != null) {
       try {
-        if (selectByWhereClause("content_id=" + content.getId(), -1).size() ==
+        if (selectByWhereClause("comment_id=" + comment.getId(), -1).size() ==
             0)
           return false;
         else
           return true;
       }
       catch (Exception e) {
-        logger.error("DatabaseContentToMedia.hasMedia: " + e.toString());
-        throw new StorageObjectFailure("DatabaseContentToMedia.hasMedia: " +
+        logger.error("DatabaseCommentToMedia.hasMedia: " + e.toString());
+        throw new StorageObjectFailure("DatabaseCommentToMedia.hasMedia: " +
                                        e.toString(), e);
       }
     }
     else {
-      logger.error("DatabaseContentToMedia.hasMedia: content == null");
+      logger.error("DatabaseCommentToMedia.hasMedia: comment == null");
       throw new StorageObjectExc(
-          "DatabaseContentToMedia.hasMedia: content == null");
+          "DatabaseCommentToMedia.hasMedia: comment == null");
     }
   }
 
   /**
-   * get all the audio belonging to a content entity
+   * get all the audio belonging to a comment entity
    *
    */
-  public EntityList getAudio(EntityContent content) throws StorageObjectFailure {
+  public EntityList getAudio(EntityComment comment) throws StorageObjectFailure {
     EntityList returnList = null;
-    if (content != null) {
+    if (comment != null) {
       // get all to_topic from media_x_topic
-      String id = content.getId();
+      String id = comment.getId();
       //this is not supported by mysql
       String subselect = "id in (select media_id from " + theTable +
-          " where content_id=" + id + ")";
+          " where comment_id=" + id + ")";
 
       try {
         // media should stay in uploaded order. this is especially important
@@ -149,8 +149,8 @@ public class DatabaseContentToMedia extends Database implements StorageObject{
             "id", -1);
       }
       catch (Exception e) {
-        logger.error("DatabaseContentToMedia.getAudio: " + e.toString());
-        throw new StorageObjectFailure("DatabaseContentToMedia.getAudio: " +
+        logger.error("DatabaseCommentToMedia.getAudio: " + e.toString());
+        throw new StorageObjectFailure("DatabaseCommentToMedia.getAudio: " +
                                        e.toString(), e);
       }
     }
@@ -158,17 +158,17 @@ public class DatabaseContentToMedia extends Database implements StorageObject{
   }
 
   /**
-   * get all the video belonging to a content entity
+   * get all the video belonging to a comment entity
    *
    */
-  public EntityList getVideo(EntityContent content) throws StorageObjectFailure {
+  public EntityList getVideo(EntityComment comment) throws StorageObjectFailure {
     EntityList returnList = null;
-    if (content != null) {
+    if (comment != null) {
       // get all to_topic from media_x_topic
-      String id = content.getId();
+      String id = comment.getId();
       //this is not supported by mysql
       String subselect = "id in (select media_id from " + theTable +
-          " where content_id=" + id + ")";
+          " where comment_id=" + id + ")";
 
       try {
         // media should stay in uploaded order. this is especially important
@@ -178,8 +178,8 @@ public class DatabaseContentToMedia extends Database implements StorageObject{
             "id", -1);
       }
       catch (Exception e) {
-        logger.error("DatabaseContentToMedia.getVideo: " + e.toString());
-        throw new StorageObjectFailure("DatabaseContentToMedia.getVideo: " +
+        logger.error("DatabaseCommentToMedia.getVideo: " + e.toString());
+        throw new StorageObjectFailure("DatabaseCommentToMedia.getVideo: " +
                                        e.toString(), e);
       }
     }
@@ -187,18 +187,18 @@ public class DatabaseContentToMedia extends Database implements StorageObject{
   }
 
   /**
-   * get all the images belonging to a content entity
+   * get all the images belonging to a comment entity
    *
    */
-  public EntityList getImages(EntityContent content) throws
+  public EntityList getImages(EntityComment comment) throws
       StorageObjectFailure {
     EntityList returnList = null;
-    if (content != null) {
+    if (comment != null) {
       // get all to_topic from media_x_topic
-      String id = content.getId();
+      String id = comment.getId();
       //this is not supported by mysql
       String subselect = "id in (select media_id from " + theTable +
-          " where content_id=" + id + ")";
+          " where comment_id=" + id + ")";
 
       try {
         // media should stay in uploaded order. this is especially important
@@ -208,8 +208,8 @@ public class DatabaseContentToMedia extends Database implements StorageObject{
             "id", -1);
       }
       catch (Exception e) {
-        logger.error("DatabaseContentToMedia.getImages: " + e.toString());
-        throw new StorageObjectFailure("DatabaseContentToMedia.getImages: " +
+        logger.error("DatabaseCommentToMedia.getImages: " + e.toString());
+        throw new StorageObjectFailure("DatabaseCommentToMedia.getImages: " +
                                        e.toString(), e);
       }
     }
@@ -217,19 +217,19 @@ public class DatabaseContentToMedia extends Database implements StorageObject{
   }
 
   /**
-   * get all the uploaded/other Media belonging to a content entity
+   * get all the uploaded/other Media belonging to a comment entity
    *
    */
-  public EntityList getOther(EntityContent content) throws StorageObjectFailure {
+  public EntityList getOther(EntityComment comment) throws StorageObjectFailure {
     /** @todo this should only fetch published media / rk */
 
     EntityList returnList = null;
-    if (content != null) {
+    if (comment != null) {
       // get all to_topic from media_x_topic
-      String id = content.getId();
+      String id = comment.getId();
       //this is not supported by mysql
       String subselect = "id in (select media_id from " + theTable +
-          " where content_id=" + id + ")";
+          " where comment_id=" + id + ")";
 
       try {
         // media should stay in uploaded order. this is especially important
@@ -239,28 +239,28 @@ public class DatabaseContentToMedia extends Database implements StorageObject{
             "id");
       }
       catch (Exception e) {
-        logger.error("DatabaseContentToMedia.getOther: " + e.toString());
-        throw new StorageObjectFailure("DatabaseContentToMedia.getOther: " + e.toString(), e);
+        logger.error("DatabaseCommentToMedia.getOther: " + e.toString());
+        throw new StorageObjectFailure("DatabaseCommentToMedia.getOther: " + e.toString(), e);
       }
     }
     return returnList;
   }
 
   /**
-   * get all the uploaded/other Media belonging to a content entity
+   * get all the uploaded/other Media belonging to a comment entity
    *
    */
-  public EntityList getUploadedMedia(EntityContent content) throws
+  public EntityList getUploadedMedia(EntityComment comment) throws
       StorageObjectFailure {
     /** @todo this should only fetch published media / rk */
 
     EntityList returnList = null;
-    if (content != null) {
+    if (comment != null) {
       // get all to_topic from media_x_topic
-      String id = content.getId();
+      String id = comment.getId();
       //this is not supported by mysql
       String subselect = "id in (select media_id from " + theTable +
-          " where content_id=" + id + ")";
+          " where comment_id=" + id + ")";
 
       try {
         returnList = DatabaseUploadedMedia.getInstance().selectByWhereClause(
@@ -268,24 +268,24 @@ public class DatabaseContentToMedia extends Database implements StorageObject{
             "id");
       }
       catch (Exception e) {
-        logger.error("DatabaseContentToMedia.getUploadedMedia: " + e.toString());
+        logger.error("DatabaseCommentToMedia.getUploadedMedia: " + e.toString());
         throw new StorageObjectFailure(
-            "DatabaseContentToMedia.getUploadedMedia: " + e.toString(), e);
+            "DatabaseCommentToMedia.getUploadedMedia: " + e.toString(), e);
       }
     }
     return returnList;
   }
 
-  public void setMedia(String contentId, String[] mediaId) throws
+  public void setMedia(String commentId, String[] mediaId) throws
       StorageObjectFailure {
-    if (contentId == null) {
+    if (commentId == null) {
       return;
     }
     if (mediaId == null || mediaId[0] == null) {
       return;
     }
-    //first delete all row with content_id=contentId
-    String sql = "delete from " + theTable + " where content_id=" + contentId;
+    //first delete all row with comment_id=commentId
+    String sql = "delete from " + theTable + " where comment_id=" + commentId;
 
     Connection con = null;
     Statement stmt = null;
@@ -304,10 +304,10 @@ public class DatabaseContentToMedia extends Database implements StorageObject{
     }
 
     //now insert
-    //first delete all row with content_id=contentId
+    //first delete all row with comment_id=commentId
     for (int i = 0; i < mediaId.length; i++) {
-      sql = "insert into " + theTable + " (content_id,media_id) values ("
-          + contentId + "," + mediaId[i] + ")";
+      sql = "insert into " + theTable + " (comment_id,media_id) values ("
+          + commentId + "," + mediaId[i] + ")";
       try {
         con = getPooledCon();
         // should be a preparedStatement because is faster
@@ -324,9 +324,9 @@ public class DatabaseContentToMedia extends Database implements StorageObject{
     }
   }
 
-  public void addMedia(String contentId, String mediaId) throws
+  public void addMedia(String commentId, String mediaId) throws
       StorageObjectFailure {
-    if (contentId == null && mediaId == null) {
+    if (commentId == null && mediaId == null) {
       return;
     }
 
@@ -334,8 +334,8 @@ public class DatabaseContentToMedia extends Database implements StorageObject{
     Statement stmt = null;
     //now insert
 
-    String sql = "insert into " + theTable + " (content_id,media_id) values ("
-        + contentId + "," + mediaId + ")";
+    String sql = "insert into " + theTable + " (comment_id,media_id) values ("
+        + commentId + "," + mediaId + ")";
     try {
       con = getPooledCon();
       // should be a preparedStatement because is faster
@@ -351,13 +351,13 @@ public class DatabaseContentToMedia extends Database implements StorageObject{
     }
   }
 
-  public void setMedia(String contentId, String mediaId) throws
+  public void setMedia(String commentId, String mediaId) throws
       StorageObjectFailure {
-    if (contentId == null && mediaId == null) {
+    if (commentId == null && mediaId == null) {
       return;
     }
-    //first delete all row with content_id=contentId
-    String sql = "delete from " + theTable + " where content_id=" + contentId;
+    //first delete all row with comment_id=commentId
+    String sql = "delete from " + theTable + " where comment_id=" + commentId;
 
     Connection con = null;
     Statement stmt = null;
@@ -376,10 +376,10 @@ public class DatabaseContentToMedia extends Database implements StorageObject{
     }
 
     //now insert
-    //first delete all row with content_id=contentId
+    //first delete all row with comment_id=commentId
 
-    sql = "insert into " + theTable + " (content_id,media_id) values ("
-        + contentId + "," + mediaId + ")";
+    sql = "insert into " + theTable + " (comment_id,media_id) values ("
+        + commentId + "," + mediaId + ")";
     try {
       con = getPooledCon();
       // should be a preparedStatement because is faster
@@ -395,13 +395,13 @@ public class DatabaseContentToMedia extends Database implements StorageObject{
     }
   }
 
-  public void deleteByContentId(String contentId) throws StorageObjectFailure {
-    if (contentId == null) {
-      //theLog.printDebugInfo("-- delete topics failed -- no content id");
+  public void deleteByCommentId(String commentId) throws StorageObjectFailure {
+    if (commentId == null) {
+      //theLog.printDebugInfo("-- delete topics failed -- no comment id");
       return;
     }
-    //delete all row with content_id=contentId
-    String sql = "delete from " + theTable + " where content_id=" + contentId;
+    //delete all row with comment_id=commentId
+    String sql = "delete from " + theTable + " where comment_id=" + commentId;
 
     Connection con = null;
     Statement stmt = null;
@@ -412,9 +412,9 @@ public class DatabaseContentToMedia extends Database implements StorageObject{
       int rs = executeUpdate(stmt, sql);
     }
     catch (Exception e) {
-      logger.error("-- delete by contentId failed  ");
+      logger.error("-- delete by commentId failed  ");
       throw new StorageObjectFailure(
-          "-- delete by content id failed -- delete ", e);
+          "-- delete by comment id failed -- delete ", e);
     }
     finally {
       freeConnection(con, stmt);
@@ -426,7 +426,7 @@ public class DatabaseContentToMedia extends Database implements StorageObject{
       //theLog.printDebugInfo("-- delete topics failed -- no topic id");
       return;
     }
-    //delete all row with content_id=contentId
+    //delete all row with comment_id=commentId
     String sql = "delete from " + theTable + " where media_id=" + mediaId;
 
     Connection con = null;
@@ -447,15 +447,15 @@ public class DatabaseContentToMedia extends Database implements StorageObject{
     }
   }
 
-  public void delete(String contentId, String mediaId) throws
+  public void delete(String commentId, String mediaId) throws
       StorageObjectFailure {
-    if (mediaId == null || contentId == null) {
+    if (mediaId == null || commentId == null) {
       logger.debug("-- delete media failed -- missing parameter");
       return;
     }
-    //delete all row with content_id=contentId and media_id=mediaId
+    //delete all row with comment_id=commentId and media_id=mediaId
     String sql = "delete from " + theTable + " where media_id=" + mediaId +
-        " and content_id= " + contentId;
+        " and comment_id= " + commentId;
 
     Connection con = null;
     Statement stmt = null;
@@ -464,23 +464,23 @@ public class DatabaseContentToMedia extends Database implements StorageObject{
       // should be a preparedStatement because is faster
       stmt = con.createStatement();
       int rs = executeUpdate(stmt, sql);
-      logger.debug("-- delete content_x_media success ");
+      logger.debug("-- delete comment_x_media success ");
     }
     catch (Exception e) {
-      logger.error("-- delete content_x_media failed ");
-      throw new StorageObjectFailure("-- delete content_x_media failed -- ", e);
+      logger.error("-- delete comment_x_media failed ");
+      throw new StorageObjectFailure("-- delete comment_x_media failed -- ", e);
     }
     finally {
       freeConnection(con, stmt);
     }
   }
 
-  public EntityList getContent(EntityUploadedMedia media) throws
+  public EntityList getComment(EntityUploadedMedia media) throws
       StorageObjectFailure {
     EntityList returnList = null;
     if (media != null) {
       String id = media.getId();
-      String select = "select content_id from " + theTable + " where media_id=" +
+      String select = "select comment_id from " + theTable + " where media_id=" +
           id;
 
       // execute select statement
@@ -502,13 +502,13 @@ public class DatabaseContentToMedia extends Database implements StorageObject{
           }
           mediaSelect += ")";
           if (first == false)
-            returnList = DatabaseContent.getInstance().selectByWhereClause(
+            returnList = DatabaseComment.getInstance().selectByWhereClause(
                 mediaSelect, -1);
         }
       }
       catch (Exception e) {
-        logger.error("-- get content failed");
-        throw new StorageObjectFailure("-- get content failed -- ", e);
+        logger.error("-- get comment failed");
+        throw new StorageObjectFailure("-- get comment failed -- ", e);
       }
       finally {
         freeConnection(con, stmt);
@@ -518,13 +518,13 @@ public class DatabaseContentToMedia extends Database implements StorageObject{
   }
 
   /**
-   * Returns a EntityList with all content-objects having a relation to a media
+   * Returns a EntityList with all comment-objects having a relation to a media
    */
 
-  public EntityList getContent() throws StorageObjectFailure {
+  public EntityList getComment() throws StorageObjectFailure {
     EntityList returnList = null;
 
-    String select = "select distinct content_id from " + theTable;
+    String select = "select distinct comment_id from " + theTable;
     // execute select statement
     Connection con = null;
     Statement stmt = null;
@@ -544,13 +544,13 @@ public class DatabaseContentToMedia extends Database implements StorageObject{
         }
         mediaSelect += ")";
         if (first == false)
-          returnList = DatabaseContent.getInstance().selectByWhereClause(
+          returnList = DatabaseComment.getInstance().selectByWhereClause(
               mediaSelect, "webdb_lastchange desc");
       }
     }
     catch (Exception e) {
-      logger.error("-- get content failed");
-      throw new StorageObjectFailure("-- get content failed -- ", e);
+      logger.error("-- get comment failed");
+      throw new StorageObjectFailure("-- get comment failed -- ", e);
     }
     finally {
       freeConnection(con, stmt);
