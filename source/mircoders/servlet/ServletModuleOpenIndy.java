@@ -39,6 +39,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
@@ -69,7 +70,6 @@ import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.Searcher;
 import org.apache.struts.util.MessageResources;
-
 import mir.entity.Entity;
 import mir.entity.EntityList;
 import mir.generator.Generator;
@@ -83,6 +83,7 @@ import mir.servlet.ServletModuleFailure;
 import mir.servlet.ServletModuleUserExc;
 import mir.storage.StorageObjectFailure;
 import mir.util.ExceptionFunctions;
+import mir.util.HTTPRequestParser;
 import mir.util.StringRoutines;
 import mircoders.entity.EntityComment;
 import mircoders.entity.EntityContent;
@@ -116,7 +117,7 @@ import mircoders.storage.DatabaseTopics;
  *    open-postings to the newswire
  *
  * @author mir-coders group
- * @version $Id: ServletModuleOpenIndy.java,v 1.69 2003/03/17 20:47:04 zapata Exp $
+ * @version $Id: ServletModuleOpenIndy.java,v 1.70 2003/04/02 22:15:03 zapata Exp $
  *
  */
 
@@ -655,6 +656,11 @@ public class ServletModuleOpenIndy extends ServletModule
   public void search(HttpServletRequest req, HttpServletResponse res)
       throws ServletModuleExc, ServletModuleUserExc, ServletModuleFailure {
     try {
+      final String[] search_variables = { "search_content", "search_boolean", "search_creator",
+          "search_topic", "search_hasImages", "search_hasAudio", "search_hasVideo", "search_sort",
+          "search_submit", "search_back", "search_forward" };
+      HTTPRequestParser requestParser = new HTTPRequestParser(req);
+
       int increment=10;
 
       HttpSession session = req.getSession(false);
@@ -676,11 +682,11 @@ public class ServletModuleOpenIndy extends ServletModule
 
       //make the query available to subsequent iterations
 
-      for (Enumeration theParams = req.getParameterNames(); theParams.hasMoreElements() ;) {
-        String pName=(String)theParams.nextElement();
-        if (pName.startsWith("search_")){
-          mergeData.put(pName, req.getParameter(pName) );
-        }
+      Iterator j = Arrays.asList(search_variables).iterator();
+      while (j.hasNext()) {
+        String variable = (String) j.next();
+
+        mergeData.put(variable, requestParser.getParameter(variable));
       }
 
       try{
@@ -875,8 +881,14 @@ public class ServletModuleOpenIndy extends ServletModule
           if (!(pIR+increment>=numHits)){
             mergeData.put("hasNext","y");
           }
+          else {
+            mergeData.put("hasNext", null);
+          }
           if (pIR>0){
             mergeData.put("hasPrevious","y");
+          }
+          else {
+            mergeData.put("hasPrevious", null);
           }
 
           if ((pIR+increment)>numHits){

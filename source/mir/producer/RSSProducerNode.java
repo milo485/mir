@@ -7,6 +7,7 @@ import mir.rss.RSSData;
 import mir.rss.RSSReader;
 import mir.rss.RSSToMapConverter;
 import mir.util.ParameterExpander;
+import mir.util.ExceptionFunctions;
 
 public class RSSProducerNode implements ProducerNode {
   private String key;
@@ -22,12 +23,14 @@ public class RSSProducerNode implements ProducerNode {
       String expandedKey = ParameterExpander.expandExpression( aValueMap, key );
       String expandedUrl = ParameterExpander.expandExpression( aValueMap, url );
 
+      ParameterExpander.setValueForKey(aValueMap, expandedKey, null);
       RSSReader reader = new RSSReader();
-      RSSData rssData = reader.parseUrl(url);
+      RSSData rssData = reader.parseUrl(expandedUrl);
       ParameterExpander.setValueForKey(aValueMap, expandedKey, RSSToMapConverter.convertRSSData(rssData));
     }
     catch (Throwable t) {
-      aLogger.error("Error while processing RSS data: " + t.toString());
+      Throwable s = ExceptionFunctions.traceCauseException(t);
+      aLogger.error("Error while processing RSS data: " + s.getClass().getName()+","+ s.getMessage());
     }
   };
 }

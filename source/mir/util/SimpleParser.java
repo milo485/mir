@@ -37,20 +37,51 @@ import gnu.regexp.REMatch;
 import multex.Exc;
 import multex.Failure;
 
+/**
+ * a class to do some basic, regexp based parsing of character data
+ *
+ * <p>Title: </p>
+ * <p>Description: </p>
+ * <p>Copyright: Copyright (c) 2003</p>
+ * <p>Company: </p>
+ * @author not attributable
+ * @version 1.0
+ */
+
 public class SimpleParser {
   private String data;
   private int position;
+
+  /**
+   *
+   * @param aData
+   */
 
   public SimpleParser(String aData) {
     data=aData;
     position=0;
   }
 
+  /**
+   *
+   * @param aRegularExpression
+   * @return
+   * @throws SimpleParserExc
+   */
+
   public boolean parses(RE aRegularExpression) throws SimpleParserExc {
     REMatch match = aRegularExpression.getMatch(data, position);
 
     return (match!=null && match.getStartIndex()==position) ;
   }
+
+  /**
+   *
+   * @param aRegularExpression
+   * @param aMessage
+   * @return
+   * @throws SimpleParserExc
+   */
 
   public String parse(RE aRegularExpression, String aMessage) throws SimpleParserExc {
     REMatch match = aRegularExpression.getMatch(data, position);
@@ -63,9 +94,22 @@ public class SimpleParser {
     return match.toString();
   }
 
+  /**
+   *
+   * @param aRegularExpression
+   * @return
+   * @throws SimpleParserExc
+   */
+
   public String parse(RE aRegularExpression) throws SimpleParserExc {
     return parse( aRegularExpression, "No match found for '"+aRegularExpression.toString()+"'");
   }
+
+  /**
+   *
+   * @param aRegularExpression
+   * @throws SimpleParserExc
+   */
 
   public void skip(RE aRegularExpression) throws SimpleParserExc {
     REMatch match = aRegularExpression.getMatch(data, position);
@@ -73,6 +117,13 @@ public class SimpleParser {
     if (match!=null && match.getStartIndex()==position)
       position=match.getEndIndex();
   }
+
+  /**
+   *
+   * @param anExpression
+   * @return
+   * @throws SimpleParserExc
+   */
 
   public boolean parses(String anExpression) throws SimpleParserExc {
     try {
@@ -89,6 +140,14 @@ public class SimpleParser {
     }
   }
 
+  /**
+   *
+   * @param anExpression
+   * @return
+   * @throws SimpleParserExc
+   * @throws SimpleParserFailure
+   */
+
   public String parse(String anExpression) throws SimpleParserExc, SimpleParserFailure {
     try {
       return parse(new RE(anExpression));
@@ -103,6 +162,15 @@ public class SimpleParser {
       throw new SimpleParserFailure( t );
     }
   }
+
+  /**
+   *
+   * @param anExpression
+   * @param aMessage
+   * @return
+   * @throws SimpleParserExc
+   * @throws SimpleParserFailure
+   */
 
   public String parse(String anExpression, String aMessage) throws SimpleParserExc, SimpleParserFailure {
     try {
@@ -119,6 +187,13 @@ public class SimpleParser {
     }
   }
 
+  /**
+   *
+   * @param anExpression
+   * @throws SimpleParserExc
+   * @throws SimpleParserFailure
+   */
+
   public void skip(String anExpression) throws SimpleParserExc, SimpleParserFailure {
     try {
       skip(new RE(anExpression));
@@ -133,9 +208,33 @@ public class SimpleParser {
       throw new SimpleParserFailure( t );
     }
   }
+
+  /**
+   *
+   * @return true if the parser is at the end of the data
+   */
+
   public boolean isAtEnd() {
     return position>=data.length();
   }
+
+  /**
+   *
+   * @return
+   */
+  public String remainingData() {
+    return data.substring(position);
+  }
+
+  /**
+   *
+   * <p>Title: </p>
+   * <p>Description: </p>
+   * <p>Copyright: Copyright (c) 2003</p>
+   * <p>Company: </p>
+   * @author not attributable
+   * @version 1.0
+   */
 
   public static class SimpleParserFailure extends Failure {
     public SimpleParserFailure(Throwable aThrowable) {

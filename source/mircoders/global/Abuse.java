@@ -1,26 +1,29 @@
 package mircoders.global;
 
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 import java.util.Random;
-import java.io.*;
-import javax.servlet.http.*;
+import java.util.Vector;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.collections.*;
+import org.apache.commons.collections.ExtendedProperties;
+
 import gnu.regexp.RE;
 
+import mir.entity.Entity;
 import mir.log.LoggerWrapper;
 import mir.util.DateToMapAdapter;
+import mir.util.InternetFunctions;
 import mir.util.StringRoutines;
-import mir.util.*;
-import mir.entity.*;
-
 import mircoders.entity.EntityComment;
 import mircoders.entity.EntityContent;
 import mircoders.localizer.MirAdminInterfaceLocalizer;
