@@ -30,9 +30,11 @@
 package mircoders.module;
 
 import mir.log.LoggerWrapper;
-import mir.module.*;
+import mir.module.AbstractModule;
+import mir.module.ModuleExc;
+import mir.module.ModuleFailure;
 import mir.storage.StorageObject;
-import mir.util.*;
+import mir.util.JDBCStringRoutines;
 
 /**
  * Title:        mir - another content management system

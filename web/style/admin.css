@@ -142,7 +142,7 @@ a:hover		{
 	padding:2px;
 	padding-left:8px;
 	padding-right:8px;
-	border:1px solid #990000; 
+	border:1px solid #990000;  
 }
 
 .link-help {  
@@ -152,7 +152,7 @@ a:hover		{
 	padding-left:8px;
 	padding-right:8px;
 	border:1px solid #003399;
-	color: #003399;
+	color: #003399; 
 }
 
 .link-help-small {  

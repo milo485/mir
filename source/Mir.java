@@ -80,7 +80,7 @@ import mircoders.storage.DatabaseUsers;
  * Mir.java - main servlet, that dispatches to servletmodules
  *
  * @author $Author: zapata $
- * @version $Id: Mir.java,v 1.48 2003/05/01 01:42:11 zapata Exp $
+ * @version $Id: Mir.java,v 1.49 2003/05/08 02:43:41 zapata Exp $
  *
  */
 public class Mir extends AbstractServlet {
@@ -442,7 +442,7 @@ public class Mir extends AbstractServlet {
     String sessionUrl = aResponse.encodeURL("");
 
     try {
-      Map mergeData = ServletHelper.makeGenerationData(new Locale[] {getLocale(aRequest), getFallbackLocale()}, "bundles.admin", "bundles.adminlocal");
+      Map mergeData = ServletHelper.makeGenerationData(aResponse, new Locale[] {getLocale(aRequest), getFallbackLocale()}, "bundles.admin", "bundles.adminlocal");
       mergeData.put("messages",
              new CachingRewindableIterator(
                new EntityIteratorAdapter( "", "webdb_create desc", 10,

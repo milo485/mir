@@ -71,7 +71,7 @@ import freemarker.template.SimpleHash;
  *  ServletModuleContent -
  *  deliver html for the article admin form.
  *
- * @version $Id: ServletModuleContent.java,v 1.51 2003/04/28 00:44:06 zapata Exp $
+ * @version $Id: ServletModuleContent.java,v 1.52 2003/05/08 02:43:42 zapata Exp $
  * @author rk, mir-coders
  *
  */
@@ -359,7 +359,7 @@ public class ServletModuleContent extends ServletModule
       throws ServletModuleExc {
     try {
       HTTPRequestParser requestParser = new HTTPRequestParser(aRequest);
-      Map responseData = ServletHelper.makeGenerationData(new Locale[] { getLocale(aRequest), getFallbackLocale(aRequest)});
+      Map responseData = ServletHelper.makeGenerationData(aResponse, new Locale[] { getLocale(aRequest), getFallbackLocale(aRequest)});
       EntityAdapterModel model = MirGlobal.localizer().dataModel().adapterModel();
       Map article;
       URLBuilder urlBuilder = new URLBuilder();
@@ -419,7 +419,7 @@ public class ServletModuleContent extends ServletModule
     int count;
 
     try {
-      Map responseData = ServletHelper.makeGenerationData(new Locale[] { getLocale(aRequest), getFallbackLocale(aRequest)});
+      Map responseData = ServletHelper.makeGenerationData(aResponse, new Locale[] { getLocale(aRequest), getFallbackLocale(aRequest)});
       model = MirGlobal.localizer().dataModel().adapterModel();
 
       Object articleList =

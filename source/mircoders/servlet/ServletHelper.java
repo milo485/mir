@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with  any library licensed under the Apache Software License, 
- * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
- * (or with modified versions of the above that use the same license as the above), 
- * and distribute linked combinations including the two.  You must obey the 
- * GNU General Public License in all respects for all of the code used other than 
- * the above mentioned libraries.  If you modify this file, you may extend this 
- * exception to your version of the file, but you are not obligated to do so.  
+ * the code of this program with  any library licensed under the Apache Software License,
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library
+ * (or with modified versions of the above that use the same license as the above),
+ * and distribute linked combinations including the two.  You must obey the
+ * GNU General Public License in all respects for all of the code used other than
+ * the above mentioned libraries.  If you modify this file, you may extend this
+ * exception to your version of the file, but you are not obligated to do so.
  * If you do not wish to do so, delete this exception statement from your version.
  */
 package mircoders.servlet;
@@ -33,6 +33,11 @@ import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.struts.util.MessageResources;
+
 
 import mir.entity.adapter.EntityIteratorAdapter;
 import mir.generator.Generator;
@@ -43,28 +48,29 @@ import mir.util.CachingRewindableIterator;
 import mir.util.ResourceBundleGeneratorFunction;
 import mircoders.global.MirGlobal;
 
-import org.apache.struts.util.MessageResources;
-
-
 
 public class ServletHelper {
   static LoggerWrapper logger = new LoggerWrapper("ServletModule.Helper");
 
 
-  public static Map makeGenerationData(Locale[] aLocales) throws ServletModuleExc {
-    return makeGenerationData(aLocales, "bundles.adminlocal", "bundles.admin");
+  public static Map makeGenerationData(HttpServletResponse aResponse, Locale[] aLocales) throws ServletModuleExc {
+    return makeGenerationData(aResponse, aLocales, "bundles.adminlocal", "bundles.admin");
   }
 
-  public static Map makeGenerationData(Locale[] aLocales, String aBundle) throws ServletModuleExc {
-    return makeGenerationData(aLocales, aBundle, aBundle);
+  public static Map makeGenerationData(HttpServletResponse aResponse, Locale[] aLocales, String aBundle) throws ServletModuleExc {
+    return makeGenerationData(aResponse, aLocales, aBundle, aBundle);
   }
 
-  public static Map makeGenerationData(Locale[] aLocales, String aBundle, String aDefaultBundle) throws ServletModuleExc {
+  public static Map makeGenerationData(HttpServletResponse aResponse, Locale[] aLocales, String aBundle, String aDefaultBundle) throws ServletModuleExc {
 
     try {
       Map result = new HashMap();
 
       MirGlobal.localizer().producerAssistant().initializeGenerationValueSet(result);
+
+      // ML: hackish
+      ((Map) result.get("config")).put("actionRoot",
+             aResponse.encodeURL(MirGlobal.config().getString("RootUri") + "/servlet/Mir"));
 
       result.put("returnurl", null);
 

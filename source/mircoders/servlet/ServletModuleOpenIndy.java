@@ -31,16 +31,12 @@
 package mircoders.servlet;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -123,7 +119,7 @@ import mircoders.storage.DatabaseTopics;
  *    open-postings to the newswire
  *
  * @author mir-coders group
- * @version $Id: ServletModuleOpenIndy.java,v 1.86 2003/05/04 12:56:33 john Exp $
+ * @version $Id: ServletModuleOpenIndy.java,v 1.89 2003/05/08 02:43:42 zapata Exp $
  *
  */
 
@@ -554,7 +550,7 @@ public class ServletModuleOpenIndy extends ServletModule
       Session session = new HTTPAdapters.HTTPSessionAdapter(aRequest.getSession());
 
       SimpleResponse response = new SimpleResponse(
-          ServletHelper.makeGenerationData(new Locale[] {getLocale(aRequest), getFallbackLocale(aRequest)},
+          ServletHelper.makeGenerationData(aResponse, new Locale[] {getLocale(aRequest), getFallbackLocale(aRequest)},
              "bundles.open"));
 
       response.setResponseValue("actionURL", aResponse.encodeURL(HttpUtils.getRequestURL(aRequest).toString())+"?"+SESSION_REQUEST_KEY+"="+aRequest.getSession().getId());
@@ -591,16 +587,15 @@ public class ServletModuleOpenIndy extends ServletModule
     String mail_language = req.getParameter("mail_language");
 
     Map mergeData = new HashMap();
+    mergeData.put("mail_to",to);
+    mergeData.put("mail_from",from);
+    mergeData.put("mail_from_name",from_name);
+    mergeData.put("mail_comment",comment);
+    mergeData.put("mail_aid",aid);
+    mergeData.put("mail_language",mail_language);
+
 
     if (to == null || from == null || from_name == null|| to.equals("") || from.equals("") || from_name.equals("") || mail_language == null || mail_language.equals("")){
-
-      for (Enumeration theParams = req.getParameterNames(); theParams.hasMoreElements() ;) {
-        String pName=(String)theParams.nextElement();
-        if (pName.startsWith("mail_")){
-          mergeData.put( pName,req.getParameter(pName) );
-        }
-      }
-
       deliver(req, res, mergeData, null, prepareMailTemplate);
     }
     else {
@@ -616,32 +611,32 @@ public class ServletModuleOpenIndy extends ServletModule
       if (from.indexOf('\n') != -1 || from.indexOf('\r') != -1 || from.indexOf(',') != -1 ) {
         throw new ServletModuleUserExc("email.error.invalidfromaddress", new String[] {from});
       }
-      
+
       CacheKey theCacheKey=new CacheKey("email",aid+mail_language);
       String theEmailText;
-      
+
       if (MirGlobal.mruCache().hasObject(theCacheKey)){
-	logger.info("fetching email text for article "+aid+" from cache");
-	theEmailText = (String) MirGlobal.mruCache().getObject(theCacheKey);
+  logger.info("fetching email text for article "+aid+" from cache");
+  theEmailText = (String) MirGlobal.mruCache().getObject(theCacheKey);
       }
       else {
-	EntityContent contentEnt;
-	try{
-	  contentEnt = (EntityContent)contentModule.getById(aid);
-	  StringWriter theEMailTextWriter=new StringWriter();
-	  PrintWriter dest = new PrintWriter(theEMailTextWriter);
-	  Map articleData = new HashMap();
-	  articleData.put("article",mir.generator.FreemarkerGenerator.makeAdapter(contentEnt));
-	  articleData.put("languagecode",mail_language);
-	  deliver(dest,req, res, articleData, null, emailAnArticleTemplate,mail_language);
-	  theEmailText=theEMailTextWriter.toString();
-	  MirGlobal.mruCache().storeObject(theCacheKey,theEmailText);
-	}
-	catch (Throwable e){
-	  throw new ServletModuleFailure("Couldn't get content for article "+aid + mail_language + ": " + e.getMessage(), e);
-	}
+        EntityContent contentEnt;
+        try {
+          contentEnt = (EntityContent) contentModule.getById(aid);
+          StringWriter theEMailTextWriter = new StringWriter();
+          PrintWriter dest = new PrintWriter(theEMailTextWriter);
+          Map articleData = new HashMap();
+          articleData.put("article", MirGlobal.localizer().dataModel().adapterModel().makeEntityAdapter("content", contentEnt));
+          articleData.put("languagecode", mail_language);
+          deliver(dest, req, res, articleData, null, emailAnArticleTemplate, mail_language);
+          theEmailText = theEMailTextWriter.toString();
+          MirGlobal.mruCache().storeObject(theCacheKey, theEmailText);
+        }
+        catch (Throwable e) {
+          throw new ServletModuleFailure("Couldn't get content for article " + aid + mail_language + ": " + e.getMessage(), e);
+        }
       }
-            
+
       String content = theEmailText;
 
 
@@ -994,69 +989,69 @@ public class ServletModuleOpenIndy extends ServletModule
     try {
       String idParam = req.getParameter(ID_REQUEST_PARAM);
       if (idParam != null) {
-          
 
-	RE re = new RE("[0-9]+");
-          
-          
-	REMatch[] idMatches=re.getAllMatches(idParam);
-          
-	String cacheSelector="";
-          
-	for (int i = 0; i < idMatches.length; i++){
-	  cacheSelector=   cacheSelector + "," + idMatches[i].toString();
-	}
-          
-	String cacheType="pdf";
-          
-	CacheKey theCacheKey = new CacheKey(cacheType,cacheSelector);
-          
-	byte[] thePDF;
-          
-	if (MirGlobal.mruCache().hasObject(theCacheKey)){
-	  logger.info("fetching pdf from cache");
-	  thePDF = (byte[]) MirGlobal.mruCache().getObject(theCacheKey);
-	}
-	else {
-	  logger.info("generating pdf and caching it");
-	  ByteArrayOutputStream out = new ByteArrayOutputStream();
-	  PDFGenerator pdfMaker = new PDFGenerator(out);
-            
-	  if (idMatches.length > 1){
-	    pdfMaker.addLine();
-	    for (int i = 0; i < idMatches.length  && i < maxArticlesInNewsleter; i++){
-	      REMatch aMatch = idMatches[i];
-	      String id=aMatch.toString();
-	      EntityContent contentEnt = (EntityContent)contentModule.getById(id);
-	      pdfMaker.addIndexItem(contentEnt);
-	    }
-	  }
-            
-	  for (int i = 0; i < idMatches.length; i++){
-	    REMatch aMatch = idMatches[i];
-	    String id=aMatch.toString();
-	    EntityContent contentEnt = (EntityContent)contentModule.getById(id);
-              
-	    pdfMaker.add(contentEnt);
-	  }
-            
-	  pdfMaker.stop();
-	  thePDF  = out.toByteArray();
-            
-	  //and save all our hard work!
-	  MirGlobal.mruCache().storeObject(theCacheKey,thePDF);
-	}
-          
-	res.setContentType("application/pdf");
-	res.setContentLength(thePDF.length);
-	res.getOutputStream().write(thePDF);
-	res.getOutputStream().flush();
-	String elapsedtime=(new Long(System.currentTimeMillis()-starttime)).toString();
-	logger.info("pdf retireval took "+elapsedtime + " milliseconds"  );
+
+  RE re = new RE("[0-9]+");
+
+
+  REMatch[] idMatches=re.getAllMatches(idParam);
+
+  String cacheSelector="";
+
+  for (int i = 0; i < idMatches.length; i++){
+    cacheSelector=   cacheSelector + "," + idMatches[i].toString();
+  }
+
+  String cacheType="pdf";
+
+  CacheKey theCacheKey = new CacheKey(cacheType,cacheSelector);
+
+  byte[] thePDF;
+
+  if (MirGlobal.mruCache().hasObject(theCacheKey)){
+    logger.info("fetching pdf from cache");
+    thePDF = (byte[]) MirGlobal.mruCache().getObject(theCacheKey);
+  }
+  else {
+    logger.info("generating pdf and caching it");
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    PDFGenerator pdfMaker = new PDFGenerator(out);
+
+    if (idMatches.length > 1){
+      pdfMaker.addLine();
+      for (int i = 0; i < idMatches.length  && i < maxArticlesInNewsleter; i++){
+        REMatch aMatch = idMatches[i];
+        String id=aMatch.toString();
+        EntityContent contentEnt = (EntityContent)contentModule.getById(id);
+        pdfMaker.addIndexItem(contentEnt);
+      }
+    }
+
+    for (int i = 0; i < idMatches.length; i++){
+      REMatch aMatch = idMatches[i];
+      String id=aMatch.toString();
+      EntityContent contentEnt = (EntityContent)contentModule.getById(id);
+
+      pdfMaker.add(contentEnt);
+    }
+
+    pdfMaker.stop();
+    thePDF  = out.toByteArray();
+
+    //and save all our hard work!
+    MirGlobal.mruCache().storeObject(theCacheKey,thePDF);
+  }
+
+  res.setContentType("application/pdf");
+  res.setContentLength(thePDF.length);
+  res.getOutputStream().write(thePDF);
+  res.getOutputStream().flush();
+  String elapsedtime=(new Long(System.currentTimeMillis()-starttime)).toString();
+  logger.info("pdf retireval took "+elapsedtime + " milliseconds"  );
 
       }
       else {
-	throw new ServletModuleExc("Missing id.");
+  throw new ServletModuleExc("Missing id.");
       }
     }
     catch (Throwable t) {
@@ -1065,7 +1060,7 @@ public class ServletModuleOpenIndy extends ServletModule
     }
 
   }
-  
+
 
   public String generateOnetimePassword() {
     Random r = new Random();
@@ -1094,7 +1089,7 @@ public class ServletModuleOpenIndy extends ServletModule
   public void deliver(PrintWriter anOutputWriter, HttpServletRequest aRequest, HttpServletResponse aResponse, Map aData, Map anExtra, String aGenerator)
       throws ServletModuleFailure {
     try {
-      Map responseData = ServletHelper.makeGenerationData(new Locale[] { getLocale(aRequest), getFallbackLocale(aRequest)}, "bundles.open");
+      Map responseData = ServletHelper.makeGenerationData(aResponse, new Locale[] { getLocale(aRequest), getFallbackLocale(aRequest)}, "bundles.open");
       responseData.put("data", aData);
       responseData.put("extra", anExtra);
 
@@ -1114,7 +1109,7 @@ public class ServletModuleOpenIndy extends ServletModule
   public void deliver(PrintWriter anOutputWriter, HttpServletRequest aRequest, HttpServletResponse aResponse, Map aData, Map anExtra, String aGenerator,String aLocaleString)
       throws ServletModuleFailure {
     try {
-      Map responseData = ServletHelper.makeGenerationData(new Locale[] { new Locale(aLocaleString,""), getFallbackLocale(aRequest)}, "bundles.open");
+      Map responseData = ServletHelper.makeGenerationData(aResponse, new Locale[] { new Locale(aLocaleString,""), getFallbackLocale(aRequest)}, "bundles.open");
       responseData.put("data", aData);
       responseData.put("extra", anExtra);
 

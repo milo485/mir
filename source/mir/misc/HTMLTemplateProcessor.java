@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with  any library licensed under the Apache Software License, 
- * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
- * (or with modified versions of the above that use the same license as the above), 
- * and distribute linked combinations including the two.  You must obey the 
- * GNU General Public License in all respects for all of the code used other than 
- * the above mentioned libraries.  If you modify this file, you may extend this 
- * exception to your version of the file, but you are not obligated to do so.  
+ * the code of this program with  any library licensed under the Apache Software License,
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library
+ * (or with modified versions of the above that use the same license as the above),
+ * and distribute linked combinations including the two.  You must obey the
+ * GNU General Public License in all respects for all of the code used other than
+ * the above mentioned libraries.  If you modify this file, you may extend this
+ * exception to your version of the file, but you are not obligated to do so.
  * If you do not wish to do so, delete this exception statement from your version.
  */
 package mir.misc;
@@ -203,11 +203,6 @@ public final class HTMLTemplateProcessor {
       tmr = new SimpleHash();
 
       /** @todo  what is this for? (rk) */
-    String session = "";
-    if (res != null) {
-      session = res.encodeURL("");
-    }
-
     SimpleHash configHash = new SimpleHash();
 
     // pass the whole config hash to the templates
@@ -222,7 +217,8 @@ public final class HTMLTemplateProcessor {
 
     // this does not come directly from the config file
     configHash.put("docRoot", new SimpleScalar(docRoot));
-    configHash.put("actionRoot", new SimpleScalar(actionRoot + session));
+
+    configHash.put("actionRoot", new SimpleScalar(res.encodeURL(actionRoot)));
     configHash.put("now",
                    new SimpleScalar(StringUtil.date2readableDateTime(new GregorianCalendar())));
 

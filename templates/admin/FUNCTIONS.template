@@ -109,6 +109,18 @@
   </tr>
 </function>
 
+<function PasswordTextInputTableRow (label, size, maxlength, fieldname, fieldcontent)>
+  <tr>
+    <td align="right" class="table-left">
+      <b>${label}:</b>
+    </td>
+    
+    <td class="listrow2">
+      <input type="password" size="${size}" maxlength="${maxlength}" name="${fieldname}" value="${utility.encodeHTML(fieldcontent)}">
+    </td>
+  </tr>
+</function>
+
 <function TextInputTableRowLight (label, size, maxlength, fieldname, fieldcontent)>
   <tr>
     <td align="right" class="table-left-light">

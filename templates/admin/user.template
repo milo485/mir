@@ -20,8 +20,8 @@
 
   <table border="0">
     <call TextInputTableRow (lang("user.login"), 40, 40, "login", data.login)>
-    <call TextInputTableRow (lang("user.password"), 40, 40, "newpassword", "")>
-    <call TextInputTableRow (lang("user.password2"), 40, 40, "newpassword2", "")>
+    <call PasswordTextInputTableRow (lang("user.password"), 40, 40, "newpassword", "")>
+    <call PasswordTextInputTableRow (lang("user.password2"), 40, 40, "newpassword2", "")>
     <tr>
       <td align="right" class="table-left">
         <b>${lang("user.admin")}:</b>

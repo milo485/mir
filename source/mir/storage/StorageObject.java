@@ -197,15 +197,6 @@ public interface StorageObject {
   abstract public ResultSet executeSql(Statement a, String sql) throws StorageObjectFailure, SQLException;
 
   /**
-   *
-   * @param sql
-   * @return
-   * @throws StorageObjectFailure
-   * @throws SQLException
-   */
-  abstract public ResultSet executeSql(String sql) throws StorageObjectFailure, SQLException;
-
-  /**
    * Executes 1 sql statement and returns the results as a <code>List</code> of <code>Map</code>s
    *
    * @param sql

@@ -131,7 +131,7 @@ public class Abuse {
 
         if (filter.getType().equals(REGEXP_FILTER_TYPE)) {
           try {
-            RE regularExpression = new RE(filter.getExpression());
+            RE regularExpression = new RE(filter.getExpression(), RE.REG_ICASE);
 
             Iterator j = anEntity.getFields().iterator();
             while (j.hasNext()) {

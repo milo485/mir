@@ -59,7 +59,7 @@ import mir.util.URLBuilder;
  *  in the config file.
  *
  * @author $Author: zapata $
- * @version $Revision: 1.12 $ $Date: 2003/04/28 01:57:14 $
+ * @version $Revision: 1.13 $ $Date: 2003/05/08 02:43:42 $
  *
  */
 
@@ -228,7 +228,7 @@ public class ServletModuleFileEdit extends ServletModule
   public void listSubDirectory(FileEditDirectory aDirectory, String aSubDirectory, HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc
   {
     try {
-      Map responseData = ServletHelper.makeGenerationData(new Locale[] { getLocale(aRequest), getFallbackLocale(aRequest)});
+      Map responseData = ServletHelper.makeGenerationData(aResponse, new Locale[] { getLocale(aRequest), getFallbackLocale(aRequest)});
       File dir = new File(aDirectory.getRootDirectory(), aSubDirectory);
 
       if (!validateDirectory(aDirectory, dir) || !dir.isDirectory()) {
@@ -271,7 +271,7 @@ public class ServletModuleFileEdit extends ServletModule
         listSubDirectory(aDirectory, "", aRequest, aResponse);
       }
       else {
-        Map responseData = ServletHelper.makeGenerationData(new Locale[] { getLocale(aRequest), getFallbackLocale(aRequest)});
+        Map responseData = ServletHelper.makeGenerationData(aResponse, new Locale[] { getLocale(aRequest), getFallbackLocale(aRequest)});
         URLBuilder urlBuilder = new URLBuilder();
 
         urlBuilder.setValue("module", "FileEdit");

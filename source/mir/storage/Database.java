@@ -76,7 +76,7 @@ import mir.util.JDBCStringRoutines;
  * Treiber, Host, User und Passwort, ueber den der Zugriff auf die
  * Datenbank erfolgt.
  *
- * @version $Id: Database.java,v 1.42 2003/05/03 00:21:22 zapata Exp $
+ * @version $Id: Database.java,v 1.44 2003/05/06 18:08:05 zapata Exp $
  * @author rk
  *
  */
@@ -659,9 +659,11 @@ public class Database implements StorageObject {
           o_store.add(sid);
         }
       }
-    } catch (SQLException sqe) {
+    }
+    catch (SQLException sqe) {
       throwSQLException(sqe, "selectByWhereClause");
-    } finally {
+    }
+    finally {
       try {
         if (con != null) {
           freeConnection(con, stmt);
@@ -1229,13 +1231,15 @@ public class Database implements StorageObject {
 
     return rs;
   }
-
+/*
   public ResultSet executeSql(String sql) throws StorageObjectFailure, SQLException {
     long startTime = System.currentTimeMillis();
+    Connection connection = null;
+    Statement statement = null;
 
     try {
-      Connection connection = getPooledCon();
-      Statement statement = connection.createStatement();
+      connection = getPooledCon();
+      statement = connection.createStatement();
       ResultSet result;
 
       result = statement.executeQuery(sql);
@@ -1247,8 +1251,13 @@ public class Database implements StorageObject {
       logger.error(e.getMessage() +"\n" + (System.currentTimeMillis() - startTime) + "ms. for: " + sql);
       throw new StorageObjectFailure(e);
     }
+    finally {
+      if (connection!=null) {
+        freeConnection(connection, statement);
+      }
+    }
   }
-
+*/
   private Map processRow(ResultSet aResultSet) throws StorageObjectFailure, StorageObjectExc {
     try {
       Map result = new HashMap();
@@ -1266,12 +1275,20 @@ public class Database implements StorageObject {
   }
 
   public List executeFreeSql(String sql, int aLimit) throws StorageObjectFailure, StorageObjectExc {
+    Connection connection = null;
+    Statement statement = null;
     try {
-      ResultSet resultset = executeSql(sql);
       List result = new Vector();
-
-      while (resultset.next() && result.size() < aLimit) {
-        result.add(processRow(resultset));
+      connection = getPooledCon();
+      statement = connection.createStatement();
+      ResultSet resultset = executeSql(statement, sql);
+      try {
+        while (resultset.next() && result.size() < aLimit) {
+          result.add(processRow(resultset));
+        }
+      }
+      finally {
+        resultset.close();
       }
 
       return result;
@@ -1279,16 +1296,24 @@ public class Database implements StorageObject {
     catch (Throwable e) {
       throw new StorageObjectFailure(e);
     }
+    finally {
+      if (connection!=null) {
+        freeConnection(connection, statement);
+      }
+    }
   };
 
-  public Map executeFreeSingleRowSql(String sql) throws StorageObjectFailure, StorageObjectExc {
+  public Map executeFreeSingleRowSql(String anSqlStatement) throws StorageObjectFailure, StorageObjectExc {
     try {
-      ResultSet resultset = executeSql(sql);
-
-      if (resultset.next())
-        return processRow(resultset);
-      else
-        return null;
+      List resultList = executeFreeSql(anSqlStatement, 1);
+      try {
+        if (resultList.size()>0)
+          return (Map) resultList.get(0);
+        else
+          return null;
+      }
+      finally {
+      }
     }
     catch (Throwable t) {
       throw new StorageObjectFailure(t);

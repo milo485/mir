@@ -108,7 +108,7 @@ public class ServletModuleComment extends ServletModule
   public void showComment(String anId, HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc {
     try {
       HTTPRequestParser requestParser = new HTTPRequestParser(aRequest);
-      Map responseData = ServletHelper.makeGenerationData(new Locale[] {getLocale(aRequest), getFallbackLocale(aRequest)});
+      Map responseData = ServletHelper.makeGenerationData(aResponse, new Locale[] {getLocale(aRequest), getFallbackLocale(aRequest)});
       EntityAdapterModel model = MirGlobal.localizer().dataModel().adapterModel();
       Map comment;
       URLBuilder urlBuilder = new URLBuilder();
@@ -263,7 +263,7 @@ public class ServletModuleComment extends ServletModule
     int count;
 
     try {
-      Map responseData = ServletHelper.makeGenerationData(new Locale[] { getLocale(aRequest), getFallbackLocale(aRequest)});
+      Map responseData = ServletHelper.makeGenerationData(aResponse, new Locale[] { getLocale(aRequest), getFallbackLocale(aRequest)});
       model = MirGlobal.localizer().dataModel().adapterModel();
 
       Object commentList =
