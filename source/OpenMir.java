@@ -51,7 +51,7 @@ import mircoders.storage.*;
  *  OpenMir.java - main servlet for open posting and comment feature to articles
  *
  *  @author RK 1999-2001, the mir-coders group
- *  @version $Id: OpenMir.java,v 1.17 2002/12/23 03:12:46 mh Exp $
+ *  @version $Id: OpenMir.java,v 1.18 2003/01/18 08:38:06 mh Exp $
  *
  */
 
@@ -98,8 +98,8 @@ public class OpenMir extends AbstractServlet {
     //make sure client browsers don't cache anything
     setNoCaching(res);
 
-    res.setContentType("text/html; charset="
-                      +MirConfig.getProp("Mir.DefaultHTMLCharset"));
+    res.setContentType("text/html");
+    //res.setContentType("text/html; charset="+MirConfig.getProp("Mir.DefaultHTMLCharset"));
     try {
       ServletModuleDispatch.dispatch(ServletModuleOpenIndy.getInstance(),req,res);
     }

@@ -34,7 +34,7 @@ Content-type: text/html;charset="utf-8";
 
 <html>
 <body bgcolor="#dddddd" marginwidth="0" marginheight="0" leftmargin="0" topmargin="0" link="#003399" alink="#cc0033" vlink="#660033" >
-<h1>${general.htmltitle}::Forwarded Article </h1>
+<h1>${lang("general.htmltitle")}::Forwarded Article </h1>
 <table cellpadding="30" cellspacing="0" border="0" width="80%"><tr><td>
         <br>
         <h2>${article.title}(<a href="${config["Producer.ProductionHost"]}/${config["Producer.DocRoot"]}/${language.code}/${article.creationdate.formatted["yyyy/MM"]}/${article.id}.shtml">original location here</a>)</h2>

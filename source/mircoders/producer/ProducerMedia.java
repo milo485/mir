@@ -107,7 +107,7 @@ abstract public class ProducerMedia extends Producer {
                             e.toString());
           logHTML(htmlout, "problem with media id: "+currentMedia.getId()+
                   " <font color=\"Red\"> failed!</font>: "+e.toString());
-          e.printStackTrace(htmlout);
+          e.printStackTrace(System.out);
         }
       }
 

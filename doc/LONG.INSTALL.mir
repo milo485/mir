@@ -1,6 +1,6 @@
 MIR INSTALLATION HOWTO
 
-Last updated: $Date: 2002/10/25 20:22:10 $
+Last updated: $Date: 2003/01/18 08:44:09 $
 ----------------------------------------------------------------
 
 Here is a short installation-howto of Mir, somewhat more explicit than
@@ -69,6 +69,9 @@ apt-get install apache
     to the file pointed to by the "TypesConfig" command in your apache config
     file. Or add and equivalent AddType command to your httpd.conf.  Of course
     this assumes that the mod_mime is loaded.
+* Make sure that if you are using a non standard character set enconding that 
+  Apache doesn't accidentally send the wrong encoding in the HTTP headers.
+
 
 
 Now deal with Tomcat:
@@ -531,4 +534,4 @@ You can give these a try if anything goes wrong:
 
 ----------------------------------------------------------------
 
-$Date: 2002/10/25 20:22:10 $ - the Mir coders
+$Date: 2003/01/18 08:44:09 $ - the Mir coders

@@ -87,7 +87,7 @@ an attribution of copyright/left rights, etc.  the possibilities are endless.
                 line-height="18pt"
                 space-after.optimum="3pt"
                 text-align="center">      	
-      ${article.content.title}
+      ${article.title}
       </fo:block>
       
       <!-- here is the article author and date-->
@@ -96,7 +96,7 @@ an attribution of copyright/left rights, etc.  the possibilities are endless.
                 line-height="13pt"
                 space-after.optimum="3pt"
                 text-align="end">      	
-      ${article.content.creator},  ${article.content.webdb_create_formatted}
+      ${article.creator},  ${article.webdb_create_formatted}
       </fo:block>
 
 
@@ -107,27 +107,27 @@ an attribution of copyright/left rights, etc.  the possibilities are endless.
                 line-height="13pt"
                 space-after.optimum="3pt"
                 text-align="justify">      	
-      ${article.content.description_parsed}
+      ${article.description_parsed}
       </fo:block>
 
 
 	      <!-- here is the header stuff -->
-<if article.content.creator_main_url || article.content.creator_email>
+<if article.creator_main_url || article.creator_email>
 	<fo:block><fo:leader leader-pattern="rule" leader-length="18cm"
             rule-thickness="1pt" color="black"/></fo:block>
 </if>
-      <if article.content.creator_email>
+      <if article.creator_email>
       <fo:block font-size="10pt" 
                 font-family="sans-serif" 
                 line-height="12pt">
-      Email:   	${article.content.creator_email}
+      Email:   	${article.creator_email}
       </fo:block>
       </if>
-      <if article.content.creator_main_url>
+      <if article.creator_main_url>
       <fo:block font-size="10pt" 
                 font-family="sans-serif" 
                 line-height="12pt">
-      URL:  	${article.content.creator_main_url}
+      URL:  	${article.creator_main_url}
       </fo:block>
       </if> 
       <fo:block><fo:leader leader-pattern="rule" leader-length="18cm"
@@ -164,10 +164,7 @@ an attribution of copyright/left rights, etc.  the possibilities are endless.
 </if>
 
 </list>
-<!--        <list article.content.to_media_images as media>
-	<fo:external-graphic  src="file:${config["Producer.Image.Path"]}/${media["publish_path"]}"  />
-	     ${media["description"]}
-        </list>-->
+
       </fo:block>
 	
 

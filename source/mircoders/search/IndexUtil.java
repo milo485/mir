@@ -1,5 +1,4 @@
-/*
- * Copyright (C) 2001, 2002  The Mir-coders group
+/* Copyright (C) 2001, 2002  The Mir-coders group
  *
  * This file is part of Mir.
  *
@@ -29,46 +28,56 @@
  * not wish to do so, delete this exception statement from your version.
  */
 
-package mir.misc;
+package mircoders.search;
 
-import java.io.InputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import org.xml.sax.SAXException;
-import com.icl.saxon.trax.Transformer;
-import com.icl.saxon.trax.Templates;
-import com.icl.saxon.trax.Result;
-import com.icl.saxon.PreparedStyleSheet;
-import org.xml.sax.InputSource;
+import java.util.*;
+import java.io.*;
+import mircoders.entity.*;
+import org.apache.lucene.index.*;
+import org.apache.lucene.store.FSDirectory;
 
-/**
- * Title:        XmlSaxonStyler
- * Description:  Implement XmlStyler
- * Copyright:    Copyright (c) 2001
- * Company:      Indymedia
- * @author       idfx
- * @version 1.0
- */
 
-public class XmlSaxonStyler implements XmlStyler{
-
-  private XmlSaxonStyler() {}
-  private static XmlSaxonStyler styler = new XmlSaxonStyler();
-  public static XmlSaxonStyler getInstance(){
-    return styler;
+public class IndexUtil {
+  public static void unindexEntity (EntityContent entity,String index) throws IOException{
+    IndexReader indexReader = null;
+    try{
+      indexReader = IndexReader.open(index);
+      indexReader.delete(new Term("id",entity.getValue("id")));
+      indexReader.close();
+    }
+    catch(Exception e){
+      if (indexReader != null){
+	indexReader.close();
+      }
+    }
+    finally { 
+      if (indexReader != null){
+	FSDirectory theIndexDir=FSDirectory.getDirectory(index,false);
+	if (IndexReader.isLocked(theIndexDir)){
+	  IndexReader.unlock(theIndexDir);
+	}
+      }
+    }
   }
-
-  public void style( String styleKey, InputStream is, OutputStream os )
-    throws SAXException {
-
-    Templates styleSheet = XslStyleCache.getPreparedStyleSheet( styleKey );
-    Transformer transformer = styleSheet.newTransformer();
-    transformer.transform( new InputSource( is ), new Result( os ) );
-  }
-
-  public void style( Transformer transformer, InputStream is, OutputStream os )
-    throws SAXException {
-
-    transformer.transform( new InputSource( is ), new Result( os ) );
+  public static void unindexID (String id,String index) throws IOException{
+    IndexReader indexReader = null;
+    try{
+      indexReader = IndexReader.open(index);
+      indexReader.delete(new Term("id",id));
+      indexReader.close();
+    }
+    catch(Exception e){
+      if (indexReader != null){
+	indexReader.close();
+      }
+    }
+    finally { 
+      if (indexReader != null){
+	FSDirectory theIndexDir=FSDirectory.getDirectory(index,false);
+	if (IndexReader.isLocked(theIndexDir)){
+	  IndexReader.unlock(theIndexDir);
+	}
+      }
+    }
   }
 }

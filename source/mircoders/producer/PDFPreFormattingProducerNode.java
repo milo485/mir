@@ -39,6 +39,9 @@ import mir.producer.*;
 import mir.entity.*;
 import mir.entity.adapter.*;
 import mir.log.*;
+import mir.misc.StringUtil;
+import mir.util.HTMLRoutines;
+
 
 import mircoders.entity.*;
 import mircoders.storage.*;
@@ -77,12 +80,12 @@ public class PDFPreFormattingProducerNode implements ProducerNode {
       data = ParameterExpander.findValueForKey( aValueMap, contentKey );
 
       if (! (data instanceof EntityAdapter)) {
-        throw new ProducerFailure("ContentMarkingProducerNode: value of '"+contentKey+"' is not an EntityAdapter, but an " + data.getClass().getName(), null);
+        throw new ProducerFailure("PDFPreFormattingProducerNode: value of '"+contentKey+"' is not an EntityAdapter, but an " + data.getClass().getName(), null);
       }
 
       entity = ((EntityAdapter) data).getEntity();
       if (! (entity instanceof EntityContent)) {
-        throw new ProducerFailure("ContentMarkingProducerNode: value of '"+contentKey+"' is not a content EntityAdapter, but a " + entity.getClass().getName() + " adapter", null);
+        throw new ProducerFailure("PDFPreFormattingProducerNode: value of '"+contentKey+"' is not a content EntityAdapter, but a " + entity.getClass().getName() + " adapter", null);
       }
 
       int currentPosition = 0;
@@ -101,6 +104,11 @@ public class PDFPreFormattingProducerNode implements ProducerNode {
 
       EntityList images=DatabaseContentToMedia.getInstance().getImages((EntityContent)entity);
       String theContent = ((EntityContent) entity).getValue("content_data");
+      //remove pesky characters
+      theContent = HTMLRoutines.encodeXML(theContent);
+      //put in the <BR> tags so we can turn them to empty blocks
+      theContent = StringUtil.convertNewline2Break(theContent);
+
       if (images == null){
           HashMap row = new HashMap();
           row.put("text",theContent);
@@ -131,9 +139,9 @@ public class PDFPreFormattingProducerNode implements ProducerNode {
               float img_height=(new Float(currentImage.getValue("img_height"))).floatValue();
 
               //oversize images must be shrunk
-              if (img_width>400){
-                  img_height=(new Float((new Float(img_height*(400.0F/img_width))).intValue())).floatValue();
-                  img_width=400.0F;
+              if (img_width>250){
+                  img_height=(new Float((new Float(img_height*(250.0F/img_width))).intValue())).floatValue();
+                  img_width=250.0F;
               }
 
 

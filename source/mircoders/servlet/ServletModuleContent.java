@@ -39,6 +39,7 @@ import javax.servlet.*;
 import javax.servlet.http.*;
 
 import org.apache.struts.util.MessageResources;
+import org.apache.lucene.index.*;
 
 import freemarker.template.*;
 
@@ -57,12 +58,13 @@ import mircoders.storage.*;
 import mircoders.module.*;
 import mircoders.entity.*;
 import mircoders.localizer.*;
+import mircoders.search.IndexUtil;
 
 /*
  *  ServletModuleContent -
  *  deliver html for the article admin form.
  *
- * @version $Id: ServletModuleContent.java,v 1.30 2002/12/28 03:14:42 mh Exp $
+ * @version $Id: ServletModuleContent.java,v 1.31 2003/01/18 15:55:14 john Exp $
  * @author rk, mir-coders
  *
  */
@@ -233,11 +235,19 @@ public class ServletModuleContent extends ServletModule
           DatabaseContentToTopics.getInstance().deleteByContentId(idParam);
           //delete rows in the comment-table
           DatabaseComment.getInstance().deleteByContentId(idParam);
+	  //delete from lucene index, if any
+	  String index=MirConfig.getProp("IndexPath");
+	  if (IndexReader.indexExists(index)){
+	    IndexUtil.unindexID(idParam,index);
+	  }
+	  
         } catch (ModuleException e) {
           throw new ServletModuleException(e.toString());
         } catch (StorageObjectException e) {
           throw new ServletModuleException(e.toString());
-        }
+        } catch (IOException e) {
+	  throw new ServletModuleException(e.toString());
+	}
         list(req,res);
       }
       else {

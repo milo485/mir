@@ -47,6 +47,7 @@ public class SupplementalProducerNodeBuilders {
     aBuilderLibrary.registerBuilder("GenerateMedia", MediaGeneratingProducerNodeBuilder.class);
 
     aBuilderLibrary.registerBuilder("IndexContent",ContentIndexingProducerNodeBuilder.class);
+    aBuilderLibrary.registerBuilder("UnIndexContent",ContentUnIndexingProducerNodeBuilder.class);
     aBuilderLibrary.registerBuilder("PDFPreFormat", PDFPreFormattingProducerNodeBuilder.class);
     aBuilderLibrary.registerBuilder("PDFGenerate", PDFGeneratingProducerNodeBuilder.class);
   }
@@ -101,6 +102,32 @@ public class SupplementalProducerNodeBuilders {
     };
   }
 
+  private final static String   UNINDEXER_KEY_ATTRIBUTE = DefaultProducerNodeBuilders.KEY_ATTRIBUTE;
+  private final static String   UNINDEXER_INDEX_ATTRIBUTE = "pathToIndex";
+  private final static String[] UNINDEXER_REQUIRED_ATTRIBUTES = { UNINDEXER_KEY_ATTRIBUTE, UNINDEXER_INDEX_ATTRIBUTE };
+  private final static String[] UNINDEXER_OPTIONAL_ATTRIBUTES = {};
+  private final static String[] UNINDEXER_SUBNODES = {};
+
+  public static class ContentUnIndexingProducerNodeBuilder extends DefaultProducerNodeBuilders.AbstractProducerNodeBuilder {
+
+    private String key;
+    private String pathToIndex;
+
+    public ContentUnIndexingProducerNodeBuilder() {
+      super(UNINDEXER_SUBNODES);
+    }
+
+    public void setAttributes(Map anAttributes) throws ProducerConfigExc {
+      ReaderTool.checkAttributes(anAttributes, UNINDEXER_REQUIRED_ATTRIBUTES, UNINDEXER_OPTIONAL_ATTRIBUTES);
+
+      key = (String) anAttributes.get(UNINDEXER_KEY_ATTRIBUTE);
+      pathToIndex = (String) anAttributes.get(UNINDEXER_INDEX_ATTRIBUTE);
+    };
+
+    public ProducerNode constructNode() {
+      return new UnIndexingProducerNode(key,pathToIndex);
+    };
+  }
 
   private final static String   CONTENT_MODIFIER_KEY_ATTRIBUTE = DefaultProducerNodeBuilders.KEY_ATTRIBUTE;
   private final static String   CONTENT_MODIFIER_FIELD_ATTRIBUTE = "field";

@@ -7,18 +7,19 @@
 			</td></tr></table>
 
 			<br>
-			<form action="${lang("navigation.search.url")}" method="post">
+			<form action="${config["Producer.OpenAction"]}" method="post">
 			<table cellpadding="8" cellspacing="0" border="0" width="100%" bgcolor="#aaaaaa"><tr><td>
 				<b>${lang("navigation.search.title")}</b><br>
-				<input type="hidden" name="config" value="de_indy">
-					<input type="text" name="words" size="10" id="searchfield"><br>
-					<select name="keywords" id="searchselect" size="1" > 
-						<option value="" selected>${lang("navigation.search.all")}
-						<option value="hasImages">${lang("navigation.search.images")}
-						<option value="hasVideo">${lang("navigation.search.video")}
-						<option value="hasAudio">${lang("navigation.search.audio")}
-					</select> 
-				<input type="submit" value="${lang("navigation.search.button")}" name="searchbutton" size="16">
+				<input type="hidden" name="do" value="search">
+				<input type="hidden" name="search_boolean" value="or">
+				<input type="hidden" name="search_sort" value="score">
+				
+					<input type="text" name="search_content" size="10" id="searchfield"><br>
+					${lang("navigation.search.images")} <input type="checkbox" name="search_hasImages"><br>
+					${lang("navigation.search.audio")} <input type="checkbox" name="search_hasAudio"><br>
+					${lang("navigation.search.video")} <input type="checkbox" name="search_hasVideo"><br>
+					
+				<input type="submit" value="${lang("navigation.search.button")}" name="search_submit" size="16">
 			</td></tr></table>
 			</form>
 			

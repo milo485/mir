@@ -81,7 +81,7 @@
     <pathelement path="${deploy.home}"/>
     <pathelement path="${deploy.classes}"/>
     <pathelement path="source"/>
-    <pathelement path="etc/extrasource"/>
+    <!--<pathelement path="etc/extrasource"/>-->
     <fileset dir="lib">
       <include name="*.jar"/>
     </fileset>
@@ -219,7 +219,7 @@
     <javac destdir="${deploy.classes}"
            debug="on" optimize="off" deprecation="on">
       <src path="source"/>
-      <src path="etc/extrasource"/>
+      <!--<src path="etc/extrasource"/>-->
       <classpath refid="project.class.path"/>
     </javac>
   </target>

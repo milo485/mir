@@ -66,7 +66,7 @@ import mircoders.storage.DatabaseUsers;
  * Mir.java - main servlet, that dispatches to servletmodules
  *
  * @author $Author: mh $
- * @version $Id: Mir.java,v 1.25 2002/12/23 03:00:11 mh Exp $
+ * @version $Id: Mir.java,v 1.26 2003/01/18 08:32:07 mh Exp $
  *
  */
 
@@ -76,6 +76,8 @@ public class Mir extends AbstractServlet {
   private static ModuleMessage messageModule = null;
   private final static HashMap servletModuleInstanceHash = new HashMap();
 
+  //I don't know about making this static cause it removes the 
+  //possibility to change the config on the fly.. -mh
   private static List loginLanguages = null;
 
   public HttpSession session;
@@ -124,6 +126,18 @@ public class Mir extends AbstractServlet {
     }
   }
 
+  // FIXME: this should probalby go into AbstractServlet so it can be used in 
+  // OpenMir as well -mh
+  protected String getDefaultLanguage (HttpServletRequest req) {
+    String defaultlanguage = MirGlobal.getConfigPropertyWithDefault("Mir.Login.DefaultLanguage", "");
+    if (defaultlanguage.length() == 0) {
+      Locale locale = req.getLocale();
+      defaultlanguage = locale.getLanguage();
+    }
+ 
+    return defaultlanguage; 
+  }
+
   public void doPost(HttpServletRequest req, HttpServletResponse res) throws
       ServletException, IOException, UnavailableException {
 
@@ -153,7 +167,13 @@ public class Mir extends AbstractServlet {
     //make sure client browsers don't cache anything
     setNoCaching(res);
 
-    res.setContentType("text/html; charset=" + MirConfig.getProp("Mir.DefaultHTMLCharset"));
+    //FIXME: this seems kind of hackish and only here because we can have 
+    // default other than the one that the browser is set to.
+    Locale locale = new Locale(getDefaultLanguage(req), "");
+    MessageResources messageResources = MessageResources.getMessageResources("bundles.admin");
+    String htmlcharset = messageResources.getMessage(locale, "htmlcharset");
+
+    res.setContentType("text/html; charset=" + htmlcharset);
 
     String moduleName = req.getParameter("module");
     checkLanguage(session, req);
@@ -384,10 +404,7 @@ public class Mir extends AbstractServlet {
 
       mergeData.put("session", sessionUrl);
 
-      String defaultlanguage = MirGlobal.getConfigPropertyWithDefault("Mir.Login.DefaultLanguage", "");
-      if (defaultlanguage.length() == 0)
-        defaultlanguage = req.getLocale().getLanguage();
-      mergeData.put("defaultlanguage",  defaultlanguage);
+      mergeData.put("defaultlanguage",  getDefaultLanguage(req));
       mergeData.put("languages", getLoginLanguages());
 
       HTMLTemplateProcessor.process(res, loginTemplate, mergeData, out, getLocale(req));

@@ -88,6 +88,8 @@ Mir.Localizer.Producer.AllNewProducers= media.new;articles.changed;startpage.run
 
 
 #note that you can't make pdf's without making fo's
+#this is actually now set in producers.xml
+#but these summarize what is said in there for the benefit of OpenMir 
 GenerateFO=yes
 GeneratePDF=yes
 
@@ -191,6 +193,8 @@ Producer.Icon.BigAudio=audio_big.gif
 Producer.Icon.BigVideo=video_big.gif
 Producer.Icon.BigText=text_big.gif
 
+#the style sheet used to turn html into xsl:fo
+Producer.HTML2FOStyleSheet=/some/dir/mir/etc/producer/html2fo.xsl 
 
 
 #
@@ -248,11 +252,7 @@ Entity.Logfile=log/dbentity.log
 # The default encoding charset used in the written html files as well
 # as the dynamic output html.
 # also used for the HTML charset meta tag.
-Mir.DefaultEncoding=ISO8859_1
-# this encoding is used for the HTML charset meta tag.
-# it must be the html charset equivalent of the Java encoding above
-# don't change this unless...
-Mir.DefaultHTMLCharset=ISO-8859-1
+Mir.DefaultEncoding=UTF8
 
 Mir.Logfile=log/mir.log
 Mir.ErrorTemplate=templates/error.template
@@ -318,6 +318,7 @@ ServletModule.OpenIndy.SearchResultsTemplate=etc/open/search_results.template
 ServletModule.OpenIndy.PrepareMailTemplate=etc/open/prepare_mail.template
 ServletModule.OpenIndy.SentMailTemplate=etc/open/sent_mail.template
 ServletModule.OpenIndy.EmailIsFrom=mailer@somewhere.org
+ServletModule.OpenIndy.SMTPServer=localhost
 
 #
 # config for ServletModuleComment - browsing/editing/deleting comments

@@ -87,7 +87,7 @@ import mircoders.search.*;
  *    open-postings to the newswire
  *
  * @author mir-coders group
- * @version $Id: ServletModuleOpenIndy.java,v 1.53 2003/01/12 22:25:18 john Exp $
+ * @version $Id: ServletModuleOpenIndy.java,v 1.55 2003/01/19 14:13:34 john Exp $
  *
  */
 
@@ -539,7 +539,7 @@ public class ServletModuleOpenIndy extends ServletModule
       SMTPClient client=new SMTPClient();
       try {
 	int reply;
-	client.connect("localhost");
+	client.connect(MirConfig.getProp("ServletModule.OpenIndy.SMTPServer"));
 	System.out.print(client.getReplyString());
 	
 	reply = client.getReplyCode();
@@ -839,7 +839,8 @@ public class ServletModuleOpenIndy extends ServletModule
   public void getpdf(HttpServletRequest req, HttpServletResponse res)
     throws ServletModuleException, ServletModuleUserException {
     String ID_REQUEST_PARAM = "id";
-
+    String language = req.getParameter("language");
+    
     String generateFO=MirConfig.getProp("GenerateFO");
     String generatePDF=MirConfig.getProp("GeneratePDF");
 
@@ -854,17 +855,25 @@ public class ServletModuleOpenIndy extends ServletModule
 
       String producerStorageRoot=MirConfig.getProp("Producer.StorageRoot");
       String producerDocRoot=MirConfig.getProp("Producer.DocRoot");
-      String templateDir=MirConfig.getPropWithHome("HTMLTemplateProcessor.Dir");
-      String xslSheet=templateDir + "/"
-        + MirConfig.getProp("Producer.PrintableContent.html2foStyleSheetName");
+      //      String templateDir=MirConfig.getPropWithHome("HTMLTemplateProcessor.Dir");
+      String xslSheet=MirConfig.getProp("Producer.HTML2FOStyleSheet");
       try {
         String idParam = req.getParameter(ID_REQUEST_PARAM);
         if (idParam != null) {
           EntityContent contentEnt =
             (EntityContent)contentModule.getById(idParam);
           String publishPath = contentEnt.getValue("publish_path");
-          String foFile = producerStorageRoot + producerDocRoot + "/"
-            + publishPath + "/" + idParam + ".fo";
+          String foFile;
+	  
+	  if (language == null){
+	    foFile = producerStorageRoot + producerDocRoot + "/"
+	      + publishPath  + idParam + ".fo";
+	  }
+	  else{
+	    foFile = producerStorageRoot + producerDocRoot + "/"
+	      + language + publishPath  + idParam + ".fo";
+	  }
+	  logger.debug("USING FILES" + foFile + " and " + xslSheet);
           XSLTInputHandler input = new XSLTInputHandler(new File(foFile),
                                                         new File(xslSheet));
 
@@ -885,6 +894,7 @@ public class ServletModuleOpenIndy extends ServletModule
           throw new ServletModuleUserException("Missing id parameter.");
         }
       } catch (Exception ex) {
+	logger.error(ex.toString());
         throw new ServletModuleException(ex.toString());
       }
     } else {

@@ -59,7 +59,7 @@ import mir.storage.*;
  *
  * @see mir.media.MirMedia
  * @author mh <mh@nadir.org>
- * @version $Id: MediaHandlerGeneric.java,v 1.11 2002/11/27 08:57:32 mh Exp $
+ * @version $Id: MediaHandlerGeneric.java,v 1.12 2003/01/17 17:34:52 zapata Exp $
  */
 
 public class MediaHandlerGeneric implements MirMedia
@@ -122,7 +122,7 @@ public class MediaHandlerGeneric implements MirMedia
       return in;
     }
 
-    public InputStream getIcon (Entity ent) {
+    public InputStream getIcon (Entity ent) throws MirMediaException {
         return null;
     }
 

@@ -1,6 +1,6 @@
 MIR INSTALLATION HOWTO
 
-Last updated: $Date: 2002/10/12 11:22:03 $
+Last updated: $Date: 2003/01/18 08:44:09 $
 ----------------------------------------------------------------
 
 Here is a short installation-howto of Mir.
@@ -259,8 +259,10 @@ JkMount /Mir/* ajp13
 </IfModule>
 
 
-13. configure apache
+13. configure apache for the static site
 
+* Make sure that if you are using a non standard character set enconding that 
+  Apache doesn't accidentally send the wrong encoding in the HTTP headers.
 edit http.conf:
 * set the document root to the same directory as in the mir config file
 * enable shtml includes:
@@ -321,4 +323,4 @@ You can give these a try if anything goes wrong:
 
 ----------------------------------------------------------------
 
-$Date: 2002/10/12 11:22:03 $ - the Mir coders
+$Date: 2003/01/18 08:44:09 $ - the Mir coders

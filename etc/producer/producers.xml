@@ -44,25 +44,45 @@
       </verb>
     </verbs>
     <body>
-      <Enumerate key="article" table="content" selection="is_published='t' ${verbcondition}"
+      <Enumerate key="article" table="content" selection="1=1 ${verbcondition}"
                   limit="limit" order="webdb_create desc, date desc">
-        <Language>
-          <Generate 
-              generator="/article.template" 
-              destination="${config.storageRoot}/${pathprefix}/${article.date.formatted.yyyy}/${article.date.formatted.MM}/${article.id}.shtml"/>
-          <Generate 
-              generator="/emailThisArticle.template" 
-              destination="${config.storageRoot}/${pathprefix}/${article.date.formatted.yyyy}/${article.date.formatted.MM}/${article.id}.txt"/>
-
-        </Language>
-
-        <MarkContent key="article"/>            
-<!--	<IndexContent key="article" pathToIndex="/tmp/index"/>-->
+        <If condition="article.is_published == '1'">
+	  <then>
+	    <Language>
+              <Generate 
+                generator="/article.template" 
+                destination="${config.storageRoot}/${pathprefix}/${article.date.formatted.yyyy}/${article.date.formatted.MM}/${article.id}.shtml"/>
+	      <Generate 
+                generator="/emailThisArticle.template" 
+                destination="${config.storageRoot}/${pathprefix}/${article.date.formatted.yyyy}/${article.date.formatted.MM}/${article.id}.txt"/>
+	      <PDFPreFormat 
+	        key="article" 
+	        numLinesBetweenImages="3" 
+	        charWidthCM="0.19" 
+	        pixelWidthCM="0.035"
+	        contentAreaWidthCM="16" 
+	        lineHeightCM="0.5" />
+	      <Generate 
+                generator="/printablecontent.template" 
+                destination="${config.storageRoot}/${pathprefix}/${article.date.formatted.yyyy}/${article.date.formatted.MM}/${article.id}.fo"
+	        parameters="UTF-8" />
+	      <PDFGenerate
+                generator="${config.storageRoot}/${pathprefix}/${article.date.formatted.yyyy}/${article.date.formatted.MM}/${article.id}.fo"
+	        destination="${config.storageRoot}/${pathprefix}/${article.date.formatted.yyyy}/${article.date.formatted.MM}/${article.id}.pdf"
+	        stylesheet="${config[&quot;Producer.HTML2FOStyleSheet&quot;]}" />
+            </Language>
+            <MarkContent key="article"/>            
+	    <IndexContent key="article" pathToIndex="${config[&quot;IndexPath&quot;]}"/>
+	  </then>
+	  <else>
+	    <UnIndexContent key="article" pathToIndex="${config[&quot;IndexPath&quot;]}"/>
+	  </else>
+	</If>
       </Enumerate>
     </body>
   </producer>  
 
-<!--  <producer name="search-articles">
+<!--  <producer name="index-articles">
     <verbs>
       <verb name="changed" default="1">
         <Define key="verbcondition" value=" and (not is_produced)"/>

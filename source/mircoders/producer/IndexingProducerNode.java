@@ -1,5 +1,4 @@
-/*
- * Copyright (C) 2001, 2002  The Mir-coders group
+/* Copyright (C) 2001, 2002  The Mir-coders group
  *
  * This file is part of Mir.
  *
@@ -67,19 +66,20 @@ public class IndexingProducerNode implements ProducerNode {
   }
 
   public void produce(Map aValueMap, String aVerb, LoggerWrapper aLogger) throws ProducerFailure {
-    IndexReader indexReader = null;
     IndexWriter indexWriter = null;
     Object data;
     Entity entity;
-
+    String index = null;
     long startTime;
     long endTime;
 
     startTime = System.currentTimeMillis();
-
+    
+    
+    
     try {
-      data = ParameterExpander.findValueForKey( aValueMap, contentKey );
-
+      index = ParameterExpander.expandExpression(aValueMap, indexPath);
+      data =  ParameterExpander.findValueForKey( aValueMap, contentKey );
       if (! (data instanceof EntityAdapter)) {
         throw new ProducerFailure("IndexingProducerNode: value of '"+contentKey+"' is not an EntityAdapter, but an " + data.getClass().getName(), null);
       }
@@ -88,13 +88,18 @@ public class IndexingProducerNode implements ProducerNode {
       if (! (entity instanceof EntityContent)) {
         throw new ProducerFailure("IndexingProducerNode: value of '"+contentKey+"' is not a content EntityAdapter, but a " + entity.getClass().getName() + " adapter", null);
       }
-      aLogger.info("Indexing " + (String) entity.getValue("id") + " into " + indexPath);
+      aLogger.info("Indexing " + (String) entity.getValue("id") + " into " + index);
 
-      indexReader = IndexReader.open(indexPath);
-      indexReader.delete(new Term("id",entity.getValue("id")));
-      indexReader.close();
+      // create an index here if one did not already exist
+      if (! (IndexReader.indexExists(index))){
+	aLogger.error("Didn't find existing index, so I'm making one in "+index);
+	IndexWriter indexCreator = new IndexWriter(index,new StandardAnalyzer(),true);
+	indexCreator.close();
+      }
 
-      indexWriter = new IndexWriter(indexPath, new StandardAnalyzer(), false);
+      IndexUtil.unindexEntity((EntityContent) entity,index);
+
+      indexWriter = new IndexWriter(index, new StandardAnalyzer(), false);
       Document theDoc =  new Document();
 
       // Keyword is stored and indexed, but not tokenized
@@ -104,10 +109,10 @@ public class IndexingProducerNode implements ProducerNode {
       
       //this initialization should go somewhere global like an xml file....
 
-
       (new KeywordSearchTerm("id","","id","","id")).index(theDoc,entity);
-      (new KeywordSearchTerm("date_formatted","search_date","webdb_create_formatted","webdb_create_formatted","webdb_create_formatted")).index(theDoc,entity);
-
+      
+      (new KeywordSearchTerm("webdb_create_formatted","search_date","webdb_create_formatted","webdb_create_formatted","webdb_create_formatted")).index(theDoc,entity);
+      
       (new UnIndexedSearchTerm("","","","where","where")).indexValue(theDoc,entity.getValue("publish_path")+entity.getValue("id")+".shtml");
 
       (new TextSearchTerm("creator","search_creator","creator","creator","creator")).index(theDoc,entity);
@@ -154,16 +159,6 @@ public class IndexingProducerNode implements ProducerNode {
       t.printStackTrace(new PrintWriter(new LoggerToWriterAdapter(aLogger, LoggerWrapper.DEBUG_MESSAGE)));
     }
     finally {
-      if (indexReader != null){
-        try{
-          indexReader.close();
-        }
-        catch (Throwable t) {
-          aLogger.warn("Error while closing indexReader: " + t.getMessage());
-        }
-
-      }
-
       if (indexWriter != null){
         try{
           indexWriter.close();
@@ -173,12 +168,10 @@ public class IndexingProducerNode implements ProducerNode {
         }
 
       }
-
-
       try{
-        FSDirectory theIndexDir=FSDirectory.getDirectory(indexPath,false);
-        if (indexReader.isLocked(theIndexDir)){
-          indexReader.unlock(theIndexDir);
+        FSDirectory theIndexDir=FSDirectory.getDirectory(index,false);
+        if (IndexReader.isLocked(theIndexDir)){
+          IndexReader.unlock(theIndexDir);
         }
       }
       catch (Throwable t) {
