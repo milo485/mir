@@ -38,7 +38,8 @@ import mir.producer.ProducerNode;
 import mir.producer.reader.DefaultProducerNodeBuilders;
 import mir.producer.reader.ProducerConfigExc;
 import mir.producer.reader.ProducerNodeBuilderLibrary;
-import mir.producer.reader.ReaderTool;
+import mir.util.*;
+
 import mircoders.producer.ContentMarkingProducerNode;
 import mircoders.producer.ContentModifyingProducerNode;
 import mircoders.producer.IndexingProducerNode;
@@ -46,6 +47,7 @@ import mircoders.producer.MediaGeneratingProducerNode;
 import mircoders.producer.PDFGeneratingProducerNode;
 import mircoders.producer.PDFPreFormattingProducerNode;
 import mircoders.producer.UnIndexingProducerNode;
+
 
 public class SupplementalProducerNodeBuilders {
 
@@ -73,8 +75,8 @@ public class SupplementalProducerNodeBuilders {
       super(MARKER_SUBNODES);
     }
 
-    public void setAttributes(Map anAttributes) throws ProducerConfigExc {
-      ReaderTool.checkAttributes(anAttributes, MARKER_REQUIRED_ATTRIBUTES, MARKER_OPTIONAL_ATTRIBUTES);
+    public void setAttributes(Map anAttributes) throws ProducerConfigExc, XMLReader.XMLReaderExc {
+      XMLReaderTool.checkAttributes(anAttributes, MARKER_REQUIRED_ATTRIBUTES, MARKER_OPTIONAL_ATTRIBUTES);
 
       key = (String) anAttributes.get(MARKER_KEY_ATTRIBUTE);
     };
@@ -98,8 +100,8 @@ public class SupplementalProducerNodeBuilders {
       super(INDEXER_SUBNODES);
     }
 
-    public void setAttributes(Map anAttributes) throws ProducerConfigExc {
-      ReaderTool.checkAttributes(anAttributes, INDEXER_REQUIRED_ATTRIBUTES, INDEXER_OPTIONAL_ATTRIBUTES);
+    public void setAttributes(Map anAttributes) throws ProducerConfigExc, XMLReader.XMLReaderExc {
+      XMLReaderTool.checkAttributes(anAttributes, INDEXER_REQUIRED_ATTRIBUTES, INDEXER_OPTIONAL_ATTRIBUTES);
 
       key = (String) anAttributes.get(INDEXER_KEY_ATTRIBUTE);
       pathToIndex = (String) anAttributes.get(INDEXER_INDEX_ATTRIBUTE);
@@ -125,8 +127,8 @@ public class SupplementalProducerNodeBuilders {
       super(UNINDEXER_SUBNODES);
     }
 
-    public void setAttributes(Map anAttributes) throws ProducerConfigExc {
-      ReaderTool.checkAttributes(anAttributes, UNINDEXER_REQUIRED_ATTRIBUTES, UNINDEXER_OPTIONAL_ATTRIBUTES);
+    public void setAttributes(Map anAttributes) throws ProducerConfigExc, XMLReader.XMLReaderExc {
+      XMLReaderTool.checkAttributes(anAttributes, UNINDEXER_REQUIRED_ATTRIBUTES, UNINDEXER_OPTIONAL_ATTRIBUTES);
 
       key = (String) anAttributes.get(UNINDEXER_KEY_ATTRIBUTE);
       pathToIndex = (String) anAttributes.get(UNINDEXER_INDEX_ATTRIBUTE);
@@ -154,8 +156,8 @@ public class SupplementalProducerNodeBuilders {
       super(CONTENT_MODIFIER_SUBNODES);
     }
 
-    public void setAttributes(Map anAttributes) throws ProducerConfigExc {
-      ReaderTool.checkAttributes(anAttributes, CONTENT_MODIFIER_REQUIRED_ATTRIBUTES, CONTENT_MODIFIER_OPTIONAL_ATTRIBUTES);
+    public void setAttributes(Map anAttributes) throws ProducerConfigExc, XMLReader.XMLReaderExc {
+      XMLReaderTool.checkAttributes(anAttributes, CONTENT_MODIFIER_REQUIRED_ATTRIBUTES, CONTENT_MODIFIER_OPTIONAL_ATTRIBUTES);
 
       key = (String) anAttributes.get(CONTENT_MODIFIER_KEY_ATTRIBUTE);
       field = (String) anAttributes.get(CONTENT_MODIFIER_FIELD_ATTRIBUTE);
@@ -180,8 +182,8 @@ public class SupplementalProducerNodeBuilders {
       super(MEDIA_SUBNODES);
     }
 
-    public void setAttributes(Map anAttributes) throws ProducerConfigExc {
-      ReaderTool.checkAttributes(anAttributes, MEDIA_REQUIRED_ATTRIBUTES, MEDIA_OPTIONAL_ATTRIBUTES);
+    public void setAttributes(Map anAttributes) throws ProducerConfigExc, XMLReader.XMLReaderExc {
+      XMLReaderTool.checkAttributes(anAttributes, MEDIA_REQUIRED_ATTRIBUTES, MEDIA_OPTIONAL_ATTRIBUTES);
 
       key = (String) anAttributes.get(MEDIA_KEY_ATTRIBUTE);
     };
@@ -213,8 +215,8 @@ public class SupplementalProducerNodeBuilders {
       super(MARKER_SUBNODES);
     }
 
-    public void setAttributes(Map anAttributes) throws ProducerConfigExc {
-      ReaderTool.checkAttributes(anAttributes, MARKER_REQUIRED_ATTRIBUTES, MARKER_OPTIONAL_ATTRIBUTES);
+    public void setAttributes(Map anAttributes) throws ProducerConfigExc, XMLReader.XMLReaderExc {
+      XMLReaderTool.checkAttributes(anAttributes, MARKER_REQUIRED_ATTRIBUTES, MARKER_OPTIONAL_ATTRIBUTES);
 
       key = (String) anAttributes.get(MARKER_KEY_ATTRIBUTE);
       numLinesBetweenImages = (String) anAttributes.get(PDF_NUM_LINES_ATTRIBUTE);
@@ -249,8 +251,8 @@ public class SupplementalProducerNodeBuilders {
       super(MARKER_SUBNODES);
     }
 
-    public void setAttributes(Map anAttributes) throws ProducerConfigExc {
-      ReaderTool.checkAttributes(anAttributes, MARKER_REQUIRED_ATTRIBUTES, MARKER_OPTIONAL_ATTRIBUTES);
+    public void setAttributes(Map anAttributes) throws ProducerConfigExc, XMLReader.XMLReaderExc {
+      XMLReaderTool.checkAttributes(anAttributes, MARKER_REQUIRED_ATTRIBUTES, MARKER_OPTIONAL_ATTRIBUTES);
 
       generator = (String) anAttributes.get(PDF_GENERATOR_ATTRIBUTE);
       destination = (String) anAttributes.get(PDF_DESTINATION_ATTRIBUTE);

@@ -41,6 +41,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import freemarker.template.SimpleHash;
+import freemarker.template.TemplateModelRoot;
+
 import mir.config.MirPropertiesConfiguration;
 import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
 import mir.entity.EntityList;
@@ -52,8 +55,10 @@ import mir.module.AbstractModule;
 import mir.module.ModuleException;
 import mir.storage.StorageObject;
 import mir.storage.StorageObjectFailure;
-import freemarker.template.SimpleHash;
-import freemarker.template.TemplateModelRoot;
+
+import mir.util.*;
+
+
 
 
 /**
@@ -73,13 +78,13 @@ public abstract class ServletModule {
 
   public String defaultAction;
   protected LoggerWrapper logger;
-	protected MirPropertiesConfiguration configuration;
+        protected MirPropertiesConfiguration configuration;
   protected AbstractModule mainModule;
   protected String templateListString;
   protected String templateObjektString;
   protected String templateConfirmString;
-  
-  
+
+
   public ServletModule(){
     try {
       configuration = MirPropertiesConfiguration.instance();
@@ -87,7 +92,7 @@ public abstract class ServletModule {
       e.printStackTrace(System.err);
     }
   }
-  
+
 
   /**
    * Singelton - Methode muss in den abgeleiteten Klassen ueberschrieben werden.
@@ -449,23 +454,43 @@ public abstract class ServletModule {
    */
   public HashMap getIntersectingValues(HttpServletRequest req, StorageObject theStorage)
       throws ServletModuleException {
-    ArrayList theFieldList;
+
     try {
+      HTTPRequestParser parser;
+      ArrayList theFieldList;
+      System.out.println("using charset: " + req.getParameter("charset"));
+      System.out.println("using method: " + req.getParameter("do"));
+      if (req.getParameter("charset") != null) {
+        parser = new HTTPRequestParser(req, req.getParameter("charset"));
+        System.out.println("using charset: " + req.getParameter("charset"));
+        System.out.println("original charset: " + req.getCharacterEncoding());
+      }
+      else {
+        parser = new HTTPRequestParser(req);
+      }
+
+
       theFieldList = theStorage.getFields();
-    }
-    catch (StorageObjectFailure e) {
-      throw new ServletModuleException("ServletModule.getIntersectingValues: " + e.getMessage());
-    }
 
-    HashMap withValues = new HashMap();
-    String aField, aValue;
+      HashMap withValues = new HashMap();
+      String aField, aValue;
 
-    for (int i = 0; i < theFieldList.size(); i++) {
-      aField = (String) theFieldList.get(i);
-      aValue = req.getParameter(aField);
-      if (aValue != null) withValues.put(aField, aValue);
+      for (int i = 0; i < theFieldList.size(); i++) {
+        aField = (String) theFieldList.get(i);
+
+        System.out.println("field " + aField + " = " + parser.getParameter(aField));
+
+        aValue = parser.getParameter(aField);
+        if (aValue != null)
+          withValues.put(aField, aValue);
+      }
+      return withValues;
     }
-    return withValues;
+    catch (Throwable e) {
+      e.printStackTrace(System.out);
+      throw new ServletModuleException(
+          "ServletModule.getIntersectingValues: " + e.getMessage());
+    }
   }
 
 }

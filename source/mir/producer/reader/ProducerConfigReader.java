@@ -44,21 +44,12 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.Vector;
 
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-
 import mir.producer.CompositeProducerNode;
 import mir.producer.ProducerFactory;
 import mir.producer.ProducerNode;
 import mir.producer.SimpleProducerVerb;
 
-import org.xml.sax.Attributes;
-import org.xml.sax.InputSource;
-import org.xml.sax.Locator;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
-import org.xml.sax.helpers.DefaultHandler;
+import mir.util.*;
 
 public class ProducerConfigReader {
   private ProducerNodeBuilderLibrary builderLibrary;
@@ -74,217 +65,42 @@ public class ProducerConfigReader {
 
   public void parseFile(String aFileName, ProducerNodeBuilderLibrary aBuilderLibrary, List aProducerFactories, List aUsedFiles) throws ProducerConfigFailure {
     try {
+      XMLReader reader = new XMLReader();
+
       builderLibrary = aBuilderLibrary;
       scriptedNodeBuilderLibrary = new ProducerNodeBuilderLibrary();
 
-      SAXParserFactory parserFactory = SAXParserFactory.newInstance();
-
-      parserFactory.setNamespaceAware(false);
-      parserFactory.setValidating(true);
-
-      ProducerConfigHandler handler = new ProducerConfigHandler(parserFactory, aProducerFactories, aUsedFiles);
-
-      handler.includeFile(aFileName);
+      reader.parseFile(aFileName, new RootSectionHandler(aProducerFactories), aUsedFiles);
     }
     catch (Throwable e) {
-      if (e instanceof SAXParseException && ((SAXParseException) e).getException() instanceof ProducerConfigFailure) {
-        throw (ProducerConfigFailure) ((SAXParseException) e).getException();
+      if ((e instanceof XMLReader.XMLReaderExc) && ((XMLReader.XMLReaderExc) e).getHasLocation()) {
+        XMLReader.XMLReaderExc f = (XMLReader.XMLReaderExc) e;
+        throw new ProducerConfigFailure("'" + f.getMessage()+"' in " + f.getFilename()+"(line " + f.getLineNr()+", column " + f.getColumnNr() + ")", e);
       }
-      else {
-        throw new ProducerConfigFailure( e );
-      }
+      throw new ProducerConfigFailure( e );
     }
   }
 
-  private class ProducerConfigHandler extends DefaultHandler {
-    private Locator locator;
-    private Stack includeFileStack;
-    private SAXParserFactory parserFactory;
-    private SectionsManager manager;
-    private List usedFiles;
-    private InputSource inputSource;
 
-    public ProducerConfigHandler(SAXParserFactory aParserFactory, List aProducers, List aUsedFiles) {
-      super();
-
-      includeFileStack=new Stack();
-      parserFactory=aParserFactory;
-      includeFileStack = new Stack();
-      manager = new SectionsManager();
-      usedFiles = aUsedFiles;
-
-      manager.pushHandler(new RootSectionHandler(aProducers));
-   }
-
-    public String getLocatorDescription(Locator aLocator) {
-      return aLocator.getPublicId()+" ("+aLocator.getLineNumber()+")";
-    }
-
-    public void setDocumentLocator(Locator aLocator) {
-      locator=aLocator;
-    }
-
-    private void includeFile(String aFileName) throws ProducerConfigExc, ProducerConfigFailure, SAXParseException, SAXException {
-      File file;
-      SAXParser parser;
-
-      try {
-        if (!includeFileStack.empty())
-          file = new File(new File((String) includeFileStack.peek()).getParent(), aFileName);
-        else
-          file = new File(aFileName);
-
-        System.err.println("about to include "+file.getCanonicalPath());
-
-        if (includeFileStack.contains(file.getCanonicalPath())) {
-          throw new ProducerConfigExc("recursive inclusion of file "+file.getCanonicalPath());
-        }
-
-        usedFiles.add(file);
-
-        parser=parserFactory.newSAXParser();
-
-        inputSource = new InputSource(new FileInputStream(file));
-        inputSource.setPublicId(file.getCanonicalPath());
-
-        includeFileStack.push(file.getCanonicalPath());
-        try {
-          parser.parse(inputSource, this);
-        }
-        finally {
-          includeFileStack.pop();
-        }
-      }
-      catch (ParserConfigurationException e) {
-        throw new ProducerConfigExc("Internal exception while including \""+aFileName+"\": "+e.getMessage());
-      }
-      catch (SAXParseException e) {
-        throw e;
-      }
-      catch (ProducerConfigFailure e) {
-        throw e;
-      }
-      catch (FileNotFoundException e) {
-        throw new ProducerConfigExc("Include file \""+aFileName+"\" not found: "+e.getMessage());
-      }
-      catch (IOException e) {
-        throw new ProducerConfigExc("unable to open include file \""+aFileName+"\": "+e.getMessage());
-      }
-    }
-
-    public void startElement(String aUri, String aTag, String aQualifiedName, Attributes anAttributes) throws SAXException {
-      Map attributesMap;
-      int i;
-
-      try {
-        if (aQualifiedName.equals("include")) {
-          String fileName=anAttributes.getValue("file");
-
-          if (fileName==null) {
-            throw new ProducerConfigExc("include has no file attribute");
-          }
-
-          includeFile(fileName);
-        }
-        else {
-          attributesMap = new HashMap();
-          for (i=0; i<anAttributes.getLength(); i++)
-            attributesMap.put(anAttributes.getQName(i), anAttributes.getValue(i));
-
-          manager.pushHandler( manager.currentHandler().startElement(aQualifiedName, attributesMap) );
-        }
-      }
-      catch (ProducerConfigExc e) {
-        throw new SAXParseException(e.getMessage(), locator, new ProducerConfigExc("Config error at ["+getLocatorDescription(locator)+"]: "+e.getMessage()));
-      }
-      catch (Exception e) {
-        throw new SAXException(e);
-      }
-    }
-
-    public void endElement(String aUri, String aTag, String aQualifiedName) throws SAXException {
-      try
-      {
-        if (!aQualifiedName.equals("include")) {
-          SectionHandler handler = manager.popHandler();
-
-          handler.finishSection();
-
-          if (!manager.isEmpty()) {
-            manager.currentHandler().endElement(handler);
-          }
-        }
-      }
-      catch (ProducerConfigExc e) {
-        throw new SAXParseException(e.getMessage(), locator, new ProducerConfigExc("Config error at ["+getLocatorDescription(locator)+"]: "+e.getMessage()));
-      }
-      catch (Exception e) {
-        throw new SAXException(e);
-      }
-    }
-
-    public void characters(char[] aBuffer, int aStart, int anEnd) throws SAXParseException {
-      String text = new String(aBuffer, aStart, anEnd).trim();
-      if ( text.length() > 0) {
-        throw new SAXParseException("Text not allowed", locator, new ProducerConfigExc("Config error at ["+getLocatorDescription(locator)+"]: Text not allowed"));
-      }
-    }
-
-  }
-  public class SectionsManager {
-    Stack handlerStack;
-
-    public SectionsManager() {
-      handlerStack = new Stack();
-    }
-
-    public void pushHandler(SectionHandler aSectionHandler) {
-      handlerStack.push(aSectionHandler);
-    }
-
-    public SectionHandler popHandler() {
-      return (SectionHandler) handlerStack.pop();
-    }
-
-    public SectionHandler currentHandler() {
-      return (SectionHandler) handlerStack.peek();
-    }
-
-    public boolean isEmpty() {
-      return handlerStack.isEmpty();
-    }
-  }
-
-  public abstract class SectionHandler {
-    public abstract SectionHandler startElement(String aTag, Map anAttributes) throws ProducerConfigExc;
-
-    public abstract void endElement(SectionHandler aHandler) throws ProducerConfigExc;
-//    {
-//    }
-
-    public void finishSection() throws ProducerConfigExc {
-    }
-  }
-
-  public class RootSectionHandler extends SectionHandler {
+  public class RootSectionHandler implements XMLReader.SectionHandler {
     private List producers;
 
     public RootSectionHandler(List aProducers) {
       producers = aProducers;
     }
 
-    public SectionHandler startElement(String aTag, Map anAttributes) throws ProducerConfigExc {
+    public XMLReader.SectionHandler startElement(String aTag, Map anAttributes) throws XMLReader.XMLReaderExc {
       if (aTag.equals("producers")) {
         return new ProducersSectionHandler(producers);
       }
       else
-        throw new ProducerConfigExc ("Tag 'producers' expected, tag '"+aTag+"' found");
+        throw new XMLReader.XMLReaderExc("Tag 'producers' expected, tag '"+aTag+"' found");
     }
 
-    public void endElement(SectionHandler aHandler) {
+    public void endElement(XMLReader.SectionHandler aHandler) {
     }
 
-    public void finishSection() throws ProducerConfigExc {
+    public void finishSection() {
     }
   }
 
@@ -297,7 +113,7 @@ public class ProducerConfigReader {
   private final static String[] NODE_DEFINITION_REQUIRED_ATTRIBUTES = { NODE_DEFINITION_NAME_ATTRIBUTE };
   private final static String[] NODE_DEFINITION_OPTIONAL_ATTRIBUTES = {  };
 
-  public class ProducersSectionHandler extends SectionHandler {
+  public class ProducersSectionHandler implements XMLReader.SectionHandler {
     private List producers;
     private Set producerNames;
     private String name;
@@ -307,39 +123,39 @@ public class ProducerConfigReader {
       producerNames = new HashSet();
     }
 
-    public SectionHandler startElement(String aTag, Map anAttributes) throws ProducerConfigExc {
-
+    public XMLReader.SectionHandler startElement(String aTag, Map anAttributes) throws XMLReader.XMLReaderExc {
       if (aTag.equals("producer")) {
-        ReaderTool.checkAttributes(anAttributes, PRODUCER_REQUIRED_ATTRIBUTES, PRODUCER_OPTIONAL_ATTRIBUTES);
+        XMLReaderTool.checkAttributes(anAttributes,
+                                      PRODUCER_REQUIRED_ATTRIBUTES,
+                                      PRODUCER_OPTIONAL_ATTRIBUTES);
 
         name = (String) anAttributes.get(PRODUCER_NAME_ATTRIBUTE);
-        ReaderTool.checkValidIdentifier( name );
+        XMLReaderTool.checkValidIdentifier(name);
 
         if (producerNames.contains(name))
-          throw new ProducerConfigExc("Duplicate producer name: '" + name + "'");
+          throw new XMLReader.XMLReaderExc("Duplicate producer name: '" +
+                                           name + "'");
 
         name = (String) anAttributes.get(PRODUCER_NAME_ATTRIBUTE);
 
         return new ProducerSectionHandler(name);
       }
       else if (aTag.equals("nodedefinition")) {
-        ReaderTool.checkAttributes(anAttributes, NODE_DEFINITION_REQUIRED_ATTRIBUTES, NODE_DEFINITION_OPTIONAL_ATTRIBUTES);
+        XMLReaderTool.checkAttributes(anAttributes,
+                                      NODE_DEFINITION_REQUIRED_ATTRIBUTES,
+                                      NODE_DEFINITION_OPTIONAL_ATTRIBUTES);
 
         name = (String) anAttributes.get(NODE_DEFINITION_NAME_ATTRIBUTE);
-        ReaderTool.checkValidIdentifier( name );
-
-//        if (producers.containsKey(name))
-//          throw new ProducerConfigExc("Duplicate producer name: '" + name + "'");
+        XMLReaderTool.checkValidIdentifier(name);
 
         name = (String) anAttributes.get(NODE_DEFINITION_NAME_ATTRIBUTE);
 
         return new NodeDefinitionSectionHandler(name);
       }
-
-      throw new ProducerConfigExc("Unexpected tag: "+aTag );
+      throw new XMLReader.XMLReaderExc("Unexpected tag: " + aTag);
     }
 
-    public void endElement(SectionHandler aHandler) throws ProducerConfigExc {
+    public void endElement(XMLReader.SectionHandler aHandler) throws XMLReader.XMLReaderExc {
       if (aHandler instanceof ProducerSectionHandler) {
         producers.add(((ProducerSectionHandler) aHandler).getProducerFactory());
         producerNames.add(((ProducerSectionHandler) aHandler).getProducerFactory().getName());
@@ -349,14 +165,14 @@ public class ProducerConfigReader {
             new DefaultProducerNodeBuilders.ScriptedProducerNodeBuilder.factory(
                 ((NodeDefinitionSectionHandler) aHandler).getDefinition()));
       }
-      else throw new ProducerConfigExc("ProducersSectionHandler.endElement Internal error: Unexpected handler: " + aHandler.getClass().getName());
+      else throw new XMLReader.XMLReaderExc("ProducersSectionHandler.endElement Internal error: Unexpected handler: " + aHandler.getClass().getName());
     }
 
-    public void finishSection() throws ProducerConfigExc {
+    public void finishSection() {
     }
   }
 
-  public class ProducerSectionHandler extends SectionHandler {
+  public class ProducerSectionHandler implements XMLReader.SectionHandler {
     private ProducerFactory producerFactory;
     private String factoryName;
 
@@ -369,12 +185,12 @@ public class ProducerConfigReader {
       factoryName = aName;
     }
 
-    public SectionHandler startElement(String aTag, Map anAttributes)  throws ProducerConfigExc {
+    public XMLReader.SectionHandler startElement(String aTag, Map anAttributes) throws XMLReader.XMLReaderExc {
       if (aTag.equals("verbs")) {
         if (verbs!=null)
-          throw new ProducerConfigExc("Verbs already processed");
+          throw new XMLReader.XMLReaderExc("Verbs already processed");
         if (body!=null)
-          throw new ProducerConfigExc("Verbs should come before body");
+          throw new XMLReader.XMLReaderExc("Verbs should come before body");
         else
           return new ProducerVerbsSectionHandler();
       }
@@ -382,12 +198,12 @@ public class ProducerConfigReader {
         if (body==null)
           return new ProducerNodeSectionHandler();
         else
-          throw new ProducerConfigExc("Body already processed");
+          throw new XMLReader.XMLReaderExc("Body already processed");
       }
-      throw new ProducerConfigExc("Unexpected tag: '"+aTag+"'");
+      throw new XMLReader.XMLReaderExc("Unexpected tag: '"+aTag+"'");
     }
 
-    public void endElement(SectionHandler aHandler) throws ProducerConfigExc {
+    public void endElement(XMLReader.SectionHandler aHandler) throws XMLReader.XMLReaderExc {
       if (aHandler instanceof ProducerNodeSectionHandler) {
         body = ((ProducerNodeSectionHandler) aHandler).getProducerNode();
       }
@@ -397,15 +213,15 @@ public class ProducerConfigReader {
         verbNodes = ((ProducerVerbsSectionHandler) aHandler).getVerbNodes();
         defaultVerb = ((ProducerVerbsSectionHandler) aHandler).getDefaultVerb();
       }
-      else throw new ProducerConfigExc("ProducerSectionHandler.endElement Internal error: Unexpected handler: " + aHandler.getClass().getName());
+      else throw new XMLReader.XMLReaderExc("ProducerSectionHandler.endElement Internal error: Unexpected handler: " + aHandler.getClass().getName());
     }
 
-    public void finishSection() throws ProducerConfigExc {
+    public void finishSection() throws XMLReader.XMLReaderExc {
       if (verbs==null)
-        throw new ProducerConfigExc("No verbs defined");
+        throw new XMLReader.XMLReaderExc("No verbs defined");
 
       if (body==null)
-        throw new ProducerConfigExc("No body defined");
+        throw new XMLReader.XMLReaderExc("No body defined");
 
       producerFactory = new ScriptedProducerFactory(factoryName, verbs, verbNodes, body, defaultVerb);
     }
@@ -421,7 +237,7 @@ public class ProducerConfigReader {
   private final static String[] PRODUCER_VERB_REQUIRED_ATTRIBUTES = { PRODUCER_VERB_NAME_ATTRIBUTE };
   private final static String[] PRODUCER_VERB_OPTIONAL_ATTRIBUTES = { PRODUCER_VERB_DEFAULT_ATTRIBUTE, PRODUCER_VERB_DESCRIPTION_ATTRIBUTE };
 
-  public class ProducerVerbsSectionHandler extends SectionHandler {
+  public class ProducerVerbsSectionHandler implements XMLReader.SectionHandler {
     private Map verbNodes;
     private List verbs;
     private String defaultVerb;
@@ -434,34 +250,40 @@ public class ProducerConfigReader {
       defaultVerb = null;
     }
 
-    public SectionHandler startElement(String aTag, Map anAttributes) throws ProducerConfigExc {
+    public XMLReader.SectionHandler startElement(String aTag, Map anAttributes) throws XMLReader.XMLReaderExc {
       if (aTag.equals("verb")) {
-        ReaderTool.checkAttributes(anAttributes, PRODUCER_VERB_REQUIRED_ATTRIBUTES, PRODUCER_VERB_OPTIONAL_ATTRIBUTES);
-        currentVerb = (String) anAttributes.get( PRODUCER_VERB_NAME_ATTRIBUTE );
+        XMLReaderTool.checkAttributes(anAttributes,
+                                      PRODUCER_VERB_REQUIRED_ATTRIBUTES,
+                                      PRODUCER_VERB_OPTIONAL_ATTRIBUTES);
+        currentVerb = (String) anAttributes.get(PRODUCER_VERB_NAME_ATTRIBUTE);
 
-        ReaderTool.checkValidIdentifier( currentVerb );
+        XMLReaderTool.checkValidIdentifier(currentVerb);
 
         if (verbNodes.containsKey(currentVerb))
-          throw new ProducerConfigExc( "Duplicate definition of verb '" + currentVerb + "'" );
+          throw new XMLReader.XMLReaderExc("Duplicate definition of verb '" +
+                                           currentVerb + "'");
 
         if (anAttributes.containsKey(PRODUCER_VERB_DEFAULT_ATTRIBUTE)) {
-          if (defaultVerb!=null)
-            throw new ProducerConfigExc( "Default verb already declared" );
+          if (defaultVerb != null)
+            throw new XMLReader.XMLReaderExc("Default verb already declared");
 
           defaultVerb = currentVerb;
         }
 
-        if (anAttributes.containsKey( PRODUCER_VERB_DESCRIPTION_ATTRIBUTE ))
-          currentVerbDescription = (String) anAttributes.get( PRODUCER_VERB_DESCRIPTION_ATTRIBUTE );
+        if (anAttributes.containsKey(PRODUCER_VERB_DESCRIPTION_ATTRIBUTE))
+          currentVerbDescription = (String) anAttributes.get(
+              PRODUCER_VERB_DESCRIPTION_ATTRIBUTE);
         else
           currentVerbDescription = "";
 
         return new ProducerNodeSectionHandler();
       }
-      else throw new ProducerConfigExc("Only 'verb' tags allowed here, '" + aTag + "' encountered.");
+      else
+        throw new XMLReader.XMLReaderExc("Only 'verb' tags allowed here, '" +
+                                         aTag + "' encountered.");
     }
 
-    public void endElement(SectionHandler aHandler) {
+    public void endElement(XMLReader.SectionHandler aHandler) {
       verbNodes.put(currentVerb, ((ProducerNodeSectionHandler) aHandler).getProducerNode());
       verbs.add(new SimpleProducerVerb(currentVerb, currentVerbDescription));
     }
@@ -482,17 +304,19 @@ public class ProducerConfigReader {
     }
   }
 
-  public class EmptySectionHandler extends SectionHandler {
-    public SectionHandler startElement(String aTag, Map anAttributes) throws ProducerConfigExc {
-      throw new ProducerConfigExc("No tags are allowed here");
+  public class EmptySectionHandler implements XMLReader.SectionHandler {
+    public XMLReader.SectionHandler startElement(String aTag, Map anAttributes) throws XMLReader.XMLReaderExc {
+      throw new XMLReader.XMLReaderExc("No tags are allowed here");
     }
 
-    public void endElement(SectionHandler aHandler) {
+    public void endElement(XMLReader.SectionHandler aHandler) {
     }
 
+    public void finishSection() {
+    }
   }
 
-  public class MultiProducerNodeSectionHandler extends SectionHandler {
+  public class MultiProducerNodeSectionHandler implements XMLReader.SectionHandler {
     private Map nodeParameters;
     private Set validNodeParameters;
     private String currentNodeParameter;
@@ -509,34 +333,37 @@ public class ProducerConfigReader {
       this("", new HashSet(), aValidNodeParameters);
     }
 
-    public SectionHandler startElement(String aTag, Map anAttributes) throws ProducerConfigExc {
+    public XMLReader.SectionHandler startElement(String aTag, Map anAttributes) throws XMLReader.XMLReaderExc {
       if (!validNodeParameters.contains(aTag))
-        throw new ProducerConfigExc("Invalid node parameter: '" + aTag + "'");
+        throw new XMLReader.XMLReaderExc("Invalid node parameter: '" + aTag + "'");
       else if (nodeParameters.containsKey(aTag))
-        throw new ProducerConfigExc("Node parameter: '" + aTag + "' already specified");
+        throw new XMLReader.XMLReaderExc("Node parameter: '" + aTag + "' already specified");
       else if (anAttributes.size()>0)
-        throw new ProducerConfigExc("No parameters are allowed here");
+        throw new XMLReader.XMLReaderExc("No parameters are allowed here");
 
       currentNodeParameter = aTag;
 
       return new ProducerNodeSectionHandler(scriptedNodeName, validNodeParameters);
     }
 
-    public void endElement(SectionHandler aHandler) throws ProducerConfigExc  {
+    public void endElement(XMLReader.SectionHandler aHandler) throws XMLReader.XMLReaderExc  {
       if (aHandler instanceof ProducerNodeSectionHandler) {
         nodeParameters.put(currentNodeParameter, ((ProducerNodeSectionHandler) aHandler).getProducerNode());
       }
       else {
-        throw new ProducerConfigExc("Internal error: unknown section handler '" + aHandler.getClass().getName() + "'" );
+        throw new XMLReader.XMLReaderExc("Internal error: unknown section handler '" + aHandler.getClass().getName() + "'" );
       }
     }
 
     public Map getNodeParameters() {
       return nodeParameters;
     }
+
+    public void finishSection() {
+    }
   }
 
-  public class ProducerNodeSectionHandler extends SectionHandler {
+  public class ProducerNodeSectionHandler implements XMLReader.SectionHandler {
     private CompositeProducerNode producerNode;
     private ProducerNodeBuilder currentBuilder;
     private String scriptedNodeName;
@@ -552,66 +379,85 @@ public class ProducerConfigReader {
       this("", new HashSet());
     }
 
-    public SectionHandler startElement(String aTag, Map anAttributes) throws ProducerConfigExc {
-      if (allowedNodeParameterReferences.contains((aTag))) {
-        if (!anAttributes.isEmpty()) {
-          throw new ProducerConfigExc( "No attributes allowed" );
+    public XMLReader.SectionHandler startElement(String aTag, Map anAttributes) throws XMLReader.XMLReaderExc {
+      try {
+        if (allowedNodeParameterReferences.contains( (aTag))) {
+          if (!anAttributes.isEmpty()) {
+            throw new XMLReader.XMLReaderExc("No attributes allowed");
+          }
+
+          currentBuilder = new DefaultProducerNodeBuilders.
+              ScriptedProducerParameterNodeBuilder(scriptedNodeName, aTag);
+          return new EmptySectionHandler();
         }
+        else if (scriptedNodeBuilderLibrary.hasBuilderForName(aTag) ||
+                 builderLibrary.hasBuilderForName( (aTag))) {
 
-        currentBuilder = new DefaultProducerNodeBuilders.ScriptedProducerParameterNodeBuilder(scriptedNodeName, aTag);
-//        producerNode.addSubNode(
-//        new ScriptedProducerNodeDefinition.NodeParameterProducerNode(scriptedNodeName, aTag));
-        return new EmptySectionHandler();
-      }
-      else if (scriptedNodeBuilderLibrary.hasBuilderForName(aTag) || builderLibrary.hasBuilderForName((aTag))) {
+          if (scriptedNodeBuilderLibrary.hasBuilderForName(aTag))
+            currentBuilder = scriptedNodeBuilderLibrary.constructBuilder(aTag);
+          else
+            currentBuilder = builderLibrary.constructBuilder(aTag);
 
-        if (scriptedNodeBuilderLibrary.hasBuilderForName(aTag))
-          currentBuilder = scriptedNodeBuilderLibrary.constructBuilder(aTag);
+          currentBuilder.setAttributes(anAttributes);
+          if (currentBuilder.getAvailableSubNodes().isEmpty()) {
+            return new EmptySectionHandler();
+          }
+          if (currentBuilder.getAvailableSubNodes().size() > 1)
+            return new MultiProducerNodeSectionHandler(scriptedNodeName,
+                allowedNodeParameterReferences,
+                currentBuilder.getAvailableSubNodes());
+          else if (currentBuilder.getAvailableSubNodes().size() < 1)
+            return new EmptySectionHandler();
+          else {
+            return new ProducerNodeSectionHandler(scriptedNodeName,
+                allowedNodeParameterReferences);
+          }
+        }
         else
-          currentBuilder = builderLibrary.constructBuilder(aTag);
-
-        currentBuilder.setAttributes(anAttributes);
-        if (currentBuilder.getAvailableSubNodes().isEmpty())  {
-          return new EmptySectionHandler();
-        }
-        if (currentBuilder.getAvailableSubNodes().size()>1)
-          return new MultiProducerNodeSectionHandler(scriptedNodeName, allowedNodeParameterReferences, currentBuilder.getAvailableSubNodes());
-        else if (currentBuilder.getAvailableSubNodes().size()<1)
-          return new EmptySectionHandler();
-        else {
-          return new ProducerNodeSectionHandler(scriptedNodeName, allowedNodeParameterReferences);
-        }
+          throw new XMLReader.XMLReaderExc("Unknown producer node tag: '" +
+                                           aTag + "'");
       }
-      else
-        throw new ProducerConfigExc("Unknown producer node tag: '" + aTag + "'");
+      catch (Throwable t) {
+        throw new XMLReader.XMLReaderFailure(t);
+      }
     }
 
-    public void endElement(SectionHandler aHandler) throws ProducerConfigExc  {
-      if (aHandler instanceof ProducerNodeSectionHandler) {
-        currentBuilder.setSubNode((String) (currentBuilder.getAvailableSubNodes().iterator().next()),
-                    ((ProducerNodeSectionHandler) aHandler).getProducerNode());
-      }
-      else if (aHandler instanceof MultiProducerNodeSectionHandler) {
-        Iterator i;
-        Map nodeParameters;
-        Map.Entry entry;
-
-        nodeParameters = ((MultiProducerNodeSectionHandler) aHandler).getNodeParameters();
-        i = nodeParameters.entrySet().iterator();
-        while (i.hasNext()) {
-          entry = (Map.Entry) i.next();
-          currentBuilder.setSubNode((String) entry.getKey(), (ProducerNode) entry.getValue());
+    public void endElement(XMLReader.SectionHandler aHandler) throws XMLReader.XMLReaderExc  {
+      try {
+        if (aHandler instanceof ProducerNodeSectionHandler) {
+          currentBuilder.setSubNode(
+                (String) (currentBuilder.getAvailableSubNodes().iterator().next()),
+                ((ProducerNodeSectionHandler) aHandler).getProducerNode());
         }
-      }
-      else if (aHandler instanceof EmptySectionHandler) {
-        // deliberately empty: nothing expected, so nothing to process
-      }
-      else {
-        throw new ProducerConfigExc("Internal error: unknown section handler '" + aHandler.getClass().getName() + "'" );
-      }
+        else if (aHandler instanceof MultiProducerNodeSectionHandler) {
+          Iterator i;
+          Map nodeParameters;
+          Map.Entry entry;
 
-      producerNode.addSubNode(currentBuilder.constructNode());
-      currentBuilder = null;
+          nodeParameters = ( (MultiProducerNodeSectionHandler) aHandler).
+              getNodeParameters();
+          i = nodeParameters.entrySet().iterator();
+          while (i.hasNext()) {
+            entry = (Map.Entry) i.next();
+            currentBuilder.setSubNode( (String) entry.getKey(),
+                                      (ProducerNode) entry.getValue());
+          }
+        }
+        else if (aHandler instanceof EmptySectionHandler) {
+          // deliberately empty: nothing expected, so nothing to process
+        }
+        else {
+          throw new XMLReader.XMLReaderExc(
+              "Internal error: unknown section handler '" +
+              aHandler.getClass().getName() + "'");
+        }
+
+        producerNode.addSubNode(currentBuilder.constructNode());
+        currentBuilder = null;
+      }
+      catch (Throwable t) {
+        throw new XMLReader.XMLReaderFailure(t);
+      }
     }
 
     public ProducerNode getProducerNode() {
@@ -622,9 +468,12 @@ public class ProducerConfigReader {
         return producerNode;
       }
     }
+
+    public void finishSection() {
+    }
   }
 
-  public class NodeDefinitionSectionHandler extends SectionHandler {
+  public class NodeDefinitionSectionHandler implements XMLReader.SectionHandler {
     private ScriptedProducerNodeDefinition nodeDefinition;
     private ProducerNode body;
     private Map stringParameters;
@@ -640,27 +489,30 @@ public class ProducerConfigReader {
       name = aName;
     }
 
-    public SectionHandler startElement(String aTag, Map anAttributes) throws ProducerConfigExc {
+    public XMLReader.SectionHandler startElement(String aTag, Map anAttributes) throws XMLReader.XMLReaderExc {
       if (aTag.equals("parameters")) {
         if (!anAttributes.isEmpty()) {
-          throw new ProducerConfigExc( "No attributes allowed for tag 'parameters'" );
+          throw new XMLReader.XMLReaderExc( "No attributes allowed for tag 'parameters'" );
         }
         if (nodeParameters!=null) {
-          throw new ProducerConfigExc( "Parameters have already been declared" );
+          throw new XMLReader.XMLReaderExc( "Parameters have already been declared" );
         }
         if (body!=null) {
-          throw new ProducerConfigExc( "Parameters should come before definition" );
+          throw new XMLReader.XMLReaderExc( "Parameters should come before definition in nodedefinition '" + name +"'" );
         }
 
         return new NodeDefinitionParametersSectionHandler();
       }
       else if (aTag.equals("definition")) {
+        if (nodeParameters==null)
+          throw new XMLReader.XMLReaderExc( "Parameters should come before definition in nodedefinition '" + name +"'"  );
+
         return new ProducerNodeSectionHandler(name, nodeParameters.keySet());
       }
-      else throw new ProducerConfigExc("Only 'definition' or 'parameters' tags allowed here, '" + aTag + "' encountered.");
+      else throw new XMLReader.XMLReaderExc("Only 'definition' or 'parameters' tags allowed here, '" + aTag + "' encountered.");
     }
 
-    public void endElement(SectionHandler aHandler) {
+    public void endElement(XMLReader.SectionHandler aHandler) {
       if (aHandler instanceof NodeDefinitionParametersSectionHandler) {
         stringParameters = ((NodeDefinitionParametersSectionHandler) aHandler).getStringParameters();
         integerParameters = ((NodeDefinitionParametersSectionHandler) aHandler).getIntegerParameters();
@@ -671,10 +523,10 @@ public class ProducerConfigReader {
       }
     }
 
-    public void finishSection() throws ProducerConfigExc {
+    public void finishSection() throws XMLReader.XMLReaderExc {
       Iterator i;
       if (body == null)
-        throw new ProducerConfigExc( "Definition missing" );
+        throw new XMLReader.XMLReaderExc( "Definition missing" );
 
       nodeDefinition = new ScriptedProducerNodeDefinition(name);
 
@@ -709,7 +561,7 @@ public class ProducerConfigReader {
   private final static String[] NODE_DEFINITION_PARAMETER_OPTIONAL_ATTRIBUTES = { NODE_DEFINITION_PARAMETER_DEFAULTVALUE_ATTRIBUTE };
   private final static String[] NODE_DEFINITION_NODE_PARAMETER_OPTIONAL_ATTRIBUTES = { };
 
-  public class NodeDefinitionParametersSectionHandler extends SectionHandler {
+  public class NodeDefinitionParametersSectionHandler implements XMLReader.SectionHandler {
     private Map nodeParameters;
     private Map stringParameters;
     private Map integerParameters;
@@ -720,33 +572,43 @@ public class ProducerConfigReader {
       integerParameters = new HashMap();
     }
 
-    public SectionHandler startElement(String aTag, Map anAttributes) throws ProducerConfigExc {
+    public XMLReader.SectionHandler startElement(String aTag, Map anAttributes) throws XMLReader.XMLReaderExc {
       String parameterName;
       String defaultValue;
 
       if (aTag.equals("node")) {
-        ReaderTool.checkAttributes(anAttributes, NODE_DEFINITION_PARAMETER_REQUIRED_ATTRIBUTES, NODE_DEFINITION_NODE_PARAMETER_OPTIONAL_ATTRIBUTES);
-        parameterName = (String) anAttributes.get( NODE_DEFINITION_PARAMETER_NAME_ATTRIBUTE );
+        XMLReaderTool.checkAttributes(anAttributes,
+            NODE_DEFINITION_PARAMETER_REQUIRED_ATTRIBUTES,
+            NODE_DEFINITION_NODE_PARAMETER_OPTIONAL_ATTRIBUTES);
+        parameterName = (String) anAttributes.get(
+            NODE_DEFINITION_PARAMETER_NAME_ATTRIBUTE);
 
         if (nodeParameters.containsKey(parameterName))
-          throw new ProducerConfigExc("Duplicate parameter name: '" + parameterName + "'");
+          throw new XMLReader.XMLReaderExc("Duplicate parameter name: '" +
+                                           parameterName + "'");
 
-        ReaderTool.checkValidIdentifier( parameterName );
+        XMLReaderTool.checkValidIdentifier(parameterName);
 
         nodeParameters.put(parameterName, parameterName);
 
         return new EmptySectionHandler();
       }
       else if (aTag.equals("string") || aTag.equals("integer")) {
-        ReaderTool.checkAttributes(anAttributes, NODE_DEFINITION_PARAMETER_REQUIRED_ATTRIBUTES, NODE_DEFINITION_PARAMETER_OPTIONAL_ATTRIBUTES);
-        parameterName = (String) anAttributes.get( NODE_DEFINITION_PARAMETER_NAME_ATTRIBUTE );
+        XMLReaderTool.checkAttributes(anAttributes,
+            NODE_DEFINITION_PARAMETER_REQUIRED_ATTRIBUTES,
+            NODE_DEFINITION_PARAMETER_OPTIONAL_ATTRIBUTES);
+        parameterName = (String) anAttributes.get(
+            NODE_DEFINITION_PARAMETER_NAME_ATTRIBUTE);
 
-        if (stringParameters.containsKey(parameterName) || integerParameters.containsKey(parameterName))
-          throw new ProducerConfigExc("Duplicate parameter name: '" + parameterName + "'");
+        if (stringParameters.containsKey(parameterName) ||
+            integerParameters.containsKey(parameterName))
+          throw new XMLReader.XMLReaderExc("Duplicate parameter name: '" +
+                                           parameterName + "'");
 
-        ReaderTool.checkValidIdentifier( parameterName );
+        XMLReaderTool.checkValidIdentifier(parameterName);
 
-        defaultValue = (String) anAttributes.get( NODE_DEFINITION_PARAMETER_DEFAULTVALUE_ATTRIBUTE );
+        defaultValue = (String) anAttributes.get(
+            NODE_DEFINITION_PARAMETER_DEFAULTVALUE_ATTRIBUTE);
 
         if (aTag.equals("string"))
           stringParameters.put(parameterName, defaultValue);
@@ -755,11 +617,12 @@ public class ProducerConfigReader {
 
         return new EmptySectionHandler();
       }
-      else throw new ProducerConfigExc("Only 'string', 'integer' and 'node' tags allowed here, '" + aTag + "' encountered.");
-
+      else
+        throw new XMLReader.XMLReaderExc(
+            "Only 'string', 'integer' and 'node' tags allowed here, '" + aTag + "' encountered.");
     }
 
-    public void endElement(SectionHandler aHandler) {
+    public void endElement(XMLReader.SectionHandler aHandler) {
     }
 
     public void finishSection() {

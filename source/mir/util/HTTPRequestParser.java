@@ -4,9 +4,15 @@ import javax.servlet.http.HttpServletRequest;
 
 public class HTTPRequestParser {
   private HttpServletRequest request;
+  private String encoding;
 
   public HTTPRequestParser(HttpServletRequest aRequest) {
+    this(aRequest, aRequest.getCharacterEncoding());
+  }
+
+  public HTTPRequestParser(HttpServletRequest aRequest, String anEncoding) {
     request = aRequest;
+    encoding = anEncoding;
   }
 
   public boolean hasParameter(String aName) {
@@ -15,13 +21,26 @@ public class HTTPRequestParser {
 
   public String getParameterWithDefault(String aName, String aDefault) {
     if (hasParameter(aName))
-      return request.getParameter(aName);
+      return getParameter(aName);
     else
       return aDefault;
   }
 
   public String getParameter(String aName) {
-    return getParameterWithDefault(aName, "");
+    try {
+      String result = request.getParameter(aName);
+
+      if (result != null && encoding!=null && !encoding.equals(request.getCharacterEncoding())) {
+        System.out.println("recoding");
+        result = new String(result.getBytes(request.getCharacterEncoding()), encoding);
+      }
+
+      return result;
+    }
+    catch (Throwable t) {
+      t.printStackTrace(System.out);
+      throw new RuntimeException("HTTPRequestParser.getParameter: " + t.getMessage());
+    }
   }
 
   public int getIntegerWithDefault(String aName, int aDefault) {

@@ -18,7 +18,10 @@ public class URLBuilder {
   }
 
   public void setValue(String aKey, String aValue) {
-    keyValues.put(aKey, aValue);
+    if (aValue!=null)
+      keyValues.put(aKey, aValue);
+    else
+      deleteKey(aKey);
   }
 
   public void setValue(String aKey, int aValue) {

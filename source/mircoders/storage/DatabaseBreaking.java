@@ -48,7 +48,7 @@ public class DatabaseBreaking extends Database implements StorageObject{
   // the following *has* to be sychronized cause this static method
   // could get preemted and we could end up with 2 instances of DatabaseFoo..
   // see the "Singletons with needles and thread" article at JavaWorld -mh
-  public synchronized static DatabaseBreaking getInstance() 
+  public synchronized static DatabaseBreaking getInstance()
     throws StorageObjectFailure {
     if (instance == null) {
       instance = new DatabaseBreaking();
@@ -62,10 +62,6 @@ public class DatabaseBreaking extends Database implements StorageObject{
     super();
     //this.cache = new DatabaseCache(4);
     this.theTable="breaking";
-    try {
-      this.theEntityClass = Class.forName("mircoders.entity.EntityBreaking");
-    }
-    catch (Exception e) { throw new StorageObjectFailure(e); }
   }
 
 

@@ -57,6 +57,7 @@ import mir.producer.LoopProducerNode;
 import mir.producer.ProducerNode;
 import mir.producer.ResourceBundleProducerNode;
 import mir.producer.ScriptCallingProducerNode;
+import mir.util.*;
 
 public class DefaultProducerNodeBuilders {
 
@@ -137,8 +138,8 @@ public class DefaultProducerNodeBuilders {
       super(ASSIGNMENT_SUBNODES);
     }
 
-    public void setAttributes(Map anAttributes) throws ProducerConfigExc {
-      ReaderTool.checkAttributes(anAttributes, ASSIGNMENT_REQUIRED_ATTRIBUTES, ASSIGNMENT_OPTIONAL_ATTRIBUTES);
+    public void setAttributes(Map anAttributes) throws ProducerConfigExc, XMLReader.XMLReaderExc {
+      XMLReaderTool.checkAttributes(anAttributes, ASSIGNMENT_REQUIRED_ATTRIBUTES, ASSIGNMENT_OPTIONAL_ATTRIBUTES);
 
       key = (String) anAttributes.get(ASSIGNMENT_KEY_ATTRIBUTE);
       value = (String) anAttributes.get(ASSIGNMENT_VALUE_ATTRIBUTE);
@@ -160,8 +161,8 @@ public class DefaultProducerNodeBuilders {
       super(ASSIGNMENT_SUBNODES);
     }
 
-    public void setAttributes(Map anAttributes) throws ProducerConfigExc {
-      ReaderTool.checkAttributes(anAttributes, ASSIGNMENT_REQUIRED_ATTRIBUTES, ASSIGNMENT_OPTIONAL_ATTRIBUTES);
+    public void setAttributes(Map anAttributes) throws ProducerConfigExc, XMLReader.XMLReaderExc {
+      XMLReaderTool.checkAttributes(anAttributes, ASSIGNMENT_REQUIRED_ATTRIBUTES, ASSIGNMENT_OPTIONAL_ATTRIBUTES);
 
       key = (String) anAttributes.get(ASSIGNMENT_KEY_ATTRIBUTE);
       value = (String) anAttributes.get(ASSIGNMENT_VALUE_ATTRIBUTE);
@@ -200,13 +201,13 @@ public class DefaultProducerNodeBuilders {
       model = aModel;
     }
 
-    public void setAttributes(Map anAttributes) throws ProducerConfigExc  {
-      ReaderTool.checkAttributes(anAttributes, ENUMERATION_REQUIRED_ATTRIBUTES, ENUMERATION_OPTIONAL_ATTRIBUTES);
+    public void setAttributes(Map anAttributes) throws ProducerConfigExc, XMLReader.XMLReaderExc  {
+      XMLReaderTool.checkAttributes(anAttributes, ENUMERATION_REQUIRED_ATTRIBUTES, ENUMERATION_OPTIONAL_ATTRIBUTES);
 
       key = (String) anAttributes.get(ENUMERATION_KEY_ATTRIBUTE);
       definition = (String) anAttributes.get(ENUMERATION_DEFINITION_ATTRIBUTE);
-      selection = (String) ReaderTool.getStringAttributeWithDefault(anAttributes, ENUMERATION_SELECTION_ATTRIBUTE, "");
-      order = (String) ReaderTool.getStringAttributeWithDefault(anAttributes, ENUMERATION_ORDER_ATTRIBUTE, "");
+      selection = (String) XMLReaderTool.getStringAttributeWithDefault(anAttributes, ENUMERATION_SELECTION_ATTRIBUTE, "");
+      order = (String) XMLReaderTool.getStringAttributeWithDefault(anAttributes, ENUMERATION_ORDER_ATTRIBUTE, "");
       limit = (String) anAttributes.get(ENUMERATION_LIMIT_ATTRIBUTE);
       skip = (String) anAttributes.get(ENUMERATION_SKIP_ATTRIBUTE);
     };
@@ -245,11 +246,11 @@ public class DefaultProducerNodeBuilders {
       super(LOOP_SUBNODES);
     }
 
-    public void setAttributes(Map anAttributes) throws ProducerConfigExc  {
-      ReaderTool.checkAttributes(anAttributes, LOOP_REQUIRED_ATTRIBUTES, LOOP_OPTIONAL_ATTRIBUTES);
+    public void setAttributes(Map anAttributes) throws ProducerConfigExc, XMLReader.XMLReaderExc  {
+      XMLReaderTool.checkAttributes(anAttributes, LOOP_REQUIRED_ATTRIBUTES, LOOP_OPTIONAL_ATTRIBUTES);
 
       condition = (String) anAttributes.get(LOOP_CONDITION_ATTRIBUTE);
-      limit = (String) ReaderTool.getStringAttributeWithDefault(anAttributes, LOOP_LIMIT_ATTRIBUTE, "");
+      limit = (String) XMLReaderTool.getStringAttributeWithDefault(anAttributes, LOOP_LIMIT_ATTRIBUTE, "");
     };
 
     public ProducerNode constructNode() {
@@ -285,13 +286,13 @@ public class DefaultProducerNodeBuilders {
       model = aModel;
     }
 
-    public void setAttributes(Map anAttributes) throws ProducerConfigExc {
-      ReaderTool.checkAttributes(anAttributes, LIST_REQUIRED_ATTRIBUTES, LIST_OPTIONAL_ATTRIBUTES);
+    public void setAttributes(Map anAttributes) throws ProducerConfigExc, XMLReader.XMLReaderExc {
+      XMLReaderTool.checkAttributes(anAttributes, LIST_REQUIRED_ATTRIBUTES, LIST_OPTIONAL_ATTRIBUTES);
 
       key = (String) anAttributes.get(LIST_KEY_ATTRIBUTE);
       definition = (String) anAttributes.get(LIST_DEFINITION_ATTRIBUTE);
-      selection = (String) ReaderTool.getStringAttributeWithDefault(anAttributes, LIST_SELECTION_ATTRIBUTE, "");
-      order = (String) ReaderTool.getStringAttributeWithDefault(anAttributes, LIST_ORDER_ATTRIBUTE, "");
+      selection = (String) XMLReaderTool.getStringAttributeWithDefault(anAttributes, LIST_SELECTION_ATTRIBUTE, "");
+      order = (String) XMLReaderTool.getStringAttributeWithDefault(anAttributes, LIST_ORDER_ATTRIBUTE, "");
       limit = (String) anAttributes.get(LIST_LIMIT_ATTRIBUTE);
       skip = (String) anAttributes.get(LIST_SKIP_ATTRIBUTE);
     };
@@ -329,10 +330,10 @@ public class DefaultProducerNodeBuilders {
       super(LOG_SUBNODES);
     }
 
-    public void setAttributes(Map anAttributes) throws ProducerConfigExc {
+    public void setAttributes(Map anAttributes) throws ProducerConfigExc, XMLReader.XMLReaderExc {
       String typeString;
 
-      ReaderTool.checkAttributes(anAttributes, LOG_REQUIRED_ATTRIBUTES, LOG_OPTIONAL_ATTRIBUTES);
+      XMLReaderTool.checkAttributes(anAttributes, LOG_REQUIRED_ATTRIBUTES, LOG_OPTIONAL_ATTRIBUTES);
 
       message = (String) anAttributes.get(LOG_MESSAGE_ATTRIBUTE);
       if (anAttributes.containsKey(LOG_TYPE_ATTRIBUTE)) {
@@ -379,8 +380,8 @@ public class DefaultProducerNodeBuilders {
       super(RESOURCEBUNDLE_SUBNODES);
     }
 
-    public void setAttributes(Map anAttributes) throws ProducerConfigExc {
-      ReaderTool.checkAttributes(anAttributes, RESOURCEBUNDLE_REQUIRED_ATTRIBUTES, RESOURCEBUNDLE_OPTIONAL_ATTRIBUTES);
+    public void setAttributes(Map anAttributes) throws ProducerConfigExc, XMLReader.XMLReaderExc {
+      XMLReaderTool.checkAttributes(anAttributes, RESOURCEBUNDLE_REQUIRED_ATTRIBUTES, RESOURCEBUNDLE_OPTIONAL_ATTRIBUTES);
 
       key = (String) anAttributes.get(RESOURCEBUNDLE_KEY_ATTRIBUTE);
       bundle = (String) anAttributes.get(RESOURCEBUNDLE_BUNDLE_ATTRIBUTE);
@@ -408,8 +409,8 @@ public class DefaultProducerNodeBuilders {
       super(FILEDATESETTING_SUBNODES);
     }
 
-    public void setAttributes(Map anAttributes) throws ProducerConfigExc {
-      ReaderTool.checkAttributes(anAttributes, FILEDATESETTING_REQUIRED_ATTRIBUTES, FILEDATESETTING_OPTIONAL_ATTRIBUTES);
+    public void setAttributes(Map anAttributes) throws ProducerConfigExc, XMLReader.XMLReaderExc {
+      XMLReaderTool.checkAttributes(anAttributes, FILEDATESETTING_REQUIRED_ATTRIBUTES, FILEDATESETTING_OPTIONAL_ATTRIBUTES);
 
       fileNameKey = (String) anAttributes.get(FILEDATESETTING_FILE_ATTRIBUTE);
       dateKey = (String) anAttributes.get(FILEDATESETTING_DATE_ATTRIBUTE);
@@ -434,8 +435,8 @@ public class DefaultProducerNodeBuilders {
       super(FILEDELETING_SUBNODES);
     }
 
-    public void setAttributes(Map anAttributes) throws ProducerConfigExc {
-      ReaderTool.checkAttributes(anAttributes, FILEDELETING_REQUIRED_ATTRIBUTES, FILEDELETING_OPTIONAL_ATTRIBUTES);
+    public void setAttributes(Map anAttributes) throws ProducerConfigExc, XMLReader.XMLReaderExc {
+      XMLReaderTool.checkAttributes(anAttributes, FILEDELETING_REQUIRED_ATTRIBUTES, FILEDELETING_OPTIONAL_ATTRIBUTES);
 
       fileNameKey = (String) anAttributes.get(FILEDELETING_FILE_ATTRIBUTE);
     };
@@ -459,8 +460,8 @@ public class DefaultProducerNodeBuilders {
       super(SCRIPT_SUBNODES);
     }
 
-    public void setAttributes(Map anAttributes) throws ProducerConfigExc {
-      ReaderTool.checkAttributes(anAttributes, SCRIPT_REQUIRED_ATTRIBUTES, SCRIPT_OPTIONAL_ATTRIBUTES);
+    public void setAttributes(Map anAttributes) throws ProducerConfigExc, XMLReader.XMLReaderExc {
+      XMLReaderTool.checkAttributes(anAttributes, SCRIPT_REQUIRED_ATTRIBUTES, SCRIPT_OPTIONAL_ATTRIBUTES);
 
       command = (String) anAttributes.get(SCRIPT_COMMAND_ATTRIBUTE);
     };
@@ -491,8 +492,8 @@ public class DefaultProducerNodeBuilders {
       destinationBasePath = aDestinationBasePath;
     }
 
-    public void setAttributes(Map anAttributes) throws ProducerConfigExc {
-      ReaderTool.checkAttributes(anAttributes, DIRCOPY_REQUIRED_ATTRIBUTES, DIRCOPY_OPTIONAL_ATTRIBUTES);
+    public void setAttributes(Map anAttributes) throws ProducerConfigExc, XMLReader.XMLReaderExc {
+      XMLReaderTool.checkAttributes(anAttributes, DIRCOPY_REQUIRED_ATTRIBUTES, DIRCOPY_OPTIONAL_ATTRIBUTES);
 
       source = (String) anAttributes.get(DIRCOPY_SOURCE_ATTRIBUTE);
       destination = (String) anAttributes.get(DIRCOPY_DESTINATION_ATTRIBUTE);
@@ -540,12 +541,12 @@ public class DefaultProducerNodeBuilders {
       generatorLibrary = aGeneratorLibrary;
     }
 
-    public void setAttributes(Map anAttributes) throws ProducerConfigExc {
-      ReaderTool.checkAttributes(anAttributes, GENERATION_REQUIRED_ATTRIBUTES, GENERATION_OPTIONAL_ATTRIBUTES);
+    public void setAttributes(Map anAttributes) throws ProducerConfigExc, XMLReader.XMLReaderExc {
+      XMLReaderTool.checkAttributes(anAttributes, GENERATION_REQUIRED_ATTRIBUTES, GENERATION_OPTIONAL_ATTRIBUTES);
 
       generator = (String) anAttributes.get(GENERATION_GENERATOR_ATTRIBUTE);
       destination = (String) anAttributes.get(GENERATION_DESTINATION_ATTRIBUTE);
-      parameters = ReaderTool.getStringAttributeWithDefault(anAttributes, GENERATION_PARAMETERS_ATTRIBUTE, "" );
+      parameters = XMLReaderTool.getStringAttributeWithDefault(anAttributes, GENERATION_PARAMETERS_ATTRIBUTE, "" );
     };
 
     public ProducerNode constructNode() {
@@ -608,19 +609,19 @@ public class DefaultProducerNodeBuilders {
       model = aModel;
     }
 
-    public void setAttributes(Map anAttributes) throws ProducerConfigExc {
-      ReaderTool.checkAttributes(anAttributes, BATCHER_REQUIRED_ATTRIBUTES, BATCHER_OPTIONAL_ATTRIBUTES);
+    public void setAttributes(Map anAttributes) throws ProducerConfigExc, XMLReader.XMLReaderExc {
+      XMLReaderTool.checkAttributes(anAttributes, BATCHER_REQUIRED_ATTRIBUTES, BATCHER_OPTIONAL_ATTRIBUTES);
 
-      batchDataKey = ReaderTool.getStringAttributeWithDefault(anAttributes, BATCHER_DATAKEY_ATTRIBUTE, "data" );
-      batchInfoKey = ReaderTool.getStringAttributeWithDefault(anAttributes, BATCHER_INFOKEY_ATTRIBUTE, "info" );
-      definition = ReaderTool.getStringAttributeWithDefault(anAttributes, BATCHER_DEFINITION_ATTRIBUTE, "" );
-      selection = ReaderTool.getStringAttributeWithDefault(anAttributes, BATCHER_SELECTION_ATTRIBUTE, "" );
-      order = ReaderTool.getStringAttributeWithDefault(anAttributes, BATCHER_ORDER_ATTRIBUTE, "" );
+      batchDataKey = XMLReaderTool.getStringAttributeWithDefault(anAttributes, BATCHER_DATAKEY_ATTRIBUTE, "data" );
+      batchInfoKey = XMLReaderTool.getStringAttributeWithDefault(anAttributes, BATCHER_INFOKEY_ATTRIBUTE, "info" );
+      definition = XMLReaderTool.getStringAttributeWithDefault(anAttributes, BATCHER_DEFINITION_ATTRIBUTE, "" );
+      selection = XMLReaderTool.getStringAttributeWithDefault(anAttributes, BATCHER_SELECTION_ATTRIBUTE, "" );
+      order = XMLReaderTool.getStringAttributeWithDefault(anAttributes, BATCHER_ORDER_ATTRIBUTE, "" );
 
-      batchSize = ReaderTool.getStringAttributeWithDefault(anAttributes, BATCHER_BATCHSIZE_ATTRIBUTE, "20" );
-      minBatchSize = ReaderTool.getStringAttributeWithDefault(anAttributes, BATCHER_MINBATCHSIZE_ATTRIBUTE, "0" );
-      skip = ReaderTool.getStringAttributeWithDefault(anAttributes, BATCHER_SKIP_ATTRIBUTE, "0" );
-      process = ReaderTool.getStringAttributeWithDefault(anAttributes, BATCHER_PROCESS_ATTRIBUTE, "-1" );
+      batchSize = XMLReaderTool.getStringAttributeWithDefault(anAttributes, BATCHER_BATCHSIZE_ATTRIBUTE, "20" );
+      minBatchSize = XMLReaderTool.getStringAttributeWithDefault(anAttributes, BATCHER_MINBATCHSIZE_ATTRIBUTE, "0" );
+      skip = XMLReaderTool.getStringAttributeWithDefault(anAttributes, BATCHER_SKIP_ATTRIBUTE, "0" );
+      process = XMLReaderTool.getStringAttributeWithDefault(anAttributes, BATCHER_PROCESS_ATTRIBUTE, "-1" );
     };
 
     public ProducerNode constructNode() {
@@ -670,8 +671,8 @@ public class DefaultProducerNodeBuilders {
       super(IF_SUBNODES);
     }
 
-    public void setAttributes(Map anAttributes) throws ProducerConfigExc {
-      ReaderTool.checkAttributes(anAttributes, IF_REQUIRED_ATTRIBUTES, IF_OPTIONAL_ATTRIBUTES);
+    public void setAttributes(Map anAttributes) throws ProducerConfigExc, XMLReader.XMLReaderExc {
+      XMLReaderTool.checkAttributes(anAttributes, IF_REQUIRED_ATTRIBUTES, IF_OPTIONAL_ATTRIBUTES);
 
       condition = (String) anAttributes.get( IF_CONDITION_ATTRIBUTE );
     };
@@ -742,8 +743,8 @@ public class DefaultProducerNodeBuilders {
       return definition.getNodeParameters();
     };
 
-    public void setAttributes(Map anAttributes) throws ProducerConfigExc {
-      ReaderTool.checkAttributeSet(anAttributes.keySet(), definition.getRequiredAttributes(), definition.getOptionalAttributes());
+    public void setAttributes(Map anAttributes) throws ProducerConfigExc, XMLReader.XMLReaderExc {
+      XMLReaderTool.checkAttributeSet(anAttributes.keySet(), definition.getRequiredAttributes(), definition.getOptionalAttributes());
 
       Iterator i = anAttributes.entrySet().iterator();
       while (i.hasNext()) {

@@ -1,3 +1,5 @@
+package mir.util;
+
 /*
  * Copyright (C) 2001, 2002  The Mir-coders group
  *
@@ -29,17 +31,15 @@
  * not wish to do so, delete this exception statement from your version.
  */
 
-package mir.producer.reader;
-
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-public class ReaderTool {
+public class XMLReaderTool {
 
-  public static void checkValidIdentifier(String anIdentifier) throws ProducerConfigExc {
+  public static void checkValidIdentifier(String anIdentifier) throws XMLReader.XMLReaderExc {
   }
 
   public static String getStringAttributeWithDefault(Map anAttributes, String aKey, String aDefault) {
@@ -49,16 +49,16 @@ public class ReaderTool {
       return aDefault;
   }
 
-  public static void checkIntegerAttribute(Map anAttributes, String aKey) throws ProducerConfigExc {
+  public static void checkIntegerAttribute(Map anAttributes, String aKey) throws XMLReader.XMLReaderExc {
     try {
       Integer.parseInt((String) anAttributes.get(aKey));
     }
     catch (Throwable t) {
-      throw new ProducerConfigExc("attribute '"+aKey+"' is not an integer" );
+      throw new XMLReader.XMLReaderExc("attribute '"+aKey+"' is not an integer" );
     }
   }
 
-  public static int getIntegerAttributeWithDefault(Map anAttributes, String aKey, int aDefault) throws ProducerConfigExc  {
+  public static int getIntegerAttributeWithDefault(Map anAttributes, String aKey, int aDefault) throws XMLReader.XMLReaderExc  {
     String value;
 
     if (anAttributes.containsKey(aKey)) {
@@ -69,13 +69,13 @@ public class ReaderTool {
       return aDefault;
   }
 
-  public static void checkAttributes(Map anAttributes, String[] aRequiredAttributes, String[] anOptionalAttributes)  throws ProducerConfigExc {
+  public static void checkAttributes(Map anAttributes, String[] aRequiredAttributes, String[] anOptionalAttributes)  throws XMLReader.XMLReaderExc {
     checkAttributeSet(anAttributes.keySet(),
        new HashSet(Arrays.asList(aRequiredAttributes)),
        new HashSet(Arrays.asList(anOptionalAttributes)));
   }
 
-  public static void checkAttributeSet(Set aSet, Set aRequiredElements, Set anOptionalElements) throws ProducerConfigExc{
+  public static void checkAttributeSet(Set aSet, Set aRequiredElements, Set anOptionalElements) throws XMLReader.XMLReaderExc{
     Iterator i;
 
     i = aSet.iterator();
@@ -83,7 +83,7 @@ public class ReaderTool {
       Object item = i.next();
 
       if (!(aRequiredElements.contains(item) || anOptionalElements.contains(item)))
-        throw new ProducerConfigExc("unknown attribute '" + item + "'" );
+        throw new XMLReader.XMLReaderExc("unknown attribute '" + item + "'" );
     }
 
     i = aRequiredElements.iterator();
@@ -91,7 +91,7 @@ public class ReaderTool {
       Object item = i.next();
 
       if (!(aSet.contains(item)))
-        throw new ProducerConfigExc("missing required attribute '" + item + "'" );
+        throw new XMLReader.XMLReaderExc("missing required attribute '" + item + "'" );
     }
 
   }

@@ -35,9 +35,10 @@ import java.util.Map;
 import java.util.Set;
 
 import mir.producer.ProducerNode;
+import mir.util.*;
 
 public interface ProducerNodeBuilder  {
-  public void setAttributes(Map anAttributes) throws ProducerConfigExc;
+  public void setAttributes(Map anAttributes) throws ProducerConfigExc, XMLReader.XMLReaderExc;
   public void setSubNode(String aName, ProducerNode aNode) throws ProducerConfigExc;
   public Set getAvailableSubNodes() throws ProducerConfigExc;
   public ProducerNode constructNode() throws ProducerConfigExc;
@@ -49,14 +50,14 @@ public interface ProducerNodeBuilder  {
   public class DefaultProducerNodeBuilderFactory implements ProducerNodeBuilderFactory {
     private Class producerNodeBuilderClass;
 
-    public DefaultProducerNodeBuilderFactory(Class aProducerNodeBuilderClass) throws ProducerConfigExc {
+    public DefaultProducerNodeBuilderFactory(Class aProducerNodeBuilderClass) throws ProducerConfigExc, XMLReader.XMLReaderExc  {
       if (!ProducerNodeBuilder.class.isAssignableFrom(aProducerNodeBuilderClass))
         throw new ProducerConfigExc("supplied class is not a ProducerNodeBuilder class but a " + aProducerNodeBuilderClass.getClass().getName());
 
       producerNodeBuilderClass = aProducerNodeBuilderClass;
     }
 
-    public ProducerNodeBuilder makeBuilder() throws ProducerConfigExc{
+    public ProducerNodeBuilder makeBuilder() throws ProducerConfigExc {
       try {
         return (ProducerNodeBuilder) producerNodeBuilderClass.newInstance();
       }
