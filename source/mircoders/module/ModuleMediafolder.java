@@ -43,7 +43,7 @@ import mir.module.AbstractModule;
 import mir.module.ModuleExc;
 import mir.module.ModuleFailure;
 import mir.storage.StorageObject;
-import mircoders.storage.DatabaseMediafolder;
+import mir.util.JDBCStringRoutines;
 
 
 public class ModuleMediafolder extends AbstractModule
@@ -57,4 +57,13 @@ public class ModuleMediafolder extends AbstractModule
 
     theStorage = aStorage;
   }
+  public String mediaFolderIdForName(String aName) throws ModuleExc, ModuleFailure {
+    try {
+      return theStorage.executeFreeSingleValueSql("select id from media_folder where name = '" + JDBCStringRoutines.escapeStringLiteral(aName) + "'");
+    }
+    catch (Throwable t) {
+      throw new ModuleFailure(t);
+    }
+  }
+
 }

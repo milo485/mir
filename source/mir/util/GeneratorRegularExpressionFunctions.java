@@ -56,4 +56,25 @@ public class GeneratorRegularExpressionFunctions {
       }
     };
   }
+ 
+  public static class regularExpressionMatchFunction implements Generator.GeneratorFunction {
+    public Object perform(List aParameters) throws GeneratorExc, GeneratorFailure {
+      try {
+        if (aParameters.size()!=2)
+          throw new GeneratorExc("regularExpressionMatchFunction: exactly 2 parameters expected: data, search expression");
+        if (aParameters.get(0)==null)
+          return new Boolean(false);
+        if (!(aParameters.get(0) instanceof String) || !(aParameters.get(1) instanceof String))
+          throw new GeneratorExc("regularExpressionReplaceFunction: parameters must be strings");
+
+        return new Boolean(StringRoutines.performRegularExpressionSearch((String) aParameters.get(0), (String) aParameters.get(1)));
+      }
+      catch (Throwable t) {
+        throw new GeneratorFailure(t);
+      }
+    };
+  }
+    
+    
+
 }

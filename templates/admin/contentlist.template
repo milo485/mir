@@ -33,7 +33,7 @@
       <input type="hidden" name="do" value="articleoperationbatch">
       <input type="hidden" name="returnurl" value="${utility.encodeHTML(thisurl)}">
       <p class="box">
-        <input type="submit" name="save" value="${lang("save")}"> &nbsp; (${lang("commentlist.activate")})
+        <input type="submit" class="majorbutton" name="save" value="${lang("save")}"> &nbsp; (${lang("commentlist.activate")})
       </p>
   </if>    
 </if>
@@ -68,8 +68,8 @@
           <if entry.is_published!="0">Pub.<else>-</if> <if entry.is_html!="0">HTML<else>-</if>
       </td>
       <td>
-        ${lang("articletypes." + entry.article_type.name)} <b>${entry.title}</b> (${entry.id})<br>
-        ${lang("by")} <i>${utility.encodeHTML(entry.creator)}</i><br>
+        ${lang("articletypes." + entry.article_type.name)} <b>${utility.prettyEncodeHTML(entry.title)}</b> (${entry.id})<br>
+        ${lang("by")} <i>${utility.prettyEncodeHTML(entry.creator)}</i><br>
         <if showactions=="1">
           <if config["Mir.Localizer.Admin.ListOperationsFlavor"]=="0">
             <list entry.operations as op>
@@ -102,7 +102,7 @@
         </if>
       </td>
       <td width="25%"  <if grey=="1">class="listrow3"<else>class="listrow4"</if> valign="top">
-        <span class="small">${entry.comment}&nbsp;</span>
+        <span class="small">${utility.prettyEncodeHTML(entry.comment)}&nbsp;</span>
       </td>
       <td valign="top" class="listcommand">
         <if showactions=="1">

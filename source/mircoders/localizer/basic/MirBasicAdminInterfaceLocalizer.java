@@ -30,20 +30,25 @@
 
 package mircoders.localizer.basic;
 
-import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
-import java.util.*;
+import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
 
 import mir.entity.Entity;
 import mir.entity.adapter.EntityAdapter;
+import mir.log.LoggerWrapper;
 import mir.misc.StringUtil;
 import mir.storage.StorageObjectFailure;
-import mir.util.StringRoutines;
+import mir.util.DateTimeFunctions;
 import mircoders.entity.EntityComment;
 import mircoders.entity.EntityContent;
+import mircoders.global.MirGlobal;
 import mircoders.localizer.MirAdminInterfaceLocalizer;
 import mircoders.localizer.MirLocalizerExc;
 import mircoders.localizer.MirLocalizerFailure;
@@ -55,9 +60,10 @@ public class MirBasicAdminInterfaceLocalizer implements MirAdminInterfaceLocaliz
   private Vector simpleArticleOperations;
   private Map simpleCommentOperationsMap;
   private Map simpleArticleOperationsMap;
-  private static SimpleDateFormat dateFormatter = new SimpleDateFormat("dd.MM.yyyy HH:mm");
+  protected static LoggerWrapper logger = new LoggerWrapper("Localizer.AdminInterface");;
 
   public MirBasicAdminInterfaceLocalizer() throws MirLocalizerFailure, MirLocalizerExc {
+
     simpleCommentOperations = new Vector();
     simpleArticleOperations = new Vector();
     simpleCommentOperationsMap = new HashMap();
@@ -190,25 +196,26 @@ public class MirBasicAdminInterfaceLocalizer implements MirAdminInterfaceLocaliz
       anEntity.setValueForProperty("is_produced", "0");
 
       if (logOperation) {
-        StringBuffer comment = new StringBuffer();
         try {
-          comment.append(StringRoutines.interpretAsString(anEntity.getValue("comment")));
+          StringBuffer line = new StringBuffer();
+
+          line.append(DateTimeFunctions.advancedDateFormat(
+              MirGlobal.config().getString("Mir.DefaultDateTimeFormat"),
+              (new GregorianCalendar()).getTime(),
+              MirGlobal.config().getString("Mir.DefaultTimezone")));
+          line.append(" ");
+          if (aUser != null)
+            line.append(aUser.get("login"));
+          else
+            line.append("unknown");
+
+          line.append(" ");
+          line.append(getName());
+          ( (EntityContent) anEntity).appendToComments(line.toString());
         }
         catch (Throwable t) {
+          logger.error("Error while trying to log an article operation: " + t.toString());
         }
-        if (comment.length()>0 && comment.charAt(comment.length()-1)!='\n') {
-          comment.append('\n');
-        }
-        comment.append(dateFormatter.format((new GregorianCalendar()).getTime()));
-        comment.append(" ");
-        try {
-          comment.append(StringRoutines.interpretAsString(aUser.get("login")));
-        }
-        catch (Throwable t) {
-        }
-        comment.append(" ");
-        comment.append(getName());
-        anEntity.setValueForProperty("comment", comment.toString());
       }
     };
 

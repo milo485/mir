@@ -41,6 +41,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Vector;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -58,8 +59,8 @@ import mir.util.URLBuilder;
  *  Allows one to do a basic edit of a file in a directory specified
  *  in the config file.
  *
- * @author $Author: zapata $
- * @version $Revision: 1.14 $ $Date: 2003/09/03 18:29:05 $
+ * @author $Author: rk $
+ * @version $Revision: 1.13.2.4 $ $Date: 2003/10/23 14:55:25 $
  *
  */
 
@@ -212,6 +213,9 @@ public class ServletModuleFileEdit extends ServletModule
           out.write(c);
         in.close();
         out.close();
+
+        logAdminUsage(aRequest, f.getAbsolutePath(), "object modified");
+
 
         editFile(directory, filename, subDirectory, aRequest, aResponse);
       }

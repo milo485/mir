@@ -21,12 +21,12 @@
   <input type="hidden" name="entry" value="${entry}">
   <input type="hidden" name="subdirectory" value="${subdirectory}">
   <input type="hidden" name="do" value="update">
-  <input type="submit" name="save" value="${lang("save")}"> &nbsp;
-  <input type="reset" value="${lang("reset")}">
+  <input type="submit" class="majorbutton" name="save" value="${lang("save")}"> &nbsp;
+  <input type="reset" class="majorbutton" value="${lang("reset")}">
   <br><br>  
   <textarea cols="120" rows="40" name="text" wrap=virtual>${utility.encodeHTML(text)}</textarea>
   <br><br>
-  <input type="submit" name="save" value="${lang("save")}"> &nbsp;
+  <input type="submit" class="majorbutton" name="save" value="${lang("save")}"> &nbsp;
   <input type="reset" value="${lang("reset")}">
 </form>
 <br>

@@ -42,7 +42,7 @@ import mircoders.storage.DatabaseContent;
  * This class maps one line of the comment-table to a java-object.
  *
  * @author $Author: zapata $
- * @version $Revision: 1.17 $ $Date: 2003/09/03 18:29:04 $
+ * @version $Revision: 1.16.2.1 $ $Date: 2003/07/29 22:01:59 $
  */
 
 

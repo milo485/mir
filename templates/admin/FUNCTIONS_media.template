@@ -7,7 +7,7 @@
 
 <function MediaSearch (module)>
 
-<form method="post" action="${config.actionRoot}">
+<form method="GET" action="${config.actionRoot}">
 
 <input type="hidden" name="module" value="${module}">
 <input type="hidden" name="do" value="search">
@@ -54,7 +54,7 @@
     </td>
     
     <td class="listrow2">
-      <input type="submit" name="search" value="${lang("filter")}">
+      <input type="submit" class="majorbutton" name="search" value="${lang("filter")}">
     </td>
     
     <td>
@@ -83,8 +83,6 @@
           <td class="table-head">
         <b>${lang("media.format")}</b></td>
           <td class="table-head">
-        <b>${lang("media.size")}</b></td>
-          <td class="table-head">
         <b>${lang("media.mediafolder")}</b></td>
           <td class="table-head">
         <b>${lang("media.creator")}</b></td>
@@ -104,14 +102,16 @@
       </if>
           </td>
             <td>
-            ${entry.title}&nbsp;
-                <if entry.description><br>${entry.description}</if>
+                ${utility.encodeHTML(entry.title)}&nbsp;
+                <if entry.description && entry.title><br></if>${utility.encodeHTML(entry.description)}
+                <br><br>
+                <if entry.is_published=="1">${lang("media.published")}: <a href="${entry.publish_server}${entry.publish_path}">${entry.publish_server}${entry.publish_path}</a><br></if>
+                <a href="${config.actionRoot}?module=${module}&do=showarticles&id=${entry.id}">${lang("media.articles")}</a> |
+                <a href="${config.actionRoot}?module=${module}&do=showcomments&id=${entry.id}">${lang("media.comments")}</a>
+             
           </td>
             <td>
             ${entry.media_descr}&nbsp;
-          </td>
-            <td>
-            ${entry.human_readable_size}&nbsp;
           </td>
             <td>
              <if entry.mediafolder>

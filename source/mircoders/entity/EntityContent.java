@@ -33,24 +33,20 @@ package mircoders.entity;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.HashMap;
 import java.util.Map;
 
 import mir.entity.Entity;
-import mir.entity.EntityList;
 import mir.log.LoggerWrapper;
 import mir.storage.StorageObject;
-import mir.storage.StorageObjectExc;
 import mir.storage.StorageObjectFailure;
-import mircoders.storage.DatabaseContent;
+import mir.util.StringRoutines;
 import mircoders.storage.DatabaseContentToMedia;
-import mircoders.storage.DatabaseContentToTopics;
 
 /**
  * this class implements mapping of one line of the database table content
  * to a java object
  *
- * @version $Id: EntityContent.java,v 1.20 2003/09/03 18:29:04 zapata Exp $
+ * @version $Id: EntityContent.java,v 1.19.2.3 2003/09/19 23:34:20 zapata Exp $
  * @author mir-coders group
  *
  */
@@ -58,18 +54,6 @@ import mircoders.storage.DatabaseContentToTopics;
 
 public class EntityContent extends Entity
 {
-
-  String mirconf_extLinkName  = configuration.getString("Producer.ExtLinkName");
-  String mirconf_intLinkName  = configuration.getString("Producer.IntLinkName");
-  String mirconf_mailLinkName = configuration.getString("Producer.MailLinkName");
-  String mirconf_imageRoot    = configuration.getString("Producer.ImageRoot");
-
-  //this should always be transient i.e it can never be stored in the db
-  //or ObjectStore. (so the ObjectStore should only be caching what comes
-  //directly out of the DB. @todo confirm this with rk. -mh
-  Map _entCache = new HashMap();
-  Boolean _hasMedia = null;
-
   // constructors
 
   public EntityContent()
@@ -177,16 +161,21 @@ public class EntityContent extends Entity
     super.setValues(theStringValues);
   }
 
-  private boolean hasMedia() throws StorageObjectFailure
-  {
-    if (_hasMedia == null) {
-      try {
-        _hasMedia =
-            new Boolean(DatabaseContentToMedia.getInstance().hasMedia(this));
-      } catch (StorageObjectExc e) {
-        throw new StorageObjectFailure(e);
-      }
+  public void appendToComments(String aLine) {
+    StringBuffer comment = new StringBuffer();
+    try {
+      comment.append(StringRoutines.interpretAsString(getValue("comment")));
     }
-    return _hasMedia.booleanValue();
+    catch (Throwable t) {
+    }
+    if (comment.length() > 0 && comment.charAt(comment.length() - 1) != '\n') {
+      comment.append('\n');
+    }
+
+    comment.append(aLine);
+    setValueForProperty("comment", comment.toString());
   }
+
+
+
 }

@@ -42,21 +42,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Vector;
+
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.collections.ExtendedProperties;
 import mir.config.MirPropertiesConfiguration;
 import mir.entity.Entity;
 import mir.log.LoggerWrapper;
 import mir.session.Request;
+import mir.util.DateTimeFunctions;
 import mir.util.GeneratorFormatAdapters;
 import mir.util.StringRoutines;
 import mircoders.entity.EntityComment;
 import mircoders.entity.EntityContent;
-import mircoders.entity.EntityUsers;
 import mircoders.localizer.MirAdminInterfaceLocalizer;
 import mircoders.localizer.MirAntiAbuseFilterType;
+
+import org.apache.commons.collections.ExtendedProperties;
 
 
 public class Abuse {
@@ -65,7 +67,6 @@ public class Abuse {
   private List filterTypeIds;
   private int maxIdentifier;
   private LoggerWrapper logger;
-  private LoggerWrapper adminUsageLogger;
   private int logSize;
   private boolean logEnabled;
   private boolean openPostingDisabled;
@@ -78,12 +79,11 @@ public class Abuse {
 
   private MirPropertiesConfiguration configuration;
 
-  private static String cookieName=MirGlobal.config().getString("Abuse.CookieName");
-  private static int cookieMaxAge = 60*60*MirGlobal.config().getInt("Abuse.CookieMaxAge");
+  private static String cookieName = MirGlobal.config().getString("Abuse.CookieName");
+  private static int cookieMaxAge = 60 * 60 * MirGlobal.config().getInt("Abuse.CookieMaxAge");
 
   public Abuse() {
     logger = new LoggerWrapper("Global.Abuse");
-    adminUsageLogger = new LoggerWrapper("AdminUsage");
     filterRules = new Vector();
     maxIdentifier = 0;
     log = new Vector();
@@ -129,7 +129,7 @@ public class Abuse {
     cookie.setMaxAge(cookieMaxAge);
     cookie.setPath("/");
 
-    if (aResponse!=null)
+    if (aResponse != null)
       aResponse.addCookie(cookie);
   }
 
@@ -164,49 +164,66 @@ public class Abuse {
   }
 
   public void checkComment(EntityComment aComment, Request aRequest, HttpServletResponse aResponse) {
-    logComment(aComment, aRequest);
-
     try {
       long time = System.currentTimeMillis();
 
       FilterRule filterRule = findMatchingFilter(aComment, aRequest);
 
-      if (filterRule!=null) {
-        logger.debug("Match for " + filterRule.getType()+" rule '"+ filterRule.getExpression()+"'");
+      if (filterRule != null) {
+        logger.debug("Match for " + filterRule.getType() + " rule '" + filterRule.getExpression() + "'");
         filterRule.setLastHit(new GregorianCalendar().getTime());
         MirGlobal.performCommentOperation(null, aComment, filterRule.getCommentAction());
         setCookie(aResponse);
         save();
+        logComment(aComment, aRequest, filterRule.getType(), filterRule.getExpression());
       }
+      else
+        logComment(aComment, aRequest);
 
-      logger.info("checkComment: " + (System.currentTimeMillis()-time) + "ms");
+
+      logger.info("checkComment: " + (System.currentTimeMillis() - time) + "ms");
     }
     catch (Throwable t) {
-      t.printStackTrace(logger.asPrintWriter(logger.DEBUG_MESSAGE));
+      t.printStackTrace(logger.asPrintWriter(LoggerWrapper.DEBUG_MESSAGE));
       logger.error("Abuse.checkComment: " + t.toString());
     }
   }
 
   public void checkArticle(EntityContent anArticle, Request aRequest, HttpServletResponse aResponse) {
-    logArticle(anArticle, aRequest);
-
     try {
       long time = System.currentTimeMillis();
 
       FilterRule filterRule = findMatchingFilter(anArticle, aRequest);
 
-      if (filterRule!=null) {
-        logger.debug("Match for " + filterRule.getType() + " rule '" + filterRule.getExpression()+"'");
+      if (filterRule != null) {
+        logger.debug("Match for " + filterRule.getType() + " rule '" + filterRule.getExpression() + "'");
         filterRule.setLastHit(new GregorianCalendar().getTime());
+
+        StringBuffer line = new StringBuffer();
+
+        line.append(DateTimeFunctions.advancedDateFormat(
+            configuration.getString("Mir.DefaultDateTimeFormat"),
+            (new GregorianCalendar()).getTime(), configuration.getString("Mir.DefaultTimezone")));
+
+        line.append(" ");
+        line.append("filter");
+
+        line.append(" ");
+        line.append(filterRule.getType() +" ("+ filterRule.getExpression()+")");
+        anArticle.appendToComments(line.toString());
+
         MirGlobal.performArticleOperation(null, anArticle, filterRule.getArticleAction());
         setCookie(aResponse);
         save();
+        logArticle(anArticle, aRequest, filterRule.getType(), filterRule.getExpression());
       }
+      else
+        logArticle(anArticle, aRequest);
 
-      logger.info("checkArticle: " + (System.currentTimeMillis()-time) + "ms");
+      logger.info("checkArticle: " + (System.currentTimeMillis() - time) + "ms");
     }
     catch (Throwable t) {
-      t.printStackTrace(logger.asPrintWriter(logger.DEBUG_MESSAGE));
+      t.printStackTrace(logger.asPrintWriter(LoggerWrapper.DEBUG_MESSAGE));
       logger.error("Abuse.checkArticle: " + t.toString());
     }
   }
@@ -271,7 +288,7 @@ public class Abuse {
   }
 
   public List getLog() {
-    synchronized(log) {
+    synchronized (log) {
       try {
         List result = new Vector();
 
@@ -288,6 +305,8 @@ public class Abuse {
           else
             entry.put("type", "comment");
           entry.put("browser", logEntry.getBrowserString());
+          entry.put("hitfiltertype", logEntry.getHitFilterType());
+          entry.put("hitfilterexpression", logEntry.getHitFilterExpression());
 
           result.add(entry);
         }
@@ -301,27 +320,35 @@ public class Abuse {
   }
 
   public void logComment(Entity aComment, Request aRequest) {
+    logComment(aComment, aRequest, null, null);
+  }
+
+  public void logComment(Entity aComment, Request aRequest, String aHitFilterType, String aHitFilterExpression) {
     String ipAddress = aRequest.getHeader("ip");
     String id = aComment.getId();
     String browser = aRequest.getHeader("User-Agent");
 
-    logComment(ipAddress, id, new Date(), browser);
+    logComment(ipAddress, id, new Date(), browser, aHitFilterType, aHitFilterExpression);
   }
 
   public void logArticle(Entity anArticle, Request aRequest) {
+    logArticle(anArticle, aRequest, null, null);
+  }
+
+  public void logArticle(Entity anArticle, Request aRequest, String aHitFilterType, String aHitFilterExpression) {
     String ipAddress = aRequest.getHeader("ip");
     String id = anArticle.getId();
     String browser = aRequest.getHeader("User-Agent");
 
-    logArticle(ipAddress, id, new Date(), browser);
+    logArticle(ipAddress, id, new Date(), browser, aHitFilterType, aHitFilterExpression);
   }
 
-  public void logComment(String anIp, String anId, Date aTimeStamp, String aBrowser) {
-    appendLog(new LogEntry(aTimeStamp, anIp, aBrowser, anId, false));
+  public void logComment(String anIp, String anId, Date aTimeStamp, String aBrowser, String aHitFilterType, String aHitFilterExpression) {
+    appendLog(new LogEntry(aTimeStamp, anIp, aBrowser, anId, false, aHitFilterType, aHitFilterExpression));
   }
 
-  public void logArticle(String anIp, String anId, Date aTimeStamp, String aBrowser) {
-    appendLog(new LogEntry(aTimeStamp, anIp, aBrowser, anId, true));
+  public void logArticle(String anIp, String anId, Date aTimeStamp, String aBrowser, String aHitFilterType, String aHitFilterExpression) {
+    appendLog(new LogEntry(aTimeStamp, anIp, aBrowser, anId, true, aHitFilterType, aHitFilterExpression));
   }
 
   public void load() {
@@ -445,7 +472,7 @@ public class Abuse {
   public List getFilters() {
     List result = new Vector();
 
-    synchronized(filterRules) {
+    synchronized (filterRules) {
       Iterator i = filterRules.iterator();
       while (i.hasNext()) {
         FilterRule filter = (FilterRule) i.next();
@@ -466,7 +493,7 @@ public class Abuse {
   public FilterRule getFilter(String anId) {
     synchronized (filterRules) {
       FilterRule result = (FilterRule) findFilter(filterRules, anId);
-      if (result==null)
+      if (result == null)
         return result;
       else
         return (FilterRule) result.clone();
@@ -481,10 +508,18 @@ public class Abuse {
     deleteFilter(filterRules, anIdentifier);
   }
 
+  public void moveFilterUp(String anIdentifier) {
+    moveFilter(filterRules, anIdentifier, -1);
+  }
+
+  public void moveFilterDown(String anIdentifier) {
+    moveFilter(filterRules, anIdentifier, 1);
+  }
+
   private String addFilter(List aFilters, String aType, String anExpression, String aComments, String aCommentAction, String anArticleAction, Date aLastHit) {
     MirAntiAbuseFilterType type = (MirAntiAbuseFilterType) filterTypes.get(aType);
 
-    if (type==null)
+    if (type == null)
       return "invalidtype";
 
     if (!type.validate(anExpression)) {
@@ -511,7 +546,7 @@ public class Abuse {
   private String setFilter(List aFilters, String anIdentifier, String aType, String anExpression, String aComments, String aCommentAction, String anArticleAction) {
     MirAntiAbuseFilterType type = (MirAntiAbuseFilterType) filterTypes.get(aType);
 
-    if (type==null)
+    if (type == null)
       return "invalidtype";
 
     if (!type.validate(anExpression)) {
@@ -521,7 +556,7 @@ public class Abuse {
     synchronized (aFilters) {
       FilterRule filter = findFilter(aFilters, anIdentifier);
 
-      if (filter!=null) {
+      if (filter != null) {
         filter.setExpression(anExpression);
         filter.setType(aType);
         filter.setCommentAction(aCommentAction);
@@ -548,19 +583,33 @@ public class Abuse {
     return null;
   }
 
+  private void moveFilter(List aFilters, String anIdentifier, int aDirection) {
+    synchronized (aFilters) {
+      for (int i = 0; i < aFilters.size(); i++) {
+        FilterRule rule = (FilterRule) aFilters.get(i);
+
+        if (rule.getId().equals(anIdentifier) && (i + aDirection >= 0) && (i + aDirection < aFilters.size())) {
+          aFilters.remove(rule);
+          aFilters.add(i + aDirection, rule);
+          break;
+        }
+      }
+    }
+  }
+
   private void deleteFilter(List aFilters, String anIdentifier) {
     synchronized (aFilters) {
       FilterRule filter = findFilter(aFilters, anIdentifier);
 
-      if (filter!=null) {
+      if (filter != null) {
         aFilters.remove(filter);
       }
     }
   }
 
   private String generateId() {
-    synchronized(this) {
-      maxIdentifier = maxIdentifier+1;
+    synchronized (this) {
+      maxIdentifier = maxIdentifier + 1;
 
       return Integer.toString(maxIdentifier);
     }
@@ -648,7 +697,7 @@ public class Abuse {
           return filterType.test(expression, anEntity, aRequest);
       }
       catch (Throwable t) {
-        logger.error("error while testing "+type+"-filter '"+expression+"'");
+        logger.error("error while testing " + type + "-filter '" + expression + "'");
       }
 
       return false;
@@ -668,21 +717,34 @@ public class Abuse {
     }
   }
 
+  private String escapeFilterPart(String aFilterPart) {
+    return StringRoutines.replaceStringCharacters(aFilterPart,
+        new char[] {'\\', ':', '\n', '\r', '\t', ' '},
+        new String[] {"\\\\", "\\:", "\\n", "\\r", "\\t", "\\ "});
+  }
+
+  private String deescapeFilterPart(String aFilterPart) {
+    return StringRoutines.replaceEscapedStringCharacters(aFilterPart,
+        '\\',
+        new char[] {'\\', ':', 'n', 'r', 't', ' '},
+        new String[] {"\\", ":", "\n", "\r", "\t", " "});
+  }
+
   private void setFilterConfig(List aFilters, String aConfigKey, ExtendedProperties aConfiguration) {
-    synchronized(aFilters) {
+    synchronized (aFilters) {
       Iterator i = aFilters.iterator();
 
       while (i.hasNext()) {
         FilterRule filter = (FilterRule) i.next();
 
         String filterconfig =
-            StringRoutines.replaceStringCharacters(filter.getType(), new char[] { '\\', ':'}, new String[] { "\\\\", "\\:"} ) + ":" +
-            StringRoutines.replaceStringCharacters(filter.getExpression(), new char[] { '\\', ':'}, new String[] { "\\\\", "\\:"} ) + ":" +
-            StringRoutines.replaceStringCharacters(filter.getArticleAction(), new char[] { '\\', ':'}, new String[] { "\\\\", "\\:"} ) + ":" +
-            StringRoutines.replaceStringCharacters(filter.getCommentAction(), new char[] { '\\', ':'}, new String[] { "\\\\", "\\:"} ) + ":" +
-            StringRoutines.replaceStringCharacters(filter.getComments(), new char[] { '\\', ':'}, new String[] { "\\\\", "\\:"})  + ":";
+            escapeFilterPart(filter.getType()) + ":" +
+            escapeFilterPart(filter.getExpression()) + ":" +
+            escapeFilterPart(filter.getArticleAction()) + ":" +
+            escapeFilterPart(filter.getCommentAction()) + ":" +
+            escapeFilterPart(filter.getComments()) + ":";
 
-        if (filter.getLastHit()!=null)
+        if (filter.getLastHit() != null)
           filterconfig = filterconfig + filter.getLastHit().getTime();
 
         aConfiguration.addProperty(aConfigKey, filterconfig);
@@ -691,10 +753,10 @@ public class Abuse {
   }
 
   private void getFilterConfig(List aFilters, String aConfigKey, ExtendedProperties aConfiguration) {
-    synchronized(aFilters) {
+    synchronized (aFilters) {
       aFilters.clear();
 
-      if (aConfiguration.getStringArray(aConfigKey)!=null) {
+      if (aConfiguration.getStringArray(aConfigKey) != null) {
 
         Iterator i = Arrays.asList(aConfiguration.getStringArray(aConfigKey)).
             iterator();
@@ -712,7 +774,7 @@ public class Abuse {
           if (parts.size() >= 5) {
             Date lastHit = null;
 
-            if (parts.size()>=6) {
+            if (parts.size() >= 6) {
               String lastHitString = (String) parts.get(5);
 
               try {
@@ -722,7 +784,11 @@ public class Abuse {
               }
             }
 
-            addFilter( (String) parts.get(0), (String) parts.get(1), (String) parts.get(4), (String) parts.get(3), (String) parts.get(2), lastHit);
+            addFilter(deescapeFilterPart( (String) parts.get(0)),
+                      deescapeFilterPart( (String) parts.get(1)),
+                      deescapeFilterPart( (String) parts.get(4)),
+                      deescapeFilterPart( (String) parts.get(3)),
+                      deescapeFilterPart( (String) parts.get(2)), lastHit);
           }
         }
       }
@@ -735,13 +801,21 @@ public class Abuse {
     private String id;
     private Date timeStamp;
     private boolean isArticle;
+    private String hitFilterType;
+    private String hitFilterExpression;
 
-    public LogEntry(Date aTimeStamp, String anIpNumber, String aBrowserString, String anId, boolean anIsArticle) {
+    public LogEntry(Date aTimeStamp, String anIpNumber, String aBrowserString, String anId, boolean anIsArticle, String aHitFilterType, String aHitFilterExpression) {
       ipNumber = anIpNumber;
       browserString = aBrowserString;
       id = anId;
       isArticle = anIsArticle;
-      timeStamp=aTimeStamp;
+      timeStamp = aTimeStamp;
+      hitFilterType = aHitFilterType;
+      hitFilterExpression = aHitFilterExpression;
+    }
+
+    public LogEntry(Date aTimeStamp, String anIpNumber, String aBrowserString, String anId, boolean anIsArticle) {
+      this(aTimeStamp, anIpNumber, aBrowserString, anId, anIsArticle, null, null);
     }
 
     public String getIpNumber() {
@@ -756,6 +830,14 @@ public class Abuse {
       return id;
     }
 
+    public String getHitFilterType() {
+      return hitFilterType;
+    }
+
+    public String getHitFilterExpression() {
+      return hitFilterExpression;
+    }
+
     public Date getTimeStamp() {
       return timeStamp;
     }
@@ -766,11 +848,11 @@ public class Abuse {
   }
 
   private void truncateLog() {
-    synchronized(log) {
+    synchronized (log) {
       if (!logEnabled)
         log.clear();
       else {
-        while (log.size()>0 && log.size()>logSize) {
+        while (log.size() > 0 && log.size() > logSize) {
           log.remove(0);
         }
       }
@@ -783,18 +865,6 @@ public class Abuse {
         log.add(anEntry);
         truncateLog();
       }
-    }
-  }
-
-  public void logAdminUsage(EntityUsers aUser, String aDescription) {
-    try {
-      String user = "unknown (" + aUser.toString() +")";
-      if (user!=null)
-        user = aUser.getValue("login");
-      adminUsageLogger.info(user + ": " + aDescription);
-    }
-    catch (Throwable t) {
-      logger.error("Error while logging admin usage ("+aUser.toString()+", "+aDescription+"): " +t.toString());
     }
   }
 }

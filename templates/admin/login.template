@@ -32,7 +32,7 @@
   <div class="box">
     
     
-      <form method="post" action="${config.docRoot}/admin/logon.do">
+      <form method="post" action="${config.actionRoot}">
         
     <input type="hidden" name="module" value="login">
 
@@ -58,7 +58,7 @@
       </tr>  
     <tr>
       <td colspan="2" align="right">
-        <input type="submit" value="${lang("login.submit")}">
+        <input type="submit" class="majorbutton" value="${lang("login.submit")}">
       </td>
     </tr>
     </tbody>

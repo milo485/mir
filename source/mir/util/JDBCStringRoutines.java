@@ -38,8 +38,9 @@ package mir.util;
  * @version 1.0
  */
 
-import java.util.*;
-import java.text.*;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
 
 public class JDBCStringRoutines {
   private JDBCStringRoutines() {

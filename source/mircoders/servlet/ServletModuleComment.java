@@ -35,10 +35,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import mir.config.MirPropertiesConfiguration;
 import mir.entity.adapter.EntityAdapterModel;
 import mir.entity.adapter.EntityIteratorAdapter;
 import mir.log.LoggerWrapper;
@@ -101,10 +101,10 @@ public class ServletModuleComment extends ServletModule
     if (idParam == null)
       throw new ServletModuleExc("Invalid call: id not supplied ");
 
-    showComment(idParam, aRequest, aResponse);
+    editObject(aRequest, aResponse, idParam);
   }
 
-  public void showComment(String anId, HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc {
+  public void editObject(HttpServletRequest aRequest, HttpServletResponse aResponse, String anId) throws ServletModuleExc {
     try {
       HTTPRequestParser requestParser = new HTTPRequestParser(aRequest);
       Map responseData = ServletHelper.makeGenerationData(aRequest, aResponse, new Locale[] {getLocale(aRequest), getFallbackLocale(aRequest)});
@@ -157,7 +157,9 @@ public class ServletModuleComment extends ServletModule
       throw new ServletModuleFailure(e);
     }
 
-    showComment(commentId, aRequest, aResponse);
+    logAdminUsage(aRequest, commentId, "media " + mediaIdParam + " attached");
+
+    editObject(aRequest, aResponse, commentId);
   }
 
   public void dettach(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc
@@ -177,7 +179,9 @@ public class ServletModuleComment extends ServletModule
       throw new ServletModuleFailure(e);
     }
 
-    showComment(commentId, aRequest, aResponse);
+    logAdminUsage(aRequest, commentId, "media " + midParam + " deattached");
+
+    editObject(aRequest, aResponse, commentId);
   }
 
 
@@ -189,7 +193,7 @@ public class ServletModuleComment extends ServletModule
     String order = requestParser.getParameterWithDefault("order", "webdb_create desc");
     int offset = requestParser.getIntegerWithDefault("offset", 0);
 
-    returnCommentList(aRequest, aResponse, where, order, offset);
+    returnList(aRequest, aResponse, where, order, offset);
   }
 
   public void search(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc
@@ -223,16 +227,16 @@ public class ServletModuleComment extends ServletModule
 
     if (searchOrder.length()>0) {
       if (searchOrder.equals("datedesc"))
-        queryBuilder.appendAscendingOrder("webdb_create");
-      else if (searchOrder.equals("dateasc"))
         queryBuilder.appendDescendingOrder("webdb_create");
+      else if (searchOrder.equals("dateasc"))
+        queryBuilder.appendAscendingOrder("webdb_create");
       else if (searchOrder.equals("articletitle"))
         queryBuilder.appendAscendingOrder("(select content.title from content where content.id = comment.to_media)");
       else if (searchOrder.equals("creator"))
         queryBuilder.appendDescendingOrder("creator");
     }
 
-    returnCommentList(aRequest, aResponse, queryBuilder.getWhereClause(), queryBuilder.getOrderByClause(), 0);
+    returnList(aRequest, aResponse, queryBuilder.getWhereClause(), queryBuilder.getOrderByClause(), 0);
   }
 
   public void articlecomments(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc
@@ -243,14 +247,14 @@ public class ServletModuleComment extends ServletModule
     try {
       articleId  = Integer.parseInt(articleIdString);
 
-      returnCommentList( aRequest, aResponse, "to_media="+articleId, "webdb_create desc", 0);
+      returnList( aRequest, aResponse, "to_media="+articleId, "webdb_create desc", 0);
     }
     catch (Throwable e) {
       throw new ServletModuleFailure(e);
     }
   }
 
-  public void returnCommentList(HttpServletRequest aRequest, HttpServletResponse aResponse,
+  public void returnList(HttpServletRequest aRequest, HttpServletResponse aResponse,
      String aWhereClause, String anOrderByClause, int anOffset) throws ServletModuleExc {
 
     HTTPRequestParser requestParser = new HTTPRequestParser(aRequest);
@@ -342,11 +346,13 @@ public class ServletModuleComment extends ServletModule
 
       String id = mainModule.set(withValues);
 
+      logAdminUsage(aRequest, id, "object modified");
+
       if (returnUrl!=null){
         redirect(aResponse, returnUrl);
       }
       else
-        showComment(idParam, aRequest, aResponse);
+        editObject(aRequest, aResponse, idParam);
     }
     catch (Throwable e) {
       throw new ServletModuleFailure(e);

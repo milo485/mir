@@ -446,13 +446,19 @@ public class MirBasicDataModelLocalizer implements MirDataModelLocalizer {
 
   protected class ContentToTopicsField implements EntityAdapterDefinition.CalculatedField {
     private String topicCondition;
+    private String topicOrder;
 
     public ContentToTopicsField() {
       this(null);
     }
 
     public ContentToTopicsField(String aTopicCondition) {
+      this(aTopicCondition, "title");
+    }
+
+    public ContentToTopicsField(String aTopicCondition, String aTopicOrder) {
       topicCondition = aTopicCondition;
+      topicOrder = aTopicOrder;
     }
 
     public Object getValue(EntityAdapter anEntityAdapter) {
@@ -463,7 +469,7 @@ public class MirBasicDataModelLocalizer implements MirDataModelLocalizer {
 
         return anEntityAdapter.getRelation(
                     condition,
-                    "title",
+                    topicOrder,
                     "topic" );
       }
       catch (Throwable t) {

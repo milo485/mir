@@ -30,16 +30,17 @@
 
 package mir.producer;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.*;
+import java.util.Map;
 
 import mir.entity.Entity;
 import mir.entity.adapter.EntityAdapter;
 import mir.entity.adapter.EntityAdapterModel;
 import mir.log.LoggerWrapper;
+import mir.util.JDBCStringRoutines;
 import mir.util.ParameterExpander;
-import mir.util.*;
 
 
 public class EntityModifyingProducerNode implements ProducerNode {
@@ -105,7 +106,7 @@ public class EntityModifyingProducerNode implements ProducerNode {
     }
     catch (Throwable t) {
       aLogger.error("Error while performing entity modification operation: " + t.getMessage());
-      t.printStackTrace(aLogger.asPrintWriter(aLogger.DEBUG_MESSAGE));
+      t.printStackTrace(aLogger.asPrintWriter(LoggerWrapper.DEBUG_MESSAGE));
 
       throw new ProducerFailure(t.getMessage(), t);
     }

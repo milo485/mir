@@ -30,12 +30,9 @@
 package mir.producer;
 
 import java.util.Map;
-import java.util.Vector;
 
 import mir.entity.adapter.EntityAdapterModel;
-import mir.entity.adapter.EntityIteratorAdapter;
 import mir.log.LoggerWrapper;
-import mir.util.CachingRewindableIterator;
 import mir.util.ParameterExpander;
 
 public class EntityDeletingProducerNode implements ProducerNode {

@@ -32,6 +32,7 @@ package mircoders.servlet;
 
 import java.util.Locale;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -120,9 +121,11 @@ public class ServletModuleAbuse extends ServletModule {
 
     if (id.equals("")) {
       errorMessage = MirGlobal.abuse().addFilter(type, expression,comments, commentaction, articleaction);
+      logAdminUsage(aRequest, "?", "object added");
     }
     else {
       errorMessage = MirGlobal.abuse().setFilter(id, type, expression, comments, commentaction, articleaction);
+      logAdminUsage(aRequest, id, "object modified");
     }
 
     if (errorMessage!=null) {
@@ -139,6 +142,31 @@ public class ServletModuleAbuse extends ServletModule {
 
     String id=requestParser.getParameterWithDefault("id", "");
     MirGlobal.abuse().deleteFilter(id);
+    logAdminUsage(aRequest, id, "object deleted");
+
+    MirGlobal.abuse().save();
+
+    showfilters(aRequest, aResponse);
+  }
+
+  public void moveup(HttpServletRequest aRequest, HttpServletResponse aResponse) {
+    HTTPRequestParser requestParser = new HTTPRequestParser(aRequest);
+
+    String id=requestParser.getParameterWithDefault("id", "");
+    MirGlobal.abuse().moveFilterUp(id);
+
+    MirGlobal.abuse().save();
+    logAdminUsage(aRequest, id, "object moved upwards");
+
+    showfilters(aRequest, aResponse);
+  }
+
+  public void movedown(HttpServletRequest aRequest, HttpServletResponse aResponse) {
+    HTTPRequestParser requestParser = new HTTPRequestParser(aRequest);
+
+    String id=requestParser.getParameterWithDefault("id", "");
+    MirGlobal.abuse().moveFilterDown(id);
+    logAdminUsage(aRequest, id, "object moved downwards");
 
     MirGlobal.abuse().save();
 
@@ -148,6 +176,7 @@ public class ServletModuleAbuse extends ServletModule {
   public void add(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc {
     editfilter(aRequest, aResponse, "", "", "", "", "", "", "");
   }
+
   public void showfilters(HttpServletRequest aRequest, HttpServletResponse aResponse) {
     URLBuilder urlBuilder = new URLBuilder();
 
@@ -216,6 +245,7 @@ public class ServletModuleAbuse extends ServletModule {
       MirGlobal.abuse().setCommentBlockAction(parser.getParameter("commentaction"));
 
       MirGlobal.abuse().save();
+      logAdminUsage(aRequest, "settings", "object modified");
 
       showsettings(aRequest, aResponse);
     }

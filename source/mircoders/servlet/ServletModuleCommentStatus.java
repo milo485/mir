@@ -29,12 +29,11 @@
  */
 package mircoders.servlet;
 
-import mir.config.MirPropertiesConfiguration;
 import mir.log.LoggerWrapper;
 import mir.servlet.ServletModule;
+import mircoders.global.MirGlobal;
 import mircoders.module.ModuleCommentStatus;
 import mircoders.storage.DatabaseCommentStatus;
-import mircoders.global.*;
 
 
 public class ServletModuleCommentStatus extends ServletModule

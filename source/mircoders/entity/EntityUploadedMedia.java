@@ -45,7 +45,7 @@ import mircoders.storage.DatabaseUploadedMedia;
 /**
  *
  * @author mh, mir-coders group
- * @version $Id: EntityUploadedMedia.java,v 1.27 2003/09/03 18:29:04 zapata Exp $
+ * @version $Id: EntityUploadedMedia.java,v 1.26.2.1 2003/09/03 17:49:39 zapata Exp $
  */
 
 

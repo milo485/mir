@@ -50,8 +50,6 @@ import java.util.ListIterator;
 
 import javax.servlet.http.HttpServletRequest;
 
-import mir.config.MirPropertiesConfiguration;
-import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
 import mir.log.LoggerWrapper;
 import mir.misc.StringUtil;
 
@@ -66,8 +64,7 @@ public class StoreContainer {
   private int hitCount = 0, missCount = 0;
   private static ObjectStore o_store = ObjectStore.getInstance();
 
-  protected LoggerWrapper logger = new LoggerWrapper("Database");
-  private MirPropertiesConfiguration configuration;
+  protected LoggerWrapper logger = new LoggerWrapper("Database.ObjectStore");
 
   // avoid construction without parameters
   private StoreContainer() {};
@@ -77,14 +74,9 @@ public class StoreContainer {
     this.uniqueId = ++uniqueCounter;
     this.stocType = stoc_type;
     this.container = new LinkedList();
-    try {
-			configuration = MirPropertiesConfiguration.instance();
-		} catch (PropertiesConfigExc e) {
-			e.printStackTrace(logger.asPrintWriter(LoggerWrapper.ERROR_MESSAGE));
-		}
     int defaultSize = stoc_type.getDefaultSize();
     String confProperty = stoc_type.getConfPrefix() + ".DefaultSize";
-    String confedSize = configuration.getString(confProperty);
+    String confedSize = o_store.getConfProperty(confProperty);
     if (confedSize != null) {
       this.maxSize = StringUtil.parseInt(confedSize, defaultSize);
     }

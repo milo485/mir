@@ -38,7 +38,6 @@ import mir.module.AbstractModule;
 import mir.module.ModuleExc;
 import mir.module.ModuleFailure;
 import mir.storage.StorageObject;
-import mircoders.storage.DatabaseTopics;
 
 public class ModuleTopics extends AbstractModule {
 

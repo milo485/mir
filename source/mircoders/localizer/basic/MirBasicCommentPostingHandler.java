@@ -41,16 +41,18 @@ import mir.session.Session;
 import mir.session.SessionExc;
 import mir.session.SessionFailure;
 import mir.session.UploadedFile;
-import mir.session.ValidationError;
 import mir.session.ValidationHelper;
-import mir.util.ExceptionFunctions;
 import mircoders.entity.EntityComment;
 import mircoders.global.MirGlobal;
 import mircoders.media.MediaUploadProcessor;
 import mircoders.module.ModuleComment;
+import mircoders.module.ModuleCommentStatus;
+import mircoders.module.ModuleMediafolder;
 import mircoders.storage.DatabaseComment;
+import mircoders.storage.DatabaseCommentStatus;
 import mircoders.storage.DatabaseCommentToMedia;
 import mircoders.storage.DatabaseContent;
+import mircoders.storage.DatabaseMediafolder;
 
 /**
  *
@@ -106,10 +108,16 @@ public class MirBasicCommentPostingHandler extends MirBasicPostingSessionHandler
   };
 
   public void finalizeComment(Request aRequest, Session aSession, EntityComment aComment) throws SessionExc, SessionFailure {
-    aComment.setValueForProperty("is_published", "1");
-    aComment.setValueForProperty("to_comment_status", "1");
-    aComment.setValueForProperty("is_html","0");
-    aComment.setValueForProperty("to_media", (String) aSession.getAttribute("to_media"));
+    try {
+      aComment.setValueForProperty("is_published", "1");
+      ModuleCommentStatus module = new ModuleCommentStatus(DatabaseCommentStatus.getInstance());
+      aComment.setValueForProperty("to_comment_status", module.commentStatusIdForName(configuration.getString("Localizer.OpenSession.comment.DefaultCommentStatus")));
+      aComment.setValueForProperty("is_html", "0");
+      aComment.setValueForProperty("to_media", (String) aSession.getAttribute("to_media"));
+    }
+    catch (Throwable t) {
+      throw new SessionFailure(t);
+    }
   }
 
   public void preProcessRequest(Request aRequest, Session aSession) throws SessionExc, SessionFailure {
@@ -139,6 +147,9 @@ public class MirBasicCommentPostingHandler extends MirBasicPostingSessionHandler
       values.put("creator", aRequest.getParameter("creator"));
       values.put("to_publisher", "0");
       values.put("is_published", "1");
+      ModuleMediafolder module = new ModuleMediafolder(DatabaseMediafolder.getInstance());
+      values.put("to_media_folder", module.mediaFolderIdForName(configuration.getString("Localizer.OpenSession.comment.DefaultMediaFolder")));
+
       Entity mediaItem = MediaUploadProcessor.processMediaUpload(aFile, values);
       mediaItem.update();
       commentToMedia.addMedia(((EntityComment) aSession.getAttribute("comment")).getId(), mediaItem.getId());

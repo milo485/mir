@@ -16,8 +16,8 @@
              <input type="hidden" name="id" value="${id}">
              <input type="hidden" name="okurl" value="${okurl}">
              <input type="hidden" name="cancelurl" value="${cancelurl}">
-             <input type="submit" name="cancel" value="${lang("cancel")}">
-             <input type="submit" name="confirm" value="${lang("delete")}"><br>
+             <input type="submit" class="majorbutton" name="cancel" value="${lang("cancel")}">
+             <input type="submit" class="majorbutton" name="confirm" value="${lang("delete")}"><br>
              <br>
             <b><span class="text-alert">${lang("confirm.text")}</span></b>
         </p>

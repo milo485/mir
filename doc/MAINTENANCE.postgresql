@@ -7,7 +7,7 @@ To dump the database use pg_dump
 
 To restore do the following
 
-  pg_restore -d [name_of_database] -u [dbuser] -Ft dump.tar 
+  pg_restore -d [name_of_database] -U [dbuser] -Ft dump.tar 
 
 
 VACUUM and VACUUM ANALYZE
@@ -25,3 +25,4 @@ USER MANAGMENT IN POSTGRESQL
 
 If you want to change the db user of a mir db, there's a script for 
 that in mir/dbscripts/extra.
+

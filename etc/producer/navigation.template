@@ -1,46 +1,46 @@
 
-			<table cellpadding="8" cellspacing="0" border="0" width="100%" bgcolor="#aaaaaa"><tr><td>
-				<b>${lang("navigation.languages")}</b>
-				  <list languages as l> 
-				    <br><a href="${config["Producer.DocRoot"]}/${l.code}/">${l.name}</a>
-				  </list> 
-			</td></tr></table>
+      <table cellpadding="8" cellspacing="0" border="0" width="100%" bgcolor="#aaaaaa"><tr><td>
+        <b>${lang("navigation.languages")}</b>
+          <list languages as l> 
+            <br><a href="${config["Producer.DocRoot"]}/${l.code}/">${l.name}</a>
+          </list> 
+      </td></tr></table>
 
-			<br>
-			<form action="${config["Producer.OpenAction"]}" method="post">
-			<table cellpadding="8" cellspacing="0" border="0" width="100%" bgcolor="#aaaaaa"><tr><td>
-				<b>${lang("navigation.search.title")}</b><br>
-				<input type="hidden" name="do" value="search">
-				<input type="hidden" name="search_boolean" value="or">
-				<input type="hidden" name="search_sort" value="score">
-				
-					<input type="text" name="search_content" size="10" id="searchfield"><br>
-					<input type="checkbox" name="search_hasImages"> ${lang("navigation.search.images")} <br>
-					<input type="checkbox" name="search_hasAudio"> ${lang("navigation.search.audio")} <br>
-					<input type="checkbox" name="search_hasVideo"> ${lang("navigation.search.video")} <br>
-					
-				<input type="submit" value="${lang("navigation.search.button")}" name="search_submit" size="16">
-			</td></tr></table>
-			</form>
-			
-			<table cellpadding="8" cellspacing="0" border="0" width="100%" bgcolor="#cc6666"><tr><td>
-				<b><a href="${config["Producer.OpenAction"]}">${lang("navigation.publish")}&nbsp;&gt;&gt;</a></b>
-			</td></tr></table>
-			<br>
-			<table cellpadding="8" cellspacing="0" border="0" width="100%" bgcolor="#cc6666"><tr><td>
-				<b><a href="${config["Producer.DocRoot"]}/${language.code}/newswire/archive.shtml">${lang("navigation.newswirearchive")} &gt;&gt;</a>&nbsp;</b>
-			</td></tr></table>
-			<br>
-			<table cellpadding="8" cellspacing="0" border="0" width="100%" bgcolor="#cc6666"><tr><td>
-				<b><a href="${config["Producer.DocRoot"]}/${language.code}/feature/archive.shtml">${lang("navigation.featurearchive")} &gt;&gt;</a>&nbsp;</b>
-			</td></tr></table>
-			<br>
-			
-			<table cellpadding="8" cellspacing="0" border="0" width="100%" bgcolor="#cc9999"><tr><td>
-			  <b>${lang("navigation.topics")}</b>
-				  <list topics as t> 
-				    <br><a href="${config["Producer.DocRoot"]}/${language.code}/${t.filename}/archive.shtml">${t.title}</a>
-				  </list> 
-			</td></tr></table>
-			<br>
-			
+      <br>
+      <form action="${config["Producer.OpenAction"]}" method="post">
+      <table cellpadding="8" cellspacing="0" border="0" width="100%" bgcolor="#aaaaaa"><tr><td>
+        <b>${lang("navigation.search.title")}</b><br>
+        <input type="hidden" name="do" value="search">
+        <input type="hidden" name="search_boolean" value="or">
+        <input type="hidden" name="search_sort" value="score">
+        
+          <input type="text" name="search_content" size="10" id="searchfield"><br>
+          <input type="checkbox" name="search_hasImages"> ${lang("navigation.search.images")} <br>
+          <input type="checkbox" name="search_hasAudio"> ${lang("navigation.search.audio")} <br>
+          <input type="checkbox" name="search_hasVideo"> ${lang("navigation.search.video")} <br>
+          
+        <input type="submit" value="${lang("navigation.search.button")}" name="search_submit" size="16">
+      </td></tr></table>
+      </form>
+      
+      <table cellpadding="8" cellspacing="0" border="0" width="100%" bgcolor="#cc6666"><tr><td>
+        <b><a href="${config["Producer.OpenAction"]}">${lang("navigation.publish")}&nbsp;&gt;&gt;</a></b>
+      </td></tr></table>
+      <br>
+      <table cellpadding="8" cellspacing="0" border="0" width="100%" bgcolor="#cc6666"><tr><td>
+        <b><a href="${config["Producer.DocRoot"]}/${language.code}/newswire/archive.shtml">${lang("navigation.newswirearchive")} &gt;&gt;</a>&nbsp;</b>
+      </td></tr></table>
+      <br>
+      <table cellpadding="8" cellspacing="0" border="0" width="100%" bgcolor="#cc6666"><tr><td>
+        <b><a href="${config["Producer.DocRoot"]}/${language.code}/feature/archive.shtml">${lang("navigation.featurearchive")} &gt;&gt;</a>&nbsp;</b>
+      </td></tr></table>
+      <br>
+      
+      <table cellpadding="8" cellspacing="0" border="0" width="100%" bgcolor="#cc9999"><tr><td>
+        <b>${lang("navigation.topics")}</b>
+          <list topics as t> 
+            <br><a href="${config["Producer.DocRoot"]}/${language.code}/${t.filename}/archive.shtml">${t.title}</a>
+          </list> 
+      </td></tr></table>
+      <br>
+      

@@ -29,10 +29,24 @@
  */
 package mircoders.pdf;
 
+import gnu.regexp.RE;
+import gnu.regexp.REException;
+import gnu.regexp.REMatch;
+import gnu.regexp.REMatchEnumeration;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.*;
+import java.util.Iterator;
+
+import mir.config.MirPropertiesConfiguration;
+import mir.entity.EntityBrowser;
+import mir.log.LoggerWrapper;
+import mir.misc.StringUtil;
+import mir.util.DateTimeFunctions;
+import mircoders.entity.EntityContent;
+import mircoders.entity.EntityImages;
+import mircoders.storage.DatabaseImages;
 
 import com.lowagie.text.BadElementException;
 import com.lowagie.text.Document;
@@ -48,19 +62,6 @@ import com.lowagie.text.pdf.ColumnText;
 import com.lowagie.text.pdf.PdfContentByte;
 import com.lowagie.text.pdf.PdfTemplate;
 import com.lowagie.text.pdf.PdfWriter;
-import gnu.regexp.RE;
-import gnu.regexp.REException;
-import gnu.regexp.REMatch;
-import gnu.regexp.REMatchEnumeration;
-
-import mir.config.MirPropertiesConfiguration;
-import mir.entity.*;
-import mir.log.LoggerWrapper;
-import mir.misc.StringUtil;
-import mir.util.DateTimeFunctions;
-import mircoders.entity.EntityContent;
-import mircoders.entity.EntityImages;
-import mircoders.storage.*;
 
 public class PDFGenerator{
 

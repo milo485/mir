@@ -44,18 +44,18 @@ import mir.session.Session;
 import mir.session.SessionExc;
 import mir.session.SessionFailure;
 import mir.session.UploadedFile;
-import mir.session.ValidationError;
 import mir.session.ValidationHelper;
-import mir.util.ExceptionFunctions;
 import mircoders.entity.EntityContent;
 import mircoders.global.MirGlobal;
 import mircoders.media.MediaUploadProcessor;
+import mircoders.module.ModuleArticleType;
 import mircoders.module.ModuleContent;
-import mircoders.module.*;
-import mircoders.storage.*;
+import mircoders.module.ModuleMediafolder;
+import mircoders.storage.DatabaseArticleType;
 import mircoders.storage.DatabaseContent;
 import mircoders.storage.DatabaseContentToMedia;
 import mircoders.storage.DatabaseContentToTopics;
+import mircoders.storage.DatabaseMediafolder;
 
 /**
  *
@@ -106,18 +106,12 @@ public class MirBasicArticlePostingHandler extends MirBasicPostingSessionHandler
     try {
       anArticle.setValueForProperty("is_published", "1");
       anArticle.setValueForProperty("is_produced", "0");
-      anArticle.setValueForProperty("date",
-                                    StringUtil.date2webdbDate(new GregorianCalendar()));
+      anArticle.setValueForProperty("date", StringUtil.date2webdbDate(new GregorianCalendar()));
       anArticle.setValueForProperty("is_html", "0");
-      anArticle.setValueForProperty("publish_path",
-                                    StringUtil.webdbDate2path(anArticle.
-          getValue("date")));
-      ModuleArticleType module = new ModuleArticleType(DatabaseArticleType.
-          getInstance());
+      anArticle.setValueForProperty("publish_path", StringUtil.webdbDate2path(anArticle. getValue("date")));
 
-      anArticle.setValueForProperty("to_article_type",
-                                    module.articleTypeIdForName(configuration.
-          getString("Localizer.OpenSession.article.DefaultArticleType")));
+      ModuleArticleType module = new ModuleArticleType(DatabaseArticleType.getInstance());
+      anArticle.setValueForProperty("to_article_type", module.articleTypeIdForName(configuration.getString("Localizer.OpenSession.article.DefaultArticleType")));
       anArticle.setValueForProperty("to_publisher", "1");
     }
     catch (Throwable t) {
@@ -172,6 +166,9 @@ public class MirBasicArticlePostingHandler extends MirBasicPostingSessionHandler
       values.put("to_publisher", "0");
       values.put("is_published", "1");
       values.put("is_produced", "1");
+      ModuleMediafolder module = new ModuleMediafolder(DatabaseMediafolder.getInstance());
+      values.put("to_media_folder", module.mediaFolderIdForName(configuration.getString("Localizer.OpenSession.article.DefaultMediaFolder")));
+
       Entity mediaItem = MediaUploadProcessor.processMediaUpload(aFile, values);
       mediaItem.update();
       contentToMedia.addMedia(((EntityContent) aSession.getAttribute("content")).getId(), mediaItem.getId());
@@ -195,4 +192,3 @@ public class MirBasicArticlePostingHandler extends MirBasicPostingSessionHandler
   };
 
 }
-

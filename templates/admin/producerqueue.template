@@ -27,13 +27,11 @@
     <list p.verbs as v>
     <tr <if grey=="1">class="listrow2"<else>class="listrow2"</if>>
       <td width="25"></td>
-      <if v.name=="all">
-        <td class="small text-alert">${v.name} [!]</td>
-      <else>
-        <td class="small">${v.name}</td>
-      </if>
+      <td class="small">${v.name}</td>
       <td class="small">${v.description}</td>
-      <td class="small"><a href="${config.actionRoot}?module=Producer&do=enqueue&producer=${utility.encodeURI(p.name)}&verb=${utility.encodeURI(v.name)}">${lang("producer.verb.enqueue")}</a>&nbsp;</td>
+     
+      <td class="small"><form style="margin: 0px; border: 0px; padding: 0px" method="post" action="${config.actionRoot}?module=Producer&do=enqueue&producer=${utility.encodeURI(p.name)}&verb=${utility.encodeURI(v.name)}"><input class="listbutton" type="submit" value="${lang("producer.verb.enqueue")}"></form></div>
+      </td>
     </tr>
     <if grey=="1"><assign grey="0"><else><assign grey="1"></if>
     </list>
@@ -93,10 +91,9 @@
     </tr>
   </if>
   <tr>
-    <td colspan="5" class="table-foot" align="left">
-      <br>
-      <input class="minorbutton" type="submit" value="${lang("producer.jobqueue.canceljobs")}">
-    </td>
+    <td colspan="5" class="table-foot" align="right">
+      <br><input class="minorbutton" name="cancelsome" type="submit" value="${lang("producer.jobqueue.canceljobs")}">
+      <br><input class="minorbutton" name="cancelall" type="submit" value="${lang("producer.jobqueue.cancelalljobs")}"></td>
   </tr>
 </table>
 </form>

@@ -35,7 +35,7 @@
         </if>
 
         <list comment.operations as op>
-          <call showButton(
+          <call showPOSTButton(
             "module=Localizer&do=commentoperation&operation="+op+"&id="+comment.id+"&returnurl="+utility.encodeURI(thisurl), 
             lang("comment.operation."+op))>
         </list>
@@ -45,9 +45,9 @@
     <td align="right" valign="top">
       ${lang("comment.published")} <input type="checkbox" name="is_published" value="1" <if comment.is_published=="1"> checked</if>>
       <if new=="1">
-        <input type="submit" name="save" value="${lang("insert")}">
+        <input type="submit" class="majorbutton" name="save" value="${lang("insert")}">
       <else>
-        <input type="submit" name="save" value="${lang("save")}">
+        <input type="submit" class="majorbutton" name="save" value="${lang("save")}">
       </if> 
     </td>
   </tr>
@@ -94,9 +94,9 @@
           <td colspan="2" align="right" class="table-foot" > 
             <span class="text">
               <if new=="1">
-                <input type="submit" name="save" value="${lang("insert")}">
+                <input type="submit" class="majorbutton" name="save" value="${lang("insert")}">
               <else>
-                <input type="submit" name="save" value="${lang("save")}">
+                <input type="submit" class="majorbutton" name="save" value="${lang("save")}">
               </if> 
             </span>
           </td>

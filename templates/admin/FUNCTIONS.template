@@ -8,6 +8,15 @@
 <function showButton(anUrl, aLabel)>
   <call showAbsoluteLinkButton(config.actionRoot+"?"+anUrl, aLabel)>
 </function>
+<function showGETButton(anUrl, aLabel)>
+  <call showAbsoluteLinkButton(config.actionRoot+"?"+anUrl, aLabel)>
+</function>
+<function showPOSTButton(anUrl, aLabel)>
+  <call showGETButton(anUrl, aLabel)>
+<comment>
+  <form method="POST" action="${utility.encodeHTML(config.actionRoot+"?"+anUrl)}"><input type="submit" class="majorbutton" value="${aLabel}"></form>
+</comment>  
+</function>
 
 
 <assign TABLE_HEAD_CLASS          "table-head">
@@ -50,7 +59,7 @@
         
         <list aDataKeys as i>   
             <td>
-              ${entry[i]}
+              ${utility.prettyEncodeHTML(entry[i])}
             </td>
         </list>
         <if aShowDelete == "1" || aShowEdit == "1" >
@@ -225,7 +234,7 @@
 <comment>complete search-form for contenentries, not sure if it works from everywhere</comment>
 <function ContentSearch (layout)>
 
-      <form method="POST" action="${config.actionRoot}">
+      <form method="GET" action="${config.actionRoot}">
         <input type="hidden" name="module" value="Content">
         <input type="hidden" name="do" value="search">
         <input type="hidden" name="selectarticleurl" value="${utility.encodeHTML(selectarticleurl)}">
@@ -444,7 +453,7 @@
     <list anObject.to_all_media_other as m>
       <tr>
       <td align=right valign=top">
-      <a href="${config.actionRoot}?module=Video&do=edit&id=${m["id"]}"><img src="${config.docRoot}/img/${m["big_icon"]}" alt="edit" border="0"></a>&nbsp;  
+      <a href="${config.actionRoot}?module=OtherMedia&do=edit&id=${m["id"]}"><img src="${config.docRoot}/img/${m["big_icon"]}" alt="edit" border="0"></a>&nbsp;  
       </td>
       <td align="left" valign="top">
         <a href="${config.actionRoot}?module=${objectModule}&do=dettach&${objectKey}=${anObject.id}&mid=${m["id"]}">[-] ${lang("delete")}</a>

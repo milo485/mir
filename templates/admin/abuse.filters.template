@@ -32,12 +32,12 @@
           utility.encodeHTML(f.expression),
           lang("content.operation."+f.articleAction),
           lang("comment.operation."+f.commentAction),
-          f.comments,                                                   
+          utility.prettyEncodeHTML(f.comments),
           f.lastHit.format(config["Mir.DefaultDateTimeFormat"], config["Mir.DefaultTimezone"])
           ], 
           "module=Abuse&id="+f.id, 
-          ["&do=edit", "&do=delete"], 
-          [lang("edit"), lang("delete")])
+          ["&do=edit", "&do=delete", "&do=moveup", "&do=movedown"], 
+          [lang("edit"), lang("delete"), lang("abuse.filters.moveup"), lang("abuse.filters.movedown")])
         >
     <else>
         <call ListEntry([
@@ -45,12 +45,12 @@
           utility.encodeHTML(f.expression),
           lang("content.operation."+f.articleAction),
           lang("comment.operation."+f.commentAction),
-          f.comments,
+          utility.prettyEncodeHTML(f.comments),
           "-"
           ], 
           "module=Abuse&id="+f.id, 
-          ["&do=edit", "&do=delete"], 
-          [lang("edit"), lang("delete")])
+          ["&do=edit", "&do=delete", "&do=moveup", "&do=movedown"], 
+          [lang("edit"), lang("delete"), lang("abuse.filters.moveup"), lang("abuse.filters.movedown")])
         >
     </if>
     </list>

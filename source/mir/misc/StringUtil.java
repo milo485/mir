@@ -29,19 +29,19 @@
  */
 package  mir.misc;
 
+import gnu.regexp.RE;
+import gnu.regexp.REException;
+
 import java.text.NumberFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
-import gnu.regexp.RE;
-import gnu.regexp.REException;
-
 /**
  * Statische Hilfsmethoden zur Stringbehandlung
  *
- * @version $Id: StringUtil.java,v 1.34 2003/09/03 18:29:02 zapata Exp $
+ * @version $Id: StringUtil.java,v 1.33.2.5 2003/10/23 14:55:28 rk Exp $
  * @author mir-coders group
  *
  */

@@ -168,6 +168,16 @@ public class JobQueue {
     }
   }
 
+  public void cancelAllJobs() {
+    synchronized (jobHandlers) {
+      Iterator i = jobHandlers.iterator();
+
+      while (i.hasNext()) {
+        ((JobHandler) i.next()).cancelOrAbortJob();
+      }
+    }
+  }
+
   public interface Job {
     void abort();
 

@@ -34,6 +34,37 @@
 </table>
 </function>
 
+<function ExtendedListEntry(aFields, aLinks, aLinkTitles)>
+    <if alt=="1">
+      <assign alt="0">
+      <tr class="${LIST_ROW_CLASS_ALTERNATIVE}">
+    <else>
+      <assign alt="1"> 
+      <tr class="${LIST_ROW_CLASS}">
+    </if>
+      
+    <list aFields as i>   
+      <td>
+        ${i}
+      </td>
+    </list>
+      <td>
+        <assign index="0">
+        <assign first="1">
+        <list aLinks as i>
+          <if first=="1">
+            <assign first="0">
+          <else>  
+            |
+          </if>
+          <a class="listcommand" href="${config.actionRoot}?${utility.encodeHTML(i)}">${aLinkTitles[index]}</a>        
+          <assign index=utility.increment(index)>
+        </list>
+      </td>
+    </tr>
+</function>
+
+
 <function ListEntry(aFields, aLinkPrefix, aLinks, aLinkTitles)>
     <if alt=="1">
       <assign alt="0">

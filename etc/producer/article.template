@@ -5,12 +5,12 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=${config["Mir.DefaultHTMLCharset"]}">	
+  <meta http-equiv="Content-Type" content="text/html; charset=${config["Mir.DefaultHTMLCharset"]}"> 
     <title>${config["Mir.Name"]} | ${article.title}</title>
-	<meta name="keywords" content="indymedia,imc">
-	<meta name="description" content="indymedia,imc">
-	<meta http-equiv="expires" content="599">
-	<meta http-equiv="pragma" content="no-cache">
+  <meta name="keywords" content="indymedia,imc">
+  <meta name="description" content="indymedia,imc">
+  <meta http-equiv="expires" content="599">
+  <meta http-equiv="pragma" content="no-cache">
     <if article.to_media_images>
       <meta name="keywords" content="images"></meta>
     </if>
@@ -23,48 +23,48 @@
     <if article.to_media_other>
       <meta name="keywords" content="other"></meta>
     </if>
-	<style type="text/css">
-		body, h1, h2, h3, h4, h5, h6, p, li, dt, dd, div, td, blockquote, div, span
-						{font-family:'Lucida Grande', Verdana, Geneva, Lucida, Arial, Helvetica, sans-serif;}
-		a				{text-decoration:none;}
-		#searchfield	{font-size: 12px; width:113px; height:16px;  background-color:#aaaaaa;}
-		#searchselect	{font-size: 12px; width:120px; height:22px;  background-color:#aaaaaa;}
-		#searchbutton 	{font-size: 12px; width:120px; height:20px; background-color:#aaaaaa; text-align: right;}
-	</style>
+  <style type="text/css">
+    body, h1, h2, h3, h4, h5, h6, p, li, dt, dd, div, td, blockquote, div, span
+            {font-family:'Lucida Grande', Verdana, Geneva, Lucida, Arial, Helvetica, sans-serif;}
+    a       {text-decoration:none;}
+    #searchfield  {font-size: 12px; width:113px; height:16px;  background-color:#aaaaaa;}
+    #searchselect {font-size: 12px; width:120px; height:22px;  background-color:#aaaaaa;}
+    #searchbutton   {font-size: 12px; width:120px; height:20px; background-color:#aaaaaa; text-align: right;}
+  </style>
    <script language="javascript">
-	function addToNewsletter(id){
-		var previousValue=getCookie("myNewsletter");	
-		document.cookie="myNewsletter="+previousValue+","+id + ";path=/";			
-		alert("Added article id to cookie!");		
-	}
-	
-	function clearNewsletter(){
+  function addToNewsletter(id){
+    var previousValue=getCookie("myNewsletter");  
+    document.cookie="myNewsletter="+previousValue+","+id + ";path=/";     
+    alert("Added article id to cookie!");   
+  }
+  
+  function clearNewsletter(){
                 document.cookie="myNewsletter= ;path=/";
                 alert("newsletter erased!");
         }
 
-	function getNewsletter(){
-		var cookieValue=getCookie("myNewsletter");		
-		if (document.images)
-		    location.replace('${config["Producer.OpenAction"]}?do=getpdf&id='+cookieValue+'&forIE=.pdf');
-		else	
-		    location.href = '${config["Producer.OpenAction"]}?do=getpdf&id='+cookieValue+'&forIE=.pdf';
-	}
-	
-	function getCookie(name){
-		
-	        var cookies = document.cookie;
+  function getNewsletter(){
+    var cookieValue=getCookie("myNewsletter");    
+    if (document.images)
+        location.replace('${config["Producer.OpenAction"]}?do=getpdf&id='+cookieValue+'&forIE=.pdf');
+    else  
+        location.href = '${config["Producer.OpenAction"]}?do=getpdf&id='+cookieValue+'&forIE=.pdf';
+  }
+  
+  function getCookie(name){
+    
+          var cookies = document.cookie;
 
-        	if (cookies.indexOf(name) != -1){
-                	var startpos = cookies.indexOf(name)+name.length+1;
-                	var endpos = cookies.indexOf(";",startpos)-1;
-	                if (endpos == -2) endpos = cookies.length;
-        	        return unescape(cookies.substring(startpos,endpos));
-        	}
-        	else{
-                	return false; // the cookie couldn't be found! it was never set before, or it expired.
-        	}
-	}
+          if (cookies.indexOf(name) != -1){
+                  var startpos = cookies.indexOf(name)+name.length+1;
+                  var endpos = cookies.indexOf(";",startpos)-1;
+                  if (endpos == -2) endpos = cookies.length;
+                  return unescape(cookies.substring(startpos,endpos));
+          }
+          else{
+                  return false; // the cookie couldn't be found! it was never set before, or it expired.
+          }
+  }
 
    </script>
 
@@ -72,172 +72,172 @@
  
 <body bgcolor="#dddddd" marginwidth="0" marginheight="0" leftmargin="0" topmargin="0" link="#003399" alink="#cc0033" vlink="#660033" >
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
-	<tr>
-		<td valign="top">
-			<table cellpadding="0" cellspacing="0" border="0" width="100%" bgcolor="#cc0033">
-				<tr>
-					<td><a href="../../"><img src="../../../img/logo.gif" width="120" height="120" alt="((i))" border="0"></a></td>
-				</tr>
-			</table>
-			<table cellpadding="4" cellspacing="0" border="0" width="100%" bgcolor="#cc0033">
-				<tr>
-					<td><a href="../../">&nbsp;<font size="-1" color="#dddddd"><b>${lang("general.start")}</b></font></a></td>
-				</tr>
-			</table>
-			<br>
-			
-			<!--#include virtual="../../navigation.inc" -->
-			
-			<table cellpadding="6" cellspacing="0" border="0" width="100%"><tr><td>
-			</td></tr></table>
-		</td>
-		<td valign="top" width="100%">
-			<table cellpadding="4" cellspacing="0" border="0" width="100%" bgcolor="#cc0033"><tr><td>
-				&nbsp;&nbsp;
-				<font color="#dddddd" size="-1"><b>
-					<a href="${config["Producer.DocRoot"]}/${language.code}/static/mission.shtml"><font color="#dddddd">${lang("general.menu.missionStatement")}&nbsp;&gt;&gt;</font></a> &nbsp; 
-					<a href="${config["Producer.DocRoot"]}/${language.code}/static/moderation.shtml"><font color="#dddddd">${lang("general.menu.moderation")}&nbsp;&gt;&gt;</font></a>  &nbsp;
-					<a href="${config["Producer.DocRoot"]}/${language.code}/static/support.shtml"><font color="#dddddd">${lang("general.menu.support")}&nbsp;&gt;&gt;</font></a>  &nbsp;
-					<a href="${config["Producer.DocRoot"]}/${language.code}/static/mailinglists.shtml"><font color="#dddddd">${lang("general.menu.mailinglists")}&nbsp;&gt;&gt;</font></a> &nbsp;
-					<a href="${config["Producer.DocRoot"]}/${language.code}/static/participate.shtml"><font color="#dddddd">${lang("general.menu.participate")}&nbsp;&gt;&gt;</font></a>
-				</b></font>
-			</td></tr></table>
-			<table cellpadding="30" cellspacing="0" border="0" width="80%"><tr><td>
-				<br>
-				<h2>${article.title}</h2>
-				
-				<p><i><font size="-1">${article.creator}, ${article.creationdate.formatted["dd.MM.yyyy HH:mm"]}</font></i></p>
-				<br>
-				<p>${article.description_parsed}</p>
-					<!-- media -->
-					<list article.to_media_audio as media>
-					<p>
-					<a href="${media["publish_server"]}${media["publish_path"]}">
-					${media["title"]} - ${media["media_descr"]} ${media["human_readable_size"]}
-					</a>
-					</p>
-					</list>
-					<list article.to_media_video as media>
-					<p>
-					<img src="../../../img/${media["big_icon"]}" border="0" alt="">
-					<a href="${media["publish_server"]}${media["publish_path"]}">
-					${media["title"]} - ${media["media_descr"]} ${media["human_readable_size"]}</a>
-					</p>
-					</list>
-					<list article.to_media_other as media>
-					<p>
-					<img src="../../../img/${media["big_icon"]}" border="0" alt="">
-					<a href="${media["publish_server"]}${media["publish_path"]}">
-					${media["title"]} - ${media["media_descr"]} ${media["human_readable_size"]}</a>
-					</p>
-					</list>
-					
-					<list article.to_media_images as image>
-					<p>
-					<img src="${image["publish_server"]}${image["publish_path"]}"
-					border="0" width="${image["img_width"]}"
-					height="${image["img_height"]}" alt="${image["title"]}">
-					<br><i>${image["title"]}</i>
-					</p>
-					</list>
+  <tr>
+    <td valign="top">
+      <table cellpadding="0" cellspacing="0" border="0" width="100%" bgcolor="#cc0033">
+        <tr>
+          <td><a href="../../"><img src="../../../img/logo.gif" width="120" height="120" alt="((i))" border="0"></a></td>
+        </tr>
+      </table>
+      <table cellpadding="4" cellspacing="0" border="0" width="100%" bgcolor="#cc0033">
+        <tr>
+          <td><a href="../../">&nbsp;<font size="-1" color="#dddddd"><b>${lang("general.start")}</b></font></a></td>
+        </tr>
+      </table>
+      <br>
+      
+      <!--#include virtual="../../navigation.inc" -->
+      
+      <table cellpadding="6" cellspacing="0" border="0" width="100%"><tr><td>
+      </td></tr></table>
+    </td>
+    <td valign="top" width="100%">
+      <table cellpadding="4" cellspacing="0" border="0" width="100%" bgcolor="#cc0033"><tr><td>
+        &nbsp;&nbsp;
+        <font color="#dddddd" size="-1"><b>
+          <a href="${config["Producer.DocRoot"]}/${language.code}/static/mission.shtml"><font color="#dddddd">${lang("general.menu.missionStatement")}&nbsp;&gt;&gt;</font></a> &nbsp; 
+          <a href="${config["Producer.DocRoot"]}/${language.code}/static/moderation.shtml"><font color="#dddddd">${lang("general.menu.moderation")}&nbsp;&gt;&gt;</font></a>  &nbsp;
+          <a href="${config["Producer.DocRoot"]}/${language.code}/static/support.shtml"><font color="#dddddd">${lang("general.menu.support")}&nbsp;&gt;&gt;</font></a>  &nbsp;
+          <a href="${config["Producer.DocRoot"]}/${language.code}/static/mailinglists.shtml"><font color="#dddddd">${lang("general.menu.mailinglists")}&nbsp;&gt;&gt;</font></a> &nbsp;
+          <a href="${config["Producer.DocRoot"]}/${language.code}/static/participate.shtml"><font color="#dddddd">${lang("general.menu.participate")}&nbsp;&gt;&gt;</font></a>
+        </b></font>
+      </td></tr></table>
+      <table cellpadding="30" cellspacing="0" border="0" width="80%"><tr><td>
+        <br>
+        <h2>${article.title}</h2>
+        
+        <p><i><font size="-1">${article.creator}, ${article.creationdate.formatted["dd.MM.yyyy HH:mm"]}</font></i></p>
+        <br>
+        <p>${article.description_parsed}</p>
+          <!-- media -->
+          <list article.to_media_audio as media>
+          <p>
+          <a href="${media["publish_server"]}${media["publish_path"]}">
+          ${media["title"]} - ${media["media_descr"]} ${media["human_readable_size"]}
+          </a>
+          </p>
+          </list>
+          <list article.to_media_video as media>
+          <p>
+          <img src="../../../img/${media["big_icon"]}" border="0" alt="">
+          <a href="${media["publish_server"]}${media["publish_path"]}">
+          ${media["title"]} - ${media["media_descr"]} ${media["human_readable_size"]}</a>
+          </p>
+          </list>
+          <list article.to_media_other as media>
+          <p>
+          <img src="../../../img/${media["big_icon"]}" border="0" alt="">
+          <a href="${media["publish_server"]}${media["publish_path"]}">
+          ${media["title"]} - ${media["media_descr"]} ${media["human_readable_size"]}</a>
+          </p>
+          </list>
+          
+          <list article.to_media_images as image>
+          <p>
+          <img src="${image["publish_server"]}${image["publish_path"]}"
+          border="0" width="${image["img_width"]}"
+          height="${image["img_height"]}" alt="${image["title"]}">
+          <br><i>${image["title"]}</i>
+          </p>
+          </list>
 
-					<br>
-					<p><font size="-1">${article.content_data_parsed}</font></p>
-					<br>
-					<if article.creator_main_url || article.creator_email>
-						<p>
-						<font size="-1">
-						<if article.creator_email>
-							<img src="../../../img/mail_small.gif" width="12" height="10" border="0" alt="-"> ${lang("article.email.prefix")}: <a href="mailto:${article.creator_email}">${article.creator_email}</a><br>
-						</if>
-						<if article.creator_main_url>
-							<img src="../../../img/link_small.gif" width="12" height="10" border="0" alt=""> ${lang("article.homepage.prefix")}: <a href="${article.creator_main_url}" target="extern">${article.creator_main_url}</a><br>
-						</if>
-						</font>
-						</p>
-					</if>
-					<br>
-					<br>
-					<br>
-					<table border="0" cellpadding="2" cellspacing="0" width="100%"><tr><td bgcolor="#669999">
+          <br>
+          <p><font size="-1">${article.content_data_parsed}</font></p>
+          <br>
+          <if article.creator_main_url || article.creator_email>
+            <p>
+            <font size="-1">
+            <if article.creator_email>
+              <img src="../../../img/mail_small.gif" width="12" height="10" border="0" alt="-"> ${lang("article.email.prefix")}: <a href="mailto:${article.creator_email}">${article.creator_email}</a><br>
+            </if>
+            <if article.creator_main_url>
+              <img src="../../../img/link_small.gif" width="12" height="10" border="0" alt=""> ${lang("article.homepage.prefix")}: <a href="${article.creator_main_url}" target="extern">${article.creator_main_url}</a><br>
+            </if>
+            </font>
+            </p>
+          </if>
+          <br>
+          <br>
+          <br>
+          <table border="0" cellpadding="2" cellspacing="0" width="100%"><tr><td bgcolor="#669999">
             &nbsp;<a href="${config["Producer.OpenAction"]}?do=getpdf&id=${article.id}&forIE=.pdf">
             <font color="#dddddd" size="+1"><b>${lang("article.get_as_pdf")}&gt;&gt;</b></font></a>
-					</td></tr></table> 
+          </td></tr></table> 
 <br>
-					<table border="0" cellpadding="2" cellspacing="0" width="100%"><tr><td bgcolor="#669999">
+          <table border="0" cellpadding="2" cellspacing="0" width="100%"><tr><td bgcolor="#669999">
             &nbsp;<a href="javascript:addToNewsletter(${article.id})">
             <font color="#dddddd" size="+1"><b>${lang("article.add_to_pdf")}&gt;&gt;</b></font></a>
-					</td></tr></table> 
+          </td></tr></table> 
 <br>
-					<table border="0" cellpadding="2" cellspacing="0" width="100%"><tr><td bgcolor="#669999">
+          <table border="0" cellpadding="2" cellspacing="0" width="100%"><tr><td bgcolor="#669999">
             &nbsp;<a href="javascript:getNewsletter()">
             <font color="#dddddd" size="+1"><b>${lang("article.newsletter_checkout")}&gt;&gt;</b></font></a>
-					</td></tr></table> 
+          </td></tr></table> 
 <br>
-					<table border="0" cellpadding="2" cellspacing="0" width="100%"><tr><td bgcolor="#669999">
+          <table border="0" cellpadding="2" cellspacing="0" width="100%"><tr><td bgcolor="#669999">
             &nbsp;<a href="${config["Producer.OpenAction"]}?do=mail&mail_aid=${article.id}&mail_language=${language.code}">
             <font color="#dddddd" size="+1"><b>${lang("article.send_as_email")}&gt;&gt;</b></font></a>
-					</td></tr></table>
+          </td></tr></table>
 <br>
-					<table border="0" cellpadding="2" cellspacing="0" width="100%"><tr><td bgcolor="#669999">
-	    &nbsp;<a href="${config["Producer.OpenAction"]}?do=addcomment&aid=${article.id}&language=${language.code}">
+          <table border="0" cellpadding="2" cellspacing="0" width="100%"><tr><td bgcolor="#669999">
+      &nbsp;<a href="${config["Producer.OpenAction"]}?do=addcomment&aid=${article.id}&language=${language.code}">
             <font color="#dddddd" size="+1"><b>${lang("article.addcomment")}&gt;&gt;</b></font></a>
-					</td></tr></table>
-					<if article.to_comments>
-						<table border="0" cellpadding="10" cellspacing="0" width="100%"><tr><td bgcolor="#99cccc">
-							<list article.to_comments as c>
-								<br>
-								<font size="+1"><b>${utility.encodeHTML(c.title)}</b></font><br>
-								<i>${c.creationdate.formatted["dd.MM.yyyy HH:mm"]}</i><br>
+          </td></tr></table>
+          <if article.to_comments>
+            <table border="0" cellpadding="10" cellspacing="0" width="100%"><tr><td bgcolor="#99cccc">
+              <list article.to_comments as c>
+                <br>
+                <font size="+1"><b>${utility.encodeHTML(c.title)}</b></font><br>
+                <i>${c.creationdate.formatted["dd.MM.yyyy HH:mm"]}</i><br>
 
-					<list c.to_media_audio as media>
-					  <a href="${media["publish_server"]}${media["publish_path"]}">
-					    ${media["title"]} - ${media["media_descr"]} ${media["human_readable_size"]}
-					  </a>
-					</list>
-					<list c.to_media_video as media>
-  					<img src="../../../img/${media["big_icon"]}" border="0" alt="">
-  					<a href="${media["publish_server"]}${media["publish_path"]}">
-  					${media["title"]} - ${media["media_descr"]} ${media["human_readable_size"]}</a>
-					</list>
-					<list c.to_media_other as media>
-  					<img src="../../../img/${media["big_icon"]}" border="0" alt="">
-  					<a href="${media["publish_server"]}${media["publish_path"]}">
-  					${media["title"]} - ${media["media_descr"]} ${media["human_readable_size"]}</a>
-					</list>
-					
-					<list c.to_media_images as image>
-  					<img src="${image["publish_server"]}${image["publish_path"]}"
-  					border="0" width="${image["img_width"]}"
-  					height="${image["img_height"]}" alt="${image["title"]}">
-  					<br><i>${image["title"]}</i>
-					</list>
+          <list c.to_media_audio as media>
+            <a href="${media["publish_server"]}${media["publish_path"]}">
+              ${media["title"]} - ${media["media_descr"]} ${media["human_readable_size"]}
+            </a>
+          </list>
+          <list c.to_media_video as media>
+            <img src="../../../img/${media["big_icon"]}" border="0" alt="">
+            <a href="${media["publish_server"]}${media["publish_path"]}">
+            ${media["title"]} - ${media["media_descr"]} ${media["human_readable_size"]}</a>
+          </list>
+          <list c.to_media_other as media>
+            <img src="../../../img/${media["big_icon"]}" border="0" alt="">
+            <a href="${media["publish_server"]}${media["publish_path"]}">
+            ${media["title"]} - ${media["media_descr"]} ${media["human_readable_size"]}</a>
+          </list>
+          
+          <list c.to_media_images as image>
+            <img src="${image["publish_server"]}${image["publish_path"]}"
+            border="0" width="${image["img_width"]}"
+            height="${image["img_height"]}" alt="${image["title"]}">
+            <br><i>${image["title"]}</i>
+          </list>
 
 
-								${c.description_parsed}
-								<if c.email || c.main_url || c.address || c.phone || c.creator>
-									<i>
-										<if c.creator>
-											<br>
-											${utility.encodeHTML(c.creator)}>
-										</if>
-										<if c.email>
-											<br>
-											<img src="../../../img/mail_small.gif" width="12" height="10" border="0" alt="">${lang("article.email.prefix")}: <a href="mailto:${utility.encodeHTML(c.email)}">${utility.encodeHTML(c.email)}</a>
-										</if>
-										<if c.main_url>
-											<br>
-											<img src="../../../img/link_small.gif" width="12" height="10" border="0" alt="">${lang("article.homepage.prefix")}: <a href="${utility.encodeHTML(c.main_url)}" target="_blank">${utility.encodeHTML(c.email)}</a>
-										</if>
-									</i>
-									<br>
-								</if>
-							</list>
-						</td></tr></table>
-					</if>
+                ${c.description_parsed}
+                <if c.email || c.main_url || c.address || c.phone || c.creator>
+                  <i>
+                    <if c.creator>
+                      <br>
+                      ${utility.encodeHTML(c.creator)}>
+                    </if>
+                    <if c.email>
+                      <br>
+                      <img src="../../../img/mail_small.gif" width="12" height="10" border="0" alt="">${lang("article.email.prefix")}: <a href="mailto:${utility.encodeHTML(c.email)}">${utility.encodeHTML(c.email)}</a>
+                    </if>
+                    <if c.main_url>
+                      <br>
+                      <img src="../../../img/link_small.gif" width="12" height="10" border="0" alt="">${lang("article.homepage.prefix")}: <a href="${utility.encodeHTML(c.main_url)}" target="_blank">${utility.encodeHTML(c.main_url)}</a>
+                    </if>
+                  </i>
+                  <br>
+                </if>
+              </list>
+            </td></tr></table>
+          </if>
  </td></tr></table>
-		</td>
-	</tr>
+    </td>
+  </tr>
 </table>
 </body>
 </html>

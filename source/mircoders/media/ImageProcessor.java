@@ -30,27 +30,27 @@
 
 package mircoders.media;
 
+import java.awt.RenderingHints;
+import java.awt.image.ColorModel;
+import java.awt.image.DataBuffer;
+import java.awt.image.PixelInterleavedSampleModel;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+
 import javax.media.jai.ImageLayout;
 import javax.media.jai.InterpolationBilinear;
 import javax.media.jai.JAI;
 import javax.media.jai.ParameterBlockJAI;
 import javax.media.jai.PlanarImage;
 
-import java.awt.RenderingHints;
-import java.awt.image.ColorModel;
-import java.awt.image.DataBuffer;
-import java.awt.image.PixelInterleavedSampleModel;
+import mir.log.LoggerWrapper;
 
 import com.sun.media.jai.codec.ByteArraySeekableStream;
 import com.sun.media.jai.codec.FileSeekableStream;
 import com.sun.media.jai.codec.SeekableStream;
-
-import mir.log.LoggerWrapper;
 
 /**
  *

@@ -39,7 +39,7 @@ import mir.media.MirMedia;
  * @see mir.media.MediaHandlerGeneric
  * @see mir.media.MirMedia
  * @author mh <mh@nadir.org>
- * @version $Id: MediaHandlerAudio.java,v 1.11 2003/09/03 18:29:04 zapata Exp $
+ * @version $Id: MediaHandlerAudio.java,v 1.9.2.1 2003/08/13 02:43:56 zapata Exp $
  */
 
 public class MediaHandlerAudio extends MediaHandlerGeneric implements MirMedia

@@ -42,14 +42,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import mir.config.MirPropertiesConfiguration;
+import mir.log.LoggerWrapper;
+import mircoders.global.MirGlobal;
+
 import com.codestudio.util.JDBCPool;
 import com.codestudio.util.JDBCPoolMetaData;
 import com.codestudio.util.SQLManager;
-
-import mir.config.MirPropertiesConfiguration;
-import mir.log.LoggerWrapper;
-
-import mircoders.global.MirGlobal;
 
 /**
  * Title:        Mir
@@ -57,7 +56,7 @@ import mircoders.global.MirGlobal;
  * Copyright:    Copyright (c) 2001, 2002
  * Company:      Mir-coders group
  * @author       idfx, the Mir-coders group
- * @version      $Id: AbstractServlet.java,v 1.31 2003/09/03 18:29:03 zapata Exp $
+ * @version      $Id: AbstractServlet.java,v 1.30.2.5 2003/10/23 14:55:26 rk Exp $
  */
 
 public abstract class AbstractServlet extends HttpServlet {
@@ -196,7 +195,7 @@ public abstract class AbstractServlet extends HttpServlet {
     Connection connection;
     try {
       connection = pool.requestConnection();
-      pool.closeConnection(connection);
+	  JDBCPool.closeConnection(connection);
     }
     catch (Throwable t) {
       logger.fatal("Can't connect to database: " + t.toString());

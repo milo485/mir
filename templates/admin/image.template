@@ -16,8 +16,10 @@
       <if uploadedmedia.webdb_lastchange>/ ${lang("media.changed")} ${uploadedmedia.webdb_lastchange}</if><br>
       <if uploadedmedia.is_published=="1">${lang("media.published")}: ${uploadedmedia.publish_date} / ${uploadedmedia.publish_server}${uploadedmedia.publish_path}<br></if>
       ${lang("media.format")}: ${uploadedmedia.mimetype} / ${uploadedmedia.media_descr}<br>
+<comment>      
       ${lang("media.size")}: ${uploadedmedia.human_readable_size}<br>
       ${lang("media.rights")}: <b>${uploadedmedia.rightsHashdata[to_rights]["name"]}</b><br>
+</comment>            
     </td>
   </tr>
 </if>

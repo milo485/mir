@@ -67,7 +67,7 @@ import mir.misc.StringUtil;
  *
  * @see mir.media.MirMedia
  * @author mh <mh@nadir.org>
- * @version $Id: MediaHandlerMp3.java,v 1.16 2003/09/03 18:29:04 zapata Exp $
+ * @version $Id: MediaHandlerMp3.java,v 1.15.2.1 2003/09/03 17:49:39 zapata Exp $
  */
 
 public class MediaHandlerMp3 extends MediaHandlerAudio implements MirMedia

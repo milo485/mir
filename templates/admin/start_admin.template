@@ -72,14 +72,14 @@
         <input type="hidden" name="do" value="edit">
         ${lang("start.content.open_by_id")}: 
         <input type="text" name="id" value="" size="7">
-        <input type="submit" value=" &gt; ">
+        <input class="majorbutton" type="submit" value=" &gt; ">
       </form>
       <form>
         <input type="hidden" name="module" value="Comment">
         <input type="hidden" name="do" value="edit">
         ${lang("start.comment.open_by_id")}: 
         <input type="text" name="id" value="" size="7">
-        <input type="submit" value=" &gt; ">
+        <input class="majorbutton" type="submit" value=" &gt; ">
       </form>
       
       
@@ -89,8 +89,14 @@
     <div class="box">
       
       <a href="${config.actionRoot}?module=Images&do=list">&gt; ${lang("start.images.title")}</a>&nbsp;
-      <a href="${config.actionRoot}?module=Images&do=add">[+]</a><br>
-
+      <a href="${config.actionRoot}?module=Images&do=add">[+]</a>
+      <form>
+        <input type="hidden" name="module" value="Images">
+        <input type="hidden" name="do" value="edit">
+        ${lang("start.images.open_by_id")}: 
+        <input type="text" name="id" value="" size="7">
+        <input class="majorbutton" type="submit" value=" &gt; ">
+      </form>
       <a href="${config.actionRoot}?module=Audio&do=list">&gt; ${lang("start.audio.title")}</a>&nbsp;
       <a href="${config.actionRoot}?module=Audio&do=add">[+]</a><br>
 
@@ -110,10 +116,18 @@
     
     
     <p class="box-head"><b>${lang("start.producers.title")}</b></p>
-    <p class="box">
-      <a href="${config.actionRoot}?module=Producer&do=produceAllNew">&gt; ${lang("start.producers.produceAllNew")}</a><br>
+    <div class="box">
+      <list recipes as s>
+        <form style="margin: 0px; border: 0px; padding: 0px" method="post" action="${config.actionRoot}">
+           <input type="hidden" name="module" value="Producer">
+           <input type="hidden" name="do" value="producerecipe">
+           <input type="hidden" name="recipe" value="${utility.encodeHTML(s)}">
+           <input class="majorbutton" type="submit" value="${lang("start.producers.recipe."+s)}">
+        </form>
+      </list>
+
       <a href="${config.actionRoot}?module=Producer&do=showProducerQueueStatus">&gt; ${lang("start.producers.advanced")}</a>
-    </p>
+    </div>
     
     <p class="box bg-neutral">
       <a href="${config.actionRoot}?module=Admin&do=superusermenu">${lang("start.superusermenu")}</a>   

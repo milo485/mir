@@ -30,7 +30,6 @@
 package mir.util;
 
 import gnu.regexp.RE;
-import gnu.regexp.REException;
 
 import java.util.List;
 import java.util.Vector;
@@ -86,7 +85,54 @@ public class StringRoutines {
 
     return result.toString();
   }
+  /**
+   *
+   * @param aText
+   * @param anEscapeCharacater
+   * @param aCharactersToReplace
+   * @param aStringsToSubstitute
+   * @return
+   */
 
+  public static String replaceEscapedStringCharacters(String aText, char anEscapeCharacter, char[] aCharactersToReplace, String[] aStringsToSubstitute) {
+    if (aText==null)
+      return null;
+
+    int position, nextPosition;
+    int i;
+    StringBuffer result = new StringBuffer();
+
+    position=0;
+    do {
+      nextPosition = aText.indexOf(anEscapeCharacter, position);
+
+      if (nextPosition<0)
+        nextPosition = aText.length();
+
+      result.append(aText.substring(position, nextPosition));
+
+      if (nextPosition+1<aText.length()) {
+        nextPosition = nextPosition+1;
+
+        boolean found = false;
+        for (i = 0; i < aCharactersToReplace.length; i++) {
+          if (aCharactersToReplace[i] == aText.charAt(nextPosition)) {
+            result.append(aStringsToSubstitute[i]);
+            found=true;
+            break;
+          }
+        }
+
+        if (!found) {
+          result.append(aText.charAt(nextPosition));
+        }
+      }
+      position=nextPosition+1;
+    }
+    while (nextPosition<aText.length()) ;
+
+    return result.toString();
+  }
 
   public static String interpretAsString(Object aValue) throws Exception {
     if (aValue instanceof String)
@@ -125,13 +171,31 @@ public class StringRoutines {
    * @throws Exception
    */
   public static String performRegularExpressionReplacement(String aSource,
-      String aSearchExpression, String aReplacement) throws Exception {
+      String aSearchExpression, String aReplacement) throws UtilExc {
+    try {
+      RE regularExpression;
 
-    RE regularExpression;
+      regularExpression = new RE(aSearchExpression);
 
-    regularExpression = new RE(aSearchExpression);
+      return regularExpression.substituteAll(aSource, aReplacement);
+    }
+    catch (Throwable t) {
+      throw new UtilFailure("StringRoutines.performRegularExpressionReplacement: " + t.toString(), t);
+    }
+  }
 
-    return regularExpression.substituteAll(aSource, aReplacement);
+  public static String performCaseInsensitiveRegularExpressionReplacement(String aSource,
+      String aSearchExpression, String aReplacement) throws UtilExc {
+    try {
+      RE regularExpression;
+
+      regularExpression = new RE(aSearchExpression, RE.REG_ICASE);
+
+      return regularExpression.substituteAll(aSource, aReplacement);
+    }
+    catch (Throwable t) {
+      throw new UtilFailure("StringRoutines.performRegularExpressionReplacement: " + t.toString(), t);
+    }
   }
 
   /**
@@ -142,12 +206,17 @@ public class StringRoutines {
    * @throws REException
    */
   public static boolean performRegularExpressionSearch(String aSource,
-      String aSearchExpression) throws REException {
-    RE regularExpression;
+      String aSearchExpression) throws UtilExc {
+    try {
+      RE regularExpression;
 
-    regularExpression = new RE(aSearchExpression);
+      regularExpression = new RE(aSearchExpression);
 
-    return regularExpression.isMatch(aSource);
+      return regularExpression.isMatch(aSource);
+    }
+    catch (Throwable t) {
+      throw new UtilFailure("StringRoutines.performRegularExpressionSearch: " + t.toString(), t);
+    }
   }
 
   /**
@@ -224,6 +293,7 @@ public class StringRoutines {
           currentItem.delete(0, currentItem.length());
         }
         else {
+          currentItem.append(aString.charAt(position));
           if (aString.length()>position+1) {
             position=position+1;
             currentItem.append(aString.charAt(position));

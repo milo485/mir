@@ -30,6 +30,7 @@
 package mircoders.localizer.basic;
 
 import mir.generator.FreemarkerGenerator;
+import mir.generator.VelocityGenerator;
 import mir.generator.Generator;
 import mir.generator.GeneratorLibraryRepository;
 import mir.generator.WriterEngine;
@@ -54,6 +55,9 @@ public class MirBasicGeneratorLocalizer implements MirGeneratorLocalizer {
     aRepository.registerLibraryFactory(
         "freemarker",
         new FreemarkerGenerator.FreemarkerGeneratorLibraryFactory(MirGlobal.config().getString("Home") ) );
+    aRepository.registerLibraryFactory(
+        "velocity",
+        new VelocityGenerator.VelocityGeneratorLibraryFactory(MirGlobal.config().getString("Home") ) );
   }
 
   public Generator.GeneratorLibrary makeProducerGeneratorLibrary() throws MirLocalizerExc, MirLocalizerFailure {

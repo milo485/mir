@@ -16,14 +16,14 @@
     <dc:date>${config.now.dc}</dc:date>
     <items>
       <rdf:Seq>
-        <list articles as i> 	
+        <list articles as i>  
           <rdf:li rdf:resource="${config["Producer.PublicationHost"]}${config.docRoot}${i.publish_path}${i.id}.shtml" />
         </list>
       </rdf:Seq>
     </items>
   </channel>
 
-  <list articles as i> 		
+  <list articles as i>    
     <item rdf:about="${config["Producer.ProductionHost"]}${config.docRoot}${i.publish_path}${i.id}.shtml">
       <title>${i.title}</title>
         <link>${config["Producer.ProductionHost"]}${config.docRoot}${i.publish_path}${i.id}.shtml</link>

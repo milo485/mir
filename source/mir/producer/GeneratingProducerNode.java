@@ -18,17 +18,18 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with  any library licensed under the Apache Software License, 
- * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
- * (or with modified versions of the above that use the same license as the above), 
- * and distribute linked combinations including the two.  You must obey the 
- * GNU General Public License in all respects for all of the code used other than 
- * the above mentioned libraries.  If you modify this file, you may extend this 
- * exception to your version of the file, but you are not obligated to do so.  
+ * the code of this program with  any library licensed under the Apache Software License,
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library
+ * (or with modified versions of the above that use the same license as the above),
+ * and distribute linked combinations including the two.  You must obey the
+ * GNU General Public License in all respects for all of the code used other than
+ * the above mentioned libraries.  If you modify this file, you may extend this
+ * exception to your version of the file, but you are not obligated to do so.
  * If you do not wish to do so, delete this exception statement from your version.
  */
 package mir.producer;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import mir.generator.Generator;
@@ -67,17 +68,37 @@ public class GeneratingProducerNode implements ProducerNode {
 
     startTime = System.currentTimeMillis();
     try {
-      destinationIdentifier = ParameterExpander.expandExpression( aValueMap, destinationExpression );
-      generatorIdentifier = ParameterExpander.expandExpression( aValueMap, generatorExpression );
-      parameters = ParameterExpander.expandExpression( aValueMap, parametersExpression );
+      Map mirMap = (Map) aValueMap.get("Mir");
+      if (mirMap==null) {
+        mirMap = new HashMap();
+        aValueMap.put("Mir", mirMap);
+      }
 
-      writer = writerEngine.openWriter( destinationIdentifier, parameters );
-      generator = generatorLibrary.makeGenerator( generatorIdentifier );
-      generator.generate(writer, aValueMap, aLogger);
-      writerEngine.closeWriter( writer );
+      Object oldGenerator = mirMap.get("generator");
+      Object oldDestination = mirMap.get("destination");
+      Object oldParameters = mirMap.get("parameters");
+      try {
+        destinationIdentifier = ParameterExpander.expandExpression(aValueMap, destinationExpression);
+        generatorIdentifier = ParameterExpander.expandExpression(aValueMap, generatorExpression);
+        parameters = ParameterExpander.expandExpression(aValueMap, parametersExpression);
 
-      endTime = System.currentTimeMillis();
-      aLogger.info("Generated " + generatorIdentifier + " into " + destinationIdentifier + " [" + parameters + "] in " + (endTime-startTime) + " ms");
+        mirMap.put("generator", generatorIdentifier);
+        mirMap.put("destination", destinationIdentifier);
+        mirMap.put("parameters", parameters);
+
+        writer = writerEngine.openWriter(destinationIdentifier, parameters);
+        generator = generatorLibrary.makeGenerator(generatorIdentifier);
+        generator.generate(writer, aValueMap, aLogger);
+        writerEngine.closeWriter(writer);
+
+        endTime = System.currentTimeMillis();
+        aLogger.info("Generated " + generatorIdentifier + " into " + destinationIdentifier + " [" + parameters + "] in " + (endTime - startTime) + " ms");
+      }
+      finally {
+        mirMap.put("generator", oldGenerator);
+        mirMap.put("destination", oldDestination);
+        mirMap.put("parameters", oldParameters);
+      }
     }
     catch (Throwable t) {
       aLogger.error("  error while generating: " + t.getClass().getName() + ": " + t.getMessage());

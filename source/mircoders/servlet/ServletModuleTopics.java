@@ -32,10 +32,9 @@ package mircoders.servlet;
 
 import mir.log.LoggerWrapper;
 import mir.servlet.ServletModule;
-import mir.storage.StorageObjectFailure;
+import mircoders.global.MirGlobal;
 import mircoders.module.ModuleTopics;
 import mircoders.storage.DatabaseTopics;
-import mircoders.global.*;
 
 /**
  *

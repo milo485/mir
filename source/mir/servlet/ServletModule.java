@@ -34,13 +34,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import mir.config.MirPropertiesConfiguration;
 import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
-import mir.entity.adapter.EntityAdapterDefinition;
 import mir.entity.adapter.EntityAdapterEngine;
 import mir.entity.adapter.EntityAdapterModel;
 import mir.log.LoggerWrapper;
@@ -48,6 +48,7 @@ import mir.module.AbstractModule;
 import mir.storage.StorageObject;
 import mir.util.HTTPRequestParser;
 import mir.util.URLBuilder;
+import mircoders.global.MirGlobal;
 import mircoders.servlet.ServletHelper;
 
 /**
@@ -97,6 +98,10 @@ public abstract class ServletModule {
     fallbackLocale = new Locale(configuration.getString("Mir.Admin.FallbackLanguage", "en"), "");
   }
 
+
+  public void logAdminUsage(HttpServletRequest aRequest, String anObject, String aDescription) {
+    MirGlobal.logAdminUsage(ServletHelper.getUser(aRequest), getOperationModuleName() + ":" + anObject, aDescription);
+  }
 
   /**
    * Singleton instance retrievel method. MUST be overridden in subclasses.
@@ -258,6 +263,15 @@ public abstract class ServletModule {
     }
   }
 
+  public void editObject(HttpServletRequest aRequest, HttpServletResponse aResponse, String anId) throws ServletModuleExc {
+    try {
+      editObject(aRequest, aResponse, model.makeEntityAdapter(definition, mainModule.getById(anId)), false, anId);
+    }
+    catch (Throwable t) {
+      throw new ServletModuleFailure(t);
+    }
+  }
+
   public void editObject(HttpServletRequest aRequest, HttpServletResponse aResponse, Object anObject, boolean anIsNew, String anId) throws ServletModuleExc {
     HTTPRequestParser requestParser = new HTTPRequestParser(aRequest);
     URLBuilder urlBuilder = new URLBuilder();
@@ -368,6 +382,8 @@ public abstract class ServletModule {
       Map withValues = getIntersectingValues(aRequest, mainModule.getStorageObject());
       mainModule.set(withValues);
 
+      logAdminUsage(aRequest, id, "object modified");
+
       String returnUrl = requestParser.getParameter("returnurl");
 
       if (returnUrl!=null) {
@@ -399,6 +415,8 @@ public abstract class ServletModule {
       Map object = getIntersectingValues(aRequest, mainModule.getStorageObject());
 
       String id = processInstertedObject(object, aRequest, aResponse);
+
+      logAdminUsage(aRequest, id, "object inserted");
 
       String returnUrl = requestParser.getParameter("returnurl");
 
@@ -436,6 +454,7 @@ public abstract class ServletModule {
 
       if (confirmParam != null && !confirmParam.equals("")) {
         mainModule.deleteById(idParam);
+        logAdminUsage(aRequest, idParam, "object deleted");
         redirect(aResponse, aRequest.getParameter("okurl"));
       }
       else

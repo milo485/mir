@@ -23,14 +23,14 @@
   <tr>
     <td align="left" valign="top">
       <if new=="0">
-        <call showButton(
+        <call showGETButton(
           "module=Comment&do=articlecomments&articleid="+article.id+"&returnurl="+utility.encodeURI(thisurl),
           lang("content.comments"))>
         <call showAbsoluteLinkButton(
           article.publicurl,
           lang("preview"))>
         <list article.operations as op>
-          <call showButton(
+          <call showPOSTButton(
             "module=Localizer&do=articleoperation&operation="+op+"&articleid="+article.id+"&returnurl="+utility.encodeURI(thisurl), 
             lang("content.operation."+op))>
         </list>
@@ -41,9 +41,9 @@
       ${lang("content.published")} :
       <input type="checkbox" name="is_published" value="1"<if article.is_published!="0" && article.is_published!=""> checked</if>>
       <if new=="1">
-        <input type="submit" name="save" value="${lang("insert")}">
+        <input type="submit" class="majorbutton" name="save" value="${lang("insert")}">
       <else>
-        <input type="submit" name="save" value="${lang("save")}">
+        <input type="submit" class="majorbutton" name="save" value="${lang("save")}">
       </if>
     </td>
   </tr>
@@ -80,20 +80,22 @@
   <call PulldownTableRow (lang("content.articletype"), "to_article_type", articletypes, "id", "name", article.to_article_type, "articletypes.")>
   <call PulldownTableRow (lang("content.language"), "to_language", languages, "id", "name", article.to_language, "")>
   
+  
+  <list topics as r>
   <tr>
     <td align="right" valign="top" class="table-left">
-      ${lang("content.topic")}:
+      ${lang(r.key)}:
     </td>
-    <td class="listrow2" >
-      <if config["Mir.Localizer.Admin.TopicListFlavor"]!="0">
+    <td class="listrow2">
+      <if r.listtype=="1">
       <table border=0 cellpadding="2" cellspacing="0">
         <tr> 
-          <assign col=config["Mir.Localizer.Admin.TopicListColumns"]>
-          <list topics as t>
+          <assign col=r.listparameter>
+          <list r.items as t>
             <if col=="0">
         </tr>
         <tr>
-          <assign col=config["Mir.Localizer.Admin.TopicListColumns"]>
+          <assign col=r.listparameter>
             </if>
           <td title="${utility.encodeHTML(t.description)}">
             <input type="checkbox" name="to_topic" value="${t.id}" <list article.to_topics as to><if (t.id == to["id"])>checked</if></list>>
@@ -109,14 +111,24 @@
         </tr>
       </table>
       <else>
-      <select name="to_topic" size="7" multiple>
-		<list topics as t>
-		  <option value="${t.id}" <list article.to_topics as to><if (t.id == to["id"])>selected</if></list>>${t.title}</option>
-        </list>
-      </select>
+        <if r.listtype=="0">
+          <select name="to_topic" size="r.listparameter" multiple>
+		        <list r.items as t>
+		          <option value="${t.id}" <list article.to_topics as to><if (t.id == to["id"])>selected</if></list>>${t.title}</option>
+            </list>
+          </select>
+        <else>
+          <select name="to_topic" size="1">
+		        <list r.items as t>
+		          <option value="${t.id}" <list article.to_topics as to><if (t.id == to["id"])>selected</if></list>>${t.title}</option>
+            </list>
+          </select>
+        </if>
       </if>
     </td>
   </tr>
+  </list>
+  
   
   <call TextInputTableRow      (lang("content.title"), 40, 255, "title", article.title)>
   <call TextInputTableRowLight (lang("content.subtitle"), 40, 255, "subtitle", article.subtitle)>
@@ -138,9 +150,9 @@
   <tr>
     <td colspan="2" align="right" valign="top">
       <if new=="1">
-        <input type="submit" name="save" value="${lang("insert")}">
+        <input type="submit" class="majorbutton" name="save" value="${lang("insert")}">
       <else>
-        <input type="submit" name="save" value="${lang("save")}">
+        <input type="submit" class="majorbutton" name="save" value="${lang("save")}">
       </if>
     </td>
   </tr>

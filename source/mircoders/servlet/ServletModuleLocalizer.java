@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -43,7 +44,6 @@ import mir.servlet.ServletModuleExc;
 import mir.util.StringRoutines;
 import mircoders.entity.EntityComment;
 import mircoders.entity.EntityContent;
-import mircoders.entity.EntityUsers;
 import mircoders.global.MirGlobal;
 import mircoders.localizer.MirAdminInterfaceLocalizer;
 import mircoders.module.ModuleComment;
@@ -96,7 +96,7 @@ public class ServletModuleLocalizer extends ServletModule {
 
   }
 
-  public void performCommentOperation(EntityUsers aUser, String anId, String anOperation) {
+  public void performCommentOperation(HttpServletRequest aRequest, String anId, String anOperation) {
     MirAdminInterfaceLocalizer.MirSimpleEntityOperation operation;
     EntityAdapter comment;
     EntityComment entity;
@@ -105,8 +105,9 @@ public class ServletModuleLocalizer extends ServletModule {
       entity = (EntityComment) commentModule.getById(anId);
 
       if (entity != null) {
-        MirGlobal.performCommentOperation(aUser, entity, anOperation);
+        MirGlobal.performCommentOperation(ServletHelper.getUser(aRequest), entity, anOperation);
         logger.info("Operation " + anOperation + " successfully performed on comment " + anId);
+        logAdminUsage(aRequest, "comment."+anId, "operation " + anOperation + " performed");
       }
       else {
         logger.error("Error while performing " + anOperation + " on comment " + anId + ": comment is null");
@@ -122,7 +123,7 @@ public class ServletModuleLocalizer extends ServletModule {
     String operationString = aRequest.getParameter("operation");
     String returnUrlString = aRequest.getParameter("returnurl");
 
-    performCommentOperation(ServletHelper.getUser(aRequest), commentIdString, operationString);
+    performCommentOperation(aRequest, commentIdString, operationString);
 
     redirect(aResponse, returnUrlString);
   }
@@ -145,7 +146,7 @@ public class ServletModuleLocalizer extends ServletModule {
             String commentIdString = (String) parts.get(0);
             String operationString = (String) parts.get(1);
 
-            performCommentOperation(ServletHelper.getUser(aRequest), commentIdString, operationString);
+            performCommentOperation(aRequest, commentIdString, operationString);
           }
         }
       }
@@ -154,7 +155,7 @@ public class ServletModuleLocalizer extends ServletModule {
     redirect(aResponse, returnUrlString);
   }
 
-  public void performArticleOperation(EntityUsers aUser, String anId, String anOperation) {
+  public void performArticleOperation(HttpServletRequest aRequest, String anId, String anOperation) {
     MirAdminInterfaceLocalizer.MirSimpleEntityOperation operation;
     EntityAdapter article;
     EntityContent entity;
@@ -163,8 +164,9 @@ public class ServletModuleLocalizer extends ServletModule {
       entity = (EntityContent) contentModule.getById(anId);
 
       if (entity != null) {
-        MirGlobal.performArticleOperation(aUser, entity, anOperation);
+        MirGlobal.performArticleOperation(ServletHelper.getUser(aRequest), entity, anOperation);
         logger.info("Operation " + anOperation + " successfully performed on article " + anId);
+        logAdminUsage(aRequest, "article."+anId, "operation " + anOperation + " performed");
       }
       else {
         logger.error("Error while performing " + anOperation + " on article " + anId + ": article is null");
@@ -180,7 +182,7 @@ public class ServletModuleLocalizer extends ServletModule {
     String operationString = aRequest.getParameter("operation");
     String returnUrlString = aRequest.getParameter("returnurl");
 
-    performArticleOperation(ServletHelper.getUser(aRequest), articleIdString, operationString);
+    performArticleOperation(aRequest, articleIdString, operationString);
     redirect(aResponse, returnUrlString);
   }
 
@@ -202,7 +204,7 @@ public class ServletModuleLocalizer extends ServletModule {
             String articleIdString = (String) parts.get(0);
             String operationString = (String) parts.get(1);
 
-            performArticleOperation(ServletHelper.getUser(aRequest), articleIdString, operationString);
+            performArticleOperation(aRequest, articleIdString, operationString);
           }
         }
       }

@@ -36,6 +36,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Vector;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -50,6 +52,7 @@ import mir.util.CachingRewindableIterator;
 import mir.util.HTTPRequestParser;
 import mir.util.JDBCStringRoutines;
 import mir.util.SQLQueryBuilder;
+import mir.util.StringRoutines;
 import mir.util.URLBuilder;
 import mircoders.entity.EntityContent;
 import mircoders.global.MirGlobal;
@@ -61,7 +64,7 @@ import mircoders.storage.DatabaseContentToTopics;
  *  ServletModuleContent -
  *  deliver html for the article admin form.
  *
- * @version $Id: ServletModuleContent.java,v 1.53 2003/09/03 18:29:05 zapata Exp $
+ * @version $Id: ServletModuleContent.java,v 1.52.2.12 2003/10/23 14:55:25 rk Exp $
  * @author rk, mir-coders
  *
  */
@@ -93,7 +96,7 @@ public class ServletModuleContent extends ServletModule
     int offset = requestParser.getIntegerWithDefault("offset", 0);
     String selectArticleUrl = requestParser.getParameter("selectarticleurl");
 
-    returnArticleList(aRequest, aResponse, where, order, offset, selectArticleUrl);
+    returnList(aRequest, aResponse, where, order, offset, selectArticleUrl);
   }
 
   public void search(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc, ServletModuleFailure {
@@ -143,7 +146,7 @@ public class ServletModuleContent extends ServletModule
           queryBuilder.appendAscendingOrder("creator");
       }
 
-      returnArticleList(aRequest, aResponse, queryBuilder.getWhereClause(), queryBuilder.getOrderByClause(), 0, selectArticleUrl);
+      returnList(aRequest, aResponse, queryBuilder.getWhereClause(), queryBuilder.getOrderByClause(), 0, selectArticleUrl);
     }
     catch (Throwable e) {
       throw new ServletModuleFailure(e);
@@ -151,7 +154,7 @@ public class ServletModuleContent extends ServletModule
   }
 
   public void add(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc {
-    _showObject(null, aRequest, aResponse);
+    editObject(aRequest, aResponse, null);
   }
 
 
@@ -176,11 +179,13 @@ public class ServletModuleContent extends ServletModule
         withValues.remove("webdb_create");
 
       String id = mainModule.add(withValues);
+      logAdminUsage(aRequest, id, "object added");
+
       List topics;
 
       DatabaseContentToTopics.getInstance().setTopics(id, aRequest.getParameterValues("to_topic"));
 
-      _showObject(id, aRequest, aResponse);
+      editObject(aRequest, aResponse, id);
     }
     catch (Throwable e) {
       throw new ServletModuleFailure(e);
@@ -192,7 +197,7 @@ public class ServletModuleContent extends ServletModule
     String idParam = aRequest.getParameter("id");
     if (idParam == null)
       throw new ServletModuleExc("Invalid call: id not supplied ");
-    _showObject(idParam, aRequest, aResponse);
+    editObject(aRequest, aResponse, idParam);
   }
 
 // methods for attaching media file
@@ -212,7 +217,9 @@ public class ServletModuleContent extends ServletModule
       throw new ServletModuleFailure(e);
     }
 
-    _showObject(articleId, aRequest, aResponse);
+    logAdminUsage(aRequest, articleId, "media " + mediaIdParam + " attached");
+
+    editObject(aRequest, aResponse, articleId);
   }
 
   public void dettach(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc
@@ -232,7 +239,9 @@ public class ServletModuleContent extends ServletModule
       throw new ServletModuleFailure(e);
     }
 
-    _showObject(articleId, aRequest, aResponse);
+    logAdminUsage(aRequest, articleId, "media " + midParam + " deattached");
+
+    editObject(aRequest, aResponse, articleId);
   }
 
   public void update(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc
@@ -261,13 +270,16 @@ public class ServletModuleContent extends ServletModule
         withValues.remove("webdb_create");
 
       String id = mainModule.set(withValues);
+
+      logAdminUsage(aRequest, id, "object modified");
+
       DatabaseContentToTopics.getInstance().setTopics(aRequest.getParameter("id"), aRequest.getParameterValues("to_topic"));
 
       if (returnUrl!=null && !returnUrl.equals("")){
         redirect(aResponse, returnUrl);
       }
       else
-        _showObject(idParam, aRequest, aResponse);
+        editObject(aRequest, aResponse, idParam);
     }
     catch (Throwable e) {
       throw new ServletModuleFailure(e);
@@ -286,7 +298,7 @@ public class ServletModuleContent extends ServletModule
    * @param aResponse
    * @throws ServletModuleExc
    */
-  public void _showObject(String id, HttpServletRequest aRequest, HttpServletResponse aResponse)
+  public void editObject(HttpServletRequest aRequest, HttpServletResponse aResponse, String id)
       throws ServletModuleExc {
     try {
       HTTPRequestParser requestParser = new HTTPRequestParser(aRequest);
@@ -319,9 +331,61 @@ public class ServletModuleContent extends ServletModule
       }
       responseData.put("article", article);
 
-      responseData.put("topics",
-          new EntityIteratorAdapter("", configuration.getString("Mir.Localizer.Admin.TopicListOrder"),
-          20, MirGlobal.localizer().dataModel().adapterModel(), "topic"));
+      List topicsList = new Vector();
+
+      String[] topicCategories = configuration.getStringArray("Mir.Localizer.Admin.TopicLists");
+
+      if (topicCategories.length==0 ) {
+        Map categoryMap = new HashMap();
+        categoryMap.put("key", "topic");
+        categoryMap.put("listtype", "0");
+        categoryMap.put("listparameter", "3");
+        categoryMap.put("items",
+                        new EntityIteratorAdapter("", "title",
+            20, MirGlobal.localizer().dataModel().adapterModel(), "topic"));
+        topicsList.add(categoryMap);
+      }
+      else
+      {
+
+        for (int i = 0; i < topicCategories.length; i++) {
+          try {
+            Map categoryMap = new HashMap();
+            List parts = StringRoutines.splitString(topicCategories[i], ":");
+            String key = null;
+            String listtype = "0";
+            String listparameter = "5";
+            String where = "";
+            String order = "";
+
+            if (parts.size() > 0)
+              key = (String) parts.get(0);
+            if (parts.size() > 1)
+              listtype = (String) parts.get(1);
+            if (parts.size() > 2)
+              listparameter = (String) parts.get(2);
+            if (parts.size() > 3)
+              where = (String) parts.get(3);
+            if (parts.size() > 4)
+              order = (String) parts.get(4);
+
+            if (key != null) {
+              categoryMap.put("key", key);
+              categoryMap.put("listtype", listtype);
+              categoryMap.put("listparameter", listparameter);
+              categoryMap.put("items",
+                              new EntityIteratorAdapter(where, order,
+                  20, MirGlobal.localizer().dataModel().adapterModel(), "topic"));
+              topicsList.add(categoryMap);
+            }
+          }
+          catch (Throwable t) {
+            logger.error("error while preparing topics: " + t.toString());
+          }
+        }
+      }
+
+      responseData.put("topics", topicsList);
 
       responseData.put("returnurl", requestParser.getParameter("returnurl"));
       responseData.put("thisurl", urlBuilder.getQuery());
@@ -333,7 +397,12 @@ public class ServletModuleContent extends ServletModule
     }
   }
 
-  public void returnArticleList(
+  public void returnList(HttpServletRequest aRequest, HttpServletResponse aResponse,
+     String aWhereClause, String anOrderByClause, int anOffset) throws ServletModuleExc {
+    this.returnList(aRequest, aResponse, aWhereClause, anOrderByClause, anOffset, null);
+  }
+
+  public void returnList(
        HttpServletRequest aRequest,
        HttpServletResponse aResponse,
        String aWhereClause,
@@ -422,7 +491,7 @@ public class ServletModuleContent extends ServletModule
       urlBuilder.setValue("childid", requestParser.getParameter("id"));
       urlBuilder.setValue("returnurl", requestParser.getParameter("returnurl"));
 
-      returnArticleList(aRequest, aResponse, "", "", 0, urlBuilder.getQuery());
+      returnList(aRequest, aResponse, "", "", 0, urlBuilder.getQuery());
     }
     catch (Throwable e) {
       throw new ServletModuleFailure(e);
@@ -438,7 +507,7 @@ public class ServletModuleContent extends ServletModule
       if (articleId == null)
         throw new ServletModuleExc("ServletModuleContent.listchildren: article_id not set!");
 
-      returnArticleList(aRequest, aResponse, "to_content = " + articleId, "", 0, null);
+      returnList(aRequest, aResponse, "to_content = " + articleId, "", 0, null);
     }
     catch (Throwable e) {
       throw new ServletModuleFailure(e);
@@ -457,6 +526,7 @@ public class ServletModuleContent extends ServletModule
       article.setValueForProperty("to_content", parentId);
       article.setProduced(false);
       article.update();
+      logAdminUsage(aRequest, articleId, "parent set to " + parentId);
     }
     catch(Throwable e) {
       logger.error("ServletModuleContent.setparent: " + e.getMessage());
@@ -477,6 +547,7 @@ public class ServletModuleContent extends ServletModule
       article.setValueForProperty("to_content", "");
       article.setProduced(false);
       article.update();
+      logAdminUsage(aRequest, articleId, "parent cleared");
     }
     catch(Throwable e) {
       e.printStackTrace(logger.asPrintWriter(LoggerWrapper.DEBUG_MESSAGE));

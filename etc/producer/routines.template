@@ -86,7 +86,7 @@
 <function showArticleAsFeature(anArticle)>
   <h3><call showSafeText(anArticle.title)></h3>
   <h4><i><call showSafeText(anArticle.creator)>, ${anArticle.creationdate.formatted["dd.MM.yyyy HH:mm"]}</i></h4>
-    <p>			 
+    <p>      
         <call showArticleMediaIcons(anArticle)>
         ${anArticle.description_parsed} 
     </p>

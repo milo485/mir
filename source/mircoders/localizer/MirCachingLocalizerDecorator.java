@@ -30,9 +30,9 @@
 
 package mircoders.localizer;
 
+import mir.entity.adapter.EntityAdapterModel;
 import mir.generator.Generator;
 import mir.generator.WriterEngine;
-import mir.entity.adapter.*;
 
 public class MirCachingLocalizerDecorator implements MirLocalizer {
   private MirLocalizer localizer;

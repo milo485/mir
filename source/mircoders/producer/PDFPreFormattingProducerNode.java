@@ -33,10 +33,11 @@ package mircoders.producer;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.*;
+import java.util.Iterator;
+import java.util.Map;
 
-import mir.entity.*;
-import mir.entity.EntityList;
+import mir.entity.Entity;
+import mir.entity.EntityBrowser;
 import mir.entity.adapter.EntityAdapter;
 import mir.log.LoggerToWriterAdapter;
 import mir.log.LoggerWrapper;
@@ -48,7 +49,7 @@ import mir.util.HTMLRoutines;
 import mir.util.ParameterExpander;
 import mircoders.entity.EntityContent;
 import mircoders.entity.EntityImages;
-import mircoders.storage.*;
+import mircoders.storage.DatabaseImages;
 
 
 public class PDFPreFormattingProducerNode implements ProducerNode {

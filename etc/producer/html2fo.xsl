@@ -8,7 +8,7 @@ uses to break paragraphs with empty blocks,
 which do the same thing in XSL:FO -->
 
 <xsl:template match="br">
-	<fo:block />	
+  <fo:block />  
 </xsl:template>
 
 <xsl:template match="@*|*|processing-instruction()|comment()">

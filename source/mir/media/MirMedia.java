@@ -79,7 +79,7 @@ import mir.entity.Entity;
  * ) and just override the things that need to be specific. see MediaHandlerAudio
  *
  * @author <mh@nadir.org>, the Mir-coders group
- * @version $Id: MirMedia.java,v 1.19 2003/09/03 18:29:01 zapata Exp $
+ * @version $Id: MirMedia.java,v 1.18.2.1 2003/09/03 17:49:38 zapata Exp $
  */
 
 public interface  MirMedia{

@@ -30,21 +30,23 @@
 
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Vector;
+
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpSessionBindingEvent;
+import javax.servlet.http.HttpSessionBindingListener;
 
-import org.apache.struts.util.MessageResources;
 import mir.config.MirPropertiesConfiguration;
 import mir.servlet.AbstractServlet;
 import mir.servlet.ServletModule;
@@ -60,14 +62,16 @@ import mircoders.module.ModuleUsers;
 import mircoders.servlet.ServletHelper;
 import mircoders.storage.DatabaseUsers;
 
+import org.apache.struts.util.MessageResources;
+
 
 
 
 /**
  * Mir.java - main servlet, that dispatches to servletmodules
  *
- * @author $Author: zapata $
- * @version $Id: Mir.java,v 1.50 2003/09/03 18:29:01 zapata Exp $
+ * @author $Author: rk $
+ * @version $Id: Mir.java,v 1.49.2.8 2003/10/23 14:55:26 rk Exp $
  *
  */
 public class Mir extends AbstractServlet {
@@ -163,8 +167,10 @@ public class Mir extends AbstractServlet {
       if (username != null && password != null) {
         user = usersModule.getUserForLogin(username, password);
 
-
-        ServletHelper.setUser(aRequest, user);
+        if (user!=null) {
+          ServletHelper.setUser(aRequest, user);
+          aRequest.getSession().setAttribute("sessiontracker", new SessionTracker(username));
+        }
       }
 
       return user;
@@ -350,5 +356,21 @@ public class Mir extends AbstractServlet {
 
   public String getServletInfo() {
     return "Mir " + configuration.getString("Mir.Version");
+  }
+
+  private class SessionTracker implements HttpSessionBindingListener {
+    private String name;
+
+    public SessionTracker(String aUserName) {
+      name = aUserName;
+    }
+
+    public void valueBound(HttpSessionBindingEvent anEvent) {
+      MirGlobal.registerLogin(name);
+    }
+
+    public void valueUnbound(HttpSessionBindingEvent anEvent) {
+      MirGlobal.registerLogout(name);
+    }
   }
 }

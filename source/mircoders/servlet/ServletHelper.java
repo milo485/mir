@@ -30,29 +30,25 @@
 package mircoders.servlet;
 
 import java.io.PrintWriter;
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.struts.util.MessageResources;
-
 import mir.config.MirPropertiesConfiguration;
-import mir.entity.adapter.*;
+import mir.entity.adapter.EntityAdapter;
 import mir.generator.Generator;
+import mir.generator.GeneratorHelper;
 import mir.log.LoggerWrapper;
 import mir.servlet.ServletModuleExc;
 import mir.servlet.ServletModuleFailure;
-import mir.util.CachingRewindableIterator;
-import mir.util.ResourceBundleGeneratorFunction;
 import mircoders.entity.EntityUsers;
 import mircoders.global.MirGlobal;
 
 
 public class ServletHelper {
-  static LoggerWrapper logger = new LoggerWrapper("ServletModule.Helper");
-
+  private static LoggerWrapper logger = new LoggerWrapper("ServletModule.Helper");
 
   public static Map makeGenerationData(HttpServletRequest aRequest, HttpServletResponse aResponse, Locale[] aLocales) throws ServletModuleExc {
     return makeGenerationData(aRequest, aResponse, aLocales, "bundles.adminlocal", "bundles.admin");
@@ -63,11 +59,14 @@ public class ServletHelper {
   }
 
   public static Map makeGenerationData(HttpServletRequest aRequest, HttpServletResponse aResponse, Locale[] aLocales, String aBundle, String aDefaultBundle) throws ServletModuleExc {
-
     try {
-      Map result = new HashMap();
-
-      MirGlobal.localizer().producerAssistant().initializeGenerationValueSet(result);
+      MirPropertiesConfiguration configuration = MirPropertiesConfiguration.instance();
+      Map result=GeneratorHelper.makeBasicGenerationData(aLocales,aBundle,aDefaultBundle);
+      if (configuration.getString("Mir.Admin.ShowLoggedinUsers").equals("1")) {
+	result.put("loggedinusers", MirGlobal.getLoggedInUsers());
+      }
+      else
+	result.put("loggedinusers", null);
 
       // ML: hackish
       ((Map) result.get("config")).put("actionRoot",
@@ -75,36 +74,6 @@ public class ServletHelper {
 
       result.put("returnurl", null);
       result.put("login_user", getUserAdapter(aRequest));
-
-      Object languages =
-          new CachingRewindableIterator(
-            new EntityIteratorAdapter( "", "id", 30,
-               MirGlobal.localizer().dataModel().adapterModel(), "language"));
-
-      Object topics =
-          new CachingRewindableIterator(
-            new EntityIteratorAdapter("", "id", 30,
-               MirGlobal.localizer().dataModel().adapterModel(), "topic"));
-
-      Object articleTypes =
-          new CachingRewindableIterator(
-            new EntityIteratorAdapter( "", "id", 30,
-               MirGlobal.localizer().dataModel().adapterModel(), "articleType"));
-
-      Object commentStatuses =
-          new CachingRewindableIterator(
-            new EntityIteratorAdapter( "", "id", 30,
-               MirGlobal.localizer().dataModel().adapterModel(), "commentStatus"));
-
-      result.put("commentstatuses", commentStatuses);
-      result.put("articletypes", articleTypes);
-      result.put("languages", languages);
-      result.put("topics", topics);
-
-      result.put( "lang",
-          new ResourceBundleGeneratorFunction( aLocales,
-             new MessageResources[] { MessageResources.getMessageResources(aBundle),
-                MessageResources.getMessageResources(aDefaultBundle)}));
 
       return result;
     }

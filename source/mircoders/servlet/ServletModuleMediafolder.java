@@ -35,13 +35,14 @@ package mircoders.servlet;
 
 import java.util.GregorianCalendar;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import mir.log.LoggerWrapper;
 import mir.misc.StringUtil;
 import mir.servlet.ServletModule;
-import mir.storage.StorageObjectFailure;
+import mircoders.global.MirGlobal;
 import mircoders.module.ModuleMediafolder;
 import mircoders.storage.DatabaseMediafolder;
 
@@ -55,10 +56,12 @@ public class ServletModuleMediafolder extends ServletModule
     logger = new LoggerWrapper("ServletModule.Mediafolder");
 
     try {
+      model = MirGlobal.localizer().dataModel().adapterModel();
+      definition = "mediaFolder";
       mainModule = new ModuleMediafolder(DatabaseMediafolder.getInstance());
     }
-    catch (StorageObjectFailure e) {
-      logger.error("Failed to initialize ServletModuleMediafolder: " + e.getMessage());
+    catch (Throwable t) {
+      logger.error("Failed to initialize ServletModuleMediafolder: " + t.toString());
     }
   }
 

@@ -85,12 +85,6 @@
     <fileset dir="lib">
       <include name="*.jar"/>
     </fileset>
-    <fileset dir="lib/struts">
-      <include name="*.jar"/>
-    </fileset>
-    <fileset dir="lib/hibernate">
-      <include name="*.jar"/>
-    </fileset>
     <pathelement path="${tomcat.home}/lib/tomcat.jar"/>
   <!-- for libs shared between tomcat and webapps (tomcat 3.3.x) -->
 	<fileset dir="${tomcat.home}">
@@ -112,9 +106,6 @@
 	<fileset dir="${tomcat.home}">
 		<include name="shared/lib/*.jar" />
 	</fileset>
-	<fileset dir="${tomcat.home}">
-		<include name="common/endorsed/*.jar" />
-	</fileset>
   </path>
 
 
@@ -135,15 +126,9 @@
     <copy todir="${deploy.home}">
       <fileset dir="web"/>
     </copy>
-        
-    <copy todir="${deploy.webinf}/classes">
-    	<fileset dir="source">
-    		<include name="**/*.xml"/>
-    	</fileset>
-    </copy>
 
     <copy todir="${deploy.webinf}/etc">
-      <fileset dir="etc" excludes="bundles/** hibernate.cfg.xml web.xml"/>
+      <fileset dir="etc" excludes="bundles/** web.xml"/>
     </copy>
     <copy todir="${deploy.classes}/bundles">
         <fileset dir="etc/bundles"/>
@@ -160,15 +145,11 @@
       <fileset dir="bundles"/>
     </copy>
     
-    <copy todir="${deploy.classes}" file="etc/hibernate.cfg.xml"/>
-    
     <copy todir="${deploy.home}/WEB-INF/lib">
       <fileset dir="lib">
         <exclude name="ant.jar"/>
         <exclude name="xerces.jar"/>
       </fileset>
-      <fileset dir="lib/hibernate"/>
-      <fileset dir="lib/struts"/>
     </copy>
   </target>
 
@@ -293,24 +274,6 @@
     <jar jarfile="${dist.home}/${dist.war}"
          basedir="${deploy.home}"
          excludes="${dist.war}"/>
-  </target>
-  
-  <target name="rundbtest" depends="compile">
-  	<java fork="true" classname="mir.core.test.Test">
-  		<classpath>
-  			<fileset dir="${tomcat.home}/common/endorsed">
-  				<include name="**/*.jar"/>
-  			</fileset>
-  			<fileset dir="${tomcat.home}/common/lib">
-  				<include name="**/*.jar"/>
-  			</fileset>
-  			<fileset dir="${deploy.webinf}/lib">
-  				<include name="**/*.jar"/>
-  			</fileset>
-  			<path id="classes" path="${deploy.classes}"/>
-  		</classpath>
-  		<sysproperty key="org.xml.sax.driver" value="org.apache.xerces.parsers.SAXParser"/> 
-  	</java>
   </target>
 
 </project>

@@ -36,7 +36,7 @@
 <function EditSubmitButtonNormal(aLabel, aFieldName)>
   <tr>
     <td class="${TABLE_FOOT_CLASS}" colspan="2" align="right"> 
-      <input type="submit" name="${aFieldName}" value="${aLabel}">
+      <input class="majorbutton" type="submit" name="${aFieldName}" value="${aLabel}">
     </td>
   </tr>
 </function>  

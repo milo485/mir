@@ -30,7 +30,8 @@
 
 package mir.generator;
 
-import java.io.*;
+import java.io.PrintWriter;
+import java.io.Reader;
 import java.util.List;
 import java.util.Map;
 
@@ -44,7 +45,7 @@ public interface Generator {
   }
 
   public static interface GeneratorLibraryFactory {
-    public GeneratorLibrary makeLibrary(String anInitializationString);
+    public GeneratorLibrary makeLibrary(String anInitializationString) throws GeneratorExc, GeneratorFailure ;
   }
 
   public static interface GeneratorFunction {

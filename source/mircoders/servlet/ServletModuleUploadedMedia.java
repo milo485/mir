@@ -37,12 +37,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Vector;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.fileupload.FileItem;
 import mir.config.MirPropertiesConfiguration;
 import mir.entity.Entity;
 import mir.entity.adapter.EntityAdapter;
@@ -71,6 +71,8 @@ import mircoders.media.MediaUploadProcessor;
 import mircoders.module.ModuleMediaType;
 import mircoders.storage.DatabaseComment;
 import mircoders.storage.DatabaseContent;
+
+import org.apache.commons.fileupload.FileItem;
 
 /**
  *
@@ -143,10 +145,14 @@ public abstract class ServletModuleUploadedMedia extends ServletModule {
         i=mediaList.iterator();
 
         while (i.hasNext()) {
-          entContent.attach(((EntityUploadedMedia) i.next()).getId());
+          String id = ((EntityUploadedMedia) i.next()).getId();
+
+          entContent.attach(id);
+          logAdminUsage(aRequest, id, "object attached to article " + articleid);
         }
 
-        ((ServletModuleContent) ServletModuleContent.getInstance())._showObject(articleid, aRequest, aResponse);
+        ((ServletModuleContent) ServletModuleContent.getInstance()).editObject(aRequest, aResponse, articleid);
+
 
         return;
       }
@@ -157,13 +163,19 @@ public abstract class ServletModuleUploadedMedia extends ServletModule {
         i=mediaList.iterator();
 
         while (i.hasNext()) {
-          comment.attach( ( (EntityUploadedMedia) i.next()).getId());
+          String id = ((EntityUploadedMedia) i.next()).getId();
+
+          comment.attach(id);
+
+          logAdminUsage(aRequest, id, "object attached to comment " + commentid);
         }
 
-        ((ServletModuleComment) ServletModuleComment.getInstance()).showComment(commentid, aRequest, aResponse);
+        ((ServletModuleComment) ServletModuleComment.getInstance()).editObject(aRequest, aResponse, commentid);
 
         return;
       }
+
+      logAdminUsage(aRequest, "", mediaList.size() + " objects added");
 
       returnUploadedMediaList(aRequest, aResponse, mediaList, 1, mediaList.size(), mediaList.size(), "", null, null);
     }
@@ -201,6 +213,7 @@ public abstract class ServletModuleUploadedMedia extends ServletModule {
 
       String id = mainModule.set(mediaValues);
       logger.debug("update: media ID = " + id);
+      logAdminUsage(aRequest, id, "object modified");
 
       editUploadedMediaObject(id, aRequest, aResponse);
     }
@@ -408,6 +421,7 @@ public abstract class ServletModuleUploadedMedia extends ServletModule {
         responseData.put("articleid", null);
         responseData.put("commentid", null);
         responseData.put("returnurl", null);
+        responseData.put("thisurl", null);
 
         responseData.put("edittemplate", editGenerator);
         responseData.put("module", moduleName);
@@ -504,4 +518,43 @@ public abstract class ServletModuleUploadedMedia extends ServletModule {
       throw new ServletModuleFailure(t);
     }
   }
+
+  public void showarticles(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc
+  {
+    String idParam = aRequest.getParameter("id");
+    if (idParam!=null && !idParam.equals("")) {
+      try {
+        EntityUploadedMedia entity = (EntityUploadedMedia) mainModule.getById(idParam);
+
+        ServletModuleContent.getInstance().returnList(
+            aRequest,
+            aResponse,
+            "exists (select * from content_x_media where content_id=content.id and media_id=" + JDBCStringRoutines.escapeStringLiteral( idParam ) + ")", "", 0);
+      }
+      catch (Throwable t) {
+        throw new ServletModuleFailure(t);
+      }
+    }
+    else logger.error("showarticles: id not specified.");
+  }
+
+  public void showcomments(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleExc
+  {
+    String idParam = aRequest.getParameter("id");
+    if (idParam!=null && !idParam.equals("")) {
+      try {
+        EntityUploadedMedia entity = (EntityUploadedMedia) mainModule.getById(idParam);
+
+        ServletModuleComment.getInstance().returnList(
+            aRequest,
+            aResponse,
+            "exists (select * from comment_x_media where comment_id=comment.id and media_id=" + JDBCStringRoutines.escapeStringLiteral( idParam ) + ")", "", 0);
+      }
+      catch (Throwable t) {
+        throw new ServletModuleFailure(t);
+      }
+    }
+    else logger.error("editObjects: id not specified.");
+  }
+
 }

@@ -32,9 +32,9 @@
         <tr>
           <td class="table-foot" colspan="2" align="right"> 
           <if id>
-            <input type="submit" name="save" value="${lang("save")}">
+            <input type="submit" class="majorbutton" name="save" value="${lang("save")}">
           <else>
-            <input type="submit" name="save" value="${lang("insert")}">
+            <input type="submit" class="majorbutton" name="save" value="${lang("insert")}">
           </if> 
           </td>
         </tr>

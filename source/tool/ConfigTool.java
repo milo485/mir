@@ -1,9 +1,10 @@
 package tool;
 
+import gnu.regexp.RE;
+
 import java.security.MessageDigest;
 import java.util.TimeZone;
 
-import gnu.regexp.RE;
 import mir.util.StringRoutines;
 
 /**

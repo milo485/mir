@@ -18,6 +18,8 @@
         <td class="table-head">${lang("abuse.log.address")}</td>
         <td class="table-head">${lang("abuse.log.object")}</td>
         <td class="table-head">${lang("abuse.log.browser")}</td>
+        <td class="table-head">${lang("abuse.log.filtertype")}</td>
+        <td class="table-head">${lang("abuse.log.filterexpression")}</td>
       </tr>
       
       <assign grey="0">      
@@ -33,10 +35,12 @@
             </if>
           </td>
           <td>${l.browser}</td>
+          <td><if l.hitfiltertype>${lang("abuse.filtertype."+l.hitfiltertype)}</if></td>
+          <td>${utility.encodeHTML(l.hitfilterexpression)}</td>
         </tr>
       </list>
     <tr>
-      <td colspan="4" class="table-foot">&nbsp;</td>
+      <td colspan="6" class="table-foot">&nbsp;</td>
     </tr>
     </table>
 

@@ -100,4 +100,24 @@ public class GeneratorStringFunctions {
       }
     };
   }
+
+  public static class structuredStringParserFunction implements Generator.GeneratorFunction {
+    public Object perform(List aParameters) throws GeneratorExc, GeneratorFailure {
+      try {
+        if (aParameters.size()!=1)
+          throw new GeneratorExc("constructStructureStringFunction: 1 parameter expected: string ");
+
+        if (aParameters.get(0)==null)
+          return null;
+        else
+          return StructuredContentParser.parse("" + aParameters.get(0));
+      }
+      catch (GeneratorExc e) {
+        throw e;
+      }
+      catch (Throwable t) {
+        throw new GeneratorFailure(t);
+      }
+    };
+  }
 }

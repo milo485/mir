@@ -6,16 +6,31 @@
 
 <body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0">
     <include "FUNCTIONS.template">
+    <include "LISTFUNCTIONS.template">
     <include "head.template">
     
-    <call showAddOrBack("1", module, "Admin", "superusermenu")>
+    <call showAddOrBack("1", module, "Admin", "start")>
 
     <if entities>
       <call showPrevNextLinks(prevurl, nexturl, "left")>
-      <call EntityTable(entities, ["name", "place","comment"], 
-         [ lang("mediafolder.name"), 
-           lang("mediafolder.location"),
-           lang("mediafolder.comment")], from, to, count, "1", "1", module)>
+      <call ListStart()>
+      <call ListHead([
+             lang("mediafolder.name"), 
+             lang("mediafolder.location"),
+             lang("mediafolder.comment"), ])>
+  
+      <list entities as e>    
+          <call ExtendedListEntry([
+            utility.prettyEncodeHTML(e.name), 
+            utility.prettyEncodeHTML(e.place), 
+            utility.prettyEncodeHTML(e.comment)], 
+            ["module="+module+"&id="+e.id+"&do=edit", "module="+module+"&id="+e.id+"&do=delete", 
+              "module=Images&do=search&searchmediafolder="+e.id], 
+            [lang("edit"), lang("delete"), lang("list")])
+          >
+      </list>
+      <call ListFoot(count, from, to)>
+      <call ListEnd()>
       <call showPrevNextLinks(prevurl, nexturl, "left")>
       <call showAddOrBack("1", module, "Admin", "start")>
     <else>

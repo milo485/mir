@@ -46,7 +46,6 @@ import mir.session.SessionFailure;
 import mir.session.SessionHandler;
 import mir.session.UploadedFile;
 import mir.session.ValidationError;
-import mir.session.ValidationHelper;
 import mir.storage.StorageObject;
 import mir.util.ExceptionFunctions;
 import mircoders.global.MirGlobal;
@@ -120,7 +119,6 @@ public abstract class MirBasicPostingSessionHandler implements SessionHandler {
 
   public void subsequentRequest(Request aRequest, Session aSession, Response aResponse) throws SessionExc, SessionFailure {
     try {
-
       try {
         List validationErrors = new Vector();
 
@@ -168,12 +166,21 @@ public abstract class MirBasicPostingSessionHandler implements SessionHandler {
     logger.debug("referrer = " + aRequest.getHeader("Referer"));
 
     aSession.setAttribute("referer", aRequest.getHeader("Referer"));
-    aSession.setAttribute("nrmediaitems",
-        new Integer(configuration.getInt("ServletModule.OpenIndy.DefaultMediaUploadItems")));
   }
 
   protected void initializeResponseData(Request aRequest, Session aSession, Response aResponse) throws SessionExc, SessionFailure {
-    int nrMediaItems = ((Integer) aSession.getAttribute("nrmediaitems")).intValue();
+    int nrMediaItems = configuration.getInt("ServletModule.OpenIndy.DefaultMediaUploadItems", 5);
+
+    if (aSession.getAttribute("nrmediaitems")!=null) {
+      nrMediaItems = ((Integer) aSession.getAttribute("nrmediaitems")).intValue();
+    }
+    try {
+      nrMediaItems = Math.min(configuration.getInt("ServletModule.OpenIndy.MaxMediaUploadItems"), Integer.parseInt(aRequest.getParameter("nrmediaitems")));
+    }
+    catch (Throwable t) {
+    }
+    aSession.setAttribute("nrmediaitems", new Integer(nrMediaItems));
+
     List mediaItems = new Vector();
     int i=0;
 
@@ -230,15 +237,6 @@ public abstract class MirBasicPostingSessionHandler implements SessionHandler {
   };
 
   protected boolean shouldProcessRequest(Request aRequest, Session aSession, List aValidationErrors) throws SessionExc, SessionFailure {
-    int nrMediaItems = ((Integer) aSession.getAttribute("nrmediaitems")).intValue();
-    try {
-      nrMediaItems = Math.min(configuration.getInt("ServletModule.OpenIndy.MaxMediaUploadItems"), Integer.parseInt(aRequest.getParameter("nrmediaitems")));
-    }
-    catch (Throwable t) {
-    }
-
-    aSession.setAttribute("nrmediaitems", new Integer(nrMediaItems));
-
     if (aRequest.getParameter("post")==null)
       return false;
     else {

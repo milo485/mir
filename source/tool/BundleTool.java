@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with  any library licensed under the Apache Software License, 
- * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
- * (or with modified versions of the above that use the same license as the above), 
- * and distribute linked combinations including the two.  You must obey the 
- * GNU General Public License in all respects for all of the code used other than 
- * the above mentioned libraries.  If you modify this file, you may extend this 
- * exception to your version of the file, but you are not obligated to do so.  
+ * the code of this program with  any library licensed under the Apache Software License,
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library
+ * (or with modified versions of the above that use the same license as the above),
+ * and distribute linked combinations including the two.  You must obey the
+ * GNU General Public License in all respects for all of the code used other than
+ * the above mentioned libraries.  If you modify this file, you may extend this
+ * exception to your version of the file, but you are not obligated to do so.
  * If you do not wish to do so, delete this exception statement from your version.
  */
 
@@ -34,7 +34,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 
 import mir.util.ExceptionFunctions;
 import mir.util.PropertiesManipulator;
@@ -219,6 +221,23 @@ public class BundleTool {
     }
   }
 
+  public static void rename(String anOldKeyName, String aNewKeyName, List aBundles) {
+    /*
+    PropertiesManipulator bundle;
+
+    try {
+      bundle = PropertiesManipulator.readProperties(new FileInputStream(new File(aBundle)));
+
+      PropertiesManipulator.writeProperties(bundle, new FileOutputStream(anOutputFile), anEncoding, false);
+    }
+    catch (Throwable t) {
+      System.out.println("Unable to read master properties: " + t.getMessage());
+      return;
+    }
+*/
+  }
+
+
   public static void main(String[] anArguments) {
     String command = "help";
 
@@ -253,9 +272,19 @@ public class BundleTool {
           return;
         }
       }
+      else if (command.equals("rename")) {
+        if (anArguments.length>=3) {
+          List arguments = Arrays.asList(anArguments);
+
+          rename(anArguments[0], anArguments[1], arguments.subList(2, arguments.size()));
+
+/*
+          decode(anArguments[1], anArguments[2], anArguments[3]);
+*/
+          return;
+        }
+      }
     }
-
-
 
     System.out.println("Usage:");
 
@@ -272,6 +301,9 @@ public class BundleTool {
     System.out.println("      Encodes the keys/values with a custom encoding.");
     System.out.println("");
     System.out.println("  BundleTool decode <bundle> <encoding> <sourcefile>");
+    System.out.println("");
+    System.out.println("      Decodes the keys/values with a custom encoding.");
+    System.out.println("  BundleTool rename <old key> <new key> <bundle> [<bundle> [ ... ]]");
     System.out.println("");
     System.out.println("      Decodes the keys/values with a custom encoding.");
   }

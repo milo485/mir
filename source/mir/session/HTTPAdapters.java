@@ -32,12 +32,13 @@ package mir.session;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import org.apache.commons.fileupload.FileItem;
-
 import mir.util.HTTPParsedRequest;
+
+import org.apache.commons.fileupload.FileItem;
 
 public class HTTPAdapters {
   public static class HTTPRequestAdapter implements Request {

@@ -29,8 +29,11 @@
  */
 package mircoders.localizer.basic;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.Vector;
 
 import mir.config.MirPropertiesConfiguration;
 import mir.log.LoggerWrapper;
@@ -41,7 +44,8 @@ import mircoders.entity.EntityComment;
 import mircoders.entity.EntityContent;
 import mircoders.global.MirGlobal;
 import mircoders.global.ProducerEngine;
-import mircoders.localizer.*;
+import mircoders.localizer.MirAntiAbuseFilterType;
+import mircoders.localizer.MirLocalizerExc;
 import mircoders.localizer.MirLocalizerFailure;
 import mircoders.localizer.MirOpenPostingLocalizer;
 
@@ -83,7 +87,10 @@ public class MirBasicOpenPostingLocalizer implements MirOpenPostingLocalizer {
     addSimpleAntiAbuseFilterType(new MirBasicAntiAbuseFilterTypes.IPFilter("ip"));
   }
 
-  public SessionHandler getOpenSessionHandler(String aSessionType) {
+  public SessionHandler getOpenSessionHandler(String aSessionType) throws MirLocalizerExc, MirLocalizerFailure  {
+/*    if (aSessionType!=null && aSessionType.equals("email"))
+      return new MirBasicEmailArticleHandler();
+*/
     if (aSessionType!=null && aSessionType.equals("comment"))
       return new MirBasicCommentPostingHandler();
 

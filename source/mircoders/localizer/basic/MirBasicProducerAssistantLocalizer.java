@@ -84,6 +84,7 @@ public class MirBasicProducerAssistantLocalizer implements MirProducerAssistantL
 
       utilityMap.put("compressWhitespace", new freemarker.template.utility.CompressWhitespace());
       utilityMap.put("encodeHTML", new GeneratorHTMLFunctions.encodeHTMLGeneratorFunction());
+      utilityMap.put("prettyEncodeHTML", new GeneratorHTMLFunctions.prettyEncodeHTMLGeneratorFunction());
       utilityMap.put("encodeXML", new GeneratorHTMLFunctions.encodeXMLGeneratorFunction());
       utilityMap.put("encodeURI", new GeneratorHTMLFunctions.encodeURIGeneratorFunction());
       utilityMap.put("subString", new GeneratorStringFunctions.subStringFunction());
@@ -92,8 +93,10 @@ public class MirBasicProducerAssistantLocalizer implements MirProducerAssistantL
       utilityMap.put("increment", new GeneratorIntegerFunctions.incrementFunction());
       utilityMap.put("evaluate", new GeneratorExpressionFunctions.evaluateExpressionFunction());
       utilityMap.put("constructString", new GeneratorStringFunctions.constructStructuredStringFunction());
+      utilityMap.put("parseStructuredString", new GeneratorStringFunctions.structuredStringParserFunction());
       utilityMap.put("escapeJDBCString", new GeneratorStringFunctions.jdbcStringEscapeFunction());
       utilityMap.put("regexpreplace", new GeneratorRegularExpressionFunctions.regularExpressionReplaceFunction());
+      utilityMap.put("regexpmatch", new GeneratorRegularExpressionFunctions.regularExpressionMatchFunction());
       utilityMap.put("datetime", new GeneratorDateTimeFunctions.DateTimeFunctions(
           MirPropertiesConfiguration.instance().getString("Mir.DefaultTimezone")));
 

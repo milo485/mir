@@ -31,7 +31,8 @@ package mircoders.media;
 
 import java.io.File;
 import java.io.InputStream;
-import java.util.*;
+import java.util.List;
+import java.util.Vector;
 
 import mir.config.MirPropertiesConfiguration;
 import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
@@ -58,7 +59,7 @@ import mircoders.entity.EntityImages;
  *
  * @see mir.media.MirMedia
  * @author mh
- * @version $Id: MediaHandlerImages.java,v 1.24 2003/09/03 18:29:04 zapata Exp $
+ * @version $Id: MediaHandlerImages.java,v 1.23.2.2 2003/10/23 14:55:26 rk Exp $
  */
 
 

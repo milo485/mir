@@ -36,10 +36,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Vector;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.apache.struts.util.MessageResources;
 
 import mir.generator.Generator;
 import mir.log.LoggerWrapper;
@@ -49,6 +48,8 @@ import mir.servlet.ServletModuleFailure;
 import mir.util.HTTPRequestParser;
 import mir.util.ResourceBundleGeneratorFunction;
 import mircoders.global.MirGlobal;
+
+import org.apache.struts.util.MessageResources;
 
 public class ServletModuleProducer extends ServletModule
 {
@@ -93,7 +94,6 @@ public class ServletModuleProducer extends ServletModule
       throw new ServletModuleFailure(t);
     }
   }
-
 
   public void showProducerQueueStatus(HttpServletRequest aRequest, HttpServletResponse aResponse) {
     Object comments;
@@ -144,7 +144,6 @@ public class ServletModuleProducer extends ServletModule
     /*
      * This method will only be called by external scripts (e.g. from cron jobs).
      * The output therefore is very simple.
-     *
      */
 
     try {
@@ -163,10 +162,11 @@ public class ServletModuleProducer extends ServletModule
     }
   }
 
-  public void produceAllNew(HttpServletRequest aRequest, HttpServletResponse aResponse) {
+  public void producerecipe(HttpServletRequest aRequest, HttpServletResponse aResponse) {
     try {
-      MirGlobal.localizer().producers().produceAllNew();
-      showMessage(aRequest, aResponse, "produceAllNewAddedToQueue", "", "");
+      String recipe = aRequest.getParameter("recipe");
+      MirGlobal.localizer().producers().produceRecipe(recipe);
+      showMessage(aRequest, aResponse, "recipeAddedToQueue", recipe, "");
     }
     catch (Throwable t) {
       throw new ServletModuleFailure(t);
@@ -192,9 +192,15 @@ public class ServletModuleProducer extends ServletModule
   public void cancel(HttpServletRequest aRequest, HttpServletResponse aResponse)  {
     try {
       HTTPRequestParser requestParser = new HTTPRequestParser(aRequest);
-      List jobs = new Vector(requestParser.getParameterList("jobid"));
 
-      MirGlobal.producerEngine().cancelJobs(jobs);
+      if (requestParser.getParameter("cancelall") != null) {
+        MirGlobal.producerEngine().cancelAllJobs();
+      }
+      else {
+        List jobs = new Vector(requestParser.getParameterList("jobid"));
+
+        MirGlobal.producerEngine().cancelJobs(jobs);
+      }
       ServletHelper.redirect(aResponse, "Producer", "showProducerQueueStatus");
     }
     catch (Throwable t) {

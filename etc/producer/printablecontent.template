@@ -41,7 +41,7 @@
        which is to be used to layout the text contained in this
        page-sequence-->
   <fo:page-sequence master-reference="simple">
-	<fo:static-content flow-name="xsl-region-before">
+  <fo:static-content flow-name="xsl-region-before">
       <!-- this defines a title -->
       <fo:block font-size="24pt" 
             line-height="23pt"
@@ -51,17 +51,17 @@
 <fo:external-graphic  src="file://${config["Producer.Image.Path"]}/banner.png"  />
       </fo:block>
 <fo:block font-size="10pt" 
- 	font-family="serif" 
-	color="black"
-	line-height="12pt">
-	Here is where some descriptive text could go.  A fair use disclaimer
+  font-family="serif" 
+  color="black"
+  line-height="12pt">
+  Here is where some descriptive text could go.  A fair use disclaimer
 an attribution of copyright/left rights, etc.  the possibilities are endless.
-	<fo:leader leader-pattern="rule" leader-length="18cm"
+  <fo:leader leader-pattern="rule" leader-length="18cm"
             rule-thickness="1pt" color="black"/>
 </fo:block>
-	
-	</fo:static-content>
-	
+  
+  </fo:static-content>
+  
       <!-- start fo:flow
            each flow is targeted 
            at one (and only one) of the following:
@@ -83,10 +83,10 @@ an attribution of copyright/left rights, etc.  the possibilities are endless.
       <!-- here is the article title -->
       <fo:block font-size="16pt" 
                 font-family="sans-serif" 
-		font-weight="bold"
+    font-weight="bold"
                 line-height="18pt"
                 space-after.optimum="3pt"
-                text-align="center">      	
+                text-align="center">        
       ${article.title}
       </fo:block>
       
@@ -95,7 +95,7 @@ an attribution of copyright/left rights, etc.  the possibilities are endless.
                 font-family="sans-serif" 
                 line-height="13pt"
                 space-after.optimum="3pt"
-                text-align="end">      	
+                text-align="end">       
       ${article.creator},  ${article.webdb_create_formatted}
       </fo:block>
 
@@ -103,31 +103,31 @@ an attribution of copyright/left rights, etc.  the possibilities are endless.
       <!-- here is the article summary -->
       <fo:block font-size="11pt" 
                 font-family="sans-serif" 
-		font-weight="bold"
+    font-weight="bold"
                 line-height="13pt"
                 space-after.optimum="3pt"
-                text-align="justify">      	
+                text-align="justify">       
       ${article.description_parsed}
       </fo:block>
 
 
-	      <!-- here is the header stuff -->
+        <!-- here is the header stuff -->
 <if article.creator_main_url || article.creator_email>
-	<fo:block><fo:leader leader-pattern="rule" leader-length="18cm"
+  <fo:block><fo:leader leader-pattern="rule" leader-length="18cm"
             rule-thickness="1pt" color="black"/></fo:block>
 </if>
       <if article.creator_email>
       <fo:block font-size="10pt" 
                 font-family="sans-serif" 
                 line-height="12pt">
-      Email:   	${article.creator_email}
+      Email:    ${article.creator_email}
       </fo:block>
       </if>
       <if article.creator_main_url>
       <fo:block font-size="10pt" 
                 font-family="sans-serif" 
                 line-height="12pt">
-      URL:  	${article.creator_main_url}
+      URL:    ${article.creator_main_url}
       </fo:block>
       </if> 
       <fo:block><fo:leader leader-pattern="rule" leader-length="18cm"
@@ -166,7 +166,7 @@ an attribution of copyright/left rights, etc.  the possibilities are endless.
 </list>
 
       </fo:block>
-	
+  
 
 
     </fo:flow> <!-- closes the flow element-->

@@ -29,6 +29,8 @@
  */
 package mir.util;
 
+import gnu.regexp.RE;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -37,8 +39,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
-
-import gnu.regexp.RE;
 
 public class FileFunctions {
   protected static final int FILE_COPY_BUFFER_SIZE = 65536;

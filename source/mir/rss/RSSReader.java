@@ -60,7 +60,7 @@ public class RSSReader {
   public static final String CONTENT_NAMESPACE_URI = "http://purl.org/rss/1.0/modules/content/";
 
   // ML: to be localized:
-  public static final String V2V_NAMESPACE_URI = "http://v2v.indymedia.de/rss/";
+  public static final String V2V_NAMESPACE_URI = "http://v2v.cc/rss/";
 
   private static final XMLReader.XMLName RDF_ABOUT_PARAMETER = new XMLReader.XMLName(RDF_NAMESPACE_URI, "about");
   private static final XMLReader.XMLName RDF_SEQUENCE_TAG = new XMLReader.XMLName(RDF_NAMESPACE_URI, "Seq");
@@ -291,7 +291,7 @@ public class RSSReader {
     };
 
     public RDFResource getResource() {
-      if (resource.getIdentifier()==null || resource.getIdentifier().length()==0) {
+      if ((resource.getIdentifier()==null || resource.getIdentifier().length()==0) && resource.get("rss:link")!=null) {
         resource.setIdentifier(resource.get("rss:link").toString());
       }
 

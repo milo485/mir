@@ -47,7 +47,7 @@ import mircoders.entity.EntityUploadedMedia;
  * <b>implements abstract DB connection to the content_x_media SQL table
  *
  * @author RK, mir-coders group
- * @version $Id: DatabaseContentToMedia.java,v 1.20 2003/09/03 18:29:05 zapata Exp $
+ * @version $Id: DatabaseContentToMedia.java,v 1.19.2.1 2003/09/03 17:49:41 zapata Exp $
  *
  */
 

@@ -31,15 +31,14 @@ package mircoders.servlet;
 
 import mir.log.LoggerWrapper;
 import mir.servlet.ServletModule;
-import mir.storage.StorageObjectFailure;
+import mircoders.global.MirGlobal;
 import mircoders.module.ModuleImages;
 import mircoders.storage.DatabaseImages;
-import mircoders.global.*;
 
 /*
  *  ServletModuleImages -
  *
- * @version $Id: ServletModuleImages.java,v 1.27 2003/09/03 18:29:05 zapata Exp $
+ * @version $Id: ServletModuleImages.java,v 1.26.2.3 2003/10/23 14:55:25 rk Exp $
  * @author RK, the mir-coders group
  */
 

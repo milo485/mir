@@ -31,13 +31,13 @@ package mir.rss;
 
 import java.io.InputStream;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
-import java.util.*;
+import java.util.Map;
 import java.util.Vector;
-import java.text.*;
 
 import mir.util.XMLReader;
-import mir.util.*;
 
 /**
  *

@@ -30,7 +30,6 @@
 package mir.util;
 
 import java.util.List;
-import javax.servlet.http.HttpServletResponse;
 
 import mir.generator.Generator;
 import mir.generator.GeneratorExc;
@@ -78,6 +77,23 @@ public class GeneratorHTMLFunctions {
     };
   }
 
+  public static class prettyEncodeHTMLGeneratorFunction implements Generator.GeneratorFunction {
+    public Object perform(List aParameters) throws GeneratorExc {
+      try {
+        if (aParameters.size()!=1)
+          throw new GeneratorExc("prettyEncodeHTMLGeneratorFunction: only 1 parameter expected");
+
+        return HTMLRoutines.prettyEncodeHTML(StringRoutines.interpretAsString(aParameters.get(0)));
+      }
+      catch (GeneratorExc e) {
+        throw e;
+      }
+      catch (Throwable t) {
+        throw new GeneratorFailure("prettyEncodeHTMLGeneratorFunction: " + t.getMessage(), t);
+      }
+    };
+  }
+
   public static class encodeXMLGeneratorFunction implements Generator.GeneratorFunction {
     public Object perform(List aParameters) throws GeneratorExc {
       try {
@@ -94,25 +110,4 @@ public class GeneratorHTMLFunctions {
       }
     };
   }
-  
-	public static class encodeLinksGeneratorFunction implements Generator.GeneratorFunction {
-		private HttpServletResponse _response;
-		public encodeLinksGeneratorFunction(HttpServletResponse response){
-			_response = response;
-		}
-		public Object perform(List aParameters) throws GeneratorExc {
-			try {
-				if (aParameters.size()!=1)
-					throw new GeneratorExc("encodeHTMLGeneratorFunction: only 1 parameter expected");
-
-				return _response.encodeURL((String)aParameters.get(0));
-			}
-			catch (GeneratorExc e) {
-				throw e;
-			}
-			catch (Throwable t) {
-				throw new GeneratorFailure("encodeHTMLGeneratorFunction: " + t.getMessage(), t);
-			}
-		};
-	}
 }

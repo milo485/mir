@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * In addition, as a special exception, The Mir-coders gives permission to link
- * the code of this program with  any library licensed under the Apache Software License, 
- * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library 
- * (or with modified versions of the above that use the same license as the above), 
- * and distribute linked combinations including the two.  You must obey the 
- * GNU General Public License in all respects for all of the code used other than 
- * the above mentioned libraries.  If you modify this file, you may extend this 
- * exception to your version of the file, but you are not obligated to do so.  
+ * the code of this program with  any library licensed under the Apache Software License,
+ * The Sun (tm) Java Advanced Imaging library (JAI), The Sun JIMI library
+ * (or with modified versions of the above that use the same license as the above),
+ * and distribute linked combinations including the two.  You must obey the
+ * GNU General Public License in all respects for all of the code used other than
+ * the above mentioned libraries.  If you modify this file, you may extend this
+ * exception to your version of the file, but you are not obligated to do so.
  * If you do not wish to do so, delete this exception statement from your version.
  */
 package mircoders.localizer.basic;
@@ -45,6 +45,7 @@ import mir.producer.reader.DefaultProducerNodeBuilders;
 import mir.producer.reader.ProducerConfigReader;
 import mir.producer.reader.ProducerNodeBuilderLibrary;
 import mir.util.FileMonitor;
+import mir.util.StringRoutines;
 import mircoders.global.MirGlobal;
 import mircoders.global.ProducerEngine;
 import mircoders.localizer.MirLocalizerExc;
@@ -55,7 +56,9 @@ import mircoders.producer.reader.SupplementalProducerNodeBuilders;
 public class MirBasicProducerLocalizer implements MirProducerLocalizer {
   private List producerFactories;
   private Map nameToFactory;
-  private List allNewProducerTasks;
+
+  private Map producerRecipes;
+  private List producerRecipeNames;
 
   protected FileMonitor fileMonitor;
   protected EntityAdapterModel model;
@@ -68,8 +71,32 @@ public class MirBasicProducerLocalizer implements MirProducerLocalizer {
     try {
       logger = new LoggerWrapper("Localizer.Basic.Producer");
 
+      producerRecipes = new HashMap();
+      producerRecipeNames = new Vector();
+
+      String[] recipes = MirGlobal.config().getStringArray("Mir.Localizer.Producer.ProducerRecipes");
+      for (int i = 0; i<recipes.length; i++) {
+        try {
+          List parts = StringRoutines.separateString(recipes[i], "=");
+          if (parts.size() == 2) {
+            producerRecipes.put(parts.get(0), ProducerEngine.ProducerTask.parseProducerTaskList( (String) parts.get(1)));
+            producerRecipeNames.add(parts.get(0));
+          }
+          else {
+            throw new Exception("'=' expected");
+          }
+        }
+        catch (Throwable t) {
+          logger.error("Error while processing producer recipe '" + recipes[i] + "': " + t.toString());
+        }
+      }
+
+      // for backward compatibility:
       String allNewProducers = MirGlobal.config().getString("Mir.Localizer.Producer.AllNewProducers");
-      allNewProducerTasks = ProducerEngine.ProducerTask.parseProducerTaskList(allNewProducers);
+      if (allNewProducers!=null && allNewProducers.length()>0) {
+        producerRecipes.put("allnew", ProducerEngine.ProducerTask.parseProducerTaskList(allNewProducers));
+        producerRecipeNames.add("allnew");
+      }
 
       producerFactories = new Vector();
       model = MirGlobal.localizer().dataModel().adapterModel();
@@ -81,6 +108,17 @@ public class MirBasicProducerLocalizer implements MirProducerLocalizer {
       logger.error("MirBasicProducerLocalizer(): Exception "+t.getMessage());
       model = new EntityAdapterModel();
     }
+  }
+
+  public List getRecipeNames() throws MirLocalizerExc, MirLocalizerFailure {
+    return producerRecipeNames;
+  }
+
+  public void produceRecipe(String aName) throws MirLocalizerExc, MirLocalizerFailure {
+    if (producerRecipes.containsKey(aName))
+      MirGlobal.producerEngine().addTasks((List) producerRecipes.get(aName));
+    else
+      throw new MirLocalizerExc("Unknown recipe name: " + aName);
   }
 
   public List factories() throws MirLocalizerExc {
@@ -137,10 +175,6 @@ public class MirBasicProducerLocalizer implements MirProducerLocalizer {
     while (i.hasNext())
       aFileMonitor.addFile((File) i.next());
   }
-
-  public void produceAllNew() {
-    MirGlobal.producerEngine().addTasks(allNewProducerTasks);
-  };
 
   public ProducerFactory getFactoryForName(String aName) {
     try {

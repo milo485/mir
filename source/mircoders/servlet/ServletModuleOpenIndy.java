@@ -30,6 +30,9 @@
 
 package mircoders.servlet;
 
+import gnu.regexp.RE;
+import gnu.regexp.REMatch;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -47,24 +50,10 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.Vector;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import javax.servlet.http.HttpUtils;
-
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.net.smtp.SMTPClient;
-import org.apache.commons.net.smtp.SMTPReply;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.document.Document;
-import org.apache.lucene.queryParser.QueryParser;
-import org.apache.lucene.search.Hits;
-import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.Query;
-import org.apache.lucene.search.Searcher;
-import org.apache.struts.util.MessageResources;
-import gnu.regexp.RE;
-import gnu.regexp.REMatch;
 
 import mir.entity.Entity;
 import mir.generator.Generator;
@@ -101,8 +90,8 @@ import mircoders.search.ContentSearchTerm;
 import mircoders.search.ImagesSearchTerm;
 import mircoders.search.KeywordSearchTerm;
 import mircoders.search.TextSearchTerm;
-import mircoders.search.TopicSearchTerm;
 import mircoders.search.TopicMatrixSearchTerm;
+import mircoders.search.TopicSearchTerm;
 import mircoders.search.UnIndexedSearchTerm;
 import mircoders.search.VideoSearchTerm;
 import mircoders.storage.DatabaseComment;
@@ -113,6 +102,18 @@ import mircoders.storage.DatabaseImages;
 import mircoders.storage.DatabaseLanguage;
 import mircoders.storage.DatabaseTopics;
 
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.net.smtp.SMTPClient;
+import org.apache.commons.net.smtp.SMTPReply;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.queryParser.QueryParser;
+import org.apache.lucene.search.Hits;
+import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.Query;
+import org.apache.lucene.search.Searcher;
+import org.apache.struts.util.MessageResources;
+
 /*
  *  ServletModuleOpenIndy -
  *   is the open-access-servlet, which is responsible for
@@ -120,7 +121,7 @@ import mircoders.storage.DatabaseTopics;
  *    open-postings to the newswire
  *
  * @author mir-coders group
- * @version $Id: ServletModuleOpenIndy.java,v 1.90 2003/09/03 18:29:05 zapata Exp $
+ * @version $Id: ServletModuleOpenIndy.java,v 1.89.2.8 2003/10/23 14:55:25 rk Exp $
  *
  */
 

@@ -30,13 +30,13 @@
 package  mir.entity;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
-import java.util.*;
+import java.util.Map;
 
 import mir.config.MirPropertiesConfiguration;
 import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
 import mir.log.LoggerWrapper;
-import mir.misc.StringUtil;
 import mir.storage.StorageObject;
 import mir.storage.StorageObjectExc;
 import mir.storage.StorageObjectFailure;
@@ -45,7 +45,7 @@ import mir.storage.StorageObjectFailure;
  * Base class the entities are derived from. Provides base functionality of
  * an entity. Entities are used to represent rows of a database table.<p>
  *
- * @version $Id: Entity.java,v 1.22 2003/09/03 18:29:01 zapata Exp $
+ * @version $Id: Entity.java,v 1.21.2.5 2003/10/23 14:55:28 rk Exp $
  * @author rk
  *
  */
@@ -188,7 +188,7 @@ public class Entity
     }
     catch (Throwable t) {
       logger.error("Entity.setValueForProperty: " + t.toString());
-      t.printStackTrace(logger.asPrintWriter(logger.DEBUG_MESSAGE));
+      t.printStackTrace(logger.asPrintWriter(LoggerWrapper.DEBUG_MESSAGE));
 
       throw new StorageObjectFailure(t);
     }

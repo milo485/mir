@@ -30,9 +30,6 @@
 
 package mir.rss;
 
-import java.util.*;
-import mir.util.*;
-import gnu.regexp.RE;
 
 
 public class RSSTest {
@@ -48,7 +45,7 @@ public class RSSTest {
 //      System.out.println(" revised LB II : " + test.isMatch("revised LB II"));
 //      System.out.println(" buLB: " + test.isMatch("buLB"));
 
-      RSSData nl = reader.parseUrl("http://biotechdev.mir.dnsalias.net/test.rss");
+      RSSData arg = reader.parseUrl("http://argentina.indymedia.org/features.rdf");
 //      RSSData it = reader.parseUrl("http://g8.mir.dnsalias.net/italynewswire.rss");
 //      Object result = StructuredContentParser.parse(" { a = 'b' 'as a' = [ 'asd' asd 'asdas asd as''asd' ] }") ;
 //      System.out.println("" + wvl.get("rss:item"));

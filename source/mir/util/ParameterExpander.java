@@ -35,12 +35,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-import org.apache.commons.beanutils.*;
-
-import multex.Exc;
-
 import mir.generator.Generator;
 import mir.generator.GeneratorExc;
+import multex.Exc;
+
+import org.apache.commons.beanutils.MethodUtils;
+import org.apache.commons.beanutils.PropertyUtils;
 
 public class ParameterExpander {
   final static String NODE_SEPARATOR = ".";

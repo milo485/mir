@@ -42,7 +42,7 @@ import mir.log.LoggerWrapper;
  * Dispatcher, calls the method passed to ServletModule Class, through the "do"
  * Parameter (via POST or GET)
  *
- * @version $Id: ServletModuleDispatch.java,v 1.16 2003/09/03 18:29:03 zapata Exp $
+ * @version $Id: ServletModuleDispatch.java,v 1.15.2.1 2003/09/03 17:49:38 zapata Exp $
  *
  * @Author rk
  *

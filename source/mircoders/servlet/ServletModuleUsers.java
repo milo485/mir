@@ -35,6 +35,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -45,7 +46,6 @@ import mir.servlet.ServletModule;
 import mir.servlet.ServletModuleExc;
 import mir.servlet.ServletModuleFailure;
 import mir.servlet.ServletModuleUserExc;
-import mir.storage.StorageObjectFailure;
 import mir.util.CachingRewindableIterator;
 import mir.util.HTTPRequestParser;
 import mir.util.URLBuilder;
@@ -53,7 +53,6 @@ import mircoders.entity.EntityUsers;
 import mircoders.global.MirGlobal;
 import mircoders.module.ModuleUsers;
 import mircoders.storage.DatabaseUsers;
-import mircoders.global.*;
 
 /**
  *
@@ -167,6 +166,9 @@ public class ServletModuleUsers extends ServletModule
         throw new ServletModuleUserExc("user.error.missingpassword", new String[] {});
 
       String id = mainModule.add(withValues);
+
+      logAdminUsage(aRequest, id, "object added");
+
       if (requestParser.hasParameter("returnurl"))
         redirect(aResponse, requestParser.getParameter("returnurl"));
       else
@@ -181,7 +183,8 @@ public class ServletModuleUsers extends ServletModule
   {
     try {
       HTTPRequestParser requestParser = new HTTPRequestParser(aRequest);
-      EntityUsers user = (EntityUsers) mainModule.getById(requestParser.getParameter("id"));
+      String id = requestParser.getParameter("id");
+      EntityUsers user = (EntityUsers) mainModule.getById(id);
       MirGlobal.accessControl().user().assertMayEditUser(ServletHelper.getUser(aRequest), user);
 
       Map withValues = getIntersectingValues(aRequest, mainModule.getStorageObject());
@@ -193,6 +196,8 @@ public class ServletModuleUsers extends ServletModule
         withValues.put("password", MirGlobal.localizer().adminInterface().makePasswordDigest(newPassword));
 
       mainModule.set(withValues);
+
+      logAdminUsage(aRequest, id, "object modified");
 
       if (requestParser.hasParameter("returnurl"))
         redirect(aResponse, requestParser.getParameter("returnurl"));
@@ -208,13 +213,16 @@ public class ServletModuleUsers extends ServletModule
   {
     try {
       HTTPRequestParser requestParser = new HTTPRequestParser(aRequest);
-      EntityUsers user = (EntityUsers) mainModule.getById(requestParser.getParameter("id"));
+      String id = requestParser.getParameter("id");
+      EntityUsers user = (EntityUsers) mainModule.getById(id);
       MirGlobal.accessControl().user().assertMayChangeUserPassword(ServletHelper.getUser(aRequest), user);
 
       String newPassword=validatePassword(ServletHelper.getUser(aRequest), requestParser);
       if (newPassword!=null) {
         user.setValueForProperty("password", MirGlobal.localizer().adminInterface().makePasswordDigest(newPassword));
         user.update();
+
+        logAdminUsage(aRequest, id, "password changed");
 
         // hackish: to make sure the cached logged in user is up-to-date:
         ServletHelper.setUser(aRequest, (EntityUsers) mainModule.getById(ServletHelper.getUser(aRequest).getId()));

@@ -46,13 +46,10 @@ Mir.Tech-email.name=mir-coders mailinglist
 Mir.Public-email.address=mir-coders@lists.indymedia.org
 Mir.Public-email.name=mir-coders mailinglist
 
-Mir.Version=pre 1.2
 DirectOpenposting=yes
 
 # Default timezone to display times in in admin, producers
-#
-# Leave empty to use the system's default
-Mir.DefaultTimezone=
+Mir.DefaultTimezone= UTC
 
 # Default date/time format
 Mir.DefaultDateTimeFormat = yyyy-MM-dd HH:mm
@@ -81,6 +78,9 @@ Mir.Login.Languages=en;de;fr;nl;es;pt;eu;sv;tr;zh;gz
 # For missing values, the FallbackLanguage is used as default
 Mir.Admin.FallbackLanguage=en
 
+# Show who's logged in?
+Mir.Admin.ShowLoggedinUsers=1
+
 # the templates
 Mir.Localizer.Producer.GeneratorLibrary= default=freemarker(etc/producer/)
 Mir.Localizer.Admin.GeneratorLibrary= default=freemarker(templates/admin/)
@@ -106,9 +106,9 @@ Mir.Localizer.Admin.AllowDeleteComment=1
 Mir.Localizer.Admin.AllowDeleteArticle=1
 
 
-# Article Preview Link URL (Link to produced articles from within admin) 
-ContentList.ArticleLink=http://production.indy.code-foo.org/en/${date.formatted.yyyy}/${date.formatted.MM}/${id}.shtml
-CommentList.ArticleLink=http://production.indy.code-foo.org/en/${co_content.date.formatted.yyyy}/${to_content.date.formatted.MM}/${to_content.id}.shtml
+# Article Preview Link URL (Link to produced articles from within admin)
+Comment.PublicUrl=http://production.indy.code-foo.org/en/${date.formatted.yyyy}/${date.formatted.MM}/${id}.shtml
+Article.PublicUrl=http://production.indy.code-foo.org/en/${co_content.date.formatted.yyyy}/${to_content.date.formatted.MM}/${to_content.id}.shtml
 
 
 # Which producers need to be called after an article (resp. a comment) is posted
@@ -252,9 +252,6 @@ PDF.Footer=Indymedia does blah.  Content is good, and free to use for non-commer
 
 PDF.PageSize=A4
 
-
-
-
 #
 # edit with caution below this line
 ######################################################################
@@ -276,21 +273,9 @@ Database.Username=postgres
 Database.Password=
 Database.Host=localhost
 Database.Name=Mir
+Database.Port=5432
+Database.Driver=org.postgresql.Driver
 
-#
-# this sets the adaptor to be used
-
-Database.Adaptor=mir.storage.DatabaseAdaptorPostgresql
-
-#
-# configuration for adaptor postgres
-# In this example, "Mir" is the dbname
-
-Adaptor.PostgreSQL.URL=jdbc:postgresql://localhost:5432/Mir
-Adaptor.PostgreSQL.Driver=org.postgresql.Driver
-
-# how many articles should be shown on a list-page
-Lists.Max.Items=10
 
 #
 # Servlet / Module configurations

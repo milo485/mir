@@ -29,13 +29,13 @@
  */
 package mir.producer;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.Map;
 
-import mir.entity.adapter.EntityAdapterModel;
-import mir.entity.adapter.EntityIteratorAdapter;
 import mir.log.LoggerWrapper;
-import mir.util.*;
+import mir.util.ParameterExpander;
+import mir.util.RewindableIterator;
 
 public class ListEnumeratingProducerNode extends ProducerNodeDecorator {
   private String key;

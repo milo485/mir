@@ -31,6 +31,7 @@ package mircoders.servlet;
 
 import java.util.Locale;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -91,6 +92,7 @@ public class ServletModuleAdmin extends ServletModule
       mergeData.put("searcharticletype", null);
       mergeData.put("searchorder", null);
       mergeData.put("selectarticleurl", null);
+      mergeData.put("recipes", MirGlobal.localizer().producers().getRecipeNames());
 
       ServletHelper.generateResponse(aResponse.getWriter(), mergeData, startTemplate);
     }

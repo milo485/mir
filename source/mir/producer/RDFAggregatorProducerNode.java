@@ -29,10 +29,11 @@
  */
 package mir.producer;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 
 import mir.log.LoggerWrapper;
-import mir.rss.*;
+import mir.rss.RSSAggregator;
 import mir.util.ExceptionFunctions;
 import mir.util.ParameterExpander;
 

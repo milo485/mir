@@ -36,12 +36,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import mir.config.MirPropertiesConfiguration;
 import mir.log.LoggerToWriterAdapter;
 import mir.log.LoggerWrapper;
 import mir.producer.Producer;
 import mir.producer.ProducerFactory;
-import mir.util.*;
-import mir.config.*;
+import mir.util.GeneratorFormatAdapters;
 import mir.util.StringRoutines;
 import multex.Exc;
 import multex.Failure;
@@ -63,6 +63,10 @@ public class ProducerEngine {
 
   public void cancelJobs(List aJobs) {
     producerJobQueue.cancelJobs(aJobs);
+  };
+
+  public void cancelAllJobs() {
+    producerJobQueue.cancelAllJobs();
   };
 
   public void addTask(ProducerTask aTask) {
@@ -162,6 +166,11 @@ public class ProducerEngine {
       long endTime;
       boolean result = false;
       Map startingMap = new HashMap();
+      Map mirMap = new HashMap();
+      mirMap.put("producer", factoryName);
+      mirMap.put("verb", verb);
+
+      startingMap.put("Mir", mirMap);
 
       startTime = System.currentTimeMillis();
       logger.info("Producing job: "+factoryName+"."+verb);

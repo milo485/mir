@@ -56,15 +56,20 @@ public class HTMLRoutines {
     }
   }
 
-  public static String encodeHTML(String aText) {
+  public static String encodeHTML(String aText) throws UtilExc {
     final char[] CHARACTERS_TO_ESCAPE = { '&', '<', '>', '"' };
     final String[] ESCAPE_CODES = { "&amp;", "&lt;", "&gt;", "&quot;" };
 
     return StringRoutines.replaceStringCharacters(aText, CHARACTERS_TO_ESCAPE, ESCAPE_CODES);
   }
 
+  public static String prettyEncodeHTML(String aText) throws UtilExc {
+    return
+        StringRoutines.performRegularExpressionReplacement(encodeHTML(aText), "\\n", "<br>\n");
+  }
+
   public static String encodeXML(String aText) {
-//#x9 | #xA | #xD | [#x20-#xD7FF] | [#xE000-#xFFFD] | [#x10000-#x10FFFF]
+    //#x9 | #xA | #xD | [#x20-#xD7FF] | [#xE000-#xFFFD] | [#x10000-#x10FFFF]
     final char[] CHARACTERS_TO_ESCAPE = { '&', '<', '>', '"', '\'',
         '\u0000', '\u0001', '\u0003', '\u0004', '\u0005', '\u0006', '\u0007', '\u0008', '\u0000', '\u000B',
         '\u000C', '\u000E', '\u000F', '\u0010', '\u0011', '\u0012', '\u0013', '\u0014', '\u0015', '\u0016',

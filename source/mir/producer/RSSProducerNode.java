@@ -32,8 +32,9 @@ package mir.producer;
 import java.util.Map;
 
 import mir.log.LoggerWrapper;
+import mir.rss.RSS091Reader;
 import mir.rss.RSSData;
-import mir.rss.*;
+import mir.rss.RSSReader;
 import mir.util.ExceptionFunctions;
 import mir.util.ParameterExpander;
 

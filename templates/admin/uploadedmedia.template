@@ -24,7 +24,7 @@
               <b>${lang("media.nr_of_media")} :</b><br>
             </td>
             <td class="listrow2">
-              <input type="text" size="3" name="nrmedia" value="${nrmedia}">&nbsp;&nbsp;<input type="submit" value="${lang("media.nr_of_media.submit")}">
+              <input type="text" size="3" name="nrmedia" value="${nrmedia}">&nbsp;&nbsp;<input type="submit" class="majorbutton" value="${lang("media.nr_of_media.submit")}">
             </td>
           </tr>
         </table>
@@ -43,7 +43,23 @@
       <input type="hidden" name="id" value="${uploadedmedia.id}">
     
       <table border="0">
-    
+      
+        <if new!="1">
+          <tr>
+            <td align="left" valign="top">
+              <call showButton(
+                "module="+module+"&do=showcomments&id="+uploadedmedia.id+"&returnurl="+utility.encodeURI(thisurl),
+                lang("media.comments"))> &nbsp;
+              <call showButton(
+                "module="+module+"&do=showarticles&id="+uploadedmedia.id+"&returnurl="+utility.encodeURI(thisurl),
+                lang("media.articles"))>
+              <br>
+              <br>
+            </td>
+          </tr>
+        </if>
+
+
         <include edittemplate>
       
         <tr><td colspan="2" class="x-small">&nbsp;</td></tr>
@@ -83,10 +99,10 @@
         <tr>
           <td colspan="2" align="right" class="table-foot">
             <if new=="1">
-              <input type="submit" name="save" value="${lang("insert")}">
+              <input type="submit" class="majorbutton" name="save" value="${lang("insert")}">
             <else>
               ${lang("media.is_published")} <input type="checkbox" name="is_published" value="1"<if uploadedmedia.is_published!="0" && uploadedmedia.is_published!=""> checked</if>>
-              &nbsp;&nbsp;<input type="submit" name="save" value="${lang("save")}">
+              &nbsp;&nbsp;<input type="submit" class="majorbutton" name="save" value="${lang("save")}">
             </if> 
           </td>
         </tr>

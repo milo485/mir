@@ -19,3 +19,10 @@
   </tr>
 </table>
 <hr>
+<if loggedinusers>
+  logged in: 
+  <list loggedinusers as u>
+    ${u.name} (${u.count})
+  </list>
+<hr>
+</if>

@@ -54,7 +54,7 @@ import mir.misc.StringUtil;
  * @see mir.media.MediaHandlerGeneric
  * @see mir.media.MirMedia
  * @author john <john@manifestor.org>, mh <mh@nadir.org>
- * @version $Id: MediaHandlerRealVideo.java,v 1.20 2003/09/03 18:29:04 zapata Exp $
+ * @version $Id: MediaHandlerRealVideo.java,v 1.19.2.1 2003/09/03 17:49:40 zapata Exp $
  */
 
 

@@ -50,7 +50,6 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.Vector;
 
-import com.codestudio.util.SQLManager;
 import mir.config.MirPropertiesConfiguration;
 import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
 import mir.entity.Entity;
@@ -65,6 +64,8 @@ import mir.storage.store.StoreIdentifier;
 import mir.storage.store.StoreUtil;
 import mir.util.JDBCStringRoutines;
 
+import com.codestudio.util.SQLManager;
+
 
 /**
  * Diese Klasse implementiert die Zugriffsschicht auf die Datenbank.
@@ -74,7 +75,7 @@ import mir.util.JDBCStringRoutines;
  * Treiber, Host, User und Passwort, ueber den der Zugriff auf die
  * Datenbank erfolgt.
  *
- * @version $Id: Database.java,v 1.46 2003/09/03 18:29:03 zapata Exp $
+ * @version $Id: Database.java,v 1.44.2.7 2003/10/23 14:55:29 rk Exp $
  * @author rk
  *
  */

@@ -33,7 +33,7 @@ package mir.entity.adapter;
 import java.util.List;
 
 import mir.entity.EntityBrowser;
-import mir.storage.*;
+import mir.storage.StorageObjectFailure;
 
 /**
  * <p>Title: </p>
