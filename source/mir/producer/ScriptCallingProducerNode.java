@@ -33,7 +33,9 @@ package mir.producer;
 
 import java.io.*;
 import java.util.*;
+
 import mir.util.*;
+import mir.log.*;
 
 public class ScriptCallingProducerNode implements ProducerNode  {
   String scriptExpression;
@@ -42,21 +44,19 @@ public class ScriptCallingProducerNode implements ProducerNode  {
     scriptExpression = aScriptExpression;
   }
 
-  public void produce(Map aValueMap, String aVerb, PrintWriter aLogger) throws ProducerFailure {
+  public void produce(Map aValueMap, String aVerb, LoggerWrapper aLogger) throws ProducerFailure {
     String script;
     Process process;
     int returnValue;
 
     try {
       script = ParameterExpander.expandExpression( aValueMap, scriptExpression );
-      aLogger.println("Executing " + script + ":");
-
       process = Runtime.getRuntime().exec(script);
       returnValue = process.waitFor();
-      aLogger.println("Terminated successfully, return value = " + returnValue + ".");
+      aLogger.info(script + " terminated successfully, return value = " + returnValue + ".");
     }
     catch (Throwable e) {
-      throw new ProducerFailure("Executing script failed: " + e.getMessage(), e);
+      aLogger.error(scriptExpression + " failed to execute: " + e.getMessage());
     }
   }
 }

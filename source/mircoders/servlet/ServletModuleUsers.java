@@ -44,6 +44,7 @@ import mir.module.*;
 import mir.misc.*;
 import mir.entity.*;
 import mir.storage.*;
+import mir.log.*;
 
 import mircoders.entity.*;
 import mircoders.storage.*;
@@ -59,53 +60,57 @@ import mircoders.module.*;
 
 public class ServletModuleUsers extends mir.servlet.ServletModule
 {
-	// Singelton / Kontruktor
-	private static ServletModuleUsers instance = new ServletModuleUsers();
-	public static ServletModule getInstance() { return instance; }
+  private static ServletModuleUsers instance = new ServletModuleUsers();
+  public static ServletModule getInstance() { return instance; }
 
-	private ServletModuleUsers() {
-	theLog = Logfile.getInstance(MirConfig.getProp("Home") + MirConfig.getProp("ServletModule.Users.Logfile"));
-	templateListString = MirConfig.getProp("ServletModule.Users.ListTemplate");
-	templateObjektString = MirConfig.getProp("ServletModule.Users.ObjektTemplate");
-	templateConfirmString = MirConfig.getProp("ServletModule.Users.ConfirmTemplate");
-				try {
-					mainModule = new ModuleUsers(DatabaseUsers.getInstance());
-				}
-				catch (StorageObjectException e) {
-					theLog.printDebugInfo("servletmoduleusers konnte nicht initialisiert werden");
-				}
-	}
+  private ServletModuleUsers() {
+    logger = new LoggerWrapper("ServletModule.Users");
 
-	public void edit(HttpServletRequest req, HttpServletResponse res) throws ServletModuleException
-	{
-		String        idParam = req.getParameter("id");
-		if (idParam == null) throw new ServletModuleException("Falscher Aufruf: (id) nicht angegeben");
-		 try {
-			//theLog.printInfo("Showing User with id: " + idParam);
-			deliver(req, res, mainModule.getById(idParam), templateObjektString);
-		}
-		catch (ModuleException e) { throw new ServletModuleException(e.toString());}
-	}
+    templateListString = MirConfig.getProp("ServletModule.Users.ListTemplate");
+    templateObjektString = MirConfig.getProp("ServletModule.Users.ObjektTemplate");
+    templateConfirmString = MirConfig.getProp("ServletModule.Users.ConfirmTemplate");
 
-	public void add(HttpServletRequest req, HttpServletResponse res)
-		throws ServletModuleException
-	{
-		try {
-			SimpleHash mergeData = new SimpleHash();
-			mergeData.put("new", "1");
-			deliver(req, res, mergeData, templateObjektString);
-		}
-		catch (Exception e) { throw new ServletModuleException(e.toString());}
-	}
+    try {
+      mainModule = new ModuleUsers(DatabaseUsers.getInstance());
+    }
+    catch (StorageObjectException e) {
+      logger.debug("initialization of ServletModuleUsers failed!: " + e.getMessage());
+    }
+  }
 
- public void insert(HttpServletRequest req, HttpServletResponse res)
-	throws ServletModuleException
-	{
-		try {
-			HashMap withValues = getIntersectingValues(req, mainModule.getStorageObject());
-			String id = mainModule.add(withValues);
-			deliver(req, res, mainModule.getById(id), templateObjektString);
-		}
-		catch (Exception e) { throw new ServletModuleException(e.toString());}
-	}
+  public void edit(HttpServletRequest req, HttpServletResponse res) throws ServletModuleException
+  {
+    String        idParam = req.getParameter("id");
+    if (idParam == null)
+      throw new ServletModuleException("ServletModuleUser.edit: invalid call: (id) not specified");
+
+    try {
+      deliver(req, res, mainModule.getById(idParam), templateObjektString);
+    }
+    catch (ModuleException e) {
+      throw new ServletModuleException(e.toString());
+    }
+  }
+
+  public void add(HttpServletRequest req, HttpServletResponse res)
+      throws ServletModuleException
+  {
+    try {
+      SimpleHash mergeData = new SimpleHash();
+      mergeData.put("new", "1");
+      deliver(req, res, mergeData, templateObjektString);
+    }
+    catch (Exception e) { throw new ServletModuleException(e.toString());}
+  }
+
+  public void insert(HttpServletRequest req, HttpServletResponse res)
+      throws ServletModuleException
+  {
+    try {
+      HashMap withValues = getIntersectingValues(req, mainModule.getStorageObject());
+      String id = mainModule.add(withValues);
+      deliver(req, res, mainModule.getById(id), templateObjektString);
+    }
+    catch (Exception e) { throw new ServletModuleException(e.toString());}
+  }
 }

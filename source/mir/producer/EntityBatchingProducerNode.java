@@ -33,10 +33,12 @@ package mir.producer;
 
 import java.util.*;
 import java.io.*;
+
 import mir.entity.adapter.*;
 import mir.entity.*;
 import mir.storage.*;
 import mir.util.*;
+import mir.log.*;
 
 public class EntityBatchingProducerNode implements ProducerNode {
   private String batchInfoKey;
@@ -88,7 +90,7 @@ public class EntityBatchingProducerNode implements ProducerNode {
       ((NodedProducer) producerValue).getIsAborted());
   }
 
-  public void produce(Map aValueMap, String aVerb, PrintWriter aLogger) throws ProducerFailure {
+  public void produce(Map aValueMap, String aVerb, LoggerWrapper aLogger) throws ProducerFailure {
     Iterator browser;
     int nrEntities;
     int nrBatchesAfterFirst;
@@ -191,7 +193,7 @@ public class EntityBatchingProducerNode implements ProducerNode {
       }
     }
     catch (Throwable t) {
-      throw new ProducerFailure(t.getMessage(), t);
+      aLogger.error("EntityBatchingProducerNode caused an exception: " + t.getMessage());
     }
   };
 

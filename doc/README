@@ -1,0 +1,23 @@
+last changed $Date: 2002/12/08 07:05:56 $
+-----------------------------------------
+
+Mir is an Open-Source content managment system, designed to run an
+indymedia(type) website. Besides powering several indymedia sites, a number of
+progessive organizations use Mir customized for their own needs. Mir aims to
+provide sophisticated functionality, for example, complete multi-lingual content
+production, editing, administration, and presentation, while retaining the
+ability to be run on less than top of the line hardware through extensive static
+caching.
+
+more info at: http://mir.indymedia.org
+
+development and general questions/discussion happens on the mir-coders mailing
+list: mir-coders at lists.indymedia.org
+
+for archives or to subscribe:
+
+http://lists.indymedia.org/mailman/listinfo/mir-coders
+
+mailing list for cvs commits:
+
+http://lists.indymedia.org/mailman/listinfo/Mir-cvs

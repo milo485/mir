@@ -17,7 +17,7 @@
     <td colspan="2">
       <form method="post" action="${config.actionRoot}">
         <div align="center">
-          <input type="hidden" name="module" value=${data.module}>
+          <input type="hidden" name="module" value="${data.module}">
           <input type="hidden" name="do" value="delete">
           <input type="hidden" name="id" value="${data.id}">
           <input type="hidden" name="where" value="${data.where}">

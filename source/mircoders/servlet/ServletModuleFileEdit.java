@@ -33,59 +33,63 @@ package mircoders.servlet;
 
 import java.io.*;
 import java.net.*;
+
 import javax.servlet.http.*;
 import javax.servlet.*;
+
 import freemarker.template.*;
+
 import mir.servlet.*;
 import mir.misc.*;
 import mir.misc.FileExtFilter;
+import mir.log.*;
 
 /*
  *  ServletModuleFileEdit -
  *  Allows one to do a basic edit of a file in a directory specified
  *  in the config file.
  *
- * @author $Author: mh $
- * @version $Revision: 1.2 $ $Date: 2002/09/01 22:05:57 $
+ * @author $Author: zapata $
+ * @version $Revision: 1.3 $ $Date: 2002/11/29 13:43:42 $
  *
  */
 
 public class ServletModuleFileEdit extends ServletModule
 {
 
-	// Singelton / Kontruktor
+// Singelton / Kontruktor
 
-	private static ServletModuleFileEdit instance =
-                                                new ServletModuleFileEdit();
-	public static ServletModule getInstance() { return instance; }
+  private static ServletModuleFileEdit instance =
+      new ServletModuleFileEdit();
+  public static ServletModule getInstance() { return instance; }
 
   private String _dirName;
   private String _extName;
 
-	private ServletModuleFileEdit() {
+  private ServletModuleFileEdit() {
 
-		theLog = Logfile.getInstance(
-        MirConfig.getPropWithHome("ServletModule.FileEdit.Logfile"));
-		_dirName = MirConfig.getProp("ServletModule.FileEdit.FileDirectory");
-		_extName = MirConfig.getProp("ServletModule.FileEdit.ExtFilter");
+    logger = new LoggerWrapper("ServletModule.FileEdit");
 
-		templateListString =
-      MirConfig.getProp("ServletModule.FileEdit.ListTemplate");
-		templateObjektString =
-      MirConfig.getProp("ServletModule.FileEdit.ObjektTemplate");
-		templateConfirmString =
-      MirConfig.getProp("ServletModule.FileEdit.ConfirmTemplate");
-	}
+    _dirName = MirConfig.getProp("ServletModule.FileEdit.FileDirectory");
+    _extName = MirConfig.getProp("ServletModule.FileEdit.ExtFilter");
 
-	public void list(HttpServletRequest req, HttpServletResponse res)
-		throws ServletModuleException
-	{
-		// fetch and deliver
-		try {
-			SimpleHash mergeData = new SimpleHash();
-			String offset = req.getParameter("offset");
-			if (offset==null || offset.equals("")) offset="0";
-			mergeData.put("offset",offset);
+    templateListString =
+        MirConfig.getProp("ServletModule.FileEdit.ListTemplate");
+    templateObjektString =
+        MirConfig.getProp("ServletModule.FileEdit.ObjektTemplate");
+    templateConfirmString =
+        MirConfig.getProp("ServletModule.FileEdit.ConfirmTemplate");
+  }
+
+  public void list(HttpServletRequest req, HttpServletResponse res)
+      throws ServletModuleException
+  {
+// fetch and deliver
+    try {
+      SimpleHash mergeData = new SimpleHash();
+      String offset = req.getParameter("offset");
+      if (offset==null || offset.equals("")) offset="0";
+      mergeData.put("offset",offset);
       File dir = new File(_dirName);
       System.out.println("DIRNAME: "+_dirName);
       FileExtFilter extFilter = new FileExtFilter(_extName);
@@ -97,15 +101,14 @@ public class ServletModuleFileEdit extends ServletModule
       }
       mergeData.put("filelist",theList);
 
-			// raus damit
-			HTMLTemplateProcessor.process(res, templateListString, mergeData, res.getWriter(), getLocale(req));
-		}
-		catch (IOException e) {throw new ServletModuleException(e.toString());}
-		catch (Exception e) {throw new ServletModuleException(e.toString());}
-	}
+      HTMLTemplateProcessor.process(res, templateListString, mergeData, res.getWriter(), getLocale(req));
+    }
+    catch (IOException e) {throw new ServletModuleException(e.toString());}
+    catch (Exception e) {throw new ServletModuleException(e.toString());}
+  }
 
   public void edit(HttpServletRequest req, HttpServletResponse res)
-    throws ServletModuleException
+      throws ServletModuleException
   {
     String filename = req.getParameter("filename");
     if (filename == null) throw new ServletModuleException("No filename specified");
@@ -124,7 +127,7 @@ public class ServletModuleFileEdit extends ServletModule
       withValues.put("text", out.toString());
       withValues.put("filename", filename);
 
-        
+
       deliver(req, res, withValues, null, templateObjektString);
     } catch (Exception e) {
       throw new ServletModuleException(e.toString());
@@ -132,7 +135,7 @@ public class ServletModuleFileEdit extends ServletModule
   }
 
   public void update(HttpServletRequest req, HttpServletResponse res)
-    throws ServletModuleException
+      throws ServletModuleException
   {
     String filename = req.getParameter("filename");
     if (filename == null) throw new ServletModuleException("No filename specified");
@@ -153,6 +156,4 @@ public class ServletModuleFileEdit extends ServletModule
       throw new ServletModuleException(e.toString());
     }
   }
-
-
 }

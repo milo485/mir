@@ -33,6 +33,8 @@ package mir.producer;
 
 import java.util.*;
 import java.io.*;
+
+import mir.log.*;
 import mir.util.*;
 import mir.producer.*;
 import mir.generator.*;
@@ -48,19 +50,19 @@ public class FileDateSettingProducerNode extends FileOperationProducerNode {
     dateExpression = aDateExpression;
   }
 
-  protected void perform(File aFile, Map aValueMap, String aVerb, PrintWriter aLogger) throws ProducerFailure {
+  protected void perform(File aFile, Map aValueMap, String aVerb, LoggerWrapper aLogger) {
     try {
       Object date = ParameterExpander.findValueForKey( aValueMap, dateExpression );
 
       if (!(date instanceof Date))
-        throw new ProducerFailure("FileDateSettingProducerNode: expression " + dateExpression + " does not evaluate to a Date!", null );
+        aLogger.error( "FileDateSettingProducerNode: expression " + dateExpression + " does not evaluate to a Date!") ;
 
       if (!aFile.setLastModified(((Date) date).getTime())) {
-        aLogger.println("Can't set date for " + aFile.getName());
+        aLogger.error("Can't set date for " + aFile.getName());
       }
     }
     catch (Throwable t) {
-      throw new ProducerFailure(t.getMessage(), t);
+      aLogger.error( "File " + aFile.getName() + " could not be set to date " + dateExpression + ": " + t.getMessage());
     }
   }
 }

@@ -34,6 +34,8 @@ package mir.producer;
 import java.util.*;
 import java.io.*;
 
+import mir.log.*;
+
 public class NodedProducer implements Producer {
   private ProducerNode rootNode;
   private String verb;
@@ -50,7 +52,7 @@ public class NodedProducer implements Producer {
     isAborted = false;
   }
 
-  public void produce( PrintWriter aLogger ) throws ProducerFailure, ProducerExc {
+  public void produce( LoggerWrapper aLogger ) throws ProducerFailure, ProducerExc {
     Map valueMap;
 
     valueMap = new HashMap();

@@ -32,6 +32,14 @@
 package mircoders.servlet;
 
 import freemarker.template.SimpleHash;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.URLEncoder;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import mir.entity.EntityList;
 import mir.misc.HTMLParseException;
 import mir.misc.HTMLTemplateProcessor;
@@ -41,16 +49,12 @@ import mir.module.ModuleException;
 import mir.servlet.ServletModule;
 import mir.servlet.ServletModuleException;
 import mir.storage.StorageObjectException;
+import mir.log.*;
+
 import mircoders.module.ModuleLanguage;
 import mircoders.module.ModuleLinksImcs;
 import mircoders.storage.DatabaseLanguage;
 import mircoders.storage.DatabaseLinksImcs;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.net.URLEncoder;
 
 /*
  *  ServletModuleLinksImcs -
@@ -72,7 +76,7 @@ public class ServletModuleLinksImcs extends ServletModule {
 
 
   private ServletModuleLinksImcs() {
-    theLog = Logfile.getInstance(MirConfig.getProp("Home") + MirConfig.getProp("ServletModule.LinksImcs.Logfile"));
+    logger = new LoggerWrapper("ServletModule.LinksImcs");
     templateListString = MirConfig.getProp("ServletModule.LinksImcs.ListTemplate");
     templateObjektString = MirConfig.getProp("ServletModule.LinksImcs.ObjektTemplate");
     templateConfirmString = MirConfig.getProp("ServletModule.LinksImcs.ConfirmTemplate");
@@ -82,7 +86,7 @@ public class ServletModuleLinksImcs extends ServletModule {
       languageModule = new ModuleLanguage(DatabaseLanguage.getInstance());
     }
     catch (StorageObjectException e) {
-      theLog.printDebugInfo("ServletModuleLinksImcs konnte nicht initialisiert werden");
+      logger.error("Initialization of ServletModuleLinksImcs failed!: " + e.getMessage());
     }
   }
 

@@ -31,8 +31,10 @@
 
 package mircoders.producer;
 
-import mir.producer.*;
 import java.io.*;
+
+import mir.producer.*;
+import mir.log.*;
 
 public class OldProducerAdapter implements mir.producer.Producer {
 
@@ -44,9 +46,9 @@ public class OldProducerAdapter implements mir.producer.Producer {
     forced = aForced;
   }
 
-  public void produce( PrintWriter aLogger ) throws ProducerFailure {
+  public void produce( LoggerWrapper aLogger ) throws ProducerFailure {
     try {
-      oldProducer.handle( aLogger, null, forced.booleanValue(), false );
+      oldProducer.handle( new PrintWriter(new LoggerToWriterAdapter( aLogger, LoggerWrapper.INFO_MESSAGE )), null, forced.booleanValue(), false );
     }
     catch (Throwable e) {
       throw new ProducerFailure("Failure at handling old Producers",e);

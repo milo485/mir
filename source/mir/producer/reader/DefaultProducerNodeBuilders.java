@@ -32,10 +32,13 @@
 package mir.producer.reader;
 
 import java.util.*;
+
 import mir.generator.*;
+
 import mir.producer.*;
 import mir.entity.adapter.*;
 import mir.util.*;
+import mir.log.*;
 
 public class DefaultProducerNodeBuilders {
 
@@ -296,24 +299,46 @@ public class DefaultProducerNodeBuilders {
 
   public static class LoggingProducerNodeBuilder extends AbstractProducerNodeBuilder {
     private final static String   LOG_MESSAGE_ATTRIBUTE = "message";
+    private final static String   LOG_TYPE_ATTRIBUTE = "type";
     private final static String[] LOG_REQUIRED_ATTRIBUTES = { LOG_MESSAGE_ATTRIBUTE };
-    private final static String[] LOG_OPTIONAL_ATTRIBUTES = {};
+    private final static String[] LOG_OPTIONAL_ATTRIBUTES = { LOG_TYPE_ATTRIBUTE };
     private final static String[] LOG_SUBNODES = {};
 
     private String message;
+    private int type = LoggerWrapper.INFO_MESSAGE;
 
     public LoggingProducerNodeBuilder() {
       super(LOG_SUBNODES);
     }
 
     public void setAttributes(Map anAttributes) throws ProducerConfigExc {
+      String typeString;
+
       ReaderTool.checkAttributes(anAttributes, LOG_REQUIRED_ATTRIBUTES, LOG_OPTIONAL_ATTRIBUTES);
 
       message = (String) anAttributes.get(LOG_MESSAGE_ATTRIBUTE);
+      if (anAttributes.containsKey(LOG_TYPE_ATTRIBUTE)) {
+        typeString = ((String) anAttributes.get( LOG_TYPE_ATTRIBUTE ));
+
+        if (typeString.toLowerCase().equals("debug"))
+          type = LoggerWrapper.DEBUG_MESSAGE;
+        else if (typeString.toLowerCase().equals("info"))
+          type = LoggerWrapper.INFO_MESSAGE;
+        else if (typeString.toLowerCase().equals("error"))
+          type = LoggerWrapper.ERROR_MESSAGE;
+        else if (typeString.toLowerCase().equals("warning"))
+          type = LoggerWrapper.WARN_MESSAGE;
+        else if (typeString.toLowerCase().equals("fatal"))
+          type = LoggerWrapper.FATAL_MESSAGE;
+        else
+          throw new ProducerConfigExc("unknown log type: " + typeString + " (allowed are debug, info, warning, error, fatal)");
+      }
+      else
+        type = LoggerWrapper.INFO_MESSAGE;
     };
 
     public ProducerNode constructNode() {
-      return new LoggingProducerNode(message);
+      return new LoggingProducerNode(message, type);
     };
   }
 

@@ -37,23 +37,19 @@ import mir.producer.*;
 import mir.util.*;
 import multex.Exc;
 import multex.Failure;
+import mir.log.*;
 
 public class ProducerEngine {
 //  private Map producers;
   private JobQueue producerJobQueue;
   private Thread queueThread;
-  private PrintWriter log;
+  private LoggerWrapper logger;
+
 
   protected ProducerEngine() {
     producerJobQueue = new JobQueue();
-    try {
-      RandomAccessFile raFile = (new RandomAccessFile(MirGlobal.getConfigProperty("Home") + "/" + MirGlobal.getConfigProperty("Producer.Logfile"), "rw"));
-                        raFile.seek(raFile.length());
-                log = new PrintWriter(new FileWriter( raFile.getFD()));
-    }
-    catch (Exception e) {
-      log = new PrintWriter(new NullWriter());
-    }
+    logger = new LoggerWrapper("Producer");
+
     queueThread = new Thread(new ProducerJobQueueThread());
     queueThread.start();
   }
@@ -155,7 +151,7 @@ private class ProducerJob {
       Map startingMap = new HashMap();
 
       startTime = System.currentTimeMillis();
-      log.println("Producing job: "+factoryName+"."+verb);
+      logger.info("Producing job: "+factoryName+"."+verb);
 
       try {
         factory = MirGlobal.localizer().producers().getFactoryForName( factoryName );
@@ -167,18 +163,16 @@ private class ProducerJob {
             producer = factory.makeProducer(verb, startingMap);
           }
           if (producer!=null) {
-            producer.produce(log);
+            producer.produce(logger);
           }
         }
       }
       catch (Throwable t) {
-        log.println("  exception "+t.getMessage());
-        t.printStackTrace(log);
+        logger.error("Exception occurred while producing " + factoryName + "." + verb + t.getMessage());
+        t.printStackTrace(new PrintWriter(new LoggerToWriterAdapter(logger, LoggerWrapper.ERROR_MESSAGE)));
       }
-      log.println("Done producing job: "+factoryName+"."+verb);
       endTime = System.currentTimeMillis();
-      log.println("Time: " + (endTime-startTime) + " ms");
-      log.flush();
+      logger.info("Done producing job: " + factoryName + "." + verb + ", time elapsed:" + (endTime-startTime) + " ms");
     }
 
     boolean isAborted() {
@@ -188,8 +182,7 @@ private class ProducerJob {
 
   private class ProducerJobQueueThread implements Runnable {
     public void run() {
-      log.println("starting ProducerJobQueueThread");
-      log.flush();
+      logger.debug("starting ProducerJobQueueThread");
 
       while (true) {
         ProducerJob job = (ProducerJob) producerJobQueue.acquirePendingJob();

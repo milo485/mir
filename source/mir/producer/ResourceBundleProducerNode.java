@@ -34,44 +34,46 @@ package mir.producer;
 import java.util.*;
 import java.io.*;
 import org.apache.struts.util.MessageResources;
+
 import mir.util.*;
 import mir.misc.*;
+import mir.log.*;
 
 public class ResourceBundleProducerNode implements ProducerNode {
   private String key;
-  private String bundleIdentifier;
-  private String languageIdentifier;
+  private String bundleExpression;
+  private String languageExpression;
 
-  public ResourceBundleProducerNode(String aKey, String aBundleIdentifier) {
-    this (aKey, aBundleIdentifier, null);
+  public ResourceBundleProducerNode(String aKey, String aBundleExpression) {
+    this (aKey, aBundleExpression, null);
   }
 
-  public ResourceBundleProducerNode(String aKey, String aBundleIdentifier, String aLanguageIdentifier) {
-    bundleIdentifier = aBundleIdentifier;
-    languageIdentifier = aLanguageIdentifier;
+  public ResourceBundleProducerNode(String aKey, String aBundleExpression, String aLanguageExpression) {
+    bundleExpression = aBundleExpression;
+    languageExpression = aLanguageExpression;
     key = aKey;
   }
 
-  public void produce(Map aValueMap, String aVerb, PrintWriter aLogger) throws ProducerFailure {
+  public void produce(Map aValueMap, String aVerb, LoggerWrapper aLogger) throws ProducerFailure {
     Object messages;
 
     try {
-      if (languageIdentifier!=null) {
+      if (languageExpression!=null) {
         messages =
             new ResourceBundleGeneratorFunction(
-                new Locale(ParameterExpander.expandExpression( aValueMap, languageIdentifier ), "" ),
-                MessageResources.getMessageResources( ParameterExpander.expandExpression( aValueMap, bundleIdentifier ))
+                new Locale(ParameterExpander.expandExpression( aValueMap, languageExpression ), "" ),
+                MessageResources.getMessageResources( ParameterExpander.expandExpression( aValueMap, bundleExpression ))
             );
       }
       else {
         messages =
           MessageResources.getMessageResources(
-              ParameterExpander.expandExpression( aValueMap, bundleIdentifier ));
+              ParameterExpander.expandExpression( aValueMap, bundleExpression ));
       }
       ParameterExpander.setValueForKey( aValueMap, key, messages );
     }
     catch (Throwable t) {
-      throw new ProducerFailure(t.getMessage(), t);
+      aLogger.error("Failed to load bundle " + bundleExpression + " for language " + languageExpression +  " into key " + key + ": " + t.getMessage());
     }
   };
 

@@ -33,9 +33,12 @@ package mir.producer;
 
 import java.util.*;
 import java.io.*;
+
 import mir.util.*;
 import mir.producer.*;
 import mir.generator.*;
+import mir.log.*;
+
 import mircoders.global.*;
 import mircoders.localizer.*;
 
@@ -46,9 +49,9 @@ public abstract class FileOperationProducerNode implements ProducerNode {
     fileName = aFileName;
   }
 
-  protected abstract void perform(File aFile, Map aValueMap, String aVerb, PrintWriter aLogger) throws ProducerFailure;
+  protected abstract void perform(File aFile, Map aValueMap, String aVerb, LoggerWrapper aLogger);
 
-  public void produce(Map aValueMap, String aVerb, PrintWriter aLogger) throws ProducerFailure {
+  public void produce(Map aValueMap, String aVerb, LoggerWrapper aLogger) throws ProducerFailure {
     String fileIdentifier;
 
     try {
@@ -58,9 +61,7 @@ public abstract class FileOperationProducerNode implements ProducerNode {
       perform(file, aValueMap, aVerb, aLogger);
     }
     catch (Throwable t) {
-      aLogger.println("Error while performing file operation: " + t.getMessage());
-
-      throw new ProducerFailure(t.getMessage(), t);
+      aLogger.error("Error while performing file operation: " + t.getMessage());
     }
   }
 }

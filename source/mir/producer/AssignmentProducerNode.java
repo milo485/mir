@@ -33,8 +33,11 @@ package mir.producer;
 
 import java.util.*;
 import java.io.*;
+
 import org.apache.struts.util.MessageResources;
+
 import mir.util.*;
+import mir.log.*;
 
 public class AssignmentProducerNode extends ProducerNodeDecorator {
   private String key;
@@ -48,7 +51,7 @@ public class AssignmentProducerNode extends ProducerNodeDecorator {
     value = aValue;
   }
 
-  public void produce(Map aValueMap, String aVerb, PrintWriter aLogger) throws ProducerFailure {
+  public void produce(Map aValueMap, String aVerb, LoggerWrapper aLogger) throws ProducerFailure {
     try {
       ParameterExpander.setValueForKey(aValueMap, key, value);
 

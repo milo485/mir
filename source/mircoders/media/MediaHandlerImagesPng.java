@@ -32,15 +32,8 @@
 
 package mircoders.media;
 
-//import java.lang.*;
-//import java.io.*;
-//import java.util.*;
-//import java.lang.reflect.*;
-
-//import freemarker.template.SimpleList;
-
 import mir.media.*;
-//import mir.misc.*;
+import mir.entity.Entity;
 
 /**
  * This class handles saving, fetching creating representations
@@ -51,8 +44,8 @@ import mir.media.*;
  *
  * @see mir.media.MirMedia
  * @see mircoders.media.MediaHandlerImages
- * @author mh
- * @version 24.09.2001
+ * @author mh ,mir-coders
+ * @version $Id: MediaHandlerImagesPng.java,v 1.4 2002/11/28 07:28:24 mh Exp $
  */
 
 
@@ -60,6 +53,11 @@ public class MediaHandlerImagesPng extends MediaHandlerImages implements MirMedi
 {
   public String getType() {
     return PNG;
+  }
+
+  public String getDescr(Entity mediaType)
+  {
+      return "image/png";
   }
 
 }

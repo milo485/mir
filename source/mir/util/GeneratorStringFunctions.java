@@ -38,32 +38,19 @@ public class GeneratorStringFunctions {
 
   private GeneratorStringFunctions() {}
 
-  public static String interpretAsString(Object aValue) throws GeneratorExc {
-    if (aValue instanceof String)
-      return (String) aValue;
-
-    if (aValue instanceof Integer)
-      return ((Integer) aValue).toString();
-
-    throw new GeneratorExc("String expected, "+aValue+" found");
-  }
-
   public static class subStringFunction implements Generator.GeneratorFunction {
     public Object perform(List aParameters) throws GeneratorExc, GeneratorFailure {
       try {
         if (aParameters.size()>3 || aParameters.size()<2)
           throw new GeneratorExc("subStringFunction: 2 or 3 parameters expected: string from [length]");
 
-        if (aParameters.get(0)==null)
-          return "";
-
         if (aParameters.size()==3) {
-          return interpretAsString(aParameters.get(0)).substring(
+          return StringRoutines.interpretAsString(aParameters.get(0)).substring(
               StringRoutines.interpretAsInteger(aParameters.get(1)),
               StringRoutines.interpretAsInteger(aParameters.get(2)));
         }
         else {
-          return interpretAsString(aParameters.get(0)).substring(
+          return StringRoutines.interpretAsString(aParameters.get(0)).substring(
               StringRoutines.interpretAsInteger(aParameters.get(1)));
         }
       }

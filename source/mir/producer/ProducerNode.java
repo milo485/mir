@@ -34,6 +34,8 @@ package mir.producer;
 import java.util.*;
 import java.io.*;
 
+import mir.log.*;
+
 public interface ProducerNode {
-  public void produce(Map aValueSet, String aVerb, PrintWriter aLogger) throws ProducerExc, ProducerFailure;
+  public void produce(Map aValueSet, String aVerb, LoggerWrapper aLogger) throws ProducerExc, ProducerFailure;
 }

@@ -19,7 +19,7 @@
         <a href="mailto:${config["Mir.Contact-email.address"]}"><span class="spezialtext">${config["Mir.Contact-email.name"]}</span></a>.
         </span></p>
 	<hr>
-    <form method="post" action="${config.actionRootLogin}">
+    <form method="post" action="${config.actionRoot}">
     	<input type="hidden" name="module" value="login">
 		<table border="0" cellpadding="2" cellspacing="0" class="dark">
 	  		<tr class="darkgrey">

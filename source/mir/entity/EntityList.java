@@ -66,148 +66,148 @@ public class EntityList implements TemplateListModel, StorableObject {
     theLog = Logfile.getInstance(MirConfig.getProp("Home") + MirConfig.getProp("Entity.Logfile"));
   }
 
-	/**
-	 * Constructor.
-	 */
+  /**
+   * Constructor.
+   */
   public EntityList(){		}
 
-  /* get/set EntityClass of Objects stored in EntityList */
+/* get/set EntityClass of Objects stored in EntityList */
   public void setStorage(StorageObject storage) { this.theStorage=storage; }
   public StorageObject getStorage() { return theStorage; }
 
   public void setLimit(int limit) { this.limit = limit; }
 
-	/**
-	 * Sets the WHERE clause that fetched the Entities of this EntityList from the database.
-	 * @param wc The string that contains the WHERE clause
-	 */
-		public void setWhere(String wc) {
-			this.whereClause = wc;
-		}
+  /**
+   * Sets the WHERE clause that fetched the Entities of this EntityList from the database.
+   * @param wc The string that contains the WHERE clause
+   */
+  public void setWhere(String wc) {
+    this.whereClause = wc;
+  }
 
-	/**
-	 * Returns the WHERE clause that returned this EntityList from the database
-	 * @return whereClause The WHERE clause
-	 */
-		public String getWhere() {
-			return whereClause;
-		}
+  /**
+   * Returns the WHERE clause that returned this EntityList from the database
+   * @return whereClause The WHERE clause
+   */
+  public String getWhere() {
+    return whereClause;
+  }
 
 
-	/**
-	 * Sets the sorting criterium of this EntityList
-	 * @param oc
-	 */
-		public void setOrder(String oc) {
-			this.orderClause = oc;
-		}
+  /**
+   * Sets the sorting criterium of this EntityList
+   * @param oc
+   */
+  public void setOrder(String oc) {
+    this.orderClause = oc;
+  }
 
-	/**
-	 * Returns the sorting criterium.
-	 * @return orderClause The sort order
-	 */
-		public String getOrder() {
-			return orderClause;
-		}
+  /**
+   * Returns the sorting criterium.
+   * @return orderClause The sort order
+   */
+  public String getOrder() {
+    return orderClause;
+  }
 
-	/**
-	 * Sets the number of rows that match the WHERE clause
-	 * @param i The number of rows that match the WHERE clause
-	 */
-		public void setCount(int i) {
-			this.count = i;
-		}
+  /**
+   * Sets the number of rows that match the WHERE clause
+   * @param i The number of rows that match the WHERE clause
+   */
+  public void setCount(int i) {
+    this.count = i;
+  }
 
-	/**
-	 * Returns the number of rows that match the WHERE clause
-	 * @return The number of rows ...
-	 */
-		public int getCount() {
-			return count;
-		}
+  /**
+   * Returns the number of rows that match the WHERE clause
+   * @return The number of rows ...
+   */
+  public int getCount() {
+    return count;
+  }
 
-	/**
-	 * Sets the offset
-	 * @param i The offset
-	 */
-		public void setOffset(int i) {
-			offset = i;
-		}
+  /**
+   * Sets the offset
+   * @param i The offset
+   */
+  public void setOffset(int i) {
+    offset = i;
+  }
 
-	/**
-	 * Returns the offset
-	 * @return offset
-	 */
-		public int getOffset() {
-			return offset;
-		}
+  /**
+   * Returns the offset
+   * @return offset
+   */
+  public int getOffset() {
+    return offset;
+  }
 
-	/**
-	 * Sets the offset of the next batch of Entities.
-	 * @param i The next offset
-	 */
-		public void setNextBatch(int i) {
-			offsetnext = i;
-		}
+  /**
+   * Sets the offset of the next batch of Entities.
+   * @param i The next offset
+   */
+  public void setNextBatch(int i) {
+    offsetnext = i;
+  }
 
-	/**
-	 * Returns the offset of the next batch of Entities.
-	 * @return offset of the next batch
-	 */
-		public int getNextBatch() {
-			return offsetnext;
-		}
+  /**
+   * Returns the offset of the next batch of Entities.
+   * @return offset of the next batch
+   */
+  public int getNextBatch() {
+    return offsetnext;
+  }
 
-	/**
-	 * Returns whether there is a next batch within the WHERE clause
-	 * @return true if yes, false if no.
-	 */
-		public boolean hasNextBatch() {
-			return (offsetnext >= 0);
-		}
+  /**
+   * Returns whether there is a next batch within the WHERE clause
+   * @return true if yes, false if no.
+   */
+  public boolean hasNextBatch() {
+    return (offsetnext >= 0);
+  }
 
-	/**
-	 * Sets the offset of the previous batch.
-	 * @param i the previous offset
-	 */
-		public void setPrevBatch(int i) {
-			offsetprev = i;
-		}
+  /**
+   * Sets the offset of the previous batch.
+   * @param i the previous offset
+   */
+  public void setPrevBatch(int i) {
+    offsetprev = i;
+  }
 
-	/**
-	 * Returns the offset of the previous batch.
-	 * @return offset of the previous batch
-	 */
-		public int getPrevBatch() {
-			return offsetprev;
-		}
+  /**
+   * Returns the offset of the previous batch.
+   * @return offset of the previous batch
+   */
+  public int getPrevBatch() {
+    return offsetprev;
+  }
 
-	/**
-	 * Returns whether there is a previous batch.
-	 * @return true if yes, false if no
-	 */
-		public boolean hasPrevBatch() {
-			return (offsetprev >= 0);
-		}
+  /**
+   * Returns whether there is a previous batch.
+   * @return true if yes, false if no
+   */
+  public boolean hasPrevBatch() {
+    return (offsetprev >= 0);
+  }
 
-	/**
-	 * Returns the start index of the batch.
-	 * @return
-	 */
-		public int getFrom() {
-			return offset+1;
-		}
+  /**
+   * Returns the start index of the batch.
+   * @return
+   */
+  public int getFrom() {
+    return offset+1;
+  }
 
-	/**
-	 * Returns the end index of the batch.
-	 * @return
-	 */
-		public int getTo() {
-			if (hasNextBatch())
-				return offsetnext;
-			else
-				return count;
-		}
+  /**
+   * Returns the end index of the batch.
+   * @return
+   */
+  public int getTo() {
+    if (hasNextBatch())
+      return offsetnext;
+    else
+      return count;
+  }
 
   /**
    * Inserts an Entity into the EntityList.
@@ -216,9 +216,9 @@ public class EntityList implements TemplateListModel, StorableObject {
 
   public void add (Entity anEntity) {
     if (anEntity!=null)
-        theEntityArrayList.add(anEntity);
+      theEntityArrayList.add(anEntity);
     else
-	theLog.printWarning("EntityList: add called with empty Entity");
+      theLog.printWarning("EntityList: add called with empty Entity");
   }
 
 
@@ -243,9 +243,9 @@ public class EntityList implements TemplateListModel, StorableObject {
   }
 
 
-  // The following methods have to be implemented
-  // for this class to be an implementation of the
-  // TemplateListModel of the Freemarker packages
+// The following methods have to be implemented
+// for this class to be an implementation of the
+// TemplateListModel of the Freemarker packages
 
   public TemplateModel get(int i) { return elementAt(i); }
   public boolean isRewound() { return (freemarkerListPointer==-1) ? true : false; }
@@ -253,7 +253,7 @@ public class EntityList implements TemplateListModel, StorableObject {
 
   public TemplateModel next() {
     if (hasNext()) {
-      freemarkerListPointer++;return get(freemarkerListPointer); }
+    freemarkerListPointer++;return get(freemarkerListPointer); }
     else return null;
   }
 
@@ -280,16 +280,16 @@ public class EntityList implements TemplateListModel, StorableObject {
   }
 
 
-  // Methods to implement StorableObject
+// Methods to implement StorableObject
 
   public Set getNotifyOnReleaseSet() { return null; }
 
   public StoreIdentifier getStoreIdentifier() {
     if ( theStorage!=null ) {
       return
-        new StoreIdentifier( this, StoreContainerType.STOC_TYPE_ENTITYLIST,
-            StoreUtil.getEntityListUniqueIdentifierFor( theStorage.getTableName(),
-                       whereClause, orderClause, offset, limit ));
+      new StoreIdentifier( this, StoreContainerType.STOC_TYPE_ENTITYLIST,
+      StoreUtil.getEntityListUniqueIdentifierFor( theStorage.getTableName(),
+      whereClause, orderClause, offset, limit ));
     }
     theLog.printWarning("EntityList could not return StoreIdentifier");
     return null;

@@ -30,10 +30,10 @@
 			<span class="spezialtext">
 			<b>${lang("start.breaking.title")}</b></span>
 		<p>
-			<img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp;
-			<a href="${config.actionRoot}?module=Breaking&do=list">${lang("edit")}</a>
-	    	<img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp;
-			<a href="${config.actionRoot}?module=Breaking&do=add">${lang("start.breaking.new")}</a>
+      <img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp;
+			  <a href="${config.actionRoot}?module=Breaking&do=list">${lang("edit")}</a>
+      <img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp;
+			  <a href="${config.actionRoot}?module=Breaking&do=add">${lang("start.breaking.new")}</a>
 
 			<table width="100%" border="0">
 		<tr><td bgcolor="white">&nbsp;</td></tr>
@@ -48,27 +48,35 @@
 	    <p>
 			<b>${lang("start.show")}:</b><br>
       <list data.articletypes as a>
-    			<img src="${config.docRoot}/img/pointgris.gif" border=0>
+    			<img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp;
     			<a href="${config.actionRoot}?module=Content&do=list&where=is_published%3d'1'%20and%20to_article_type%3D${a.id}&order=webdb_create%20desc">${a.name}</a><br>
       </list>
 
       <br>
-	    <img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp;
-			<a href="${config.actionRoot}?module=Content&do=list&where=nfrei" >${lang("start.content.not_published")}</a><br>
 			<img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp;
-			<a href="${config.actionRoot}?module=Content&do=list&where=media">${lang("start.content.with_media")}</a><br>
-			<img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp;
-			<a href="${config.actionRoot}?module=Content&do=list&where=lastchange">${lang("start.content.last_changes")}</a><br>
-			<img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp;
-			<a href="${config.actionRoot}?module=Content&do=list&where=comments">${lang("start.content.with_comments")}</a><br>
-                        <br>
-                        <img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp;
-                        <a href="${config.actionRoot}?module=Hidden&do=list">${lang("start.content.hidden")}</a><br><br>
+			<a href="${config.actionRoot}?module=Content&do=list&where=&order=${utility.encodeURI("webdb_create desc")}">${lang("start.content.all")}</a><br>
 
-			<b>here to edit all the include files:</b>
-			<br>
+      <br>
+	    <img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp;
+			<a href="${config.actionRoot}?module=Content&do=list&where=${utility.encodeURI("is_published='f'")}&order=${utility.encodeURI("webdb_create desc")}" >${lang("start.content.not_published")}</a><br>
 			<img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp;
-		        <a href="${config.actionRoot}?module=FileEdit&do=list">${lang("edit")} ${lang("file")}</a>
+			<a href="${config.actionRoot}?module=Content&do=list&where=${utility.encodeURI("id in (select content_id from content_x_media, media where media.id=media_id)")}&order=${utility.encodeURI("webdb_create desc")}">${lang("start.content.with_media")}</a><br>
+			<img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp;
+			<a href="${config.actionRoot}?module=Content&do=list&where=&order=${utility.encodeURI("webdb_lastchange desc")}">${lang("start.content.last_changes")}</a><br>
+			<img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp;
+			<a href="${config.actionRoot}?module=Content&do=list&where=${utility.encodeURI("not (comment is null or comment like '')")}&order=${utility.encodeURI("webdb_create desc")}">${lang("start.content.with_comments")}</a><br>
+
+      <br>
+      <img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp;
+      <a href="${config.actionRoot}?module=Hidden&do=list">${lang("start.content.hidden")}</a>
+      <br>
+      <br>
+      <span class="spezialtext"><b>
+        ${lang("start.editfiles.title")}
+      </b></span>
+      <br />
+
+			<img src="${config.docRoot}/img/pointgris.gif" border=0>&nbsp;<a href="${config.actionRoot}?module=FileEdit&do=list">${lang("start.editfiles.include")}</a>
 
 			<br><br>
 
@@ -97,7 +105,6 @@
     <p>
       <a href="${config.actionRoot}?module=Producer&do=produceAllNew">${lang("start.producers.produceAllNew")}</a><br>
       <a href="${config.actionRoot}?module=Producer&do=showProducerQueueStatus">${lang("start.producers.advanced")}</a>
-
     </td>
 
 

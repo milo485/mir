@@ -31,22 +31,24 @@
 
 package mircoders.module;
 
+import java.util.HashMap;
+
 import freemarker.template.SimpleList;
+
 import mir.entity.Entity;
 import mir.entity.EntityList;
-import mir.misc.Logfile;
 import mir.misc.MirConfig;
 import mir.module.AbstractModule;
 import mir.module.ModuleException;
 import mir.storage.StorageObject;
 import mir.storage.StorageObjectException;
+import mir.log.*;
+
 import mircoders.entity.EntityContent;
 import mircoders.entity.EntityTopics;
 import mircoders.storage.DatabaseContent;
 import mircoders.storage.DatabaseContentToTopics;
 import mircoders.storage.DatabaseTopics;
-
-import java.util.HashMap;
 
 /*
  *  ThemenModule -
@@ -57,12 +59,10 @@ import java.util.HashMap;
 
 public class ModuleTopics extends AbstractModule {
 
-  static Logfile theLog;
+  static LoggerWrapper logger = new LoggerWrapper("Module.Topics");
 
   public ModuleTopics(StorageObject theStorage) {
     this.theStorage = theStorage;
-    if (theLog == null)
-      theLog = Logfile.getInstance(MirConfig.getProp("Home") + MirConfig.getProp("Module.Themen.Logfile"));
   }
 
   public SimpleList getTopicsAsSimpleList() throws ModuleException {
@@ -73,7 +73,6 @@ public class ModuleTopics extends AbstractModule {
       throw new ModuleException(e.toString());
     }
   }
-
 
   /**
    *  Method getTopicList
@@ -87,7 +86,7 @@ public class ModuleTopics extends AbstractModule {
       returnList = getByWhereClause("", "title", -1);
     }
     catch (Exception e) {
-      theLog.printWarning("--getTopicsList: topics could not be fetched");
+      logger.warn("--getTopicsList: topics could not be fetched: " + e.getMessage());
     }
     return returnList;
   }

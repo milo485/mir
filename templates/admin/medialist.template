@@ -61,17 +61,24 @@
 	<td><span class="witesmall">
 	<b>${lang("media.title")}</b></span></td>
     <td><span class="witesmall">
+	<b>${lang("media.format")}</b></span></td>
+    <td><span class="witesmall">
+	<b>${lang("media.size")}</b></span></td>
+    <td><span class="witesmall">
 	<b>${lang("media.mediafolder")}</b></span></td>
     <td><span class="witesmall">
 	<b>${lang("media.creator")}</b></span></td>
   </tr>
   <if data.contentlist>
   <list data.contentlist as entry>
-  <tr <if grey=="1"><assign grey="0">bgcolor="#dddddd"<else><assign grey="1"></if>
+  <tr <if grey=="1"><assign grey="0">class="list1"<else>class="list2"<assign grey="1"></if>>
   <td>
-	  <img src="${config.docRoot}/img/${entry.big_icon}" border=0></span></td>
+  	  <a href="${config.actionRoot}?module=OtherMedia&do=getMedia&id=${entry.id}">
+	  <img src="${config.docRoot}/img/${entry.big_icon}" border=0></a></span></td>
   <td>${entry.title}&nbsp;
-  	  <if entry.decription><br>${entry.description}</if></td>
+  	  <if entry.description><br>${entry.description}</if></td>
+  <td>${entry.media_descr}&nbsp;</td>
+  <td>${entry.human_readable_size}&nbsp;</td>
   <td>${data.mediafolderHashdata[entry.to_media_folder]["name"]}&nbsp;</td>
   <td>${entry.creator}&nbsp;</td>
   <td><span class="text">&nbsp;

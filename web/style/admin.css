@@ -35,3 +35,11 @@
 	.witex-small	{font-size: x-small; color: #ffffff; text-decoration:none;}
 
 	.lynx	        {display:none;}
+	
+   .editfieldname {
+      font-size: large; 
+      color: #ffffff; 
+      font-weight: bold;
+      text-decoration:none;
+      background-color: #dddddd; 	  
+   }

@@ -32,8 +32,9 @@
 package mir.producer;
 
 import java.io.*;
+import mir.log.*;
 
 public interface Producer {
-  public void produce( PrintWriter aLogger ) throws ProducerFailure, ProducerExc;
+  public void produce( LoggerWrapper aLogger ) throws ProducerFailure, ProducerExc;
   public void abort();
 }

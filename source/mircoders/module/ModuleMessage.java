@@ -45,9 +45,7 @@ import mir.module.*;
 import mir.entity.*;
 import mir.misc.*;
 import mir.storage.*;
-
-import mir.entity.*;
-import mir.storage.*;
+import mir.log.*;
 
 /**
  * Title: ModuleMessage
@@ -61,20 +59,12 @@ import mir.storage.*;
 
 public class ModuleMessage extends AbstractModule
 {
-	static Logfile theLog;
+  static LoggerWrapper logger = new LoggerWrapper("Module.Message");
 
-	// Kontruktor
+  public ModuleMessage (StorageObject theStorage)
+  {
+    if (theStorage == null) logger.warn("ModuleMessage -- StorageObject was null!");
 
-	public ModuleMessage (StorageObject theStorage)
-	{
-
-		if (theLog == null) theLog = Logfile.getInstance(MirConfig.getProp("Home") + MirConfig.getProp("Module.Messages.Logfile"));
-		if (theStorage == null) theLog.printWarning("ModuleMessage -- StorageObject was null!");
-
-		this.theStorage = theStorage;
-
-	}
-
-	// Methoden
-
+    this.theStorage = theStorage;
+  }
 }

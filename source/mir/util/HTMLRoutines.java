@@ -31,7 +31,14 @@
 
 package mir.util;
 
+import java.net.*;
+
 public class HTMLRoutines {
+
+  public static String encodeURL(String aString) {
+    return URLEncoder.encode(aString);
+  }
+
   public static String encodeHTML(String aText) {
     final char[] CHARACTERS_TO_ESCAPE = { '&', '<', '>', '"', '\'' };
     final String[] ESCAPE_CODES = { "&amp;", "&lt;", "&gt;", "&quot;", "&apos;" };

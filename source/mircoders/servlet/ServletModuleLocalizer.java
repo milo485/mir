@@ -38,35 +38,84 @@ import javax.servlet.http.*;
 
 import mir.servlet.*;
 import mir.entity.adapter.*;
+import mir.log.*;
+
 import mircoders.global.*;
 import mircoders.localizer.*;
 import mircoders.storage.*;
 import mircoders.entity.*;
+import mircoders.module.*;
 
 public class ServletModuleLocalizer extends ServletModule {
   private static ServletModuleLocalizer instance = new ServletModuleLocalizer();
-
   public static ServletModule getInstance() { return instance; }
 
-  public void commentoperation(HttpServletRequest req, HttpServletResponse res) throws ServletModuleException
-  {
+  private ModuleContent contentModule;
+  private ModuleComment commentModule;
+
+  private ServletModuleLocalizer() {
     try {
-      String operationKey = req.getParameter("operation");
-      String commentId = req.getParameter("commentid");
-      EntityComment comment = (EntityComment) DatabaseComment.getInstance().selectById(commentId);
-      MirAdminInterfaceLocalizer.MirSimpleEntityOperation operation =
-          (MirAdminInterfaceLocalizer.MirSimpleEntityOperation)
-          MirGlobal.localizer().adminInterface().simpleCommentOperations().get(operationKey);
+      contentModule = new ModuleContent(DatabaseContent.getInstance());
+      commentModule = new ModuleComment(DatabaseComment.getInstance());
 
-      EntityAdapter adapter = MirGlobal.localizer().dataModel().adapterModel().makeEntityAdapter("comment", comment);
-
-      operation.perform( adapter );
-
-      res.sendRedirect(req.getParameter("returnuri"));
+      logger = new LoggerWrapper("ServletModule.Localizer");
     }
-    catch (Throwable t) {
-      t.printStackTrace(System.out);
-      throw new ServletModuleException(t.getMessage());
+    catch (Exception e) {
+      logger.error("ServletModuleLocalizer could not be initialized: " + e.getMessage());
     }
   }
+
+  public void commentoperation(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleException {
+    String idString = aRequest.getParameter("id");
+    String operationString = aRequest.getParameter("operation");
+    String returnUrlString = aRequest.getParameter("returnurl");
+
+    MirAdminInterfaceLocalizer.MirSimpleEntityOperation operation;
+    EntityAdapter comment;
+    EntityComment entity;
+
+    try {
+      entity = (EntityComment) commentModule.getById(idString);
+
+      if (entity!=null) {
+        comment = MirGlobal.localizer().dataModel().adapterModel().makeEntityAdapter("comment", entity);
+        operation = MirGlobal.localizer().adminInterface().simpleCommentOperationForName(operationString);
+        operation.perform(comment);
+      }
+
+      redirect(aResponse, returnUrlString);
+    }
+    catch (Throwable e) {
+      e.printStackTrace(System.out);
+      throw new ServletModuleException(e.getMessage());
+    }
+  }
+
+  public void articleoperation(HttpServletRequest aRequest, HttpServletResponse aResponse) throws ServletModuleException {
+    String articleIdString = aRequest.getParameter("articleid");
+    String operationString = aRequest.getParameter("operation");
+    String returnUrlString = aRequest.getParameter("returnurl");
+
+    MirAdminInterfaceLocalizer.MirSimpleEntityOperation operation;
+    EntityAdapter article;
+    EntityContent entity;
+
+    try {
+      entity = (EntityContent) contentModule.getById(articleIdString);
+
+      if (entity!=null) {
+        article = MirGlobal.localizer().dataModel().adapterModel().makeEntityAdapter("content", entity);
+        operation = MirGlobal.localizer().adminInterface().simpleArticleOperationForName(operationString);
+        operation.perform(article);
+      }
+
+      redirect(aResponse, returnUrlString);
+    }
+    catch (Throwable e) {
+      e.printStackTrace(System.out);
+      throw new ServletModuleException(e.getMessage());
+    }
+  }
+
+
 }

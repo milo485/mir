@@ -1,6 +1,6 @@
 <html>
 <head>
-	<title>${config["Mir.Name"]} | ${lang("fileedit")}</title>
+	<title>${config["Mir.Name"]} | ${lang("fileeditlist.htmltitle")}</title>
         <link rel="stylesheet" type="text/css" href="${config.docRoot}/style/admin.css">
 </head>
 
@@ -14,7 +14,7 @@
 
   <tr class="dark">
 
-    <td><span class="witesmall"><b>${lang("language.file")}</b></span></td>
+    <td><span class="witesmall"><b>${lang("fileeditlist.filename")}</b></span></td>
   	<td>&nbsp;</td>
   </tr>
 

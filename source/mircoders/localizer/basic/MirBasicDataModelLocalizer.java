@@ -73,8 +73,13 @@ public class MirBasicDataModelLocalizer implements MirDataModelLocalizer {
       anEntityAdapterDefinition.addCalculatedField("to_media_other", new ContentToMediaField( "otherMedia" ));
       anEntityAdapterDefinition.addCalculatedField("to_media_icon", new ContentToIconField());
 
+      anEntityAdapterDefinition.addCalculatedField("article_type", new ContentToArticleTypeField());
+
       anEntityAdapterDefinition.addCalculatedField("description_parsed", new FilteredField("description"));
       anEntityAdapterDefinition.addCalculatedField("content_data_parsed", new FilteredField("content_data"));
+
+      anEntityAdapterDefinition.addCalculatedField("operations",
+          new EntityToSimpleOperationsField(MirGlobal.localizer().adminInterface().simpleArticleOperations()));
     }
     catch (Throwable t) {
       throw new MirLocalizerFailure(t.getMessage(), t);
@@ -87,7 +92,8 @@ public class MirBasicDataModelLocalizer implements MirDataModelLocalizer {
       anEntityAdapterDefinition.addCalculatedField("to_content", new CommentToContentField());
 
       anEntityAdapterDefinition.addCalculatedField("description_parsed", new FilteredField("description"));
-      anEntityAdapterDefinition.addCalculatedField("operations", new CommentToOperationsField());
+      anEntityAdapterDefinition.addCalculatedField("operations",
+          new EntityToSimpleOperationsField(MirGlobal.localizer().adminInterface().simpleCommentOperations()));
     }
     catch (Throwable t) {
       throw new MirLocalizerFailure(t.getMessage(), t);
@@ -150,21 +156,24 @@ public class MirBasicDataModelLocalizer implements MirDataModelLocalizer {
     }
   }
 
-  protected class CommentToOperationsField implements EntityAdapterDefinition.CalculatedField {
+  protected class EntityToSimpleOperationsField implements EntityAdapterDefinition.CalculatedField {
+    private List operations;
+
+    public EntityToSimpleOperationsField(List anOperations) {
+      operations = anOperations;
+    }
+
     public Object getValue(EntityAdapter anEntityAdapter) {
       try {
-        Map operations = MirGlobal.localizer().adminInterface().simpleCommentOperations();
-        Iterator i = operations.entrySet().iterator();
+        Iterator i = operations.iterator();
         List availableOperations = new Vector();
 
         while (i.hasNext()) {
-          Map.Entry entry = (Map.Entry) i.next();
-
           MirAdminInterfaceLocalizer.MirSimpleEntityOperation operation =
-            (MirAdminInterfaceLocalizer.MirSimpleEntityOperation) entry.getValue();
+            (MirAdminInterfaceLocalizer.MirSimpleEntityOperation) i.next();
 
           if (operation.isAvailable(anEntityAdapter)) {
-            availableOperations.add(entry.getKey());
+            availableOperations.add(operation.getName());
           }
         };
 
@@ -205,6 +214,20 @@ public class MirBasicDataModelLocalizer implements MirDataModelLocalizer {
                     "id="+anEntityAdapter.get("to_language"),
                     "id",
                     "language" );
+      }
+      catch (Throwable t) {
+        throw new RuntimeException(t.getMessage());
+      }
+    }
+  }
+
+  protected class ContentToArticleTypeField implements EntityAdapterDefinition.CalculatedField {
+    public Object getValue(EntityAdapter anEntityAdapter) {
+      try {
+        return anEntityAdapter.getToOneRelation(
+                    "id="+anEntityAdapter.get("to_article_type"),
+                    "id",
+                    "articleType" );
       }
       catch (Throwable t) {
         throw new RuntimeException(t.getMessage());
@@ -315,6 +338,7 @@ public class MirBasicDataModelLocalizer implements MirDataModelLocalizer {
       return result;
     }
   }
+
   protected class ContentCommentCountField implements EntityAdapterDefinition.CalculatedField {
     private String extraCondition;
 

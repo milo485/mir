@@ -46,10 +46,10 @@ import java.util.Random;
 /**
  * Title:        Mir
  * Description:  Abstract servlet-class
- * Copyright:    Copyright (c) 2001
- * Company:      Indymedia
- * @author       idfx
- * @version 1.0
+ * Copyright:    Copyright (c) 2001, 2002
+ * Company:      Mir-coders group
+ * @author       idfx, the Mir-coders group
+ * @version      $Id: AbstractServlet.java,v 1.18 2002/11/27 08:22:03 mh Exp $
  */
 
 public abstract class AbstractServlet extends HttpServlet {
@@ -63,17 +63,15 @@ public abstract class AbstractServlet extends HttpServlet {
             throws UnavailableException {
 
         //String RealPath = super.getServletContext().getRealPath("/");
-        String Uri = req.getRequestURI();
-        String Name = super.getServletName();
-        String RootUri = StringUtil.replace(Uri, "/servlet/" + Name, "");
+        String name = super.getServletName();
 
         // init config
         //MirConfig.initConfig(RealPath, RootUri, Name, getInitParameter("Config"));
-        MirConfig.initConfig(super.getServletContext(), RootUri, Name,
-                              getInitParameter("Config"));
+        MirConfig.initConfig(super.getServletContext(), req.getContextPath(),
+                              name, getInitParameter("Config"));
 
-        theLog = Logfile.getInstance(MirConfig.getPropWithHome(Name + ".Logfile"));
-        theLog.printInfo(Name + " started.");
+        theLog = Logfile.getInstance(MirConfig.getPropWithHome(name + ".Logfile"));
+        theLog.printInfo(name + " started.");
         theLog.printInfo("Path is: " + MirConfig.getProp("Home"));
         theLog.printInfo("Root URI is: " + MirConfig.getProp("RootUri"));
         theLog.printInfo("StandardLanguage is: " + MirConfig.getProp("StandardLanguage"));

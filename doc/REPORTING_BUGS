@@ -1,0 +1,44 @@
+last changed: $Date: 2002/12/08 07:05:56 $. 2002 mir-coders
+--------------------------------------------------------------------------
+
+BUG REPORTS
+
+Please read this file before sending in a bug report or patch.
+
+Where to send
+=============
+Send comments, bug reports, patches, etc. to mir-coders@lists.indymedia.org
+
+please also take the time to enter a bug in our bug-tracking system:
+
+https://prod.indymedia.nl/mantis
+
+What to send
+============
+Please specify the relevant versions of the software that you are running Mir
+under. i.e JVM name and version (IBM, Sun,..), what compiler was used
+(javac or jikes), tomcat version. 
+
+Of course, you should always specify what version of Mir you are running. If you
+are running a version check'out of CVS, please specify when you checked it out
+and from which branch (e.g MIR_1_0, HEAD..). Also if you can specify the
+versions of relevant files using "cvs status".
+
+If you received an Exception while running Mir, please mail in the "Oops" you
+got (if you got one) and try to find and error in one of the Mir/log/* files.
+Also, a stack trace can usually be found in one of the tomcat log files. For
+example, in tomcat4 you can look at the .../logs/catalina.out file or the
+.../logs/localhost_log.yyyy-mm-dd.txt, where the date is of the last time
+tomcat was started. Under the Debian package installation, the tomcat logs can
+be found under /var/log/tomcat... It is probably similar for other
+distributions. If you are using the tarball from jakarta.apache.org, the logs
+dir. is directly in the root of the tomcat tree.
+
+Patches
+=======
+
+Please send in patches that are a diff between an unmodified tree and your tree
+with the changes:
+
+diff -Nur standard-mir-dir your-mir-dir
+

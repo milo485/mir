@@ -45,8 +45,8 @@ import mir.storage.*;
 /**
  * This class maps one line of the comment-table to a java-object.
  *
- * @author $Author: mh $
- * @version $Revision: 1.10 $ $Date: 2002/09/01 22:05:53 $
+ * @author $Author: zapata $
+ * @version $Revision: 1.12 $ $Date: 2002/12/02 12:33:23 $
  */
 
 
@@ -71,50 +71,20 @@ public class EntityComment extends Entity
   {
     if (theStringValues != null) {
       if (!theStringValues.containsKey("is_published")) {
-       theStringValues.put("is_published","0");
-			}
+        theStringValues.put("is_published","0");
+      }
 
-			if (theStringValues.containsKey("main_url")){
-				if (((String)theStringValues.get("main_url")).equalsIgnoreCase("http://")) {
-					theStringValues.remove("main_url");
-				} else if ((!((String)theStringValues.get("main_url")).startsWith("http://"))
-									&& ((String)theStringValues.get("main_url")).length()>0){
-					theStringValues.put("main_url","http://"+((String)theStringValues.get("main_url")));
-				}
-			}
+      if (theStringValues.containsKey("main_url")){
+        if (((String)theStringValues.get("main_url")).equalsIgnoreCase("http://")) {
+          theStringValues.remove("main_url");
+        }
+        else if ((!((String)theStringValues.get("main_url")).startsWith("http://"))
+                     && ((String)theStringValues.get("main_url")).length()>0) {
+            theStringValues.put("main_url","http://"+((String)theStringValues.get("main_url")));
+        }
+      }
 
     }
     super.setValues(theStringValues);
   }
-
-  	/**
-	 * overridden method getValue to include formatted date into every
-	 * entityContent
-	 */
-
-	public String getValue(String field)
-  {
-    String returnField = null;
-    if (field!=null)
-    {
-      if (field.equals("date_formatted") || field.equals("webdb_create_short"))
-      {
-  		  if (hasValueForField("webdb_create"))
-      	  returnField = StringUtil.dateToReadableDate(getValue("webdb_create"));
-  		}
-      else if (field.equals("description_parsed")) {
-        /** @todo the config stuff should be moved to StringUtil */
-        String extLinkName = MirConfig.getProp("Producer.ExtLinkName");
-        String intLinkName = MirConfig.getProp("Producer.IntLinkName");
-        String mailLinkName = MirConfig.getProp("Producer.MailLinkName");
-        String imageRoot = MirConfig.getProp("Producer.ImageRoot");
-        returnField = StringUtil.createHTML(getValue("description"),imageRoot,mailLinkName,extLinkName,intLinkName);
-      }
-      else
-        return super.getValue(field);
-    }
-    return returnField;
-	}
-
-
 }

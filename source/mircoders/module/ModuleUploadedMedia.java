@@ -45,6 +45,7 @@ import mir.module.*;
 import mir.entity.*;
 import mir.misc.*;
 import mir.storage.*;
+import mir.log.*;
 
 import mircoders.storage.*;
 
@@ -57,13 +58,9 @@ import mircoders.storage.*;
 
 public class ModuleUploadedMedia extends AbstractModule
 {
+  static LoggerWrapper logger = new LoggerWrapper("Module.UploadedMedia");
 
-    static Logfile theLog;
-
-    public ModuleUploadedMedia(StorageObject theStorage) {
-	    this.theStorage = theStorage;
-	    if (theLog == null)
-	      theLog = Logfile.getInstance(MirConfig.getProp("Home")
-                          + MirConfig.getProp("Module.UploadedMedia.Logfile"));
-    }
+  public ModuleUploadedMedia(StorageObject theStorage) {
+    this.theStorage = theStorage;
+  }
 }

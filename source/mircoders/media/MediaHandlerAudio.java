@@ -45,8 +45,8 @@ import mir.storage.*;
  *
  * @see mir.media.MediaHandlerGeneric
  * @see mir.media.MirMedia
- * @author mh <heckmann@hbe.ca>
- * @version 24.09.2001
+ * @author mh <mh@nadir.org>
+ * @version $Id: MediaHandlerAudio.java,v 1.6 2002/11/28 07:28:24 mh Exp $
  */
 
 public class MediaHandlerAudio extends MediaHandlerGeneric implements MirMedia

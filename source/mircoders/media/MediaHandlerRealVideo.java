@@ -51,8 +51,8 @@ import mir.storage.*;
  *
  * @see mir.media.MediaHandlerGeneric
  * @see mir.media.MirMedia
- * @author john <john@manifestor.org>, mh <heckmann@hbe.ca>
- * @version 11.10.2001
+ * @author john <john@manifestor.org>, mh <mh@nadir.org>
+ * @version $Id: MediaHandlerRealVideo.java,v 1.13 2002/11/28 07:28:24 mh Exp $
  */
 
 
@@ -113,12 +113,12 @@ public class MediaHandlerRealVideo extends MediaHandlerVideo implements
 
   public String getDescr(Entity mediaType)
   {
-    return "RealMedia Video";
+    return "RealMedia";
   }
 
   public String getPublishHost()
   {
-    return MirConfig.getProp("Producer.RealMedia.Host");
+    return StringUtil.removeSlash(MirConfig.getProp("Producer.RealMedia.Host"));
   }
 
 }

@@ -35,6 +35,8 @@ import mir.misc.Logfile;
 import mir.misc.MirConfig;
 import mir.servlet.ServletModule;
 import mir.storage.StorageObjectException;
+import mir.log.*;
+
 import mircoders.module.ModuleUploadedMedia;
 import mircoders.storage.DatabaseVideo;
 
@@ -57,7 +59,7 @@ public class ServletModuleVideo extends ServletModuleUploadedMedia {
 
 
   private ServletModuleVideo() {
-    theLog = Logfile.getInstance(MirConfig.getProp("Home") + MirConfig.getProp("ServletModule.Video.Logfile"));
+    logger = new LoggerWrapper("ServletModule.Video");
     templateListString = MirConfig.getProp("ServletModule.Video.ListTemplate");
     templateObjektString = MirConfig.getProp("ServletModule.Video.ObjektTemplate");
     templateConfirmString = MirConfig.getProp("ServletModule.Video.ConfirmTemplate");
@@ -66,7 +68,7 @@ public class ServletModuleVideo extends ServletModuleUploadedMedia {
       //dbRights = DatabaseRights.getInstance();
     }
     catch (StorageObjectException e) {
-      theLog.printDebugInfo("servletmodule video could not be initialized");
+      logger.error("servletmodule video could not be initialized: " + e.getMessage());
     }
   }
 }

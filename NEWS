@@ -1,0 +1,144 @@
+[last changed: $Date: 2002/12/07 07:01:08 $]  2002 mir-coders group
+-------------------------------------------------------------------------------
+
+================================
+1.0.0-rc4 (as of yet unreleased)
+================================
+
+[New features/Improvements]
+* set a "Cache-control", "Pragma" and "Expires" header to the http response
+  in the Mir and OpenMir servlets to insure that nothing gets cached by a
+  client browser.
+
+[Bugfixes]
+
+[Build process]
+
+[Maintenance]
+
+[Notes]
+
+=========
+1.0.0-rc3
+=========
+
+[New features/Improvements]
+* support "video/avi" mime type.
+* add missing multi-file dialog for audio/video/othermedia admin interface
+* mark an article as unproduced when one of it's possible attached media items
+  is modified.
+
+[Bugfixes]
+* fix placement of FILE upload field in the media admin
+  that prevented description, author, etc fields to appear in uploaded files in
+  the admin interface.
+* prevent an Image Entity from getting out of sync w/ the DB when the setImage
+  method in EntityImages is called.
+
+[Build process]
+
+[Maintenance]
+
+[Notes]
+* manually insertion of "video/avi" mime-type in the media_type table is
+  required. see the dbscripts/populate_mediatyp file for details (id 20)
+
+=========
+1.0.0-rc2
+=========
+
+[New features/Improvements]
+
+[Bugfixes]
+* fix nasty and embaressing bug in rc1 that prevented uploads from working.
+
+[Build process]
+
+[Maintenance]
+
+[Notes]
+
+=========
+1.0.0-rc1
+=========
+
+[New features/Improvements]
+* convert the media layer to use InputStreams and OutputStreams when
+  uploading and viewing files to curb memory use. add FileHandler interface
+  abstraction to handle file uploads
+* support converting the size in bytes of a file to human readable format, eg.
+  384K vs 384 xxx
+* support for previewing of Media files in the admin interface
+* use req.getContextPath to find the RootUri.. much more robust
+* create new web.xml servlet url mapping for 4.0 and 4.1 compatibility
+
+[Bugfixes]
+* fix long standing bug that caused '&''s to be removed from an http link in
+  an article abstract
+
+[Build process]
+
+[Maintenance]
+* use cvs's \$Name\$ tag for versioning
+* get rid of some unused methos in StrinUtil.java
+
+[Notes]
+* due to the changes introduced for Input/OutputStream support in media
+  handling, the FILE upload field in the html form, must always come after
+  all other fields required for adding the media item.
+* you'll need to add the new "TempDir" config option to your config.properties
+  file.
+
+==========================================================================
+From approx. March 2001 (beginning of indymedia.de) to 1.0.0-rc1, Dec 2002
+==========================================================================
+
+[New features/Improvements]
+* create and improve ServletModules for managing media files in the admin
+  interface
+* support modification of the content creation date (webdb_create) meta field
+  of a content item
+* add a basic static file editor ServletModule to be able to edit static html
+  files through the admin interface
+* creation of a servlet module to list all non publish content items
+* start of a one-time passwd system for openposting to protect against SPAM
+  attacks
+* allow for changing the maximum allowed size of an uploaded file as well as
+  the maximum number of files one can upload
+* support changing the character encoding used in for produced files
+* support creation of printable PDF files out of articles
+* creation of the ObjectStore for Object caching to improve performance
+* make the Entity's implement the freemarker TemplateModel simplifying the
+  the producer code and improving performance.
+* switch to Poolman Database connection pooling
+* i18n support for templates via language bundles. allows for a multilingual
+  admin interface and easily switching the language of the produced site.
+* addition of the media handler interface layer for upload/handling of
+  multimedia files like audio and video
+* support for duplicate posting checks using checksums via a postgres module
+* simplify configuration slightly and remove redundant config options
+* choose between direct and indirect open posting. i.e direct to newswire vs.
+  openposting list.
+* implement multiple file upload support
+
+[Bugfixes]
+* Better and more consistent exception handling: make sure all exceptions make
+  it to the top.
+* make sure that if some part of a posting fails that the posting however 
+  complete/inconplete it may be is deleted
+* many bugfixes all over the place
+
+[Build process]
+* ditch build.sh wrapper in favor of a saner build.xml
+* INSTALL documentation revamped
+* perms.sh script to set install permissions
+* config.properties file re-organized and commented
+
+[Maintenance]
+* make changes for tomcat v4.1.x compatibility
+* change licensing to GPL
+* translate some/most comments from German to English
+* formal start of Mir project: get other developers involved
+
+[Notes]
+

@@ -50,7 +50,7 @@ import mir.misc.*;
  * Base Class of Entities
  * Interfacing TemplateHashModel and TemplateModelRoot to be freemarker compliant
  *
- * @version $Id: Entity.java,v 1.10 2002/11/04 04:35:21 mh Exp $
+ * @version $Id: Entity.java,v 1.11 2002/12/02 12:33:22 zapata Exp $
  * @author rk
  *
  */
@@ -126,7 +126,7 @@ public class Entity implements TemplateHashModel, TemplateModelRoot
    * @return String Id
    */
   public String getId () {
-    return  (String)getValue(theStorageObject.getIdName());
+    return  (String) getValue(theStorageObject.getIdName());
   }
 
   /**
@@ -155,11 +155,6 @@ public class Entity implements TemplateHashModel, TemplateModelRoot
       {
         if (hasValueForField("webdb_lastchange"))
           returnValue=StringUtil.dateToReadableDate(getValue("webdb_lastchange"));
-      }
-      else if (field.equals("webdb_create_dc"))
-      {
-        if (hasValueForField("webdb_create"))
-          returnValue=StringUtil.webdbdateToDCDate(getValue("webdb_create"));
       }
       else
         returnValue = (String)theValuesHash.get(field);
@@ -292,21 +287,6 @@ public class Entity implements TemplateHashModel, TemplateModelRoot
     throw  new StorageObjectException("Storage Object Exception in entity" +e.toString());
   }
 
-  /**
-   * Frees an instance
-   */
-  /*public void finalize () {
-    instances--;
-    Integer i = new Integer(instances);
-    System.err.println("Removing abstract entity instance: "+i.toString());
-    try {
-      super.finalize();
-    } catch (Throwable t) {
-      System.err.println(t.toString());
-    }
-  }*/
-
-
   // Now implements freemarkers TemplateHashModel
   // two methods have to be overridden:
   // 1. public boolean isEmpty() throws TemplateModelException
@@ -319,10 +299,10 @@ public class Entity implements TemplateHashModel, TemplateModelRoot
 
   public TemplateModel get(java.lang.String key) throws TemplateModelException
   {
-		return new SimpleScalar(getValue(key));
+                return new SimpleScalar(getValue(key));
   }
-	
-	public void put(java.lang.String key, TemplateModel model)
+
+        public void put(java.lang.String key, TemplateModel model)
   {
     // putting should only take place via setValue and is limited to the
     // database fields associated with the entity. no additional freemarker

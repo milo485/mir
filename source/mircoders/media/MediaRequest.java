@@ -55,7 +55,7 @@ import mir.media.*;
  *    appropriate media objects are set.
  *
  * @author mh
- * @version $Id: MediaRequest.java,v 1.3 2002/11/04 04:35:22 mh Exp $
+ * @version $Id: MediaRequest.java,v 1.9 2002/12/01 15:05:51 zapata Exp $
  *
  */
 
@@ -137,28 +137,32 @@ public class MediaRequest implements FileHandler
           contentType = "text/plain"; // rfc1867 says this is the default
       }
       //theLog.printInfo("CONTENT TYPE IS: "+contentType);
-      
+
       if (contentType.equals("text/plain") ||
           contentType.equals("application/octet-stream")) {
         _throwBadContentType(fileName, contentType);
       }
 
       String mediaTitle = (String)mediaValues.get("media_title"+fileNum);
-      if ( (mediaTitle == null) || (mediaTitle.length() == 0))
-          throw new FileHandlerUserException("Missing field: media title "+mediaTitle+fileNum);
+      if ( (mediaTitle == null) || (mediaTitle.length() == 0)) {
+        //  uncomment the next line and comment out the exception throw
+        //  if you'd rather just assign missing media titles automatically
+        //  mediaTitle="media item "+fileNum;
+        throw new FileHandlerUserException("Missing field: media title "+mediaTitle+fileNum);
+      }
 
-      // TODO: need to add all the extra fields that can be present in the 
+      // TODO: need to add all the extra fields that can be present in the
       // admin upload form. -mh
       mediaValues.put("title", mediaTitle);
       mediaValues.put("date", StringUtil.date2webdbDate(
                                                     new GregorianCalendar()));
       mediaValues.put("to_publisher", _user);
       //mediaValues.put("to_media_folder", "7"); // op media_folder
-      mediaValues.put("is_produced", "0"); 
+      mediaValues.put("is_produced", "0");
 
       // icky backwards compatibility code -mh
       if (_publish == true) {
-        mediaValues.put("is_published", "1"); 
+        mediaValues.put("is_published", "1");
       } else {
         if (!mediaValues.containsKey("is_published"))
           mediaValues.put("is_published", "0");
@@ -181,7 +185,7 @@ public class MediaRequest implements FileHandler
 
       Entity mediaType = null;
       Entity mediaType2 = null;
-      
+
       // find out if we an exact content-type match if so take it.
       // otherwise try to match majortype/*
       // @todo this should probably be moved to DatabaseMediaType -mh
@@ -209,8 +213,9 @@ public class MediaRequest implements FileHandler
         mediaHandler = MediaHelper.getHandler(mediaType);
         mediaStorage = MediaHelper.getStorage(mediaType,
                                             "mircoders.storage.Database");
-      } catch (MirMediaException e) {
-        throw new FileHandlerException (e.getMsg());
+      }
+      catch (MirMediaException e) {
+        throw new FileHandlerException (e.getMessage());
       }
       mediaValues.put("to_media_type",mediaTypeId);
 
@@ -227,30 +232,17 @@ public class MediaRequest implements FileHandler
       } catch (Exception e) {
         throw new FileHandlerException("Error in MediaRequest: "+e.toString());
       }
-                                      
+
       mediaEnt.setStorage(mediaStorage);
       mediaEnt.setValues(mediaValues);
       mediaId = mediaEnt.insert();
 
-      //try {
-      //  File f = null;
-      //  f = new File("/tmp/img.jpg");
-      //  File dir = new File(f.getParent());
-      //  dir.mkdirs();
-
-      //  FileOutputStream out = new FileOutputStream(f);
-      //  System.out.println("WRITE");
-      //  filePart.writeTo(out);
-      //  out.close();
-      //} catch (Exception e) {System.out.println("EE "+e.toString());}
-
-
-      //mir.misc.FileUtil.write("/tmp/img.jpg", filePart.getInputStream());
       //save and store the media data/metadata
       try {
         mediaHandler.set(filePart.getInputStream(), mediaEnt, mediaType);
-      } catch (MirMediaException e) {
-        throw new FileHandlerException(e.getMsg());
+      }
+      catch (MirMediaException e) {
+        throw new FileHandlerException(e.getMessage());
       }
       try {
         if (_produce == true )
@@ -262,7 +254,8 @@ public class MediaRequest implements FileHandler
       }
 
       _returnList.add(mediaEnt);
-    } catch (StorageObjectException e) {
+    }
+    catch (StorageObjectException e) {
       // first try to delete it.. don't catch exception as we've already..
       try { mediaStorage.delete(mediaId); } catch (Exception e2) {}
       throw new FileHandlerException("error in MediaRequest: "+e.toString());

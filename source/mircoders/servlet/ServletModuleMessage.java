@@ -33,22 +33,27 @@ package mircoders.servlet;
 
 import java.io.*;
 import java.net.*;
+
 import javax.servlet.http.*;
 import javax.servlet.*;
+
 import freemarker.template.*;
+
 import mir.servlet.*;
 import mir.misc.*;
 import mir.entity.*;
 import mir.storage.*;
 import mir.module.*;
+import mir.log.*;
+
 import mircoders.module.*;
 import mircoders.storage.*;
 
 /**
- * Title:    ServletModuleMessage
+ * Title:       ServletModuleMessage
  * Description:
- * Copyright:    Copyright (c) 2001
- * Company:      Indymedia
+ * Copyright:   Copyright (c) 2001-2002
+ * Company:     mir-coders
  * @author
  * @version 1.0
  */
@@ -57,55 +62,56 @@ import mircoders.storage.*;
 public class ServletModuleMessage extends ServletModule
 {
 
-	// Singelton / Kontruktor
+  // Singelton / Kontruktor
 
-	private static ServletModuleMessage instance = new ServletModuleMessage();
-	public static ServletModule getInstance() { return instance; }
+  private static ServletModuleMessage instance = new ServletModuleMessage();
+  public static ServletModule getInstance() { return instance; }
 
-	private ServletModuleMessage() {
-		theLog = Logfile.getInstance(MirConfig.getProp("Home") + MirConfig.getProp("ServletModule.Messages.Logfile"));
-		templateListString = MirConfig.getProp("ServletModule.Messages.ListTemplate");
-		templateObjektString = MirConfig.getProp("ServletModule.Messages.ObjektTemplate");
-		templateConfirmString = MirConfig.getProp("ServletModule.Messages.ConfirmTemplate");
-		try {
-			mainModule = new ModuleMessage(DatabaseMessages.getInstance());
-		}
-		catch (StorageObjectException e) {
-			theLog.printDebugInfo("ServletModuleMessage konnte nicht initialisiert werden");
-		}
-	}
+  private ServletModuleMessage() {
+    logger = new LoggerWrapper("ServletModule.Messages");
 
-	public void list(HttpServletRequest req, HttpServletResponse res)
-		throws ServletModuleException
-	{
-		// fetch and deliver
-		try {
-			SimpleHash mergeData = new SimpleHash();
-			String offset = req.getParameter("offset");
-			if (offset==null || offset.equals("")) offset="0";
-			mergeData.put("offset",offset);
-			EntityList theList = mainModule.getByWhereClause(null, "webdb_create desc", (new Integer(offset)).intValue());
-			mergeData.put("contentlist",theList);
-			if(theList.getOrder()!=null) {
-				mergeData.put("order", theList.getOrder());
-				mergeData.put("order_encoded", URLEncoder.encode(theList.getOrder()));
-			}
-			mergeData.put("count", (new Integer(theList.getCount())).toString());
-			mergeData.put("from", (new Integer(theList.getFrom())).toString());
-			mergeData.put("to", (new Integer(theList.getTo())).toString());
-			if (theList.hasNextBatch())
-				mergeData.put("next", (new Integer(theList.getNextBatch())).toString());
-			if (theList.hasPrevBatch())
-				mergeData.put("prev", (new Integer(theList.getPrevBatch())).toString());
+    templateListString = MirConfig.getProp("ServletModule.Messages.ListTemplate");
+    templateObjektString = MirConfig.getProp("ServletModule.Messages.ObjektTemplate");
+    templateConfirmString = MirConfig.getProp("ServletModule.Messages.ConfirmTemplate");
 
-			// raus damit
-			HTMLTemplateProcessor.process(res, templateListString, mergeData, res.getWriter(), getLocale(req));
+    try {
+      mainModule = new ModuleMessage(DatabaseMessages.getInstance());
+    }
+    catch (StorageObjectException e) {
+      logger.error("initialization of ServletModuleMessage failed!: " + e.getMessage());
+    }
+  }
 
-		}
-		catch (ModuleException e) {throw new ServletModuleException(e.toString());}
-		catch (IOException e) {throw new ServletModuleException(e.toString());}
-		catch (Exception e) {throw new ServletModuleException(e.toString());}
-	}
+  public void list(HttpServletRequest req, HttpServletResponse res)
+      throws ServletModuleException
+  {
+// fetch and deliver
+    try {
+      SimpleHash mergeData = new SimpleHash();
+      String offset = req.getParameter("offset");
+      if (offset==null || offset.equals("")) offset="0";
+      mergeData.put("offset",offset);
+      EntityList theList = mainModule.getByWhereClause(null, "webdb_create desc", (new Integer(offset)).intValue());
+      mergeData.put("contentlist",theList);
+      if(theList.getOrder()!=null) {
+        mergeData.put("order", theList.getOrder());
+        mergeData.put("order_encoded", URLEncoder.encode(theList.getOrder()));
+      }
+      mergeData.put("count", (new Integer(theList.getCount())).toString());
+      mergeData.put("from", (new Integer(theList.getFrom())).toString());
+      mergeData.put("to", (new Integer(theList.getTo())).toString());
+      if (theList.hasNextBatch())
+        mergeData.put("next", (new Integer(theList.getNextBatch())).toString());
+      if (theList.hasPrevBatch())
+        mergeData.put("prev", (new Integer(theList.getPrevBatch())).toString());
+
+      HTMLTemplateProcessor.process(res, templateListString, mergeData, res.getWriter(), getLocale(req));
+
+    }
+    catch (ModuleException e) {throw new ServletModuleException(e.toString());}
+    catch (IOException e) {throw new ServletModuleException(e.toString());}
+    catch (Exception e) {throw new ServletModuleException(e.toString());}
+  }
 
 
 }

@@ -59,7 +59,7 @@ import mircoders.entity.EntityImages;
  *
  * @see mir.media.MirMedia
  * @author mh
- * @version $Date: 2002/11/04 04:35:22 $ $Revision: 1.11 $
+ * @version $Id: MediaHandlerImages.java,v 1.14 2002/12/01 15:05:51 zapata Exp $
  */
 
 
@@ -67,36 +67,36 @@ public abstract class MediaHandlerImages implements MirMedia
 {
   static Logfile theLog = Logfile.getInstance(MirConfig.getProp("Home")+
                                                 "log/media.log");
-  static final String PNG = "PNG"; 
-  static final String JPEG = "JPEG"; 
+  static final String PNG = "PNG";
+  static final String JPEG = "JPEG";
 
   abstract String getType();
 
-	public InputStream getMedia(Entity ent, Entity mediaTypeEnt)
+        public InputStream getMedia(Entity ent, Entity mediaTypeEnt)
     throws MirMediaException
-	{
+        {
     InputStream in;
     try {
       in = ((EntityImages)ent).getImage();
     } catch ( StorageObjectException e) {
-      theLog.printDebugInfo("MediaHandlerImages.getImage: "+e.toString()); 
+      theLog.printDebugInfo("MediaHandlerImages.getImage: "+e.toString());
       throw new MirMediaException(e.toString());
     }
 
     return in;
   }
 
-	public void set(InputStream in, Entity ent, Entity mediaTypeEnt)
+  public void set(InputStream in, Entity ent, Entity mediaTypeEnt)
     throws MirMediaException {
 
     try {
       ((EntityImages)ent).setImage(in, getType());
-    } catch ( StorageObjectException e) {
-      theLog.printError("MediaHandlerImages.set: "+e.toString()); 
-      throw new MirMediaException(e.toString());
     }
-
-	}
+    catch ( StorageObjectException e) {
+      theLog.printError("MediaHandlerImages.set: "+e.getMessage());
+      throw new MirMediaException(e.getMessage());
+    }
+  }
 
   public void produce(Entity ent, Entity mediaTypeEnt) throws MirMediaException
   {
@@ -132,15 +132,15 @@ public abstract class MediaHandlerImages implements MirMedia
       throw new MirMediaException(msg);
     }
   }
-                        
 
-	public InputStream getIcon(Entity ent) throws MirMediaException
-	{
+
+  public InputStream getIcon(Entity ent) throws MirMediaException
+  {
     InputStream in;
     try {
       in = ((EntityImages)ent).getIcon();
     } catch ( StorageObjectException e) {
-      theLog.printDebugInfo("MediaHandlerImages.getIcon: "+e.toString()); 
+      theLog.printDebugInfo("MediaHandlerImages.getIcon: "+e.toString());
       throw new MirMediaException(e.toString());
     }
 
@@ -166,42 +166,42 @@ public abstract class MediaHandlerImages implements MirMedia
 
   public String getPublishHost()
   {
-    return MirConfig.getProp("Producer.Image.Host");
+    return StringUtil.removeSlash(MirConfig.getProp("Producer.Image.Host"));
   }
 
   public String getTinyIconName()
   {
     return MirConfig.getProp("Producer.Icon.TinyImage");
-  } 
+  }
 
   public String getBigIconName()
   {
     return MirConfig.getProp("Producer.Icon.BigImage");
-  } 
+  }
 
   public String getIconAltName()
   {
     return "Image";
-  } 
+  }
 
   public boolean isVideo()
   {
     return false;
-  } 
+  }
 
   public boolean isAudio()
   {
     return false;
-  } 
+  }
 
   public boolean isImage ()
   {
     return true;
-  } 
+  }
 
   public String getDescr(Entity mediaType)
   {
-    return "";
+    return "image/jpeg";
   }
 
 }

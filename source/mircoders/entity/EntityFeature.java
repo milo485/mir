@@ -51,21 +51,19 @@ import mircoders.storage.*;
 
 public class EntityFeature extends Entity
 {
+  public EntityFeature()
+  {
+    super();
+  }
 
-		public EntityFeature()
-		{
-    	super();
-		}
+  public EntityFeature(StorageObject theStorage) {
+    this();
+    setStorage(theStorage);
+  }
 
-		public EntityFeature(StorageObject theStorage) {
-			this();
-    	setStorage(theStorage);
-		}
-
-	public void update() throws StorageObjectException{
-		super.update();
-		DatabaseContent dbContent = DatabaseContent.getInstance();
-		dbContent.setUnproduced("to_feature="+getId());
-	}
-
+  public void update() throws StorageObjectException{
+    super.update();
+    DatabaseContent dbContent = DatabaseContent.getInstance();
+    dbContent.setUnproduced("to_feature="+getId());
+  }
 }

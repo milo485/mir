@@ -55,6 +55,19 @@ public class StringRoutines {
     return result;
   }
 
+  public static String interpretAsString(Object aValue) throws Exception {
+    if (aValue instanceof String)
+      return (String) aValue;
+
+    if (aValue instanceof Integer)
+      return ((Integer) aValue).toString();
+
+    if (aValue == null)
+      return "";
+
+    throw new Exception("String expected, "+aValue+" found");
+  }
+
   public static int interpretAsInteger(Object aValue) throws Exception {
     if (aValue instanceof Integer)
       return ((Integer) aValue).intValue();

@@ -45,6 +45,7 @@ import mir.module.*;
 import mir.entity.*;
 import mir.misc.*;
 import mir.storage.*;
+import mir.log.*;
 
 import mircoders.storage.*;
 /*
@@ -56,25 +57,20 @@ import mircoders.storage.*;
 
 public class ModuleFeature extends AbstractModule
 {
-		static Logfile theLog;
+  static LoggerWrapper logger = new LoggerWrapper("Module.Feature");
 
-		public ModuleFeature(StorageObject theStorage) {
+  public ModuleFeature(StorageObject theStorage) {
 
-			this.theStorage = theStorage;
+    this.theStorage = theStorage;
+  }
 
-	if (theLog == null)
-	theLog = Logfile.getInstance(MirConfig.getProp("Home") + MirConfig.getProp("Module.Feature.Logfile"));
-
-		}
-
-		public SimpleList getSchwerpunktAsSimpleList()
-      throws ModuleException {
-      try {
-			  return ((DatabaseFeature)theStorage).getPopupData();
-      } catch (StorageObjectException e) {
-        throw new ModuleException(e.toString());
-      }
-		}
+  public SimpleList getSchwerpunktAsSimpleList() throws ModuleException {
+    try {
+      return ((DatabaseFeature)theStorage).getPopupData();
+    }
+    catch (StorageObjectException e) {
+      throw new ModuleException(e.toString());
+    }
+  }
 }
-
 

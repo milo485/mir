@@ -47,7 +47,7 @@ import mir.storage.*;
  * @see mir.media.MediaHandlerGeneric
  * @see mir.media.MirMedia
  * @author john <john@manifestor.org>
- * @version 11.10.2001
+ * @version $Id: MediaHandlerVideo.java,v 1.5 2002/11/28 07:28:24 mh Exp $
  */
 
 public class MediaHandlerVideo extends MediaHandlerGeneric implements MirMedia

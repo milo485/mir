@@ -34,7 +34,9 @@ package mir.producer;
 import java.util.*;
 import java.io.*;
 import org.apache.struts.util.MessageResources;
+
 import mir.util.*;
+import mir.log.*;
 
 public class ValuesMapProducerNode extends ProducerNodeDecorator {
   private String key;
@@ -45,7 +47,7 @@ public class ValuesMapProducerNode extends ProducerNodeDecorator {
     super(aSubNode);
   }
 
-  public void produce(Map aValueMap, String aVerb, PrintWriter aLogger) throws ProducerFailure {
+  public void produce(Map aValueMap, String aVerb, LoggerWrapper aLogger) throws ProducerFailure {
     try {
       aValueMap.putAll(map);
 

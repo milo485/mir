@@ -58,9 +58,6 @@ public class MirBasicProducerLocalizer implements MirProducerLocalizer {
   protected static Logfile logger = Logfile.getInstance( MirGlobal.getConfigProperty("Home") + "/" + MirGlobal.getConfigProperty("Mir.Localizer.Logfile"));
 
   public MirBasicProducerLocalizer() {
-
-
-
     try {
       String allNewProducers = MirGlobal.getConfigProperty("Mir.Localizer.Producer.AllNewProducers");
       allNewProducerTasks = ProducerEngine.ProducerTask.parseProducerTaskList(allNewProducers);
@@ -156,6 +153,12 @@ public class MirBasicProducerLocalizer implements MirProducerLocalizer {
   };
 
   public ProducerFactory getFactoryForName(String aName) {
+    try {
+      factories();
+    }
+    catch (Throwable t) {
+    }
+
     return (ProducerFactory) nameToFactory.get(aName);
   }
 }

@@ -30,6 +30,7 @@ INSERT INTO "media_type" VALUES (16,'asf','video/x-ms-asf','Video','Video',NULL)
 INSERT INTO "media_type" VALUES (17,'rm','application/vnd.rn-realmedia','RealVideo','Video',NULL);
 INSERT INTO "media_type" VALUES (18,'mp3','audio/mpeg','Mp3','Audio',NULL);
 INSERT INTO "media_type" VALUES (19,'png','image/gif','ImagesPng','Images',NULL);
+INSERT INTO "media_type" VALUES (20,'avi','video/avi','Video','Video',NULL);
 -- Enable triggers
 UPDATE pg_class SET reltriggers = (SELECT count(*) FROM pg_trigger where pg_class.oid = tgrelid) WHERE relname = 'media_type';
 

@@ -35,22 +35,15 @@ import java.lang.*;
 
 /*
  *  MirMediaException -
- * 
- * @version $Id: MirMediaException.java,v 1.6 2002/11/04 04:35:21 mh Exp $
+ *
+ * @version $Id: MirMediaException.java,v 1.7 2002/12/01 15:05:51 zapata Exp $
  * @author mh
  *
  */
 
 public final class MirMediaException extends Exception {
-  String msg;
-
   public MirMediaException(String msg) {
     super(msg);
-    this.msg = msg;
-  }
-
-  public String getMsg() {
-    return msg;
   }
 }
 

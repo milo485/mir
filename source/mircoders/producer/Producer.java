@@ -50,8 +50,7 @@ abstract public class Producer {
   protected static String   producerProductionHost = MirConfig.getProp("Producer.ProductionHost");
   protected static String   producerOpenAction = MirConfig.getProp("Producer.OpenAction");;
 
-  /** @todo same as in HTMLTemplateProcessor, this should be dynamically set */
-  protected static String   actionRoot = MirConfig.getProp("RootUri") + "/servlet/Mir";
+  protected static String   actionRoot = MirConfig.getProp("RootUri") + "/Mir";
 
   protected static Logfile theLog = Logfile.getInstance(MirConfig.getProp("Home") + "/" + MirConfig.getProp("Producer.Logfile"));
   protected static ModuleTopics         topicsModule;

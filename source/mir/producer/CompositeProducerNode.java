@@ -34,6 +34,8 @@ package mir.producer;
 import java.util.*;
 import java.io.*;
 
+import mir.log.*;
+
 public class CompositeProducerNode implements ProducerNode {
   private List subNodes;
 
@@ -75,7 +77,7 @@ public class CompositeProducerNode implements ProducerNode {
       ((NodedProducer) producerValue).getIsAborted());
   }
 
-  public void produce(Map aValueMap, String aVerb, PrintWriter aLogger) throws ProducerFailure, ProducerExc {
+  public void produce(Map aValueMap, String aVerb, LoggerWrapper aLogger) throws ProducerFailure, ProducerExc {
     Iterator i = subNodes.iterator();
 
     while (i.hasNext() && !isAborted(aValueMap)) {

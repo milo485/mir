@@ -33,6 +33,8 @@ package mircoders.producer;
 
 import java.util.*;
 import java.io.*;
+
+import mir.log.*;
 import mir.util.*;
 import mir.producer.*;
 import mir.misc.PDFUtil;
@@ -48,7 +50,7 @@ public class PDFGeneratingProducerNode implements ProducerNode {
     stylesheet=aStylesheet;
   }
 
-  public void produce(Map aValueMap, String aVerb, PrintWriter aLogger) throws ProducerFailure {
+  public void produce(Map aValueMap, String aVerb, LoggerWrapper aLogger) {
 
     String generatorIdentifier;
     String destinationIdentifier;
@@ -64,21 +66,18 @@ public class PDFGeneratingProducerNode implements ProducerNode {
       generatorIdentifier = ParameterExpander.expandExpression( aValueMap, generatorExpression );
       stylesheetIdentifier = ParameterExpander.expandExpression( aValueMap, stylesheet);
 
-      aLogger.println("Generating " + generatorIdentifier + " into " + destinationIdentifier + " using "+ stylesheetIdentifier);
-      aLogger.flush();
+      aLogger.info("Generating " + generatorIdentifier + " into " + destinationIdentifier + " using "+ stylesheetIdentifier);
 
       PDFUtil.makePDF(generatorIdentifier,destinationIdentifier,stylesheetIdentifier);
 
-        }
-        catch (Throwable t) {
-            t.printStackTrace();
-            aLogger.println("  error while generating: " + t.getMessage() + t.toString());
-      aLogger.flush();
+    }
+    catch (Throwable t) {
+      t.printStackTrace();
+      aLogger.error("  error while generating: " + t.getMessage() + t.toString());
     }
     endTime = System.currentTimeMillis();
 
-    aLogger.println("  Time: " + (endTime-startTime) + " ms<br>");
-    aLogger.flush();
+    aLogger.info("  Time: " + (endTime-startTime) + " ms<br>");
   }
 }
 

@@ -44,6 +44,7 @@ import freemarker.template.*;
 import com.oreilly.servlet.multipart.*;
 import com.oreilly.servlet.*;
 
+import mir.log.*;
 import mir.servlet.*;
 import mir.module.*;
 import mir.misc.*;
@@ -58,98 +59,31 @@ import mircoders.producer.*;
 
 /*
  *  ServletModuleImages -
- *  liefert HTML fuer Images
  *
- *
- * @author RK
+ * @version $Id: ServletModuleImages.java,v 1.24 2002/11/29 13:43:42 zapata Exp $
+ * @author RK, the mir-coders group
  */
 
 public class ServletModuleImages extends ServletModuleUploadedMedia
 {
-
-  //private static DatabaseRights dbRights;
-
   // Singelton / Kontruktor
   private static ServletModuleImages instance = new ServletModuleImages();
   public static ServletModule getInstance() { return instance; }
 
 
   private ServletModuleImages() {
-    theLog = Logfile.getInstance(MirConfig.getProp("Home") + MirConfig.getProp("ServletModule.Images.Logfile"));
+    logger = new LoggerWrapper("ServletModule.Images");
     templateListString = MirConfig.getProp("ServletModule.Images.ListTemplate");
     templateObjektString = MirConfig.getProp("ServletModule.Images.ObjektTemplate");
     templateConfirmString = MirConfig.getProp("ServletModule.Images.ConfirmTemplate");
+
     try {
       mainModule = new ModuleImages(DatabaseImages.getInstance());
-      //dbRights = DatabaseRights.getInstance();
     }
     catch (StorageObjectException e) {
-      theLog.printDebugInfo("servletmodulebilder konnte nicht initialisiert werden");
+      logger.error("Initialization of ServletModuleImages failed!: " + e.getMessage());
     }
   }
 
-  public void showimg(HttpServletRequest req, HttpServletResponse res)
-    throws ServletModuleException
-  {
-    String idParam = req.getParameter("id");
-    if (idParam!=null && !idParam.equals("")) {
-      try {
-        EntityImages entImage =(EntityImages)mainModule.getById(idParam);
-        ServletContext ctx =
-                    (ServletContext)MirConfig.getPropAsObject("ServletContext");
-        String fName = entImage.getId()+"."
-                      +entImage.getMediaType().getValue("name");
-        res.setContentType(ctx.getMimeType(fName));
-        ServletOutputStream out = res.getOutputStream(); // wichtig, dass vorher kein res.getwriter() gelaufen ist
-
-        InputStream in = entImage.getImage();
-        int read;
-        byte[] buf = new byte[8 * 1024];
-        while((read = in.read(buf)) != -1) {
-          out.write(buf, 0, read);
-        }
-        in.close();
-        out.close();
-      }
-
-      catch (IOException e) {throw new ServletModuleException(e.toString());}
-      catch (ModuleException e) {throw new ServletModuleException(e.toString());}
-      catch (Exception e) {throw new ServletModuleException(e.toString());}
-    }
-    else theLog.printDebugInfo("id nicht angeben.");
-    // darf keine exception werfen
-  }
-
-  public void showicon(HttpServletRequest req, HttpServletResponse res)
-    throws ServletModuleException
-  {
-    String idParam = req.getParameter("id");
-    if (idParam!=null && !idParam.equals("")) {
-      try {
-        EntityImages entImage =(EntityImages)mainModule.getById(idParam);
-        ServletContext ctx =
-                    (ServletContext)MirConfig.getPropAsObject("ServletContext");
-        String fName = entImage.getId()+"."
-                      +entImage.getMediaType().getValue("name");
-        res.setContentType(ctx.getMimeType(fName));
-        ServletOutputStream out = res.getOutputStream(); // wichtig, dass vorher kein res.getwriter() gelaufen ist
-
-        InputStream in = entImage.getIcon();
-        int read;
-        byte[] buf = new byte[8 * 1024];
-        while((read = in.read(buf)) != -1) {
-          out.write(buf, 0, read);
-        }
-        in.close();
-        //out.write(outbytes);
-        out.close();
-      }
-
-      catch (IOException e) {throw new ServletModuleException(e.toString());}
-      catch (ModuleException e) {throw new ServletModuleException(e.toString());}
-      catch (Exception e) {throw new ServletModuleException(e.toString());}
-    }
-    else throw new ServletModuleException("id nicht angeben.");
-  }
 }
 

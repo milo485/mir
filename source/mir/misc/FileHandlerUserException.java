@@ -36,11 +36,20 @@ import java.lang.*;
 /*
  *  differentiates itself from a bug in that it
  *  represents a probable user error
- * 
- * @version $Revision: 1.2 $
- * @author $Author: mh $
+ *
+ * @version $Id: FileHandlerUserException.java,v 1.4 2002/12/01 15:05:51 zapata Exp $
+ * @author mh
  *
  * $Log: FileHandlerUserException.java,v $
+ * Revision 1.4  2002/12/01 15:05:51  zapata
+ * tracked down a nasty error reporting bug
+ *
+ * Revision 1.3  2002/11/27 07:46:34  mh
+ * get rid of annoying $Log: FileHandlerUserException.java,v $
+ * get rid of annoying Revision 1.4  2002/12/01 15:05:51  zapata
+ * get rid of annoying tracked down a nasty error reporting bug
+ * get rid of annoying keywords
+ *
  * Revision 1.2  2002/11/04 04:35:21  mh
  * merge media InputStream changes from MIR_1_0 branch
  *
@@ -62,15 +71,8 @@ import java.lang.*;
  */
 
 public final class FileHandlerUserException extends Exception {
-  String msg;
-
-	public FileHandlerUserException(String msg) {
+  public FileHandlerUserException(String msg) {
     super(msg);
-    this.msg = msg;
-  }
-
-  public String getMsg() {
-    return msg;
   }
 }
 

@@ -33,8 +33,10 @@ package mir.producer.reader;
 
 import java.util.*;
 import java.io.*;
+
 import mir.producer.*;
 import mir.util.*;
+import mir.log.*;
 
 public class ScriptedProducerNode implements ProducerNode {
   private ScriptedProducerNodeDefinition definition;
@@ -52,7 +54,7 @@ public class ScriptedProducerNode implements ProducerNode {
     nodeParameterValues.putAll(aNodeParameterValues);
   }
 
-  public void produce(Map aValues, String aVerb, PrintWriter aLogger) throws ProducerFailure, ProducerExc {
+  public void produce(Map aValues, String aVerb, LoggerWrapper aLogger) throws ProducerFailure, ProducerExc {
     try {
       Map oldValues = new HashMap();
       ScriptedProducerNodeTool.saveMapValues(oldValues, aValues, definition.getStringParameters().keySet());
@@ -92,7 +94,7 @@ public class ScriptedProducerNode implements ProducerNode {
       }
     }
     catch (Exception e) {
-      throw new ProducerFailure(e);
+      aLogger.error("Scripted producer node " + definition.getName() + " caused an exception: " + e.getMessage());
     }
   }
 

@@ -35,6 +35,7 @@ import java.io.*;
 import java.lang.*;
 import java.util.*;
 import java.sql.*;
+
 import javax.servlet.*;
 import javax.servlet.http.*;
 
@@ -45,33 +46,31 @@ import mir.module.*;
 import mir.entity.*;
 import mir.misc.*;
 import mir.storage.*;
+import mir.log.*;
 
 import mircoders.storage.*;
 
 public class ModuleImages extends AbstractModule {
-	static Logfile theLog;
+  static LoggerWrapper logger = new LoggerWrapper("Module.Images");
 
-	// Kontruktor
+  public ModuleImages(StorageObject theStorage) {
+    if (theStorage == null)
+      logger.warn("ModuleImages: StorageObject was null!");
+    this.theStorage = theStorage;
 
-	public ModuleImages(StorageObject theStorage) {
+  }
 
-		if (theLog == null) theLog = Logfile.getInstance(MirConfig.getProp("Home")+MirConfig.getProp("Module.Images.Logfile"));
-		if (theStorage == null) theLog.printWarning("StorageObject was null!");
-		this.theStorage = theStorage;
+// Methoden
 
-	}
-
-	// Methoden
-
-		public SimpleList getBilderAsSimpleList()
+  public SimpleList getBilderAsSimpleList()
       throws ModuleException {
 
-		//  String sql = "select id, name from Bilder order by name";
-      try {
-			  return ((DatabaseImages)theStorage).getPopupData();
-      } catch  (StorageObjectException e) {
-        throw new ModuleException(e.toString());
-      }
-		}
+//  String sql = "select id, name from Bilder order by name";
+    try {
+      return ((DatabaseImages)theStorage).getPopupData();
+    } catch  (StorageObjectException e) {
+      throw new ModuleException(e.toString());
+    }
+  }
 
 }

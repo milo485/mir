@@ -76,7 +76,7 @@
 					<list article.to_media_audio as media>
 					<p>
 					<a href="${media["publish_server"]}${media["publish_path"]}">
-					${media["title"]} - ${media["descr"]}
+					${media["title"]} - ${media["media_descr"]} ${media["human_readable_size"]}
 					</a>
 					</p>
 					</list>
@@ -84,14 +84,14 @@
 					<p>
 					<img src="../../../img/${media["big_icon"]}" border="0" alt="">
 					<a href="${media["publish_server"]}${media["publish_path"]}">
-					${media["title"]} - ${media["descr"]}</a>
+					${media["title"]} - ${media["media_descr"]} ${media["human_readable_size"]}</a>
 					</p>
 					</list>
 					<list article.to_media_other as media>
 					<p>
 					<img src="../../../img/${media["big_icon"]}" border="0" alt="">
 					<a href="${media["publish_server"]}${media["publish_path"]}">
-					${media["title"]} - ${media["descr"]}</a>
+					${media["title"]} - ${media["media_descr"]} ${media["human_readable_size"]}</a>
 					</p>
 					</list>
 					

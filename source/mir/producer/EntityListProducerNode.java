@@ -33,10 +33,12 @@ package mir.producer;
 
 import java.util.*;
 import java.io.*;
+
 import mir.entity.adapter.*;
 import mir.entity.*;
 import mir.storage.*;
 import mir.util.*;
+import mir.log.*;
 
 public class EntityListProducerNode extends ProducerNodeDecorator {
   private String key;
@@ -71,7 +73,7 @@ public class EntityListProducerNode extends ProducerNodeDecorator {
          Integer.toString(aLimit), Integer.toString(aSkip), aSubNode);
   }
 
-  public void produce(Map aValueMap, String aVerb, PrintWriter aLogger) throws ProducerFailure {
+  public void produce(Map aValueMap, String aVerb, LoggerWrapper aLogger) throws ProducerFailure, ProducerExc {
     try {
       int limit = ParameterExpander.evaluateIntegerExpressionWithDefault(aValueMap, limitExpression, -1);
       int skip = ParameterExpander.evaluateIntegerExpressionWithDefault(aValueMap, skipExpression, 0);
@@ -93,11 +95,21 @@ public class EntityListProducerNode extends ProducerNodeDecorator {
             skip )
         )
       );
-      super.produce(aValueMap, aVerb, aLogger);
     }
     catch (Throwable t) {
-      throw new ProducerFailure(t.getMessage(), t);
+      aLogger.error("cannot retrieve list into key " + key + ": " + t.getMessage());
+      try {
+        ParameterExpander.setValueForKey(
+          aValueMap,
+          key,
+          new CachingRewindableIterator(new Vector().iterator())
+        );
+      }
+      catch (Throwable s) {
+      }
     }
+
+    super.produce(aValueMap, aVerb, aLogger);
   };
 
 }

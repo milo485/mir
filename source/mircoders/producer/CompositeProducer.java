@@ -34,6 +34,7 @@ package mircoders.producer;
 import java.util.*;
 import java.io.*;
 import mir.producer.*;
+import mir.log.*;
 
 public class CompositeProducer implements mir.producer.Producer {
   private List producers;
@@ -46,7 +47,7 @@ public class CompositeProducer implements mir.producer.Producer {
     producers.add(aProducer);
   }
 
-  public void produce( PrintWriter aLogger ) throws ProducerFailure, ProducerExc {
+  public void produce( LoggerWrapper aLogger ) throws ProducerFailure, ProducerExc {
     Iterator i;
 
     i=producers.iterator();

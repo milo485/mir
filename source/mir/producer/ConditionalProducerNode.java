@@ -33,7 +33,9 @@ package mir.producer;
 
 import java.util.*;
 import java.io.*;
+
 import mir.util.*;
+import mir.log.*;
 
 public class ConditionalProducerNode implements ProducerNode {
   private String condition;
@@ -46,7 +48,7 @@ public class ConditionalProducerNode implements ProducerNode {
     falseNode = aFalseNode;
   }
 
-  public void produce(Map aValueMap, String aVerb, PrintWriter aLogger) throws ProducerFailure {
+  public void produce(Map aValueMap, String aVerb, LoggerWrapper aLogger) throws ProducerFailure {
     try {
       if (ParameterExpander.evaluateBooleanExpression(aValueMap, condition)) {
         if (trueNode!=null)

@@ -45,9 +45,10 @@ import mir.module.*;
 import mir.entity.*;
 import mir.misc.*;
 import mir.storage.*;
+import mir.log.*;
 
-import mir.entity.*;
 import mircoders.storage.*;
+
 /*
  *  Feature -
  *
@@ -57,25 +58,20 @@ import mircoders.storage.*;
 
 public class ModuleSchwerpunkt extends AbstractModule
 {
-		static Logfile theLog;
+  static LoggerWrapper logger = new LoggerWrapper("Module.Feature");
 
-		public ModuleSchwerpunkt(StorageObject theStorage) {
+  public ModuleSchwerpunkt(StorageObject theStorage) {
 
-			this.theStorage = theStorage;
+    this.theStorage = theStorage;
+  }
 
-	if (theLog == null)
-	theLog = Logfile.getInstance(MirConfig.getProp("Home") + MirConfig.getProp("Module.Schwerpunkt.Logfile"));
-
-		}
-
-		public SimpleList getSchwerpunktAsSimpleList()
-      throws ModuleException {
-      try {
-			  return ((DatabaseFeature)theStorage).getPopupData();
-      } catch (StorageObjectException e) {
-        throw new ModuleException(e.toString());
-      }
-		}
+  public SimpleList getSchwerpunktAsSimpleList() throws ModuleException {
+    try {
+      return ((DatabaseFeature)theStorage).getPopupData();
+    }
+    catch (StorageObjectException e) {
+      throw new ModuleException(e.toString());
+    }
+  }
 }
-
 

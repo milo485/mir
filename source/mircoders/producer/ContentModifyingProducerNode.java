@@ -33,10 +33,13 @@ package mircoders.producer;
 
 import java.util.*;
 import java.io.*;
+
 import mir.util.*;
 import mir.producer.*;
 import mir.entity.*;
 import mir.entity.adapter.*;
+import mir.log.*;
+
 import mircoders.entity.*;
 import mircoders.module.*;
 import mircoders.storage.*;
@@ -53,7 +56,7 @@ public class ContentModifyingProducerNode implements ProducerNode {
     valueExpression = aValueExpression;
   }
 
-  public void produce(Map aValueMap, String aVerb, PrintWriter aLogger) throws ProducerFailure {
+  public void produce(Map aValueMap, String aVerb, LoggerWrapper aLogger) {
     Object data;
     Entity entity;
     String value;
@@ -80,13 +83,10 @@ public class ContentModifyingProducerNode implements ProducerNode {
       entity.setValueForProperty(fieldName, value);
       entity.update();
 
-      aLogger.println("  Modified content " + entity.get("id") + ": " + fieldName + " = " + value );
+      aLogger.info("  Modified content " + entity.get("id") + ": " + fieldName + " = " + value );
     }
     catch (Throwable t) {
-      aLogger.println("Error while modifying content: " + t.getMessage());
-      t.printStackTrace(aLogger);
-
-      throw new ProducerFailure(t.getMessage(), t);
+      aLogger.error("Error while modifying content: " + t.getMessage());
     }
   }
 }

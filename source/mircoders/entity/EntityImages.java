@@ -53,88 +53,87 @@ import mir.storage.*;
 /**
  * Diese Klasse enthält die Daten eines MetaObjekts
  *
- * @author RK, mh
- * @version $Id: EntityImages.java,v 1.9 2002/11/15 22:13:21 mh Exp $
+ * @author RK, mh, mir-coders
+ * @version $Id: EntityImages.java,v 1.12 2002/12/06 08:08:14 mh Exp $
  */
 
 
 public class EntityImages extends EntityUploadedMedia
 {
 
-  Random r = new Random();
+  public EntityImages()
+  {
+    super();
+  }
 
-	public EntityImages()
-	{
-		super();
-	}
+  public EntityImages(StorageObject theStorage) {
+    this();
+    setStorage(theStorage);
+  }
 
-	public EntityImages(StorageObject theStorage) {
-		this();
-		setStorage(theStorage);
-	}
-
-	//
-	// methods
+  //
+  // methods
 
 
-	public InputStream getImage() throws StorageObjectException
-	{
-		theLog.printDebugInfo("--getimage started");
-		java.sql.Connection con=null;Statement stmt=null;
+  public InputStream getImage() throws StorageObjectException
+  {
+    theLog.printDebugInfo("--getimage started");
+    java.sql.Connection con=null;Statement stmt=null;
     BlobInputStream in; InputStream img_in = null;
 
-		try {
-			con = theStorageObject.getPooledCon();
-			con.setAutoCommit(false);
-			LargeObjectManager lom;
+    try {
+      con = theStorageObject.getPooledCon();
+      con.setAutoCommit(false);
+      LargeObjectManager lom;
       java.sql.Connection jCon;
       stmt = con.createStatement();
-			ResultSet rs = theStorageObject.executeSql(stmt,
-                            "select image_data from images where id="+getId());
+      ResultSet rs = theStorageObject.executeSql(stmt,
+          "select image_data from images where id="+getId());
       jCon = ((com.codestudio.sql.PoolManConnectionHandle)con)
-                .getNativeConnection();
+           .getNativeConnection();
       lom = ((org.postgresql.Connection)jCon).getLargeObjectAPI();
-			if(rs!=null) {
+      if(rs!=null) {
         if (rs.next()) {
           LargeObject lob = lom.open(rs.getInt(1));
           in = (BlobInputStream)lob.getInputStream();
           img_in = new ImageInputStream(in, con, stmt);
         }
         rs.close();
-			}
-		} catch (Exception e) {
+      }
+    }
+    catch (Exception e) {
       e.printStackTrace();
-      theLog.printError("EntityImages -- getImage failed"+e.toString()); 
+      theLog.printError("EntityImages -- getImage failed"+e.toString());
       try {
         con.setAutoCommit(true);
       } catch (Exception e2) {
         e.printStackTrace();
         theLog.printError(
-          "EntityImages -- getImage reseting transaction mode failed"
-            +e2.toString()); 
+            "EntityImages -- getImage reseting transaction mode failed"
+            +e2.toString());
       }
       theStorageObject.freeConnection(con,stmt);
       throwStorageObjectException(e, "EntityImages -- getImage failed: ");
     }
-
+    //}
     return img_in;
-	}
+  }
 
-	public void setImage(InputStream in, String type)
-	    throws StorageObjectException {
+  public void setImage(InputStream in, String type)
+      throws StorageObjectException {
 
-		if (in!=null) {
-			java.sql.Connection con=null;PreparedStatement pstmt=null;
+    if (in!=null) {
+      java.sql.Connection con=null;PreparedStatement pstmt=null;
       File f = null;
-			try {
+      try {
 
-				theLog.printDebugInfo("settimage :: making internal representation of image");
+        theLog.printDebugInfo("settimage :: making internal representation of image");
 
-        String fName = MirConfig.getProp("TempDir")+File.separator+r.nextInt();
-        f = new File(fName);
+        File tempDir = new File(MirConfig.getProp("TempDir"));
+        f = File.createTempFile("mir", ".tmp", tempDir);
         FileUtil.write(f, in);
-				WebdbImage webdbImage= new WebdbImage(f, type);
-				theLog.printDebugInfo("settimage :: made internal representation of image");
+        WebdbImage webdbImage= new WebdbImage(f, type);
+        theLog.printDebugInfo("settimage :: made internal representation of image");
 
         con = theStorageObject.getPooledCon();
         con.setAutoCommit(false);
@@ -144,7 +143,7 @@ public class EntityImages extends EntityUploadedMedia
         LargeObjectManager lom;
         java.sql.Connection jCon;
         jCon = ((com.codestudio.sql.PoolManConnectionHandle)con)
-                          .getNativeConnection();
+             .getNativeConnection();
         lom = ((org.postgresql.Connection)jCon).getLargeObjectAPI();
         int oidImage = lom.create();
         int oidIcon = lom.create();
@@ -154,52 +153,37 @@ public class EntityImages extends EntityUploadedMedia
         webdbImage.setIcon(lobIcon.getOutputStream());
         lobImage.close();
         lobIcon.close();
-        String sql = "update images set img_height='"
-                      +webdbImage.getImageHeight() +
-                      "',img_width='"   + webdbImage.getImageWidth() +
-                      "',icon_height='" + webdbImage.getIconHeight() +
-                      "',icon_width='"  + webdbImage.getIconWidth()
-                      +  "', image_data="+oidImage+", icon_data="+oidIcon
-                      +" where id="+getId();
-        theLog.printDebugInfo("settimage :: updating sizes: "+ sql);
-        pstmt = con.prepareStatement(sql);
-        //pstmt.setBytes(1, imageData);
-        //pstmt.setBytes(2, iconData);
-        pstmt.executeUpdate();
-        sql="update content set is_produced='0' where to_media="+getId();
-        pstmt = con.prepareStatement(sql);
-        pstmt.executeUpdate();
-			}
-			catch (Exception e) {throwStorageObjectException(e, "settimage :: setImage gescheitert: ");}
-			finally {
-				try {
+
+        setValueForProperty("img_height",
+                          new Integer(webdbImage.getImageHeight()).toString());
+        setValueForProperty("img_width",
+                          new Integer(webdbImage.getImageWidth()).toString());
+        setValueForProperty("icon_height",
+                          new Integer(webdbImage.getIconHeight()).toString());
+        setValueForProperty("icon_width",
+                          new Integer(webdbImage.getIconWidth()).toString());
+        setValueForProperty("image_data", new Integer(oidImage).toString());
+        setValueForProperty("icon_data", new Integer(oidIcon).toString());
+        update();
+      }
+      catch (Exception e) {
+        throwStorageObjectException(e, "settimage :: setImage gescheitert: ");
+      }
+      finally {
+        try {
           if (con!=null)
             con.setAutoCommit(true);
           // get rid of the temp. file
           f.delete();
-        } catch (Exception e) {;}
-				theStorageObject.freeConnection(con,pstmt);
+        }
+        catch (Exception e) {
+        }
+
+        if (con!=null)
+          theStorageObject.freeConnection(con,pstmt);
       }
-		}
-	}
-
-	public void update() throws StorageObjectException {
-		super.update();
-		try {
-			theStorageObject.executeUpdate("update content set is_produced='0' where to_media="+getId());
-		} catch (SQLException e) {
-			throwStorageObjectException(e, "EntityImages :: update :: failed!! ");
-		}
-	}
-
-	public void setValues(HashMap theStringValues)
-	{
-		if (theStringValues != null) {
-			if (!theStringValues.containsKey("is_published"))
-			 theStringValues.put("is_published","0");
-		}
-		super.setValues(theStringValues);
-	}
+    }
+  }
 
   /**
    * Takes an OutputStream as an argument and reads in the data
@@ -207,48 +191,50 @@ public class EntityImages extends EntityUploadedMedia
    *
    * It will also take care of closing the OutputStream.
    */
-	public InputStream getIcon() throws StorageObjectException
-	{
-		java.sql.Connection con=null;Statement stmt=null;
+  public InputStream getIcon() throws StorageObjectException
+  {
+    java.sql.Connection con=null;Statement stmt=null;
     BlobInputStream in=null;ImageInputStream img_in=null;
 
-		try {
-			con = theStorageObject.getPooledCon();
-			con.setAutoCommit(false);
+    try {
+      con = theStorageObject.getPooledCon();
+      con.setAutoCommit(false);
       LargeObjectManager lom;
       java.sql.Connection jCon;
-			stmt = con.createStatement();
-			ResultSet rs = theStorageObject.executeSql(stmt,
-                            "select icon_data from images where id="+getId());
+      stmt = con.createStatement();
+      ResultSet rs = theStorageObject.executeSql(stmt,
+          "select icon_data from images where id="+getId());
       jCon = ((com.codestudio.sql.PoolManConnectionHandle)con)
-                    .getNativeConnection();
+           .getNativeConnection();
       lom = ((org.postgresql.Connection)jCon).getLargeObjectAPI();
-			if(rs!=null) {
-				if (rs.next()) {
+      if(rs!=null) {
+        if (rs.next()) {
           LargeObject lob = lom.open(rs.getInt(1));
           in = (BlobInputStream)lob.getInputStream();
           img_in = new ImageInputStream( in, con ,stmt);
           //img_data = rs.getBytes(1);
-				}
+        }
         rs.close();
-			}
-		} catch (Exception e) {
+      }
+    }
+    catch (Exception e) {
       e.printStackTrace();
-      theLog.printError("EntityImages -- getIcon failed"+e.toString()); 
+      theLog.printError("EntityImages -- getIcon failed"+e.toString());
       try {
         con.setAutoCommit(true);
-      } catch (Exception e2) {
+      }
+      catch (Exception e2) {
         e.printStackTrace();
         theLog.printError(
-          "EntityImages -- getIcon reseting transaction mode failed"
-            +e2.toString()); 
+            "EntityImages -- getIcon reseting transaction mode failed"
+            +e2.toString());
       }
       theStorageObject.freeConnection(con,stmt);
       throwStorageObjectException(e, "EntityImages -- getIcon failed:");
-		}
+    }
 
     return img_in;
-	}
+  }
 
   /**
    * a small wrapper class that allows us to store the DB connection resources
@@ -274,7 +260,8 @@ public class EntityImages extends EntityUploadedMedia
       try {
         _con.setAutoCommit(true);
         theStorageObject.freeConnection(_con,_stmt);
-      } catch (Exception e) {
+      }
+      catch (Exception e) {
         throw new IOException("close(): "+e.toString());
       }
     }
@@ -284,5 +271,4 @@ public class EntityImages extends EntityUploadedMedia
     }
 
   }
-
 }

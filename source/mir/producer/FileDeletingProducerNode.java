@@ -33,9 +33,12 @@ package mir.producer;
 
 import java.util.*;
 import java.io.*;
+
 import mir.util.*;
 import mir.producer.*;
 import mir.generator.*;
+import mir.log.*;
+
 import mircoders.global.*;
 import mircoders.localizer.*;
 
@@ -45,9 +48,12 @@ public class FileDeletingProducerNode extends FileOperationProducerNode {
     super(aFileIdentifier);
   }
 
-  protected void perform(File aFile, Map aValueMap, String aVerb, PrintWriter aLogger) throws ProducerFailure {
+  protected void perform(File aFile, Map aValueMap, String aVerb, LoggerWrapper aLogger) throws ProducerFailure {
     if (!aFile.delete()) {
-      aLogger.print("Can't delete " + aFile.getName());
+      aLogger.error("Can't delete file " + aFile.getName());
+    }
+    else {
+      aLogger.info("File " + aFile.getName() + " deleted");
     }
   }
 }

@@ -39,10 +39,14 @@ import mir.entity.*;
 import mir.entity.adapter.*;
 
 public interface MirAdminInterfaceLocalizer {
-  public Map simpleCommentOperations();
-  public Map simpleArticleOperations();
+  public List simpleCommentOperations();
+  public MirSimpleEntityOperation simpleCommentOperationForName(String aName);
+
+  public List simpleArticleOperations();
+  public MirSimpleEntityOperation simpleArticleOperationForName(String aName);
 
   public interface MirSimpleEntityOperation {
+    public String getName();
     public boolean isAvailable(EntityAdapter anEntity);
     public void perform(EntityAdapter anEntity);
   }

@@ -59,7 +59,7 @@
   <property name="app.name"       value="Mir"/>
   <property name="deploy.home"    value="../${app.name}"/>
 
-  <!-- If you want to use the very good jikes compiler, uncomment this -->
+  <!-- don't use unless your Jikes is >= v1.17 and you know what you are doing -->
   <!-- <property name="build.compiler"   value="jikes"/>-->
 
 
@@ -81,6 +81,7 @@
     <pathelement path="${deploy.home}"/>
     <pathelement path="${deploy.classes}"/>
     <pathelement path="source"/>
+    <pathelement path="etc/extrasource"/>
     <fileset dir="lib">
       <include name="*.jar"/>
     </fileset>
@@ -201,6 +202,10 @@
       <srcfileset
         dir="source"
         includes="**/*.java"/>
+<!-- ML: now why can't this be added?
+      <srcfileset
+        dir="etc/extrasource"
+        includes="**/*.java"/> -->
       <srcfileset
         dir="lib"
         includes="*.jar"/>
@@ -208,8 +213,10 @@
         dir="${deploy.classes}"
         includes="**/*.class"/>
     </dependset>
-    <javac srcdir="source" destdir="${deploy.classes}"
+    <javac destdir="${deploy.classes}"
            debug="on" optimize="off" deprecation="on">
+      <src path="source"/>
+      <src path="etc/extrasource"/>
       <classpath refid="project.class.path"/>
     </javac>
   </target>

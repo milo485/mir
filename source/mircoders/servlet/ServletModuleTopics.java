@@ -42,14 +42,15 @@ import mir.module.*;
 import mir.misc.*;
 import mir.entity.*;
 import mir.storage.*;
+import mir.log.*;
 
 import mircoders.entity.*;
 import mircoders.storage.*;
 import mircoders.module.*;
 
 /*
- *  ServletModuleThemen -
- *  liefert HTML fuer Themen
+ *  ServletModuleTopics
+ *
  *
  *
  * @author RK
@@ -57,20 +58,22 @@ import mircoders.module.*;
 
 public class ServletModuleTopics extends ServletModule
 {
-
-  // Singelton / Kontruktor
+// Singelton / Constructor
   private static ServletModuleTopics instance = new ServletModuleTopics();
   public static ServletModule getInstance() { return instance; }
 
   private ServletModuleTopics() {
-	  theLog = Logfile.getInstance(MirConfig.getProp("Home") + MirConfig.getProp("ServletModule.Themen.Logfile"));
-          templateListString = MirConfig.getProp("ServletModule.Themen.ListTemplate");
-	  templateObjektString = MirConfig.getProp("ServletModule.Themen.ObjektTemplate");
-	  templateConfirmString = MirConfig.getProp("ServletModule.Themen.ConfirmTemplate");
+    logger = new LoggerWrapper("ServletModule.Topics");
+
+    templateListString = MirConfig.getProp("ServletModule.Themen.ListTemplate");
+    templateObjektString = MirConfig.getProp("ServletModule.Themen.ObjektTemplate");
+    templateConfirmString = MirConfig.getProp("ServletModule.Themen.ConfirmTemplate");
+
     try {
       mainModule = new ModuleTopics(DatabaseTopics.getInstance());
-    } catch (StorageObjectException e) {
-      theLog.printDebugInfo("servletmoduletopics konnte nicht initialisiert werden");
+    }
+    catch (StorageObjectException e) {
+      logger.error("Initialization of ServletModuleTopics failed!: " + e.getMessage());
     }
   }
 }

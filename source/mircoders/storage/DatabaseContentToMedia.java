@@ -45,8 +45,10 @@ import mir.misc.*;
 import mircoders.entity.*;
 
 /**
- * <b>Diese Klasse implementiert die Datenbankverbindung zur MetaObjekt-Tabelle
+ * <b>implements abstract DB connection to the content_x_media SQL table
  *
+ * @author RK, mir-coders group
+ * @version $Id: DatabaseContentToMedia.java,v 1.11 2002/12/06 08:08:44 mh Exp $
  *
  */
 
@@ -451,7 +453,7 @@ public class DatabaseContentToMedia extends Database implements StorageObject{
   }
 
 
-  public EntityList getContent(EntityMedia media)
+  public EntityList getContent(EntityUploadedMedia media)
     throws StorageObjectException {
     EntityList returnList=null;
     if (media != null) {

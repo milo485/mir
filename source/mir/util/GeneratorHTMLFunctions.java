@@ -32,7 +32,6 @@
 package mir.util;
 
 import java.util.*;
-import java.net.*;
 
 import mir.misc.*;
 import mir.generator.*;
@@ -41,29 +40,36 @@ public class GeneratorHTMLFunctions {
   private GeneratorHTMLFunctions() {}
 
   public static class encodeURIGeneratorFunction implements Generator.GeneratorFunction {
-    public Object perform(List aParameters) throws GeneratorExc {
-      if (aParameters.size()!=1)
-        throw new GeneratorExc("encodeURIGeneratorFunction: only 1 parameter expected");
-      if (aParameters.get(0)==null)
-        return "";
-      if (!(aParameters.get(0) instanceof String))
-        throw new GeneratorExc("encodeURIGeneratorFunction: parameter must be a string (not a "+aParameters.get(0).getClass().getName()+")");
+    public Object perform(List aParameters) throws GeneratorExc, GeneratorFailure {
+      try {
+        if (aParameters.size()!=1)
+          throw new GeneratorExc("encodeURIGeneratorFunction: only 1 parameter expected");
 
-      return URLEncoder.encode((String) aParameters.get(0));
+        return HTMLRoutines.encodeURL(StringRoutines.interpretAsString(aParameters.get(0)));
+      }
+      catch (GeneratorExc e) {
+        throw e;
+      }
+      catch (Throwable t) {
+        throw new GeneratorFailure("encodeURIGeneratorFunction: " + t.getMessage(), t);
+      }
     };
   }
 
   public static class encodeHTMLGeneratorFunction implements Generator.GeneratorFunction {
     public Object perform(List aParameters) throws GeneratorExc {
-      if (aParameters.size()!=1)
-        throw new GeneratorExc("encodeHTMLGeneratorFunction: only 1 parameter expected");
-      if (aParameters.get(0)==null)
-        return "";
-      if (!(aParameters.get(0) instanceof String))
-        throw new GeneratorExc("encodeHTMLGeneratorFunction: parameter must be a string (not a "+aParameters.get(0).getClass().getName()+")");
+      try {
+        if (aParameters.size()!=1)
+          throw new GeneratorExc("encodeHTMLGeneratorFunction: only 1 parameter expected");
 
-
-      return HTMLRoutines.encodeHTML((String) aParameters.get(0));
+        return HTMLRoutines.encodeHTML(StringRoutines.interpretAsString(aParameters.get(0)));
+      }
+      catch (GeneratorExc e) {
+        throw e;
+      }
+      catch (Throwable t) {
+        throw new GeneratorFailure("encodeHTMLGeneratorFunction: " + t.getMessage(), t);
+      }
     };
   }
 }

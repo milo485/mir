@@ -48,18 +48,12 @@ import mir.generator.*;
 import mir.producer.*;
 import mir.entity.adapter.*;
 import mir.util.*;
+import mir.log.*;
 
 import mircoders.global.*;
 
-/* Verteilerservlet, dass je nach Parameter task die Klasse Producer"TASK"
- * ueber die Methode handle(); aufruft
- *
- * @author RK
- */
-
 public class ServletModuleProducer extends ServletModule
 {
-
   private static ServletModuleProducer instance = new ServletModuleProducer();
   public static ServletModule getInstance() { return instance; }
 
@@ -82,7 +76,7 @@ public class ServletModuleProducer extends ServletModule
   }
 
   private ServletModuleProducer() {
-    theLog = Logfile.getInstance(MirConfig.getProp("Home") + MirConfig.getProp("ServletModule.Producer.Logfile"));
+    logger = new LoggerWrapper("ServletModule.Producer");
     defaultAction="showProducerQueueStatus";
   }
 

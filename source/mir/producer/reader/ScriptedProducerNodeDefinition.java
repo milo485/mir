@@ -33,7 +33,9 @@ package mir.producer.reader;
 
 import java.util.*;
 import java.io.*;
+
 import mir.producer.*;
+import mir.log.*;
 
 public class ScriptedProducerNodeDefinition {
   private Map integerParameters;               // name -> default value
@@ -132,7 +134,7 @@ public class ScriptedProducerNodeDefinition {
       parameterName = aParameterName;
     }
 
-    public void produce(Map aValues, String aVerb, PrintWriter aLogger) throws ProducerExc, ProducerFailure {
+    public void produce(Map aValues, String aVerb, LoggerWrapper aLogger) throws ProducerExc, ProducerFailure {
       ProducerNode producerNode;
 
       Map runTimeData = (Map) ((Map) aValues.get(SCRIPTED_PRODUCERNODE_RUNTIMEDATA_KEY)).get(definitionName);

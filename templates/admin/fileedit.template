@@ -1,6 +1,6 @@
 <html>
 <head>
-	<title>${config["Mir.Name"]} | ${lang("fileedit")}</title>
+	<title>${config["Mir.Name"]} | ${lang("fileedit.htmltitle")}</title>
   <link rel="stylesheet" type="text/css" href="${config.docRoot}/style/admin.css">
 </head>
 
@@ -9,7 +9,7 @@
 <include "templates/admin/head.template">
 
 <br>
-<b>${lang("fileedit")} :</b> ${data.filename}
+<b>${lang("fileedit.filename")} :</b> ${data.filename}
 
 <br>
 

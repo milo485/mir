@@ -35,21 +35,6 @@
 
     </servlet>
     
-    <servlet>
-        <servlet-name>
-            OutputMir
-        </servlet-name>
-        <servlet-class>
-            OutputMir
-        </servlet-class>
-
-        <init-param>
-            <param-name>Config</param-name>
-            <param-value>config</param-value>
-        </init-param>
-
-    </servlet>
-
     <servlet-mapping>
         <servlet-name>
             Mir
@@ -60,13 +45,21 @@
     </servlet-mapping>
 
     <servlet-mapping>
-        <servlet-name>OpenMir</servlet-name>
-        <url-pattern>/OpenMir</url-pattern>
+        <servlet-name>
+            Mir
+        </servlet-name>
+        <url-pattern>
+            /servlet/Mir
+        </url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
-        <servlet-name>OutputMir</servlet-name>
-        <url-pattern>/OutputMir</url-pattern>
+        <servlet-name>OpenMir</servlet-name>
+        <url-pattern>/OpenMir</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>OpenMir</servlet-name>
+        <url-pattern>/servlet/OpenMir</url-pattern>
     </servlet-mapping>
 
     <mime-mapping>

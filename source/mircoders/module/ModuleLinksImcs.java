@@ -35,6 +35,7 @@ import java.io.*;
 import java.lang.*;
 import java.util.*;
 import java.sql.*;
+
 import javax.servlet.*;
 import javax.servlet.http.*;
 
@@ -45,6 +46,7 @@ import mir.module.*;
 import mir.entity.*;
 import mir.misc.*;
 import mir.storage.*;
+import mir.log.*;
 
 import mircoders.storage.*;
 
@@ -57,17 +59,13 @@ import mircoders.storage.*;
 
 public class ModuleLinksImcs extends AbstractModule
 {
+  static LoggerWrapper logger = new LoggerWrapper("Module.LinksImcs");
 
-    static Logfile theLog;
+  public ModuleLinksImcs(StorageObject theStorage) {
+    this.theStorage = theStorage;
+  }
 
-    public ModuleLinksImcs(StorageObject theStorage) {
-	    this.theStorage = theStorage;
-	    if (theLog == null)
-	      theLog = Logfile.getInstance(MirConfig.getProp("Home") + MirConfig.getProp("Module.LinksImcs.Logfile"));
-    }
-
-    public SimpleHash getLinksImcsAsSimpleHash() {
-	    return ((DatabaseLinksImcs)theStorage).getHashData();
-    }
-
+  public SimpleHash getLinksImcsAsSimpleHash() {
+    return ((DatabaseLinksImcs)theStorage).getHashData();
+  }
 }

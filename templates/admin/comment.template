@@ -10,14 +10,13 @@
 
 <form method="post" action="${config.actionRoot}">
 	<input type="hidden" name="module" value="Comment">
-	<input type="hidden" name="where" value="${utility.encodeHTML(data.where)}">
-	<input type="hidden" name="offset" value="${utility.encodeHTML(data.offset)}">
-	<input type="hidden" name="order" value="${utility.encodeHTML(data.order)}">
 	<input type="hidden" name="id" value="${utility.encodeHTML(data.id)}">
 	<input type="hidden" name="date" value="${utility.encodeHTML(data.date)}">
 	<input type="hidden" name="to_media" value="${utility.encodeHTML(data.to_media)}">
-	<if new> <input type="hidden" name="do" value="insert">
-	<else>	 <input type="hidden" name="do" value="update">
+	<if new> 
+	  <input type="hidden" name="do" value="insert">
+	<else>	 
+	  <input type="hidden" name="do" value="update">
 	</if>
 
 	<table border="0">  	
@@ -25,7 +24,7 @@
 	<tr> 
     <td align="right" class="darkgrey"><span class="witesmall">
 	 <B>${lang("comment.date")}:</B></span></td>
-    <td>${utility.encodeHTML(utility.encodeHTML(data.date))}</td>
+    <td>${utility.encodeHTML(utility.encodeHTML(data.webdb_create))}</td>
   	</tr>
 
 	<tr>

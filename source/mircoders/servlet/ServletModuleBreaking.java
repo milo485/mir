@@ -36,11 +36,14 @@ import java.net.*;
 import javax.servlet.http.*;
 import javax.servlet.*;
 import freemarker.template.*;
+
 import mir.servlet.*;
 import mir.misc.*;
 import mir.entity.*;
 import mir.storage.*;
 import mir.module.*;
+import mir.log.*;
+
 import mircoders.module.*;
 import mircoders.storage.*;
 
@@ -54,55 +57,54 @@ import mircoders.storage.*;
 public class ServletModuleBreaking extends ServletModule
 {
 
-	// Singelton / Kontruktor
+// Singelton / Kontruktor
 
-	private static ServletModuleBreaking instance = new ServletModuleBreaking();
-	public static ServletModule getInstance() { return instance; }
+  private static ServletModuleBreaking instance = new ServletModuleBreaking();
+  public static ServletModule getInstance() { return instance; }
 
-	private ServletModuleBreaking() {
-
-		theLog = Logfile.getInstance(MirConfig.getProp("Home") + MirConfig.getProp("ServletModule.Breaking.Logfile"));
-		templateListString = MirConfig.getProp("ServletModule.Breaking.ListTemplate");
-		templateObjektString = MirConfig.getProp("ServletModule.Breaking.ObjektTemplate");
-		templateConfirmString = MirConfig.getProp("ServletModule.Breaking.ConfirmTemplate");
-		try {
+  private ServletModuleBreaking() {
+    logger = new LoggerWrapper("ServletModule.Breaking");
+    templateListString = MirConfig.getProp("ServletModule.Breaking.ListTemplate");
+    templateObjektString = MirConfig.getProp("ServletModule.Breaking.ObjektTemplate");
+    templateConfirmString = MirConfig.getProp("ServletModule.Breaking.ConfirmTemplate");
+    try {
       DatabaseBreaking dbb = DatabaseBreaking.getInstance();
-			mainModule = new ModuleBreaking(dbb);
-		}
-		catch (StorageObjectException e) {
-			theLog.printDebugInfo("ServletModuleBreaking konnte nicht initialisiert werden");
-		}
-	}
+      mainModule = new ModuleBreaking(dbb);
+    }
+    catch (StorageObjectException e) {
+      logger.error("Initializatoin of ServletModuleBreaking failed!: " + e.getMessage());
+    }
+  }
 
-	public void list(HttpServletRequest req, HttpServletResponse res)
-		throws ServletModuleException
-	{
-    theLog.printDebugInfo("-- breaking: list");
-		// fetch and deliver
-		try {
-			SimpleHash mergeData = new SimpleHash();
-			String offset = req.getParameter("offset");
-			if (offset==null || offset.equals("")) offset="0";
-			mergeData.put("offset",offset);
-			EntityList theList = mainModule.getByWhereClause(null, "webdb_create desc", (new Integer(offset)).intValue());
-			mergeData.put("contentlist",theList);
-			if(theList.getOrder()!=null) {
-				mergeData.put("order", theList.getOrder());
-				mergeData.put("order_encoded", URLEncoder.encode(theList.getOrder()));
-			}
-			mergeData.put("count", (new Integer(theList.getCount())).toString());
-			mergeData.put("from", (new Integer(theList.getFrom())).toString());
-			mergeData.put("to", (new Integer(theList.getTo())).toString());
-			if (theList.hasNextBatch())
-				mergeData.put("next", (new Integer(theList.getNextBatch())).toString());
-			if (theList.hasPrevBatch())
-				mergeData.put("prev", (new Integer(theList.getPrevBatch())).toString());
+  public void list(HttpServletRequest req, HttpServletResponse res)
+      throws ServletModuleException
+  {
+    logger.debug("-- breaking: list");
+// fetch and deliver
+    try {
+      SimpleHash mergeData = new SimpleHash();
+      String offset = req.getParameter("offset");
+      if (offset==null || offset.equals("")) offset="0";
+      mergeData.put("offset",offset);
+      EntityList theList = mainModule.getByWhereClause(null, "webdb_create desc", (new Integer(offset)).intValue());
+      mergeData.put("contentlist",theList);
+      if(theList.getOrder()!=null) {
+        mergeData.put("order", theList.getOrder());
+        mergeData.put("order_encoded", URLEncoder.encode(theList.getOrder()));
+      }
+      mergeData.put("count", (new Integer(theList.getCount())).toString());
+      mergeData.put("from", (new Integer(theList.getFrom())).toString());
+      mergeData.put("to", (new Integer(theList.getTo())).toString());
+      if (theList.hasNextBatch())
+        mergeData.put("next", (new Integer(theList.getNextBatch())).toString());
+      if (theList.hasPrevBatch())
+        mergeData.put("prev", (new Integer(theList.getPrevBatch())).toString());
 
-			// raus damit
-			HTMLTemplateProcessor.process(res, templateListString, mergeData, res.getWriter(), getLocale(req));
-		}
-		catch (ModuleException e) {throw new ServletModuleException(e.toString());}
-		catch (IOException e) {throw new ServletModuleException(e.toString());}
-		catch (Exception e) {throw new ServletModuleException(e.toString());}
-	}
+// raus damit
+      HTMLTemplateProcessor.process(res, templateListString, mergeData, res.getWriter(), getLocale(req));
+    }
+    catch (ModuleException e) {throw new ServletModuleException(e.toString());}
+    catch (IOException e) {throw new ServletModuleException(e.toString());}
+    catch (Exception e) {throw new ServletModuleException(e.toString());}
+  }
 }

@@ -13,29 +13,46 @@ function openWin(url) {
 
 <include "templates/admin/head.template">
 
-<form enctype="multipart/form-data" method="post" action="${config.actionRoot}?module=Audio&do=<if data.new>insert<else>update</if>&id=${data.id}">
-<if data.icon_data=="" || data.icon_data=="0">
-	<INPUT TYPE="file" NAME="mptest">
+<if data.new>
+<form action="${config.actionRoot}?module=Audio&do=add" method="post">
+	<table border="0">
+	<tr>
+	<td align="right" class="darkgrey">
+	<span class="witesmall">
+	<b>${lang("media.nr_of_media")}</b> <br>
+	</span>
+	</td>
+	<td>
+	<input type="text" size="3" name="medianum" value="${medianum}">&nbsp;<input type="submit" value="${lang("media.nr_of_media.submit")}">
+	</td>
+	</tr>
+	</table>
+</form>
 </if>
-
+<form enctype="multipart/form-data" method="post" action="${config.actionRoot}?module=Audio&do=<if data.new>insert<else>update</if>&id=${data.id}">
 	<input type="hidden" name="where" value="${data.where}">
 	<input type="hidden" name="offset" value="${data.offset}">
 	<input type="hidden" name="order" value="${data.order}">
 	<input type="hidden" name="id" value="${data.id}">
 
 	<table border="0">
+
+	<if !data.new>
 	<tr>
     <td align="right" class="darkgrey">
 		<span class="witesmall">
-	  	  	<img src="${config.docRoot}/img/${data.big_icon}" border=0></span></td>
+			<a href="${config.actionRoot}?module=Audio&do=getMedia&id=${data.id}">
+	  	  	<img src="${config.docRoot}/img/${data.big_icon}" border=0></a></span></td>
     <td valign="bottom"><span class="spezialtext">
 	  	${lang("media.created")}: ${data.webdb_create}
         <if data.webdb_lastchange>/ ${lang("media.changed")} ${data.webdb_lastchange}</if><br>
 	  	<if data.is_published=="1">${lang("media.published")}: ${data.publish_date} / ${data.publish_server}${data.publish_path}<br></if>
-	  	${lang("media.format")}: ${data.mimetype} / ${data.descr}<br>
+	  	${lang("media.format")}: ${data.mimetype} / ${data.media_descr}<br>
+	  	${lang("media.size")}: ${data.human_readable_size}<br>
 	  	${lang("media.rights")}: <b>${data.rightsHashdata[to_rights]["name"]}</b><br>
 	</td>
   	</tr>
+	</if>
 
 	<tr>
     <td align="right" class="darkgrey"><span class="witesmall">
@@ -49,12 +66,6 @@ function openWin(url) {
   	</td>
 	</tr>
 
-
-	<tr>
-    <td align="right" class="darkgrey"><span class="witesmall">
-	 <B>${lang("media.title")}:</B></span></td>
-    <td><input type="text" size="40" maxlength="255" name="title" value="${data.title}"></td>
-  	</tr>
 
 	<tr>
     <td align="right" class="darkgrey"><span class="witesmall">
@@ -100,11 +111,45 @@ function openWin(url) {
     <td><input type="text" size="40" maxlength="80" name="source" value="${data.source}"></td>
   	</tr>
 	<tr>
+	<if data.new>
+	<tr>
+	<td>
+		${lang("media.is_published")} <input type="checkbox" name="is_published" value="1"<if data.is_published!="0" && data.is_published!=""> checked</if>>
+	</td>
+	</tr>
+	<list data.mediafields as m>
+		<tr>
+		<td align="right" class="darkgrey"><span class="witesmall">
+
+			<B>${lang("media.title")}:<B>
+		</font> </td>
+		<td>
+			<input type="text" name="media_title${m}" size="40" maxlength="80" value="">
+		</td>
+		</tr>
+		<tr>
+		<td align="right" class="darkgrey"></td>
+		<td>
+				<INPUT TYPE="file" NAME="mpfile${m}"><br>
+		</td>
+		</tr>
+	</list>
+	<else>
+		<tr>
+		<td align="right" class="darkgrey"><span class="witesmall">
+			<B>${lang("media.title")}:<B>
+		</td>
+		<td>
+			<input type="text" name="title" size="40" maxlength="80" value="${data.title}">
+		</td>
+		</tr>
+	</if>
+
     <td colspan="2" align="right"> <span class="text">
-	${lang("media.is_published")} <input type="checkbox" name="is_published" value="1"<if data.is_published!="0" && data.is_published!=""> checked</if>>
 	<if data.new>
       <input type="submit" name="save" value="${lang("insert")}">
     <else>
+     ${lang("media.is_published")} <input type="checkbox" name="is_published" value="1"<if data.is_published!="0" && data.is_published!=""> checked</if>>
     <input type="submit" name="save" value="${lang("save")}">
     </if> </span></form></span>
     </td>

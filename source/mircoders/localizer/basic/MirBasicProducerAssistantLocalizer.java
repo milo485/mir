@@ -75,6 +75,8 @@ public class MirBasicProducerAssistantLocalizer implements MirProducerAssistantL
     utilityMap.put("encodeURI", new GeneratorHTMLFunctions.encodeURIGeneratorFunction());
     utilityMap.put("subString", new GeneratorStringFunctions.subStringFunction());
     utilityMap.put("subList", new GeneratorListFunctions.subListFunction());
+    utilityMap.put("isOdd", new GeneratorIntegerFunctions.isOddFunction());
+    utilityMap.put("increment", new GeneratorIntegerFunctions.incrementFunction());
 
 
     aValueSet.put("config", configMap);

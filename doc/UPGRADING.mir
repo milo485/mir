@@ -1,6 +1,12 @@
 MIR UPGRADING HOWTO
 ----------------------------------------------------------------
 
+For releases after 1.0.0-rc1, always check the NEWS file at the root of the
+tree to check the [Notes] section to see what you might have to adjust.
+
+For non releases or releases before 1.0.0-rc1, aka. the latest sources from
+CVS, it is a good idea to follow the advice below.
+
 Due to weaknesses of the current Mir configuration system, many folks get
 bitten after doing an update of their cvs tree. Suddenly Mir starts throwing
 weird exceptions, etc.. The cause is usually a new config option in the
@@ -20,4 +26,4 @@ config.properties file and modify if necessary.
 
 ----------------------------------------------------------------
 
-$Date: 2002/07/03 12:09:20 $ - the Mir coders
+last changed: $Date: 2002/12/07 07:00:16 $ - the Mir coders

@@ -68,7 +68,7 @@ public final class HTMLTemplateProcessor {
             actionRoot = docRoot + MirConfig.getProp("Producer.ActionServlet");
         } catch (ConfigException ce) {
             // if  Producer.ActionServlet is not set in the conf file
-            actionRoot = docRoot + "/servlet/Mir";
+            actionRoot = docRoot + "/Mir";
         }
     }
 
@@ -158,22 +158,6 @@ public final class HTMLTemplateProcessor {
     }
 
     /**
-     * Wandelt HashMap <code>mergeData</code> in freemarker-Struktur und mischt diese mit
-     * Template <code>templateFilename</code> und gibt das Ergebnis an den PrintWriter
-     * <code>out</code>
-     *
-     * @param templateFilename
-     * @param mergeData - a HashMap with mergeData to be converted in SimpleHash
-     * @param out
-     * @exception HTMLParseException
-     */
-    public static void process(HttpServletResponse res, String templateFilename,
-                               HashMap mergeData, PrintWriter out, Locale locale)
-            throws HTMLParseException {
-        process(res, templateFilename, makeSimpleHash(mergeData), out, locale);
-    }
-
-    /**
      * Gibt Template <code>templateFilename</code> an den PrintWriter
      * <code>out</code>
      *
@@ -254,6 +238,8 @@ public final class HTMLTemplateProcessor {
           utilityHash.put("compressWhitespace", new freemarker.template.utility.CompressWhitespace());
           utilityHash.put("encodeURI", FreemarkerGenerator.makeAdapter(new GeneratorHTMLFunctions.encodeURIGeneratorFunction()));
           utilityHash.put("encodeHTML", FreemarkerGenerator.makeAdapter(new GeneratorHTMLFunctions.encodeHTMLGeneratorFunction()));
+          utilityHash.put("isOdd", FreemarkerGenerator.makeAdapter(new GeneratorIntegerFunctions.isOddFunction()));
+          utilityHash.put("increment", FreemarkerGenerator.makeAdapter(new GeneratorIntegerFunctions.incrementFunction()));
         }
         catch (Throwable t) {
           throw new HTMLParseException(t.getMessage());
@@ -318,24 +304,6 @@ public final class HTMLTemplateProcessor {
             }
         }
         return simpleHash;
-    }
-
-    /**
-     *  Konvertiert ein Entity in ein freemarker.template.SimpleHash-Modell
-     *  @param entity ist die Entity
-     *  @return SimpleHash mit den entsprechenden freemarker Daten
-     *
-     *  @deprecated This method is deprecated and will be deleted in the next
-     *  release. Entity interfaces freemarker.template.TemplateHashModel now
-     *  and can be used in the same way as SimpleHash. It is not necessary any
-     *  more to make a SimpleHash from an Entity
-     */
-    public static SimpleHash makeSimpleHash(Entity entity) {
-        if (entity != null) {
-            theLog.printWarning("## using deprecated makeSimpleHash(entity) - a waste of resources");
-            return makeSimpleHash(entity.getValues());
-        } else
-            return null;
     }
 
     /**

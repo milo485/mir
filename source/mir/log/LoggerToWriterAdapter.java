@@ -3,20 +3,20 @@ package mir.log;
 import java.io.*;
 import java.util.*;
 
-public class WriterToLoggerAdapter extends Writer {
+public class LoggerToWriterAdapter extends Writer {
   private LoggerWrapper logger;
   private int messageType;
   private StringBuffer lineBuffer;
   private String lineSeparator;
 
-  public WriterToLoggerAdapter(LoggerWrapper aLogger, int aMessageType) {
+  public LoggerToWriterAdapter(LoggerWrapper aLogger, int aMessageType) {
     lineBuffer = new StringBuffer();
     logger = aLogger;
     messageType = aMessageType;
     lineSeparator = System.getProperty("line.separator");
   }
 
-  public WriterToLoggerAdapter(Logger aLogger, int aMessageType) {
+  public LoggerToWriterAdapter(Logger aLogger, int aMessageType) {
     this(new LoggerWrapper(aLogger), aMessageType);
   }
 

@@ -31,10 +31,11 @@
 
 package mircoders.servlet;
 
-import mir.misc.Logfile;
 import mir.misc.MirConfig;
 import mir.servlet.ServletModule;
 import mir.storage.StorageObjectException;
+import mir.log.*;
+
 import mircoders.module.ModuleUploadedMedia;
 import mircoders.storage.DatabaseOther;
 
@@ -45,9 +46,6 @@ import mircoders.storage.DatabaseOther;
  */
 
 public class ServletModuleOtherMedia extends ServletModuleUploadedMedia {
-
-  //private static DatabaseRights dbRights;
-
   // Singelton / Contructor
   private static ServletModuleOtherMedia instance = new ServletModuleOtherMedia();
 
@@ -55,9 +53,9 @@ public class ServletModuleOtherMedia extends ServletModuleUploadedMedia {
     return instance;
   }
 
-
   private ServletModuleOtherMedia() {
-    theLog = Logfile.getInstance(MirConfig.getProp("Home") + MirConfig.getProp("ServletModule.OtherMedia.Logfile"));
+    logger = new LoggerWrapper("ServletModule.OtherMedia");
+
     templateListString = MirConfig.getProp("ServletModule.OtherMedia.ListTemplate");
     templateObjektString = MirConfig.getProp("ServletModule.OtherMedia.ObjektTemplate");
     templateConfirmString = MirConfig.getProp("ServletModule.OtherMedia.ConfirmTemplate");
@@ -66,7 +64,7 @@ public class ServletModuleOtherMedia extends ServletModuleUploadedMedia {
       //dbRights = DatabaseRights.getInstance();
     }
     catch (StorageObjectException e) {
-      theLog.printDebugInfo("servletmodule otherMedia could not be initialized");
+      logger.error("servletmodule otherMedia could not be initialized: " + e.getMessage());
     }
   }
 }

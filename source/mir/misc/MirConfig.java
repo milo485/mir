@@ -74,7 +74,7 @@ public class MirConfig extends Configuration {
    * @param name, The name of the servlet (usually "Mir")
    * @param confName, the name of the config file to load.
    */
-  public static synchronized void initConfig(ServletContext ctx, String uri,
+  public static synchronized void initConfig(ServletContext ctx, String ctxPath,
                                             String name, String confName) {
 
     initConfResource(ctx.getRealPath("/WEB-INF/")+"/"+confName);
@@ -83,7 +83,7 @@ public class MirConfig extends Configuration {
 
     configHash.put("Home", ctx.getRealPath("/WEB-INF/")+"/");
     configHash.put("ServletContext", ctx);
-    configHash.put("RootUri", uri);
+    configHash.put("RootUri", ctxPath);
 
     Enumeration resKeys = getResourceKeys();
     while(resKeys.hasMoreElements()) {

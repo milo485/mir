@@ -33,7 +33,9 @@ package mir.producer;
 
 import java.io.*;
 import java.util.*;
+
 import mir.util.*;
+import mir.log.*;
 
 public class DirCopyingProducerNode implements ProducerNode  {
   private String sourceExpression;
@@ -48,7 +50,7 @@ public class DirCopyingProducerNode implements ProducerNode  {
     destinationExpression = aDestination;
   }
 
-  public void produce(Map aValueMap, String aVerb, PrintWriter aLogger) throws ProducerFailure {
+  public void produce(Map aValueMap, String aVerb, LoggerWrapper aLogger) throws ProducerFailure {
     String source = "";
     String destination = "";
     File sourceFile;
@@ -57,13 +59,13 @@ public class DirCopyingProducerNode implements ProducerNode  {
     try {
       source = ParameterExpander.expandExpression( aValueMap, sourceExpression );
       destination = ParameterExpander.expandExpression( aValueMap, destinationExpression );
-      aLogger.println("Copying " + source + " into " + destination);
       FileCopier.copy(
         new File(sourceBasePath, source),
         new File(destinationBasePath, destination));
+      aLogger.info(source + " copied into " + destination);
     }
     catch (Throwable e) {
-      throw new ProducerFailure("Copying " + source + " into " + destination + " failed: " + e.getMessage(), e);
+      aLogger.error("Copying " + source + " into " + destination + " failed: " + e.getMessage());
     }
   }
 }

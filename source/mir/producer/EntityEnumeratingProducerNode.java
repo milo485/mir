@@ -33,10 +33,12 @@ package mir.producer;
 
 import java.util.*;
 import java.io.*;
+
 import mir.entity.adapter.*;
 import mir.entity.*;
 import mir.storage.*;
 import mir.util.*;
+import mir.log.*;
 
 public class EntityEnumeratingProducerNode extends ProducerNodeDecorator {
   private String key;
@@ -67,7 +69,7 @@ public class EntityEnumeratingProducerNode extends ProducerNodeDecorator {
     skip = aSkip;
   }
 
-  public void produce(Map aValueMap, String aVerb, PrintWriter aLogger) throws ProducerFailure {
+  public void produce(Map aValueMap, String aVerb, LoggerWrapper aLogger) throws ProducerFailure {
     Iterator browser;
 
     try {
@@ -86,7 +88,7 @@ public class EntityEnumeratingProducerNode extends ProducerNodeDecorator {
       }
     }
     catch (Throwable t) {
-      aLogger.println("Exception occurred inside an EntityEnumeratingProducerNode: " + t.getMessage());
+      aLogger.error("Exception occurred inside an EntityEnumeratingProducerNode: " + t.getMessage());
     }
   };
 }

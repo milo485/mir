@@ -54,32 +54,32 @@ import mir.module.*;
 import mir.entity.*;
 import mir.misc.*;
 import mir.storage.*;
+import mir.log.*;
 
 import mircoders.storage.*;
 
 
 public class ModuleMediafolder extends AbstractModule
 {
-	static Logfile theLog;
+  static LoggerWrapper logger = new LoggerWrapper("Module.Mediafolder");
 
-	// Kontruktor
+// Kontruktor
 
-	public ModuleMediafolder(StorageObject theStorage)
-	{
-		if (theLog == null) theLog = Logfile.getInstance(MirConfig.getProp("Home") + MirConfig.getProp("Module.Mediafolder.Logfile"));
-		if (theStorage == null) theLog.printWarning("StorageObject was null!");
-		this.theStorage = theStorage;
-	}
+  public ModuleMediafolder(StorageObject theStorage)
+  {
+    if (theStorage == null) logger.warn("ModuleMediafolder: StorageObject was null!");
+    this.theStorage = theStorage;
+  }
 
-	// Methoden
+// Methoden
 
-		public SimpleList getPopupData() throws ModuleException {
-      try {
-			  return ((DatabaseMediafolder)theStorage).getPopupData();
-      } catch (Exception e) {
-        throw new ModuleException(e.toString());
-      }
-		}
+  public SimpleList getPopupData() throws ModuleException {
+    try {
+      return ((DatabaseMediafolder)theStorage).getPopupData();
+    } catch (Exception e) {
+      throw new ModuleException(e.toString());
+    }
+  }
 
 
 }

@@ -33,15 +33,16 @@ package mircoders.producer;
 
 import java.util.*;
 import java.io.*;
+
 import mir.util.*;
+import mir.log.*;
 import mir.misc.*;
 import mir.media.*;
 import mir.producer.*;
 import mir.generator.*;
 import mir.entity.*;
 import mir.entity.adapter.*;
-//import mircoders.global.*;
-//import mircoders.localizer.*;
+
 import mircoders.entity.*;
 import mircoders.storage.*;
 
@@ -52,7 +53,7 @@ public class MediaGeneratingProducerNode implements ProducerNode {
     mediaEntityKey = aMediaEntityKey;
   }
 
-  public void produce(Map aValueMap, String aVerb, PrintWriter aLogger) throws ProducerFailure, ProducerExc {
+  public void produce(Map aValueMap, String aVerb, LoggerWrapper aLogger) {
     Object data;
     Entity entity;
     EntityUploadedMedia uploadedMediaEntity = null;
@@ -83,7 +84,7 @@ public class MediaGeneratingProducerNode implements ProducerNode {
       entity.setValueForProperty("is_produced", "1");
       entity.update();
 
-      aLogger.println("media with id "+uploadedMediaEntity.getValue("id") + ", mediaType " + mediaType.getValue("name") + " successfully produced");
+      aLogger.info("media with id "+uploadedMediaEntity.getValue("id") + ", mediaType " + mediaType.getValue("name") + " successfully produced");
     }
     catch (Throwable t) {
       String message = "Error while generating media";
@@ -98,7 +99,7 @@ public class MediaGeneratingProducerNode implements ProducerNode {
       }
 
       message = message + ": " + t.getMessage();
-      aLogger.println(message);
+      aLogger.error(message);
     }
   }
 }

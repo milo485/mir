@@ -66,8 +66,8 @@ import mir.storage.*;
  * If the web server is not apache, then your on your own.
  * 
  * @see mir.media.MirMedia
- * @author mh <heckmann@hbe.ca>
- * @version 01.12.2001
+ * @author mh <mh@nadir.org>
+ * @version $Id: MediaHandlerMp3.java,v 1.9 2002/11/28 07:28:24 mh Exp $
  */
 
 public class MediaHandlerMp3 extends MediaHandlerAudio implements MirMedia
@@ -131,7 +131,7 @@ public class MediaHandlerMp3 extends MediaHandlerAudio implements MirMedia
 
   public String getDescr(Entity mediaType)
   {
-    return "Mp3 audio";
+    return "mp3";
   }
 
 }

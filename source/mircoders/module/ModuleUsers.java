@@ -35,6 +35,7 @@ import java.io.*;
 import java.lang.*;
 import java.util.*;
 import java.sql.*;
+
 import javax.servlet.*;
 import javax.servlet.http.*;
 
@@ -45,6 +46,7 @@ import mir.module.*;
 import mir.entity.*;
 import mir.misc.*;
 import mir.storage.*;
+import mir.log.*;
 
 import mircoders.entity.*;
 import mircoders.storage.*;
@@ -59,52 +61,46 @@ import mircoders.storage.*;
 
 public class ModuleUsers extends AbstractModule
 {
-	static Logfile theLog;
+  static LoggerWrapper logger = new LoggerWrapper("Module.Users");
 
-	// Kontruktor
+  public ModuleUsers(StorageObject theStorage)
+  {
+    if (theStorage == null)
+      logger.warn("StorageObject was null!");
 
-	public ModuleUsers(StorageObject theStorage)
-	{
+    this.theStorage = theStorage;
+  }
 
-		if (theLog == null) theLog = Logfile.getInstance(MirConfig.getProp("Home") + MirConfig.getProp("Module.Users.Logfile"));
-		if (theStorage == null) theLog.printWarning("StorageObject was null!");
-		this.theStorage = theStorage;
+  /**
+   * login method
+   */
 
-	}
+  public EntityUsers getUserForLogin(String user, String password) throws ModuleException
+  {
+    String whereString = "login='" +user + "' and password='"+ password + "' and is_admin='1'";
+    EntityList userList = getByWhereClause(whereString, -1);
+    if (userList != null && userList.getCount()==1)
+      return (EntityUsers)userList.elementAt(0);
+    else
+      return null;
+  }
 
-	/**
-	 * login method
-	 */
-
-	public EntityUsers getUserForLogin(String user, String password) throws ModuleException
-	{
-		String whereString = "login='" +user + "' and password='"+ password + "' and is_admin='1'";
-		EntityList userList = getByWhereClause(whereString, -1);
-		if (userList != null && userList.getCount()==1)
-			return (EntityUsers)userList.elementAt(0);
-		else return null;
-	}
-
-
-
-	public EntityList getUsers(String whereClause, int offset, int limit)
-		throws ModuleException
-	{
-		try {
-			return theStorage.selectByWhereClause(whereClause, null, offset, limit);
-		}
-		catch (StorageObjectException e){
-			throw new ModuleException(e.toString());
-		}
-	}
-
-	public SimpleList getUsersAsSimpleList() throws ModuleException {
-		//  String sql = "select id, name from Users order by name";
+  public EntityList getUsers(String whereClause, int offset, int limit) throws ModuleException
+  {
     try {
-		  return ((DatabaseUsers)theStorage).getPopupData();
-    } catch(StorageObjectException e) {
+      return theStorage.selectByWhereClause(whereClause, null, offset, limit);
+    }
+    catch (StorageObjectException e){
       throw new ModuleException(e.toString());
     }
-	}
+  }
 
+  public SimpleList getUsersAsSimpleList() throws ModuleException {
+    try {
+      return ((DatabaseUsers)theStorage).getPopupData();
+    }
+    catch(StorageObjectException e) {
+      throw new ModuleException(e.toString());
+    }
+  }
 }

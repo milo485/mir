@@ -44,14 +44,15 @@ import mir.module.*;
 import mir.misc.*;
 import mir.entity.*;
 import mir.storage.*;
+import mir.log.*;
 
 import mircoders.entity.*;
 import mircoders.storage.*;
 import mircoders.module.*;
 
 /*
- *  ServletModuleSchwerpunkt -
- *  liefert HTML fuer Schwerpunkt
+ *  ServletModuleSchwerpunkt - code for the handling of "features"
+ *
  *
  *
  * @author RK
@@ -59,20 +60,20 @@ import mircoders.module.*;
 
 public class ServletModuleSchwerpunkt extends ServletModule
 {
-   // Singelton / Kontruktor
+// Singelton / Kontruktor
   private static ServletModuleSchwerpunkt instance = new ServletModuleSchwerpunkt();
   public static ServletModule getInstance() { return instance; }
 
   private ServletModuleSchwerpunkt() {
-	theLog = Logfile.getInstance(MirConfig.getProp("Home") + MirConfig.getProp("ServletModule.Schwerpunkt.Logfile"));
-	templateListString = MirConfig.getProp("ServletModule.Schwerpunkt.ListTemplate");
-	templateObjektString = MirConfig.getProp("ServletModule.Schwerpunkt.ObjektTemplate");
-	templateConfirmString = MirConfig.getProp("ServletModule.Schwerpunkt.ConfirmTemplate");
-        try {
-          mainModule = new ModuleSchwerpunkt(DatabaseFeature.getInstance());
-        }
-        catch (StorageObjectException e) {
-          theLog.printDebugInfo("servletmodulethemen konnte nicht initialisiert werden");
-        }
+    logger = new LoggerWrapper("ServletModule.Feature");
+    templateListString = MirConfig.getProp("ServletModule.Schwerpunkt.ListTemplate");
+    templateObjektString = MirConfig.getProp("ServletModule.Schwerpunkt.ObjektTemplate");
+    templateConfirmString = MirConfig.getProp("ServletModule.Schwerpunkt.ConfirmTemplate");
+    try {
+      mainModule = new ModuleSchwerpunkt(DatabaseFeature.getInstance());
+    }
+    catch (StorageObjectException e) {
+      logger.error("Intialization of ServletModuleSchwerpunkt (Features) failed!: " + e.getMessage());
+    }
   }
 }

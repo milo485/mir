@@ -35,20 +35,25 @@ import freemarker.template.SimpleList;
 import freemarker.template.SimpleScalar;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
+
 import mir.entity.Entity;
+import mir.entity.EntityList;
 import mir.media.MediaHelper;
 import mir.media.MirMedia;
 import mir.storage.StorageObject;
 import mir.storage.StorageObjectException;
+import mir.misc.NumberUtils;
 import mircoders.storage.DatabaseUploadedMedia;
+import mircoders.storage.DatabaseContentToMedia;
 
+import java.sql.SQLException;
 import java.util.HashMap;
 
 /**
  * Diese Klasse enthält die Daten eines MetaObjekts
  *
- * @author RK
- * @version 29.6.1999
+ * @author mh, mir-coders group
+ * @version $Id: EntityUploadedMedia.java,v 1.16 2002/12/06 08:09:51 mh Exp $
  */
 
 
@@ -62,6 +67,17 @@ public class EntityUploadedMedia extends Entity {
   public EntityUploadedMedia(StorageObject theStorage) {
     this();
     setStorage(theStorage);
+  }
+
+  public void update() throws StorageObjectException {
+    super.update();
+    EntityList contentList = DatabaseContentToMedia.getInstance().getContent(this);
+    if (contentList!=null && contentList.size()>0) {
+      for(int i=0;i<contentList.size();i++) {
+        EntityContent contentEnt = (EntityContent)contentList.elementAt(i);
+        contentEnt.setProduced(false);
+      }
+    }
   }
 
   public void setValues(HashMap theStringValues) {
@@ -95,12 +111,17 @@ public class EntityUploadedMedia extends Entity {
     if (key != null) {
       if (key.equals("big_icon"))
         returnValue = getBigIconName();
-      else if (key.equals("descr"))
+      else if (key.equals("descr") || key.equals("media_descr"))
         returnValue = getDescr();
       else if (key.equals("mediatype"))
         returnValue = getMediaTypeString();
       else if (key.equals("mimetype"))
         returnValue = getMimeType();
+      else if (key.equals("human_readable_size")) {
+        String size = super.getValue("size");
+        if (size != null)
+          returnValue = NumberUtils.humanReadableSize(Double.parseDouble(size));
+      }
       else
         returnValue = super.getValue(key);
     }

@@ -45,13 +45,12 @@ import mir.module.*;
 import mir.entity.*;
 import mir.misc.*;
 import mir.storage.*;
+import mir.log.*;
 
-import mir.entity.*;
-import mir.storage.*;
 
 
 /*
- *  ContentObjekt -
+ *
  *
  *
  * @author RK
@@ -59,25 +58,22 @@ import mir.storage.*;
 
 public class ModuleBreaking extends AbstractModule
 {
-	static Logfile theLog;
+  static LoggerWrapper logger = new LoggerWrapper("Module.Breaking");
 
-	// Kontruktor
+  public ModuleBreaking (StorageObject theStorage)
+  {
+    if (theStorage == null) logger.warn("ModuleBreaking -- StorageObject was null!");
+    this.theStorage = theStorage;
+  }
 
-	public ModuleBreaking (StorageObject theStorage)
-	{
-		if (theLog == null) theLog = Logfile.getInstance(MirConfig.getProp("Home") + MirConfig.getProp("Module.Breaking.Logfile"));
-		if (theStorage == null) theLog.printWarning("ModuleBreaking -- StorageObject was null!");
-		this.theStorage = theStorage;
-	}
-
-	// Methoden
+// Methoden
   public EntityList getBreakingNews() {
     EntityList returnList = null;
     try {
       returnList = getByWhereClause(null,"webdb_create desc",0,5);
     }
     catch (Exception ex) {
-      theLog.printWarning("--getBreakingNews(): could not fetch Breaking News" + ex.toString());
+      logger.error("--getBreakingNews(): could not fetch Breaking News" + ex.toString());
     }
     return returnList;
   }

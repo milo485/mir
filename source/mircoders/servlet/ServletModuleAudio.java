@@ -31,10 +31,11 @@
 
 package mircoders.servlet;
 
-import mir.misc.Logfile;
 import mir.misc.MirConfig;
 import mir.servlet.ServletModule;
 import mir.storage.StorageObjectException;
+import mir.log.*;
+
 import mircoders.module.ModuleUploadedMedia;
 import mircoders.storage.DatabaseAudio;
 
@@ -55,9 +56,8 @@ public class ServletModuleAudio extends ServletModuleUploadedMedia {
     return instance;
   }
 
-
   private ServletModuleAudio() {
-    theLog = Logfile.getInstance(MirConfig.getProp("Home") + MirConfig.getProp("ServletModule.Audio.Logfile"));
+    logger = new LoggerWrapper("ServletModule.Audio");
     templateListString = MirConfig.getProp("ServletModule.Audio.ListTemplate");
     templateObjektString = MirConfig.getProp("ServletModule.Audio.ObjektTemplate");
     templateConfirmString = MirConfig.getProp("ServletModule.Audio.ConfirmTemplate");
@@ -66,7 +66,7 @@ public class ServletModuleAudio extends ServletModuleUploadedMedia {
       //dbRights = DatabaseRights.getInstance();
     }
     catch (StorageObjectException e) {
-      theLog.printDebugInfo("servletmodule audio could not be initialized");
+      logger.error("servletmodule audio could not be initialized: " + e.getMessage());
     }
   }
 }

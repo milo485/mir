@@ -45,6 +45,7 @@ import mir.module.*;
 import mir.entity.*;
 import mir.misc.*;
 import mir.storage.*;
+import mir.log.*;
 
 import mircoders.storage.*;
 
@@ -57,13 +58,12 @@ import mircoders.storage.*;
 
 public class ModuleComment extends AbstractModule
 {
-  static Logfile theLog;
+  static LoggerWrapper logger = new LoggerWrapper("Module.Comment");
 
   // Contructor
   public ModuleComment(StorageObject theStorage)
   {
-    if (theLog == null) theLog = Logfile.getInstance(MirConfig.getProp("Home") + MirConfig.getProp("Module.Comment.Logfile"));
-    if (theStorage == null) theLog.printWarning("StorageObject was null!");
+    if (theStorage == null) logger.warn("StorageObject was null!");
     this.theStorage = theStorage;
   }
 
@@ -71,11 +71,12 @@ public class ModuleComment extends AbstractModule
   public SimpleList getCommentAsSimpleList() throws ModuleException {
     try {
       return ((DatabaseComment)theStorage).getPopupData();
-    } catch (StorageObjectException e) {
+    }
+    catch (StorageObjectException e) {
       throw new ModuleException(e.toString());
     }
   }
-  
+
   /**
    * setValues in the Entity and updates them on the StorageObject
    */
@@ -88,8 +89,11 @@ public class ModuleComment extends AbstractModule
       theEntity.setValues(theValues);
       theEntity.update();
       return theEntity.getId();
-    } catch (StorageObjectException e){
-      e.printStackTrace(System.err);
+    }
+    catch (StorageObjectException e){
+      logger.error("ModuleComment.set: " + e.getMessage());
+      e.printStackTrace(new PrintWriter(new LoggerToWriterAdapter(logger, LoggerWrapper.DEBUG_MESSAGE)));
+
       throw new ModuleException(e.toString());
     }
   }

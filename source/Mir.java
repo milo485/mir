@@ -67,7 +67,7 @@ import mir.log.Log;
  * Mir.java - main servlet, that dispatches to servletmodules
  *
  * @author $Author: mh $
- * @version $Id: Mir.java,v 1.22 2002/11/04 04:35:20 mh Exp $
+ * @version $Id: Mir.java,v 1.23 2002/12/06 08:12:42 mh Exp $
  *
  */
 
@@ -95,11 +95,10 @@ public class Mir extends AbstractServlet {
         EntityUsers userEntity;
         String http = "";
 
-        // get the configration - this could conflict if 2 mirs are in the
-        // VM maybe? to be checked. -mh
         if (getServletContext().getAttribute("mir.confed") == null) {
             getConfig(req);
         }
+
         MirConfig.setServletName(getServletName());
 
         //*** test
@@ -109,6 +108,14 @@ public class Mir extends AbstractServlet {
         userEntity = (EntityUsers) session.getAttribute("login.uid");
 
         if (req.getServerPort() == 443) http = "https"; else http = "http";
+
+        //nothing in Mir can or should be cached as it's all dynamic...
+        //
+        //this needs to be done here and not per page (via meta tags) as some
+        //browsers have problems w/ it per-page -mh
+        res.setHeader("Pragma", "no-cache");
+        res.setDateHeader("Expires", 0);
+        res.setHeader("Cache-Control", "no-cache");
         res.setContentType("text/html; charset="
                             +MirConfig.getProp("Mir.DefaultEncoding"));
         String moduleName = req.getParameter("module");

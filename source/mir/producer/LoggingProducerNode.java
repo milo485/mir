@@ -33,26 +33,30 @@ package mir.producer;
 
 import java.io.*;
 import java.util.*;
+
 import mir.util.*;
 import mir.producer.*;
+import mir.log.*;
 
 public class LoggingProducerNode implements ProducerNode {
   private String expression;
+  private int messageType;
 
-  public LoggingProducerNode(String anExpression) {
+  public LoggingProducerNode(String anExpression, int aMessageType) {
     expression = anExpression;
+    messageType = aMessageType;
   }
 
-  public void produce(Map aValueMap, String aVerb, PrintWriter aLogger) throws ProducerFailure {
+  public void produce(Map aValueMap, String aVerb, LoggerWrapper aLogger) throws ProducerFailure {
     String text;
 
     try {
       text = ParameterExpander.expandExpression( aValueMap, expression );
-      aLogger.println(text);
+      aLogger.message(messageType, text);
     }
     catch (Throwable t) {
       try {
-        aLogger.println("Exception while logging message '"+expression+"': " + t.getMessage());
+        aLogger.error("Exception while logging message '"+expression+"': " + t.getMessage());
       }
       catch (Throwable s) {
       }

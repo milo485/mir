@@ -33,7 +33,9 @@ package mir.producer;
 
 import java.util.*;
 import java.io.*;
+
 import mir.util.*;
+import mir.log.*;
 
 public class ExpandedAssignmentProducerNode implements ProducerNode {
   private String key;
@@ -45,7 +47,7 @@ public class ExpandedAssignmentProducerNode implements ProducerNode {
     value = aValue;
   }
 
-  public void produce(Map aValueMap, String aVerb, PrintWriter aLogger) throws ProducerFailure {
+  public void produce(Map aValueMap, String aVerb, LoggerWrapper aLogger) throws ProducerFailure {
     try {
       ParameterExpander.setValueForKey(
          aValueMap,
@@ -54,7 +56,7 @@ public class ExpandedAssignmentProducerNode implements ProducerNode {
 
     }
     catch (Throwable t) {
-      throw new ProducerFailure(t.getMessage(), t);
+      aLogger.error("key " + key + " could not be set to " + value + ": " + t.getMessage());
     }
   };
 }

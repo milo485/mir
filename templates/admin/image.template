@@ -38,50 +38,24 @@ function openWin(url) {
 	<input type="hidden" name="order" value="${data.order}">
 	<input type="hidden" name="id" value="${data.id}">
 
+	<if !data.new>
 	<tr>
     <td align="right" class="darkgrey">
 		<if (data.icon_data!="" && data.icon_data!="0") && !new>
 		<span class="witesmall">
-	  	<a href="JavaScript:openWin('${config.actionRoot}?module=Images&do=showimg&id=${data.id}')">
-	  	<img src="${config.actionRoot}?module=Images&do=showicon&id=${data.id}" border=0></a></span></td>
+	  	<a href="JavaScript:openWin('${config.actionRoot}?module=Images&do=getMedia&id=${data.id}')">
+	  	<img src="${config.actionRoot}?module=Images&do=getIcon&id=${data.id}" border=0></a></span></td>
 		</if>
     <td valign="bottom"><span class="spezialtext">
 	  	${lang("media.created")}: ${data.webdb_create} <if data.webdb_lastchange>/ ${lang("media.changed")} ${data.webdb_lastchange}</if><br>
 	  	<if data.is_published=="1">${lang("media.published")}: ${data.publish_date} / ${data.publish_server}${data.publish_path}<br></if>
-	  	${lang("media.format")}: ${data.img_width}x${data.img_height} / ${data.imgformatHashdata[to_img_format]["name"]} / ${data.imglayoutHashdata[to_img_layout]["name"]} /  ${data.imgcolorHashdata[to_img_color]["name"]}<br>
+	  	${lang("media.format")}: ${data.media_descr} / ${data.img_width}x${data.img_height} / ${data.imgformatHashdata[to_img_format]["name"]} / ${data.imglayoutHashdata[to_img_layout]["name"]} /  ${data.imgcolorHashdata[to_img_color]["name"]}<br>
+	  	${lang("media.size")}: ${data.human_readable_size}<br>
 	  	${lang("media.rights")}: <b>${data.rightsHashdata[to_rights]["name"]}</b><br>
 	  	${lang("media.type")}: <b>${data.imgtypeHashdata[to_img_type]["name"]}</b><br>
       </span>
 	</td>
   	</tr>
-
-	<if data.new>
-	<list data.mediafields as m>
-		<tr>
-		<td align="right" class="darkgrey"><span class="witesmall">
-
-			<B>${lang("media.title")}:<B>
-		</font> </td>
-		<td>
-			<input type="text" name="media_title${m}" size="40" maxlength="80" value="">
-		</td>
-		</tr>
-		<tr>
-		<td align="right" class="darkgrey"></td>
-		<td>
-				<INPUT TYPE="file" NAME="mpfile${m}"><br>
-		</td>
-		</tr>
-	</list>
-	<else>
-		<tr>
-		<td align="right" class="darkgrey"><span class="witesmall">
-			<B>${lang("media.title")}:<B>
-		</td>
-		<td>
-			<input type="text" name="title" size="40" maxlength="80" value="${data.title}">
-		</td>
-		</tr>
 	</if>
 
 	<tr>
@@ -135,16 +109,50 @@ function openWin(url) {
   	</tr>
 
 	<tr>
-   <td colspan="2" align="right"> <span class="text">
+    <td align="right" class="darkgrey"><span class="witesmall">
 	 <B>${lang("media.source")}:</B></span></td>
     <td><input type="text" size="40" maxlength="80" name="source" value="${data.source}"></td>
   	</tr>
+	<if data.new>
+	<tr>
+	<td>
+		${lang("media.is_published")} <input type="checkbox" name="is_published" value="1"<if data.is_published!="0" && data.is_published!=""> checked</if>>
+	</td>
+	</tr>
+	<list data.mediafields as m>
+		<tr>
+		<td align="right" class="darkgrey"><span class="witesmall">
+
+			<B>${lang("media.title")}:<B>
+		</font> </td>
+		<td>
+			<input type="text" name="media_title${m}" size="40" maxlength="80" value="">
+		</td>
+		</tr>
+		<tr>
+		<td align="right" class="darkgrey"></td>
+		<td>
+				<INPUT TYPE="file" NAME="mpfile${m}"><br>
+		</td>
+		</tr>
+	</list>
+	<else>
+		<tr>
+		<td align="right" class="darkgrey"><span class="witesmall">
+			<B>${lang("media.title")}:<B>
+		</td>
+		<td>
+			<input type="text" name="title" size="40" maxlength="80" value="${data.title}">
+		</td>
+		</tr>
+	</if>
+
 	<tr>
     <td colspan="2" align="right"> <span class="text">
-	${lang("media.is_published")} <input type="checkbox" name="is_published" value="1"<if data.is_published!="0" && data.is_published!=""> checked</if>>
 	<if data.new>
       <input type="submit" name="save" value="${lang("insert")}">
     <else>
+	${lang("media.is_published")} <input type="checkbox" name="is_published" value="1"<if data.is_published!="0" && data.is_published!=""> checked</if>>
     <input type="submit" name="save" value="${lang("save")}">
     </if> </span></form></font>
     </td>

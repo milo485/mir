@@ -33,10 +33,13 @@ package mircoders.producer;
 
 import java.util.*;
 import java.io.*;
+
 import mir.util.*;
 import mir.producer.*;
 import mir.entity.*;
 import mir.entity.adapter.*;
+import mir.log.*;
+
 import mircoders.entity.*;
 import mircoders.storage.*;
 
@@ -66,7 +69,7 @@ public class PDFPreFormattingProducerNode implements ProducerNode {
     //float lineHeightCM = .5F;
   }
 
-  public void produce(Map aValueMap, String aVerb, PrintWriter aLogger) throws ProducerFailure {
+  public void produce(Map aValueMap, String aVerb, LoggerWrapper aLogger) throws ProducerFailure {
     Object data;
     Entity entity;
 
@@ -119,7 +122,7 @@ public class PDFPreFormattingProducerNode implements ProducerNode {
           }
           row0.put("hasImage","0");
           brokenUpContent.add(row0);
-          aLogger.println("CP1 is "+ currentPosition);
+          aLogger.debug("CP1 is "+ currentPosition);
           while(images.hasNext()){
               HashMap row1 = new HashMap();
               HashMap row2 = new HashMap();
@@ -147,8 +150,8 @@ public class PDFPreFormattingProducerNode implements ProducerNode {
               row1.put("img_width",Float.toString(img_width));
               row1.put("img_height",Float.toString(img_height));
 
-              aLogger.println("img_width " +Float.toString(img_width));
-              aLogger.println("img_height "+Float.toString(img_height));
+              aLogger.debug("img_width " +Float.toString(img_width));
+              aLogger.debug("img_height "+Float.toString(img_height));
 
               row1.put("img_src",currentImage.getValue("publish_path"));
               row1.put("hasImage","1");
@@ -163,7 +166,7 @@ public class PDFPreFormattingProducerNode implements ProducerNode {
                       outOfText = true;
                           }
               }
-              aLogger.println("CP2 is "+ currentPosition);
+              aLogger.debug("CP2 is "+ currentPosition);
               brokenUpContent.add(row1);
 
               if (! outOfText){
@@ -180,7 +183,7 @@ public class PDFPreFormattingProducerNode implements ProducerNode {
               row2.put("hasImage","0");
               brokenUpContent.add(row2);
 
-              aLogger.println("CP3 is "+ currentPosition);
+              aLogger.debug("CP3 is "+ currentPosition);
           }
           HashMap row3 = new HashMap();
           if (! outOfText){
@@ -204,10 +207,8 @@ public class PDFPreFormattingProducerNode implements ProducerNode {
 
     }
     catch (Throwable t) {
-      aLogger.println("Error while formatting content for PDF: " + t.getMessage());
-      t.printStackTrace(aLogger);
-
-      throw new ProducerFailure(t.getMessage(), t);
+      aLogger.error("Error while formatting content for PDF: " + t.getMessage());
+      t.printStackTrace(new PrintWriter(new LoggerToWriterAdapter(aLogger, LoggerWrapper.DEBUG_MESSAGE)));
     }
   }
 }

@@ -33,9 +33,11 @@ package mir.producer;
 
 import java.util.*;
 import java.io.*;
+
 import mir.util.*;
 import mir.producer.*;
 import mir.generator.*;
+import mir.log.*;
 
 public class GeneratingProducerNode implements ProducerNode {
   private String generatorExpression;
@@ -56,7 +58,7 @@ public class GeneratingProducerNode implements ProducerNode {
     this(aGeneratorLibrary, aWriterEngine, aGenerator, aDestination, "");
   }
 
-  public void produce(Map aValueMap, String aVerb, PrintWriter aLogger) throws ProducerFailure {
+  public void produce(Map aValueMap, String aVerb, LoggerWrapper aLogger) throws ProducerFailure {
     Generator generator;
     Object writer;
     String generatorIdentifier;
@@ -72,20 +74,16 @@ public class GeneratingProducerNode implements ProducerNode {
       generatorIdentifier = ParameterExpander.expandExpression( aValueMap, generatorExpression );
       parameters = ParameterExpander.expandExpression( aValueMap, parametersExpression );
 
-      aLogger.println("Generating " + generatorIdentifier + " into " + destinationIdentifier + " using parameters " + parameters);
-      aLogger.flush();
-
       writer = writerEngine.openWriter( destinationIdentifier, parameters );
       generator = generatorLibrary.makeGenerator( generatorIdentifier );
-      generator.generate(writer, aValueMap, aLogger);
+      generator.generate(writer, aValueMap, new PrintWriter(new LoggerToWriterAdapter(aLogger, LoggerWrapper.INFO_MESSAGE)));
       writerEngine.closeWriter( writer );
+
+      endTime = System.currentTimeMillis();
+      aLogger.info("Generated " + generatorIdentifier + " into " + destinationIdentifier + " [" + parameters + "] in " + (endTime-startTime) + " ms");
     }
     catch (Throwable t) {
-      aLogger.println("  error while generating: " + t.getClass().getName() + ": " + t.getMessage());
+      aLogger.error("  error while generating: " + t.getClass().getName() + ": " + t.getMessage());
     }
-    endTime = System.currentTimeMillis();
-
-    aLogger.println("  Time: " + (endTime-startTime) + " ms");
-    aLogger.flush();
   }
 }

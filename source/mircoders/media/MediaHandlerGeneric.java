@@ -59,7 +59,7 @@ import mir.storage.*;
  *
  * @see mir.media.MirMedia
  * @author mh <mh@nadir.org>
- * @version $Id: MediaHandlerGeneric.java,v 1.10 2002/11/04 04:35:22 mh Exp $
+ * @version $Id: MediaHandlerGeneric.java,v 1.11 2002/11/27 08:57:32 mh Exp $
  */
 
 public class MediaHandlerGeneric implements MirMedia
@@ -67,10 +67,10 @@ public class MediaHandlerGeneric implements MirMedia
     protected static String imageHost = MirConfig.getProp("Producer.Image.Host");
     protected static String imageRoot = MirConfig.getProp("Producer.ImageRoot");
     protected static Logfile theLog = Logfile.getInstance(
-                                                   MirConfig.getProp("Home")+
+                                                  MirConfig.getProp("Home")+
                                                   "log/media.log");
     private final String sepChar = File.separator;
-    
+
     public void set (InputStream in, Entity ent, Entity mediaTypeEnt )
         throws MirMediaException {
 
@@ -81,7 +81,7 @@ public class MediaHandlerGeneric implements MirMedia
         try {
             long size = FileUtil.write(getStoragePath()+sepChar+datePath+
                                       sepChar+mediaFname, in);
-            ent.setValueForProperty("publish_path",datePath+sepChar+mediaFname);
+            ent.setValueForProperty("publish_path",datePath+mediaFname);
             ent.setValueForProperty("size", new Long(size).toString());
             ent.update();
         } catch (Exception e) {
@@ -107,12 +107,12 @@ public class MediaHandlerGeneric implements MirMedia
 
     public InputStream getMedia (Entity ent, Entity mediaTypeEnt)
       throws MirMediaException {
-      String publishPath = mediaTypeEnt.getValue("publish_path");
+      String publishPath = ent.getValue("publish_path");
       String fname = getStoragePath()+publishPath;
       File f = new File(fname);
       if(! f.exists())
         throw new MirMediaException("error in MirMedia.getMedia(): "+fname+
-                                    "does not exist!");
+                                    " does not exist!");
       FileInputStream in;
       try {
         in = new FileInputStream(f);
@@ -138,7 +138,7 @@ public class MediaHandlerGeneric implements MirMedia
 
     public String getPublishHost()
     {
-        return MirConfig.getProp("Producer.Media.Host");
+        return StringUtil.removeSlash(MirConfig.getProp("Producer.Media.Host"));
     }
 
     public String getTinyIconName()

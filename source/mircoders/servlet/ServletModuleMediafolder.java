@@ -33,50 +33,54 @@ package mircoders.servlet;
 
 /**
  * Title:        Mir
- * Description:  liefert Webseiten zur Verwaltung von Mediafoldern aus.
+ * Description:
  * @author       rk
  * @version      02
  */
 
 import java.util.*;
+
 import javax.servlet.http.*;
+
 import freemarker.template.*;
 
 import mir.servlet.*;
 import mir.misc.*;
 import mir.storage.*;
+import mir.log.*;
+
 import mircoders.storage.*;
 import mircoders.module.*;
 
 
 public class ServletModuleMediafolder extends ServletModule
 {
+  public static ServletModule getInstance() { return instance; }
+  private static ServletModuleMediafolder instance = new ServletModuleMediafolder();
 
-	// Singelton / Kontruktor
-	public static ServletModule getInstance() { return instance; }
-	private static ServletModuleMediafolder instance = new ServletModuleMediafolder();
+  private ServletModuleMediafolder() {
+    logger = new LoggerWrapper("ServletModule.Mediafolder");
 
-	private ServletModuleMediafolder() {
-		theLog = Logfile.getInstance(MirConfig.getProp("Home") + MirConfig.getProp("ServletModule.Mediafolder.Logfile"));
-		templateListString = MirConfig.getProp("ServletModule.Mediafolder.ListTemplate");
-		templateObjektString = MirConfig.getProp("ServletModule.Mediafolder.ObjektTemplate");
-		templateConfirmString = MirConfig.getProp("ServletModule.Mediafolder.ConfirmTemplate");
-		try {
-			mainModule = new ModuleMediafolder(DatabaseMediafolder.getInstance());
-		}
-		catch (StorageObjectException e) {
-			theLog.printDebugInfo("ServletModuleMediafolder konnte nicht initialisiert werden");
-		}
-	}
+    templateListString = MirConfig.getProp("ServletModule.Mediafolder.ListTemplate");
+    templateObjektString = MirConfig.getProp("ServletModule.Mediafolder.ObjektTemplate");
+    templateConfirmString = MirConfig.getProp("ServletModule.Mediafolder.ConfirmTemplate");
 
-	public void add(HttpServletRequest req, HttpServletResponse res) throws ServletModuleException
-	{
-			SimpleHash mergeData = new SimpleHash();
-			mergeData.put("new", "1");
-			String now = StringUtil.date2webdbDate(new GregorianCalendar());
-			// date auf now
-			mergeData.put("date", new SimpleScalar(now));
-			deliver(req, res, mergeData, templateObjektString);
-	}
+    try {
+      mainModule = new ModuleMediafolder(DatabaseMediafolder.getInstance());
+    }
+    catch (StorageObjectException e) {
+      logger.error("Failed to initialize ServletModuleMediafolder: " + e.getMessage());
+    }
+  }
+
+  public void add(HttpServletRequest req, HttpServletResponse res) throws ServletModuleException
+  {
+    SimpleHash mergeData = new SimpleHash();
+    mergeData.put("new", "1");
+    String now = StringUtil.date2webdbDate(new GregorianCalendar());
+// date auf now
+    mergeData.put("date", new SimpleScalar(now));
+    deliver(req, res, mergeData, templateObjektString);
+  }
 
 }

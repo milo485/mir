@@ -45,9 +45,9 @@ import mir.module.*;
 import mir.entity.*;
 import mir.misc.*;
 import mir.storage.*;
-
 import mir.entity.*;
 import mir.storage.*;
+import mir.log.*;
 
 /**
  * Title:        mir - another content management system
@@ -59,17 +59,13 @@ import mir.storage.*;
  */
 
 public class ModuleLanguage extends AbstractModule {
+  static LoggerWrapper logger = new LoggerWrapper("Module.Language");
 
-  static Logfile theLog;
+  public ModuleLanguage (StorageObject theStorage)	{
 
-	// Kontruktor
-	public ModuleLanguage (StorageObject theStorage)	{
+    if (theStorage == null)
+      logger.warn("ModuleLanguage -- StorageObject was null!");
 
-		if (theLog == null) theLog = Logfile.getInstance(MirConfig.getProp("Home") + MirConfig.getProp("Module.Language.Logfile"));
-		if (theStorage == null) theLog.printWarning("ModuleLanguage -- StorageObject was null!");
-
-		this.theStorage = theStorage;
-	}
-
-	// Methoden
+    this.theStorage = theStorage;
+  }
 }

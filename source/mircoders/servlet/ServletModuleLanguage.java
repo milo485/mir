@@ -42,6 +42,7 @@ import mir.module.*;
 import mir.misc.*;
 import mir.entity.*;
 import mir.storage.*;
+import mir.log.*;
 
 import mircoders.entity.*;
 import mircoders.storage.*;
@@ -57,20 +58,20 @@ import mircoders.module.*;
 
 public class ServletModuleLanguage extends ServletModule
 {
-
-  // Singelton / Kontruktor
   private static ServletModuleLanguage instance = new ServletModuleLanguage();
   public static ServletModule getInstance() { return instance; }
 
   private ServletModuleLanguage() {
-	  theLog = Logfile.getInstance(MirConfig.getProp("Home") + MirConfig.getProp("ServletModule.Language.Logfile"));
+    logger = new LoggerWrapper("ServletModule.Language");
+
     templateListString = MirConfig.getProp("ServletModule.Language.ListTemplate");
-	  templateObjektString = MirConfig.getProp("ServletModule.Language.ObjektTemplate");
-	  templateConfirmString = MirConfig.getProp("ServletModule.Language.ConfirmTemplate");
+    templateObjektString = MirConfig.getProp("ServletModule.Language.ObjektTemplate");
+    templateConfirmString = MirConfig.getProp("ServletModule.Language.ConfirmTemplate");
     try {
       mainModule = new ModuleLanguage(DatabaseLanguage.getInstance());
-    } catch (StorageObjectException e) {
-      theLog.printDebugInfo("servletmodulelanguage konnte nicht initialisiert werden");
+    }
+    catch (StorageObjectException e) {
+      logger.error("Initialization of ServletModuleLanguage failed: " + e.getMessage());
     }
   }
 }

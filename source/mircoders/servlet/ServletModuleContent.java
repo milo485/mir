@@ -38,6 +38,7 @@ import java.net.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
 
+import org.apache.struts.util.MessageResources;
 
 import freemarker.template.*;
 
@@ -47,115 +48,106 @@ import mir.module.*;
 import mir.misc.*;
 import mir.storage.*;
 import mir.entity.*;
+import mir.util.*;
+import mir.entity.adapter.*;
+import mir.log.*;
 
+import mircoders.global.*;
 import mircoders.storage.*;
 import mircoders.module.*;
 import mircoders.entity.*;
-
+import mircoders.localizer.*;
 
 /*
  *  ServletModuleContent -
  *  deliver html for the article admin form.
  *
- * @version $Id: ServletModuleContent.java,v 1.22 2002/11/04 04:35:22 mh Exp $
+ * @version $Id: ServletModuleContent.java,v 1.26 2002/12/02 12:33:24 zapata Exp $
  * @author rk, mir-coders
  *
  */
 
 public class ServletModuleContent extends ServletModule
 {
-
   static ModuleTopics         themenModule;
   static ModuleSchwerpunkt    schwerpunktModule;
   static ModuleImages         imageModule;
 
   static String templateOpString;
 
-  // Singelton / Kontruktor
+// Singelton / Kontruktor
 
   private static ServletModuleContent instance = new ServletModuleContent();
   public static ServletModule getInstance() { return instance; }
 
   private ServletModuleContent() {
+    logger = new LoggerWrapper("ServletModule.Content");
     try {
-  		theLog = Logfile.getInstance(MirConfig.getProp("Home") + MirConfig.getProp("ServletModule.Content.Logfile"));
       templateListString = MirConfig.getProp("ServletModule.Content.ListTemplate");
-      //templateOpString = MirConfig.getProp("ServletModule.Content.OpTemplate");
       templateObjektString = MirConfig.getProp("ServletModule.Content.ObjektTemplate");
       templateConfirmString = MirConfig.getProp("ServletModule.Content.ConfirmTemplate");
+
       mainModule = new ModuleContent(DatabaseContent.getInstance());
       themenModule = new ModuleTopics(DatabaseTopics.getInstance());
       schwerpunktModule = new ModuleSchwerpunkt(DatabaseFeature.getInstance());
       imageModule = new ModuleImages(DatabaseImages.getInstance());
-    } catch (StorageObjectException e) {
-      theLog.printDebugInfo("servletmodulecontent konnte nicht initialisiert werden");
+    }
+    catch (StorageObjectException e) {
+      logger.error("servletmodulecontent konnte nicht initialisiert werden");
     }
   }
 
-  // Methoden
+// Methoden
 
   public void list(HttpServletRequest req, HttpServletResponse res) throws ServletModuleException
   {
-    try {
-      EntityUsers user = _getUser(req);
-      EntityList   theList;
-      String       offsetParam = req.getParameter("offset");
-      int          offset =0;
+    EntityUsers user = _getUser(req);
+    String offsetParam = req.getParameter("offset");
+    String whereParam = req.getParameter("where");
+    String orderParam = req.getParameter("order");
 
-      // hier offsetcode bearbeiteb
-      if (offsetParam != null && !offsetParam.equals(""))
-          offset = Integer.parseInt(offsetParam);
+    int offset =0;
 
-      if (req.getParameter("next") != null)
-          offset=Integer.parseInt(req.getParameter("nextoffset"));
-      else
-          if (req.getParameter("prev") != null)
-            offset = Integer.parseInt(req.getParameter("prevoffset"));
+    if (offsetParam != null && !offsetParam.equals(""))
+      offset = Integer.parseInt(offsetParam);
 
-      String        whereParam = req.getParameter("where");
-      String        orderParam = req.getParameter("order");
+    if (req.getParameter("next") != null)
+      offset=Integer.parseInt(req.getParameter("nextoffset"));
+    else
+      if (req.getParameter("prev") != null)
+        offset = Integer.parseInt(req.getParameter("prevoffset"));
 
-      theList = ((ModuleContent)mainModule).getContent(whereParam, orderParam, offset, user);
-      _list(theList, req, res);
-    } catch (ModuleException e) {
-      throw new ServletModuleException(e.toString());
-    }
+    returnArticleList(req, res, whereParam, orderParam, offset);
   }
 
   public void listop(HttpServletRequest req, HttpServletResponse res) throws ServletModuleException
   {
-    try {
-      EntityUsers user = _getUser(req);
-      EntityList   theList;
-      String       offsetParam = req.getParameter("offset");
-      int          offset =0;
+    EntityUsers user = _getUser(req);
+    String       offsetParam = req.getParameter("offset");
+    int          offset =0;
 
-      String whereParam = req.getParameter("where");
+    String whereParam = req.getParameter("where");
 
-      if (whereParam==null) whereParam = "to_article_type='0'";
+    if (whereParam==null) whereParam = "to_article_type='0'";
 
-      // hier offsetcode bearbeiteb
-      if (offsetParam != null && !offsetParam.equals(""))
-          offset = Integer.parseInt(offsetParam);
+// hier offsetcode bearbeiteb
+    if (offsetParam != null && !offsetParam.equals(""))
+      offset = Integer.parseInt(offsetParam);
 
-      if (req.getParameter("next") != null)
-          offset=Integer.parseInt(req.getParameter("nextoffset"));
-      else
-          if (req.getParameter("prev") != null)
-            offset = Integer.parseInt(req.getParameter("prevoffset"));
+    if (req.getParameter("next") != null)
+      offset=Integer.parseInt(req.getParameter("nextoffset"));
+    else
+      if (req.getParameter("prev") != null)
+        offset = Integer.parseInt(req.getParameter("prevoffset"));
 
-      String orderParam = req.getParameter("order");
+    String orderParam = req.getParameter("order");
 
-      theList = ((ModuleContent)mainModule).getContent(whereParam, orderParam, offset, user);
-      _list(theList, req, res);
-    } catch (ModuleException e) {
-      throw new ServletModuleException(e.toString());
-    }
+    returnArticleList(req, res, whereParam, orderParam, offset);
   }
 
 
   public void search(HttpServletRequest req, HttpServletResponse res)
-    throws ServletModuleException {
+      throws ServletModuleException {
     try {
       EntityUsers   user = _getUser(req);
       EntityList    theList;
@@ -164,25 +156,25 @@ public class ServletModuleContent extends ServletModule
       String        orderParam = req.getParameter("order");
 
       theList = ((ModuleContent)mainModule).getContentByField(fieldParam, fieldValueParam, orderParam, 0, user);
-      _list(theList, req, res);
+      returnArticleList(req, res, "lower("+ fieldParam + ") like lower('%" + StringUtil.quote(fieldValueParam) + "%')", orderParam, 0);
     } catch (ModuleException e) {
       throw new ServletModuleException(e.toString());
     }
   }
 
   public void add(HttpServletRequest req, HttpServletResponse res)
-    throws ServletModuleException {
+      throws ServletModuleException {
     _showObject(null, req, res);
   }
 
 
   public void insert(HttpServletRequest req, HttpServletResponse res) throws ServletModuleException
   {
-    //theLog.printDebugInfo(":: content :: trying to insert");
+//theLog.printDebugInfo(":: content :: trying to insert");
     try {
       EntityUsers   user = _getUser(req);
       HashMap withValues = getIntersectingValues(req, DatabaseContent.getInstance());
-      //theLog.printDebugInfo(":: content :: got intersecting values");
+
       String now = StringUtil.date2webdbDate(new GregorianCalendar());
       withValues.put("date", now);
       withValues.put("publish_path", StringUtil.webdbDate2path(now));
@@ -193,14 +185,9 @@ public class ServletModuleContent extends ServletModule
       if (!withValues.containsKey("is_html"))
         withValues.put("is_html","0");
 
-//      ML: this is not multi-language friendly and this can be done in a template
-//      if (withValues.get("creator").toString().equals(""))
-//        withValues.put("creator","Anonym");
-
-
       String id = mainModule.add(withValues);
       DatabaseContentToTopics.getInstance().setTopics(id,req.getParameterValues("to_topic"));
-      //theLog.printDebugInfo(":: content :: inserted");
+
       _showObject(id, req, res);
     }
     catch (StorageObjectException e) {
@@ -213,17 +200,18 @@ public class ServletModuleContent extends ServletModule
 
   public void delete(HttpServletRequest req, HttpServletResponse res) throws ServletModuleException
   {
-
     EntityUsers   user = _getUser(req);
-    // hier pruefen ob dem akt. user loeschen erlaubt ist...
+
     String idParam = req.getParameter("id");
-    if (idParam == null) throw new ServletModuleException("Falscher Aufruf: (id) nicht angegeben");
+    if (idParam == null) throw new ServletModuleException("Invalid call: id missing");
 
     String confirmParam = req.getParameter("confirm");
     String cancelParam = req.getParameter("cancel");
 
+    logger.info("where = " + req.getParameter("where"));
+
     if (confirmParam == null && cancelParam == null) {
-      // HTML Ausgabe zum Confirmen!
+
       SimpleHash mergeData = new SimpleHash();
       mergeData.put("module", "Content");
       mergeData.put("infoString", "Content: " + idParam);
@@ -238,7 +226,7 @@ public class ServletModuleContent extends ServletModule
         try {
           mainModule.deleteById(idParam);
 
-          /** @todo the following two should be imlied in
+          /** @todo the following two should be implied in
            *  DatabaseContent */
 
           //delete rows in the content_x_topic-table
@@ -266,7 +254,7 @@ public class ServletModuleContent extends ServletModule
     _showObject(idParam, req, res);
   }
 
-  // methods for attaching media file
+// methods for attaching media file
   public void attach(HttpServletRequest req, HttpServletResponse res) throws ServletModuleException
   {
     String  mediaIdParam = req.getParameter("mid");
@@ -278,10 +266,10 @@ public class ServletModuleContent extends ServletModule
       entContent.attach(mediaIdParam);
     }
     catch(ModuleException e) {
-      theLog.printError("smod content :: attach :: could not get entityContent");
+      logger.error("smod content :: attach :: could not get entityContent");
     }
     catch(StorageObjectException e) {
-      theLog.printError("smod content :: attach :: could not get entityContent");
+      logger.error("smod content :: attach :: could not get entityContent");
     }
 
     _showObject(idParam, req, res);
@@ -290,7 +278,7 @@ public class ServletModuleContent extends ServletModule
   public void dettach(HttpServletRequest req, HttpServletResponse res) throws ServletModuleException
   {
     String  cidParam = req.getParameter("cid");
-		String  midParam = req.getParameter("mid");
+    String  midParam = req.getParameter("mid");
     if (cidParam == null) throw new ServletModuleException("smod content :: dettach :: cid missing");
     if (midParam == null) throw new ServletModuleException("smod content :: dettach :: mid missing");
 
@@ -299,10 +287,10 @@ public class ServletModuleContent extends ServletModule
       entContent.dettach(cidParam,midParam);
     }
     catch(ModuleException e) {
-      theLog.printError("smod content :: dettach :: could not get entityContent");
+      logger.error("smod content :: dettach :: could not get entityContent");
     }
     catch(StorageObjectException e) {
-      theLog.printError("smod content :: dettach :: could not get entityContent");
+      logger.error("smod content :: dettach :: could not get entityContent");
     }
 
     _showObject(cidParam, req, res);
@@ -317,10 +305,10 @@ public class ServletModuleContent extends ServletModule
       entContent.newswire();
     }
     catch(ModuleException e) {
-      theLog.printError("smod content :: newswire :: could not get entityContent");
+      logger.error("smod content :: newswire :: could not get entityContent");
     }
     catch(StorageObjectException e) {
-      theLog.printError("smod content :: dettach :: could not get entityContent");
+      logger.error("smod content :: dettach :: could not get entityContent");
     }
 
     list(req, res);
@@ -328,19 +316,19 @@ public class ServletModuleContent extends ServletModule
 
 
   public void update(HttpServletRequest req, HttpServletResponse res)
-    throws ServletModuleException
+      throws ServletModuleException
   {
     try {
 
       EntityUsers   user = _getUser(req);
-      if (user==null) theLog.printDebugInfo("user null!");
+      if (user==null) logger.debug("user null!");
       String idParam = req.getParameter("id");
       if (idParam == null) throw new ServletModuleException("Wrong call: (id) is missing");
 
       HashMap withValues = getIntersectingValues(req, DatabaseContent.getInstance());
       String[] topic_id = req.getParameterValues("to_topic");
       String content_id = req.getParameter("id");
-      // withValues.put("publish_path", StringUtil.webdbDate2path((String)withValues.get("date")));
+// withValues.put("publish_path", StringUtil.webdbDate2path((String)withValues.get("date")));
       if(user != null) withValues.put("user_id", user.getId());
       withValues.put("is_produced", "0");
       if (!withValues.containsKey("is_published"))
@@ -348,14 +336,9 @@ public class ServletModuleContent extends ServletModule
       if (!withValues.containsKey("is_html"))
         withValues.put("is_html","0");
 
-//      ML: this is not multi-language friendly and this can be done in a template
-//      if (withValues.get("creator").toString().equals(""))
-//        withValues.put("creator","Anonym");
-
-      //theLog.printDebugInfo("updating. ");
       String id = mainModule.set(withValues);
       DatabaseContentToTopics.getInstance().setTopics(req.getParameter("id"),topic_id);
-      //theLog.printDebugInfo("update done. ");
+
       String whereParam = req.getParameter("where");
       String orderParam = req.getParameter("order");
       if ((whereParam!=null && !whereParam.equals("")) || (orderParam!=null && !orderParam.equals(""))){
@@ -373,14 +356,14 @@ public class ServletModuleContent extends ServletModule
     }
   }
 
-  /* 
-   * HelperMethod shows the basic article editing form.
-   *
-   * if the "id" parameter is null, it means show an empty form to add a new
-   * article.
-   */ 
+/*
+  * HelperMethod shows the basic article editing form.
+  *
+  * if the "id" parameter is null, it means show an empty form to add a new
+  * article.
+*/
   private void _showObject(String id, HttpServletRequest req, HttpServletResponse res)
-    throws ServletModuleException {
+      throws ServletModuleException {
 
     SimpleHash extraInfo = new SimpleHash();
     try {
@@ -397,145 +380,91 @@ public class ServletModuleContent extends ServletModule
         withValues.put("login_user", user);
         entContent = withValues;
       }
-        
 
       extraInfo.put("themenPopupData", themenModule.getTopicsAsSimpleList());
       try {
-        extraInfo.put("articletypePopupData",
-                        DatabaseArticleType.getInstance().getPopupData());
-      } catch (Exception e) {
-        theLog.printError("articletype could not be fetched.");
+        extraInfo.put("articletypePopupData", DatabaseArticleType.getInstance().getPopupData());
+      }
+      catch (Exception e) {
+        logger.error("articletype could not be fetched.");
       }
       try {
         extraInfo.put("languagePopupData", DatabaseLanguage.getInstance().getPopupData());
-      } catch (Exception e) {
-        theLog.printError("language-popup could not be fetched.");
+      }
+      catch (Exception e) {
+        logger.error("language-popup could not be fetched.");
       }
 
       extraInfo.put("schwerpunktPopupData", schwerpunktModule.getSchwerpunktAsSimpleList());
-      // hier code um zur liste zurueckzukommen
+
+      // code to be able to return to the list:
       String offsetParam, whereParam, orderParam;
       if ((offsetParam = req.getParameter("offset"))!=null) extraInfo.put("offset", offsetParam);
       if ((whereParam = req.getParameter("where"))!=null) extraInfo.put("where", whereParam);
       if ((orderParam = req.getParameter("order"))!=null) extraInfo.put("order", orderParam);
+
       extraInfo.put("login_user", _getUser(req));
       deliver(req, res, entContent, extraInfo, templateObjektString);
-    } catch (Exception e) {
+    }
+    catch (Exception e) {
       throw new ServletModuleException(e.toString());
     }
   }
 
+  public void returnArticleList(HttpServletRequest aRequest, HttpServletResponse aResponse,
+                                String aWhereClause, String anOrderByClause, int anOffset) throws ServletModuleException {
+    // ML: experiment in using the producer's generation system instead of the
+    //     old one...
 
-  public void _list(EntityList theList, HttpServletRequest req, HttpServletResponse res)
-    throws ServletModuleException {
+    EntityAdapterModel model;
+    int nrArticlesPerPage = 20;
+    int count;
 
     try {
-      // hier dann htmlcode rausschreiben
-      if (theList == null || theList.getCount() == 0 || theList.getCount()>1) {
-        SimpleHash modelRoot = HTMLTemplateProcessor.makeSimpleHashWithEntitylistInfos(theList);
-        modelRoot.put("themenHashData", themenModule.getHashData());
-        modelRoot.put("schwerpunktHashData", schwerpunktModule.getHashData());
-        modelRoot.put("articletypeHash", DatabaseArticleType.getInstance().getHashData());
-        deliver(req, res, modelRoot, templateListString);
-      } else  { // count = 1
-        _showObject(theList.elementAt(0).getId(),req,res);
+      Map responseData = ServletHelper.makeGenerationData(getLocale(aRequest));
+      model = MirGlobal.localizer().dataModel().adapterModel();
+
+      Object contentList =
+          new CachingRewindableIterator(
+          new EntityIteratorAdapter( aWhereClause, anOrderByClause, nrArticlesPerPage,
+          MirGlobal.localizer().dataModel().adapterModel(), "content", nrArticlesPerPage, anOffset)
+      );
+
+      responseData.put("nexturl", null);
+      responseData.put("prevurl", null);
+
+      count=mainModule.getSize(aWhereClause);
+
+      if (count>=anOffset+nrArticlesPerPage) {
+        responseData.put("nexturl" ,
+                         "module=Content&do=list&where=" + HTMLRoutines.encodeURL(aWhereClause) +
+                         "&order=" + HTMLRoutines.encodeURL(anOrderByClause) +
+                         "&offset=" + anOffset + nrArticlesPerPage);
       }
-    } catch (StorageObjectException e) {
-      throw new ServletModuleException(e.toString());
+      if (anOffset>0) {
+        responseData.put("prevurl" ,
+                         "module=Content&do=list&where=" + HTMLRoutines.encodeURL(aWhereClause) +
+                         "&order=" + HTMLRoutines.encodeURL(anOrderByClause) +
+                         "&offset=" + Math.max(anOffset - nrArticlesPerPage, 0));
+      }
+
+      responseData.put("articles", contentList);
+
+      responseData.put("thisurl" ,
+                       "module=Content&do=list&where=" + HTMLRoutines.encodeURL(aWhereClause) +
+                       "&order=" + HTMLRoutines.encodeURL(anOrderByClause) +
+                       "&offset=" + anOffset);
+
+      responseData.put("from" , Integer.toString(anOffset+1));
+      responseData.put("count", Integer.toString(count));
+      responseData.put("to", Integer.toString(Math.min(anOffset+nrArticlesPerPage, count)));
+      responseData.put("offset" , Integer.toString(anOffset));
+      responseData.put("order", anOrderByClause);
+      responseData.put("where" , aWhereClause);
+
+      ServletHelper.generateResponse(aResponse.getWriter(), responseData, "contentlist.template");
     }
-  }
-
-  public void _listop(EntityList theList, HttpServletRequest req, HttpServletResponse res)
-    throws ServletModuleException {
-
-    try {
-      // delivering html
-      if (theList == null || theList.getCount() == 0 || theList.getCount()>1) {
-        SimpleHash modelRoot = HTMLTemplateProcessor.makeSimpleHashWithEntitylistInfos(theList);
-        modelRoot.put("articletypeHash", DatabaseArticleType.getInstance().getHashData());
-
-    EntityContent       currentContent;
-    EntityList          upMediaEntityList;
-    EntityList          imageEntityList;
-    EntityList          currentMediaList;
-    Entity              mediaType;
-    EntityMedia         uploadedMedia;
-    SimpleList          opList;
-      String imageRoot = MirConfig.getProp("Producer.ImageRoot");
-
-    SimpleHash          contentHash;
-    Class               mediaHandlerClass=null;
-    MirMedia            mediaHandler=null;
-    String              mediaHandlerName=null;
-    Database            mediaStorage=null;
-    String              tinyIcon;
-    String              iconAlt;
-
-      for (int i=0; i < theList.size();i++) {
-        currentContent = (EntityContent)theList.elementAt(i);
-        //fetching/setting the images
-        upMediaEntityList = DatabaseContentToMedia.getInstance().getUploadedMedia(currentContent);
-        if (upMediaEntityList!=null && upMediaEntityList.getCount()>=1) {
-          tinyIcon = null;
-          iconAlt = null;
-          mediaHandler = null;
-          mediaHandlerName = null;
-          for (int n=0; n < upMediaEntityList.size();n++) {
-            uploadedMedia = (EntityMedia)upMediaEntityList.elementAt(n);
-            mediaType = uploadedMedia.getMediaType();
-
-            //must of had a non-existant to_media_type entry..
-            //let's save our ass.
-            if (mediaType != null) {
-                try {
-                  mediaHandlerName = mediaType.getValue("classname");
-                  mediaHandlerClass = Class.forName("mir.media.MediaHandler"+mediaHandlerName);
-                  mediaHandler = (MirMedia)mediaHandlerClass.newInstance();
-                } catch (Exception e) {
-                  theLog.printError("ProducerStartpage:problem in reflection: "+mediaHandlerName);
-                }
-
-                //the "best" media type to show
-                if (mediaHandler.isVideo()) {
-                  tinyIcon = MirConfig.getProp("Producer.Icon.TinyVideo");
-                  iconAlt = "Video";
-                  break;
-                } else if (mediaHandler.isAudio()) {
-                  tinyIcon = MirConfig.getProp("Producer.Icon.TinyAudio");
-                  iconAlt = "Audio";
-                } else if (tinyIcon == null && !mediaHandler.isImage()) {
-                  tinyIcon = mediaHandler.getTinyIconName();
-                  iconAlt = mediaHandler.getIconAltName();
-                }
-            }
-          }
-          //it only has image(s)
-          if (tinyIcon == null) {
-            tinyIcon = MirConfig.getProp("Producer.Icon.TinyImage");
-            iconAlt = "Image";
-          }
-
-        // uploadedMedia Entity list is empty.
-        // we only have text
-        } else {
-          tinyIcon = MirConfig.getProp("Producer.Icon.TinyText");
-          iconAlt = "Text";
-        }
-
-        try{
-          //mediaList = HTMLTemplateProcessor.makeSimpleList(upMediaEntityList);
-          contentHash = (SimpleHash)theList.get(i);
-          contentHash.put("tiny_icon", imageRoot+"/"+tinyIcon);
-          contentHash.put("icon_alt", iconAlt);
-        } catch (Exception e){}
-      }
-
-
-        deliver(req, res, modelRoot, templateListString);
-      } else  { // count = 1
-        _showObject(theList.elementAt(0).getId(), req, res);
-      }
-    } catch (StorageObjectException e) {
+    catch (Throwable e) {
       throw new ServletModuleException(e.toString());
     }
   }
@@ -546,4 +475,3 @@ public class ServletModuleContent extends ServletModule
     return (EntityUsers)session.getAttribute("login.uid");
   }
 }
-

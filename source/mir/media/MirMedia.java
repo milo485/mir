@@ -82,8 +82,8 @@ import mir.entity.*;
  * Most media handlers should just extend MediaHandlerGeneric (i.e inherit from
  * ) and just override the things that need to be specific. see MediaHandlerAudio
  * 
- * @author mh <heckmann@hbe.ca>
- * @version 24.09.2001
+ * @author <mh@nadir.org>, the Mir-coders group
+ * @version $Id: MirMedia.java,v 1.14 2002/11/27 08:22:03 mh Exp $
  */
 
 public interface  MirMedia{

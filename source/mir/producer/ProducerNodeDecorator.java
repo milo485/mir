@@ -34,6 +34,8 @@ package mir.producer;
 import java.util.*;
 import java.io.*;
 
+import mir.log.*;
+
 public class ProducerNodeDecorator implements ProducerNode {
   private ProducerNode slave;
 
@@ -48,7 +50,7 @@ public class ProducerNodeDecorator implements ProducerNode {
       ((NodedProducer) producerValue).getIsAborted());
   }
 
-  public void produce(Map aValueMap, String aVerb, PrintWriter aLogger) throws ProducerFailure, ProducerExc {
+  public void produce(Map aValueMap, String aVerb, LoggerWrapper aLogger) throws ProducerFailure, ProducerExc {
     if (slave!=null)
       slave.produce(aValueMap, aVerb, aLogger);
   }

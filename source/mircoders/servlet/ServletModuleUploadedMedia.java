@@ -33,6 +33,7 @@ package mircoders.servlet;
 
 import freemarker.template.SimpleHash;
 import freemarker.template.SimpleList;
+
 import mir.entity.Entity;
 import mir.entity.EntityList;
 import mir.media.MediaHelper;
@@ -46,7 +47,10 @@ import mir.servlet.ServletModuleException;
 import mir.servlet.ServletModuleUserException;
 import mir.storage.Database;
 import mir.storage.StorageObjectException;
+import mir.log.*;
+
 import mircoders.entity.EntityUsers;
+import mircoders.entity.EntityUploadedMedia;
 import mircoders.storage.DatabaseMediaType;
 import mircoders.storage.DatabaseMediafolder;
 import mircoders.media.MediaRequest;
@@ -55,8 +59,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.servlet.ServletContext;
+import javax.servlet.ServletOutputStream;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URLEncoder;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -65,8 +71,8 @@ import java.util.HashMap;
  *  ServletModuleBilder -
  *  liefert HTML fuer Bilder
  *
- *
- * @author RK
+ * @version $Id: ServletModuleUploadedMedia.java,v 1.13 2002/12/01 15:05:51 zapata Exp $
+ * @author RK, the mir-coders group
  */
 
 public abstract class ServletModuleUploadedMedia
@@ -76,6 +82,10 @@ public abstract class ServletModuleUploadedMedia
 
   public static ServletModule getInstance() {
     return null;
+  }
+
+  public ServletModuleUploadedMedia() {
+    logger = new LoggerWrapper("ServletModule.UploadedMedia");
   }
 
   public void insert(HttpServletRequest req, HttpServletResponse res)
@@ -106,7 +116,8 @@ public abstract class ServletModuleUploadedMedia
       deliver(req, res, mergeData, popups, templateListString);
     }
     catch (FileHandlerUserException e) {
-      throw new ServletModuleUserException(e.getMsg());
+      logger.error("ServletModuleUploadedMedia.insert: " + e.getMessage());
+      throw new ServletModuleUserException(e.getMessage());
     }
     catch (FileHandlerException e) {
       throw new ServletModuleException(
@@ -134,7 +145,7 @@ public abstract class ServletModuleUploadedMedia
         parameters.put("is_published", "0");
 
       String id = mainModule.set(parameters);
-      theLog.printError("media ID" + id);
+      logger.debug("update: media ID = " + id);
       _edit(id, req, res);
     }
     catch (IOException e) {
@@ -195,7 +206,7 @@ public abstract class ServletModuleUploadedMedia
     }
     //theLog.printDebugInfo("sql-whereclause: " + whereClause + " order: " + order + " offset: " + offset);
 
-    // fetch und ausliefern
+    // fetch and deliver
     try {
       if (query_text != null || query_is_published != null || query_media_folder != null) {
         EntityList theList = mainModule.getByWhereClause(whereClause, order, (new Integer(offset)).intValue(), 10);
@@ -214,9 +225,8 @@ public abstract class ServletModuleUploadedMedia
             mergeData.put("prev", (new Integer(theList.getPrevBatch())).toString());
         }
       }
-      //fetch the popups
       popups.put("mediafolderPopupData", DatabaseMediafolder.getInstance().getPopupData());
-      // raus damit
+
       deliver(req, res, mergeData, popups, templateListString);
     }
     catch (ModuleException e) {
@@ -242,7 +252,7 @@ public abstract class ServletModuleUploadedMedia
       } else if(Integer.parseInt(numOfMedia) > Integer.parseInt(maxMedia)) {
         numOfMedia = maxMedia;
       }
-    
+
       int mediaNum = Integer.parseInt(numOfMedia);
       SimpleList mediaFields = new SimpleList();
       for(int i =0; i<mediaNum;i++){
@@ -289,6 +299,94 @@ public abstract class ServletModuleUploadedMedia
   private EntityUsers _getUser(HttpServletRequest req) {
     HttpSession session = req.getSession(false);
     return (EntityUsers) session.getAttribute("login.uid");
+  }
+
+  public void getMedia(HttpServletRequest req, HttpServletResponse res)
+    throws ServletModuleException
+  {
+    String idParam = req.getParameter("id");
+    if (idParam!=null && !idParam.equals("")) {
+      try {
+        EntityUploadedMedia ent = (EntityUploadedMedia)mainModule.getById(idParam);
+        Entity mediaType = ent.getMediaType();
+        MirMedia mediaHandler;
+
+        ServletContext ctx =
+                    (ServletContext)MirConfig.getPropAsObject("ServletContext");
+        String fName = ent.getId()+"."+mediaType.getValue("name");
+
+        mediaHandler = MediaHelper.getHandler(mediaType);
+        InputStream in = mediaHandler.getMedia(ent, mediaType);
+
+        res.setContentType(ctx.getMimeType(fName));
+        //important that before calling this res.getWriter was not called first
+        ServletOutputStream out = res.getOutputStream();
+
+        int read ;
+        byte[] buf = new byte[8 * 1024];
+        while((read = in.read(buf)) != -1) {
+          out.write(buf, 0, read);
+        }
+        in.close();
+        out.close();
+      }
+
+      catch (IOException e) {
+        throw new ServletModuleException(e.toString());
+      }
+      catch (ModuleException e) {
+        throw new ServletModuleException(e.toString());
+      }
+      catch (Exception e) {
+        throw new ServletModuleException(e.toString());
+      }
+    }
+    else logger.error("id not specified.");
+    // no exception allowed
+  }
+
+  public void getIcon(HttpServletRequest req, HttpServletResponse res)
+    throws ServletModuleException
+  {
+    String idParam = req.getParameter("id");
+    if (idParam!=null && !idParam.equals("")) {
+      try {
+        EntityUploadedMedia ent = (EntityUploadedMedia)mainModule.getById(idParam);
+        Entity mediaType = ent.getMediaType();
+        MirMedia mediaHandler;
+
+        ServletContext ctx =
+                    (ServletContext)MirConfig.getPropAsObject("ServletContext");
+        String fName = ent.getId()+"."+mediaType.getValue("name");
+
+        mediaHandler = MediaHelper.getHandler(mediaType);
+        InputStream in = mediaHandler.getIcon(ent);
+
+        res.setContentType(ctx.getMimeType(fName));
+        //important that before calling this res.getWriter was not called first
+        ServletOutputStream out = res.getOutputStream();
+
+        int read ;
+        byte[] buf = new byte[8 * 1024];
+        while((read = in.read(buf)) != -1) {
+          out.write(buf, 0, read);
+        }
+        in.close();
+        out.close();
+      }
+
+      catch (IOException e) {
+        throw new ServletModuleException(e.toString());
+      }
+      catch (ModuleException e) {
+        throw new ServletModuleException(e.toString());
+      }
+      catch (Exception e) {
+        throw new ServletModuleException(e.toString());
+      }
+    }
+    else logger.error("getIcon: id not specified.");
+    // no exception allowed
   }
 
 }

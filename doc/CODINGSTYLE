@@ -1,0 +1,36 @@
+last changed: $Date: 2002/12/08 07:05:56 $
+------------------------
+
+please us spaces not tabs for indents. all indents should be 2 spaces wide.
+
+If you use the vim editor, below is a good .vimrc entry for java files that
+makes all tabs appear 2 chars. wide and makes indenting using the TAB key create
+2 real spaces. It also sets the shiftwidth to 2 spaces.
+
+in your .vimrc add the following:
+
+autocmd FileType java source /path/to/file/.vimrc.java
+
+create .vimrc.java and add the following:
+
+set tabstop=2
+set shiftwidth=2
+set expandtab
+
+if you can, please try to make your code terminal friendly so a line should
+not be more than 80 characters wide pls. Not all mir code is like this and it
+is not required (well what really is required?)
+
+For java code, class names usually begin with a capital letter. e.g
+StringUtils.java. Names for variables and methods should begin with a lower case
+letter. However, if a variable or method is composed of more than one word
+(glued together of course) the second and following word(s) should begin with
+a capitalized letter. for example in the following code snippet:
+
+String name = "titi";
+Entity contentEntity = getContent();
+contentEntity.setPropertyForValue("name", name);
+
+some java code convention docs:
+
+http://java.sun.com/docs/codeconv/html/CodeConvTOC.doc.html

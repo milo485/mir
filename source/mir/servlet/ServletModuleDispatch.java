@@ -42,19 +42,15 @@ import  mir.log.*;
  * Dispatcher, calls the method passed to ServletModule Class, through the "do"
  * Parameter (via POST or GET)
  *
- * @version $Id: ServletModuleDispatch.java,v 1.8 2002/10/25 03:25:15 zapata Exp $
+ * @version $Id: ServletModuleDispatch.java,v 1.11 2002/12/01 15:05:51 zapata Exp $
  *
  * @Author rk
  *
  */
 public final class ServletModuleDispatch {
 
-  private static LoggerWrapper logger;
+  private static LoggerWrapper logger = new LoggerWrapper("ServletModule.Dispatch");
   private static final Class[] SIGNATURE = { HttpServletRequest.class, HttpServletResponse.class };
-
-  static {
-    logger = new LoggerWrapper("servlet.dispatch");
-  }
 
  /**
   * private constructor to prevent unwanted instantiation;
@@ -106,7 +102,7 @@ public final class ServletModuleDispatch {
       throw new ServletModuleException("method not allowed!" + e.getMessage());
     }
     catch ( InvocationTargetException e) {
-      System.out.println(e.getMessage());
+      logger.debug( "invocation target exception: " + e.getMessage());
       if (e.getTargetException() instanceof ServletModuleUserException) {
         throw new ServletModuleUserException(e.getTargetException().getMessage());
       }

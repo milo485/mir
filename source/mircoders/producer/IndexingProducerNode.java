@@ -38,11 +38,13 @@ import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.index.*;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
+import org.apache.lucene.store.FSDirectory;
 
 import freemarker.template.*;
 
 
 import mir.util.*;
+import mir.log.*;
 import mir.producer.*;
 //import mir.generator.*;
 import mircoders.global.*;
@@ -51,6 +53,7 @@ import mir.entity.*;
 import mir.entity.adapter.*;
 import mircoders.entity.*;
 import mircoders.storage.*;
+import mircoders.search.*;
 
 
 public class IndexingProducerNode implements ProducerNode {
@@ -63,8 +66,9 @@ public class IndexingProducerNode implements ProducerNode {
     indexPath=pathToIndex;
   }
 
-  public void produce(Map aValueMap, String aVerb, PrintWriter aLogger) throws ProducerFailure {
-    IndexWriter indexWriter;
+  public void produce(Map aValueMap, String aVerb, LoggerWrapper aLogger) throws ProducerFailure {
+    IndexReader indexReader = null;
+    IndexWriter indexWriter = null;
     Object data;
     Entity entity;
 
@@ -84,10 +88,9 @@ public class IndexingProducerNode implements ProducerNode {
       if (! (entity instanceof EntityContent)) {
         throw new ProducerFailure("IndexingProducerNode: value of '"+contentKey+"' is not a content EntityAdapter, but a " + entity.getClass().getName() + " adapter", null);
       }
-      aLogger.println("Indexing " + (String) entity.getValue("id") + " into " + indexPath);
-      aLogger.flush();
+      aLogger.info("Indexing " + (String) entity.getValue("id") + " into " + indexPath);
 
-      IndexReader indexReader = IndexReader.open(indexPath);
+      indexReader = IndexReader.open(indexPath);
       indexReader.delete(new Term("id",entity.getValue("id")));
       indexReader.close();
 
@@ -98,62 +101,89 @@ public class IndexingProducerNode implements ProducerNode {
       // Text is tokenized,stored, indexed
       // Unindexed is not tokenized or indexed, only stored
       // Unstored is tokenized and indexed, but not stored
-
-      theDoc.add(Field.Keyword("id",entity.getValue("id")));
-      theDoc.add(Field.Keyword("where",entity.getValue("publish_path")+entity.getValue("id")+".shtml"));
-      theDoc.add(Field.Text("creator",entity.getValue("creator")));
-      theDoc.add(Field.Text("title",entity.getValue("title")));
-      theDoc.add(Field.Keyword("webdb_create",entity.getValue("webdb_create_formatted")));
-      theDoc.add(Field.UnStored("content_and_description",entity.getValue("description")+entity.getValue("content_data")));
-
-      //topics
-      TemplateModel topics=entity.get("to_topics");
-      aLogger.println("THE CLASS NAME WAS: "+entity.get("to_topics").getClass().getName());
-      while (((TemplateListModel)topics).hasNext()){
-          theDoc.add(Field.UnStored("topic",((TemplateHashModel)((TemplateListModel)topics).next()).get("title").toString()));
-      }
+      
+      //this initialization should go somewhere global like an xml file....
 
 
-      //media
+      (new KeywordSearchTerm("id","","id","","id")).index(theDoc,entity);
+      (new KeywordSearchTerm("date_formatted","search_date","webdb_create_formatted","webdb_create_formatted","webdb_create_formatted")).index(theDoc,entity);
 
-      //images
-      TemplateModel images=entity.get("to_media_images");
-      if (images != null){
-          theDoc.add(Field.UnStored("media","images"));
-      }
-      //audio
-      TemplateModel audio=entity.get("to_media_audio");
-      if (audio != null){
-          theDoc.add(Field.UnStored("media","audio"));
-      }
-      //video
-      TemplateModel video=entity.get("to_media_video");
-      if (video != null){
-          theDoc.add(Field.UnStored("media","video"));
-      }
+      (new UnIndexedSearchTerm("","","","where","where")).indexValue(theDoc,entity.getValue("publish_path")+entity.getValue("id")+".shtml");
+
+      (new TextSearchTerm("creator","search_creator","creator","creator","creator")).index(theDoc,entity);
+      (new TextSearchTerm("title","search_title","title","title","title")).index(theDoc,entity);
+      (new UnIndexedSearchTerm("description","search_content","description","description","description")).index(theDoc,entity);
+      (new UnIndexedSearchTerm("webdb_create","search_irrelevant","creationDate","creationDate","creationDate")).index(theDoc,entity);
+
+      (new ContentSearchTerm("content_data","search_content","content","","")).indexValue(theDoc,
+										     entity.getValue("content_data")+ " "
+										     + entity.getValue("description")+ " "
+										     + entity.getValue("title")
+										     );
+
+      (new TopicSearchTerm()).index(theDoc,entity);
+
+      (new ImagesSearchTerm()).index(theDoc,entity);
+      
+      (new AudioSearchTerm()).index(theDoc,entity);
+      
+      (new VideoSearchTerm()).index(theDoc,entity);
+
 
       //comments-just aggregate all relevant fields
-      String commentsAggregate = "";
-      TemplateModel comments=entity.get("to_comments");
-      if (comments != null){
-        while (((TemplateListModel)comments).hasNext()){
-          TemplateModel aComment = ((TemplateListModel)comments).next();
-          commentsAggregate = commentsAggregate + " " + ((TemplateHashModel)aComment).get("title").toString()
-            + " " + ((TemplateHashModel)aComment).get("creator").toString()
-            + " " + ((TemplateHashModel)aComment).get("text").toString();
-        }
-      }
-      theDoc.add(Field.UnStored("comments",commentsAggregate));
+      //removed until i get a chance to do this right
+
+      //String commentsAggregate = "";
+      //TemplateModel comments=entity.get("to_comments");
+      //if (comments != null){
+      // while (((TemplateListModel)comments).hasNext()){
+      //    TemplateModel aComment = ((TemplateListModel)comments).next();
+      //    commentsAggregate = commentsAggregate + " " + ((TemplateHashModel)aComment).get("title").toString()
+      //     + " " + ((TemplateHashModel)aComment).get("creator").toString()
+      //      + " " + ((TemplateHashModel)aComment).get("text").toString();
+      //  }
+      //}
+      //theDoc.add(Field.UnStored("comments",commentsAggregate));
 
       indexWriter.addDocument(theDoc);
-      indexWriter.close();
+
 
     }
     catch (Throwable t) {
-      aLogger.println("Error while indexing content: " + t.getMessage());
-      t.printStackTrace(aLogger);
-      //should remove index lock here.....jd
-      throw new ProducerFailure(t.getMessage(), t);
+      aLogger.error("Error while indexing content: " + t.getMessage());
+      t.printStackTrace(new PrintWriter(new LoggerToWriterAdapter(aLogger, LoggerWrapper.DEBUG_MESSAGE)));
+    }
+    finally {
+      if (indexReader != null){
+        try{
+          indexReader.close();
+        }
+        catch (Throwable t) {
+          aLogger.warn("Error while closing indexReader: " + t.getMessage());
+        }
+
+      }
+
+      if (indexWriter != null){
+        try{
+          indexWriter.close();
+        }
+        catch (Throwable t) {
+          aLogger.warn("Error while closing indexWriter: " + t.getMessage());
+        }
+
+      }
+
+
+      try{
+        FSDirectory theIndexDir=FSDirectory.getDirectory(indexPath,false);
+        if (indexReader.isLocked(theIndexDir)){
+          indexReader.unlock(theIndexDir);
+        }
+      }
+      catch (Throwable t) {
+        aLogger.warn("Error while unlocking index: " + t.getMessage());
+      }
     }
 
 
@@ -161,10 +191,16 @@ public class IndexingProducerNode implements ProducerNode {
 
     endTime = System.currentTimeMillis();
 
-    aLogger.println("  IndexTime: " + (endTime-startTime) + " ms<br>");
-    aLogger.flush();
+    aLogger.info("  IndexTime: " + (endTime-startTime) + " ms<br>");
   }
 }
+
+
+
+
+
+
+
 
 
 

@@ -32,7 +32,8 @@
 package mircoders.producer;
 
 import java.util.*;
-import java.io.*;
+
+import mir.log.*;
 import mir.util.*;
 import mir.producer.*;
 import mir.entity.*;
@@ -47,7 +48,7 @@ public class ContentMarkingProducerNode implements ProducerNode {
     contentKey = aContentKey;
   }
 
-  public void produce(Map aValueMap, String aVerb, PrintWriter aLogger) throws ProducerFailure {
+  public void produce(Map aValueMap, String aVerb, LoggerWrapper aLogger) throws ProducerFailure {
     Object data;
     Entity entity;
 
@@ -66,10 +67,7 @@ public class ContentMarkingProducerNode implements ProducerNode {
       ((EntityContent) entity).setProduced(true);
     }
     catch (Throwable t) {
-      aLogger.println("Error while marking content: " + t.getMessage());
-      t.printStackTrace(aLogger);
-
-      throw new ProducerFailure(t.getMessage(), t);
+      aLogger.error("Error while marking content: " + t.getMessage());
     }
   }
 }

@@ -41,41 +41,78 @@ import mircoders.storage.*;
 
 
 public class MirBasicAdminInterfaceLocalizer implements MirAdminInterfaceLocalizer {
-  private Map simpleCommentOperations;
-  private Map simpleArticleOperations;
+  private Vector simpleCommentOperations;
+  private Vector simpleArticleOperations;
+  private Map simpleCommentOperationsMap;
+  private Map simpleArticleOperationsMap;
 
   public MirBasicAdminInterfaceLocalizer() throws MirLocalizerFailure, MirLocalizerExc {
-    simpleCommentOperations = new HashMap();
-    simpleArticleOperations = new HashMap();
+    simpleCommentOperations = new Vector();
+    simpleArticleOperations = new Vector();
+    simpleCommentOperationsMap = new HashMap();
+    simpleArticleOperationsMap = new HashMap();
 
-    buildSimpleCommentOperations(simpleCommentOperations);
-    buildSimpleArticleOperations(simpleArticleOperations);
+    addSimpleArticleOperation(new ChangeArticleFieldOperation("newswire", "to_article_type", "0", "1"));
+    addSimpleArticleOperation(new SetArticleFieldOperation("unhide", "is_published", "1"));
+    addSimpleArticleOperation(new SetArticleFieldOperation("hide", "is_published", "0"));
+
+    addSimpleCommentOperation(new SetCommentFieldOperation("unhide", "is_published", "1"));
+    addSimpleCommentOperation(new SetCommentFieldOperation("hide", "is_published", "0"));
   }
 
-  public Map simpleCommentOperations() {
+  public List simpleCommentOperations() {
     return simpleCommentOperations;
   };
 
-  public Map simpleArticleOperations() {
+  public List simpleArticleOperations() {
     return simpleArticleOperations;
   };
 
-  public void buildSimpleCommentOperations(Map anOperations) throws MirLocalizerFailure, MirLocalizerExc {
-    anOperations.put("hide", new HideCommentOperation());
-    anOperations.put("unhide", new UnhideCommentOperation());
+  public MirSimpleEntityOperation simpleArticleOperationForName(String aName) {
+    return (MirSimpleEntityOperation) simpleArticleOperationsMap.get(aName);
   };
 
-  public void buildSimpleArticleOperations(Map anOperations)  throws MirLocalizerFailure, MirLocalizerExc {
-    anOperations.put("hide", new HideArticleOperation());
-    anOperations.put("unhide", new UnhideArticleOperation());
+  public MirSimpleEntityOperation simpleCommentOperationForName(String aName) {
+    return (MirSimpleEntityOperation) simpleCommentOperationsMap.get(aName);
   };
+
+  public void removeSimpleArticleOperation(String aName) {
+    simpleArticleOperations.remove(simpleArticleOperationsMap.get(aName));
+    simpleArticleOperationsMap.remove(aName);
+  }
+
+  public void addSimpleArticleOperation(MirSimpleEntityOperation anOperation) {
+    removeSimpleArticleOperation(anOperation.getName());
+    simpleArticleOperationsMap.put(anOperation.getName(), anOperation);
+    simpleArticleOperations.add(anOperation);
+  }
+
+  public void removeSimpleCommentOperation(String aName) {
+    simpleCommentOperations.remove(simpleCommentOperationsMap.get(aName));
+    simpleCommentOperationsMap.remove(aName);
+  }
+
+  public void addSimpleCommentOperation(MirSimpleEntityOperation anOperation) {
+    removeSimpleCommentOperation(anOperation.getName());
+    simpleCommentOperationsMap.put(anOperation.getName(), anOperation);
+    simpleCommentOperations.add(anOperation);
+  }
 
   protected abstract static class EntityModifyingOperation implements MirSimpleEntityOperation {
+    private String name;
+
+    protected EntityModifyingOperation(String aName) {
+      name = aName;
+    }
+
+    public String getName() {
+      return name;
+    };
+
     public boolean isAvailable(EntityAdapter anEntity) {
       try {
-
         Entity entity = anEntity.getEntity();
-        return (entity instanceof EntityComment) && isAvailable((EntityComment) entity);
+        return isAvailable(entity);
       }
       catch (Throwable t) {
         return false;
@@ -97,6 +134,10 @@ public class MirBasicAdminInterfaceLocalizer implements MirAdminInterfaceLocaliz
   }
 
   public static abstract class CommentModifyingOperation extends EntityModifyingOperation {
+    public CommentModifyingOperation(String aName) {
+      super(aName);
+    }
+
     protected boolean isAvailable(Entity anEntity) throws StorageObjectException {
       return anEntity instanceof EntityComment && isAvailable((EntityComment) anEntity);
     }
@@ -111,8 +152,12 @@ public class MirBasicAdminInterfaceLocalizer implements MirAdminInterfaceLocaliz
   }
 
   public static abstract class ArticleModifyingOperation extends EntityModifyingOperation {
+    public ArticleModifyingOperation(String aName) {
+      super(aName);
+    }
+
     protected boolean isAvailable(Entity anEntity) throws StorageObjectException {
-      return anEntity instanceof EntityContent && isAvailable((EntityComment) anEntity);
+      return anEntity instanceof EntityContent && isAvailable((EntityContent) anEntity);
     }
 
     protected void performModification(Entity anEntity) throws StorageObjectException {
@@ -124,39 +169,65 @@ public class MirBasicAdminInterfaceLocalizer implements MirAdminInterfaceLocaliz
     protected abstract void performModification(EntityContent anArticle) throws StorageObjectException ;
   }
 
-  private static class HideCommentOperation extends CommentModifyingOperation {
+  protected static class SetCommentFieldOperation extends CommentModifyingOperation {
+    private String field;
+    private String value;
+
+    public SetCommentFieldOperation(String aName, String aField, String aValue) {
+      super(aName);
+
+      field = aField;
+      value = aValue;
+    }
+
     protected boolean isAvailable(EntityComment aComment) {
-      return aComment.getValue("is_published").equals("1");
+      return aComment.getValue(field) == null || !aComment.getValue(field).equals(value);
     }
+
     protected void performModification(EntityComment aComment) throws StorageObjectException {
-      aComment.setValueForProperty("is_published", "0");
+      aComment.setValueForProperty(field, value);
     }
   }
 
-  private static class UnhideCommentOperation extends CommentModifyingOperation {
-    protected boolean isAvailable(EntityComment aComment) {
-      return aComment.getValue("is_published").equals("0");
-    }
-    protected void performModification(EntityComment aComment) throws StorageObjectException {
-      aComment.setValueForProperty("is_published", "1");
-    }
-  }
+  protected static class SetArticleFieldOperation extends ArticleModifyingOperation {
+    private String field;
+    private String value;
 
-  private static class HideArticleOperation extends ArticleModifyingOperation {
+    public SetArticleFieldOperation(String aName, String aField, String aValue) {
+      super(aName);
+
+      field = aField;
+      value = aValue;
+    }
+
     protected boolean isAvailable(EntityContent anArticle) {
-      return anArticle.getValue("is_published").equals("1");
+      return anArticle.getValue(field) == null || !anArticle.getValue(field).equals(value);
     }
+
     protected void performModification(EntityContent anArticle) throws StorageObjectException {
-      anArticle.setValueForProperty("is_published", "0");
+      anArticle.setValueForProperty(field, value);
     }
   }
 
-  private static class UnhideArticleOperation extends ArticleModifyingOperation {
-    protected boolean isAvailable(EntityContent anArticle) {
-      return anArticle.getValue("is_published").equals("0");
+  protected static class ChangeArticleFieldOperation extends ArticleModifyingOperation {
+    private String field;
+    private String oldValue;
+    private String newValue;
+
+    public ChangeArticleFieldOperation(String aName, String aField, String anOldValue, String aNewValue) {
+      super(aName);
+
+      field = aField;
+      newValue = aNewValue;
+      oldValue = anOldValue;
     }
+
+    protected boolean isAvailable(EntityContent anArticle) {
+      return anArticle.getValue(field) != null && anArticle.getValue(field).equals(oldValue);
+    }
+
     protected void performModification(EntityContent anArticle) throws StorageObjectException {
-      anArticle.setValueForProperty("is_published", "1");
+      anArticle.setValueForProperty(field, newValue);
     }
   }
 }
