@@ -42,7 +42,6 @@ import mir.entity.adapter.EntityAdapterModel;
 import mir.generator.Generator;
 import mir.generator.WriterEngine;
 import mir.log.LoggerWrapper;
-import mir.producer.CompositeProducerNode;
 import mir.producer.ProducerFactory;
 import mir.producer.reader.DefaultProducerNodeBuilders;
 import mir.producer.reader.ProducerConfigReader;

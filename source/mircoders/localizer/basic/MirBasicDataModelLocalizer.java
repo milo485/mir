@@ -354,7 +354,7 @@ public class MirBasicDataModelLocalizer implements MirDataModelLocalizer {
       try {
         return anEntityAdapter.getRelation(
           "exists (select * from content_x_media where content_id="+anEntityAdapter.get("id")+" and media_id=id)",
-          "title",
+          "id",
           definition);
       }
       catch (Throwable t) {

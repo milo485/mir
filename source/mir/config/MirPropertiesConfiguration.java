@@ -53,10 +53,18 @@ public class MirPropertiesConfiguration extends PropertiesConfiguration {
   private static MirPropertiesConfiguration instance;
   private static ServletContext context;
   private static String contextPath;
-  
+
   //if one of these properties is not present a new 
-  //emtpy property is added
-  private String[] needed = {"Producer.DocRoot"};
+  //property is added with its default value;
+  private  static NeededProperty[] neededWithValue =
+  {
+  	new NeededProperty("Producer.DocRoot",""),
+		new NeededProperty("Producer.ImageRoot",""),
+		new NeededProperty("Producer.Image.Path",""),
+		new NeededProperty("Producer.Media.Path",""),
+		new NeededProperty("Producer.RealMedia.Path",""),
+		new NeededProperty("Producer.Image.IconPath","")
+  };
 
   /**
    * Constructor for MirPropertiesConfiguration.
@@ -64,7 +72,7 @@ public class MirPropertiesConfiguration extends PropertiesConfiguration {
   private MirPropertiesConfiguration(ServletContext ctx, String ctxPath)
     throws IOException {
     super(ctx.getRealPath("/WEB-INF/etc/") + "/config.properties",
-      ctx.getRealPath("/WEB-INF/etc/") + "/default.properties");
+      ctx.getRealPath("/WEB-INF/") + "/default.properties");
     addProperty("Home", ctx.getRealPath("/WEB-INF/") + "/");
     checkMissing();
   }
@@ -95,22 +103,6 @@ public class MirPropertiesConfiguration extends PropertiesConfiguration {
     MirPropertiesConfiguration.context = context;
   }
 
-  public Map allSettings() {
-    Iterator iterator = this.getKeys();
-    Map returnMap = new HashMap();
-
-    while (iterator.hasNext()) {
-      String key = (String) iterator.next();
-      Object o = this.getString(key);
-      if(o == null){        
-      	o = new Object();
-      }
-      returnMap.put(key, o);
-    }
-
-    return returnMap;
-  }
-
   /**
    * Returns the context.
    * @return ServletContext
@@ -119,6 +111,35 @@ public class MirPropertiesConfiguration extends PropertiesConfiguration {
     return context;
   }
 
+	/**
+	 * Returns all properties in a Map
+	 * @return Map
+	 */
+  public Map allSettings() {
+    Iterator iterator = this.getKeys();
+    Map returnMap = new HashMap();
+
+    while (iterator.hasNext()) {
+      String key = (String) iterator.next();
+      Object o = this.getString(key);
+
+      if (o == null) {
+        o = new Object();
+      }
+
+      returnMap.put(key, o);
+    }
+
+    return returnMap;
+  }
+
+
+  /**
+   * Returns a String-property concatenated with the home-dir of the
+   * installation
+   * @param key
+   * @return String
+   */
   public String getStringWithHome(String key) {
     String returnString = getString(key);
 
@@ -129,14 +150,17 @@ public class MirPropertiesConfiguration extends PropertiesConfiguration {
     return getString("Home") + returnString;
   }
 
-  private void checkMissing(){
-  	for(int i = 0; i < needed.length; i++){  	  
-  	  if(super.getProperty(needed[i]) == null){
-  	  	addProperty(needed[i],"");
-  	  }
-  	}
+  /**
+   * Checks if one property is missing and adds a default value
+   */
+  private void checkMissing() {
+		for (int i = 0; i < neededWithValue.length; i++) {
+			if (super.getProperty(neededWithValue[i].getKey()) == null) {
+				addProperty(neededWithValue[i].getKey(), neededWithValue[i].getValue());
+			}
+		}
   }
-  
+
   public File getFile(String key) throws FileNotFoundException {
     String path = getStringWithHome(key);
     File returnFile = new File(path);
@@ -155,9 +179,10 @@ public class MirPropertiesConfiguration extends PropertiesConfiguration {
     if (super.getString(key) == null) {
       return new String();
     }
+
     return super.getString(key);
   }
-  
+
   /**
    * @see org.apache.commons.configuration.Configuration#getString(java.lang.String)
    */
@@ -165,6 +190,7 @@ public class MirPropertiesConfiguration extends PropertiesConfiguration {
     if (super.getProperty(key) == null) {
       return new String();
     }
+
     return super.getProperty(key);
   }
 
@@ -192,5 +218,28 @@ public class MirPropertiesConfiguration extends PropertiesConfiguration {
     public PropertiesConfigFailure(String msg, Throwable cause) {
       super(msg, cause);
     }
+    
   }
+  
+	/**
+	 * A Class for properties to be checked
+	 * @author idefix
+	 */
+	private static class NeededProperty {
+		private String _key;
+		private String _value;
+    	
+		public NeededProperty(String key, String value) {
+			_key = key;
+			_value = value;
+		}
+		
+		public String getKey() {
+			return _key;
+		}
+		
+		public String getValue() {
+			return _value;
+		}
+	}
 }

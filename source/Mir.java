@@ -58,6 +58,7 @@ import freemarker.template.TemplateModel;
 
 import mir.config.MirPropertiesConfiguration;
 import mir.generator.FreemarkerGenerator;
+import mir.log.LoggerWrapper;
 import mir.misc.HTMLTemplateProcessor;
 import mir.misc.StringUtil;
 import mir.servlet.AbstractServlet;
@@ -80,8 +81,8 @@ import mircoders.storage.DatabaseUsers;
 /**
  * Mir.java - main servlet, that dispatches to servletmodules
  *
- * @author $Author: zapata $
- * @version $Id: Mir.java,v 1.29 2003/02/23 05:00:10 zapata Exp $
+ * @author $Author: idfx $
+ * @version $Id: Mir.java,v 1.30 2003/02/28 18:27:07 idfx Exp $
  *
  */
 public class Mir extends AbstractServlet {
@@ -376,7 +377,7 @@ public class Mir extends AbstractServlet {
     }
     catch (Exception e) {
       logger.error("Error in ErrorTemplate: " + e.getMessage());
-      e.printStackTrace(logger.asPrintWriter(logger.DEBUG_MESSAGE));
+      e.printStackTrace(logger.asPrintWriter(LoggerWrapper.DEBUG_MESSAGE));
     }
   }
 
@@ -465,7 +466,7 @@ public class Mir extends AbstractServlet {
         getLocale(req));
     }
     catch (Exception e) {
-      e.printStackTrace(logger.asPrintWriter(logger.DEBUG_MESSAGE));
+      e.printStackTrace(logger.asPrintWriter(LoggerWrapper.DEBUG_MESSAGE));
       handleError(req, res, out, "error while trying to send startpage. " + e.getMessage());
     }
   }

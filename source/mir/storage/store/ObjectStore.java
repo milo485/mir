@@ -71,7 +71,6 @@ import java.util.Properties;
 import javax.servlet.http.HttpServletRequest;
 
 import mir.config.MirPropertiesConfiguration;
-import mir.config.MirPropertiesConfiguration.PropertiesConfigExc;
 import mir.log.LoggerWrapper;
 
 public class ObjectStore {

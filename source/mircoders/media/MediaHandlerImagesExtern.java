@@ -101,7 +101,7 @@ public class MediaHandlerImagesExtern extends MediaHandlerGeneric
     }
     catch(Throwable t) {
       logger.error("MediaHandlerImagesExtern.produce: " + t.getMessage());
-      t.printStackTrace(logger.asPrintWriter(logger.DEBUG_MESSAGE));
+      t.printStackTrace(logger.asPrintWriter(LoggerWrapper.DEBUG_MESSAGE));
       throw new MirMediaException(t.getMessage());
     }
   }

@@ -65,7 +65,7 @@ public class GeneratorLibraryRepository {
       }
     }
     catch (Exception e) {
-      e.printStackTrace(logger.asPrintWriter(logger.DEBUG_MESSAGE));
+      e.printStackTrace(logger.asPrintWriter(LoggerWrapper.DEBUG_MESSAGE));
       throw new GeneratorFailure("Failed to construct generator library: " + e.getMessage(), e);
     }
 

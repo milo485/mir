@@ -53,7 +53,7 @@ import mir.storage.StorageObjectFailure;
  * Diese Klasse enth?lt die Daten eines MetaObjekts
  *
  * @author RK, mh, mir-coders
- * @version $Id: EntityImages.java,v 1.15 2003/02/23 05:00:13 zapata Exp $
+ * @version $Id: EntityImages.java,v 1.16 2003/02/28 18:27:08 idfx Exp $
  */
 
 
@@ -104,13 +104,13 @@ public class EntityImages extends EntityUploadedMedia
     }
     catch (Exception e) {
       logger.error("EntityImages.getImage failed: "+e.toString());
-      e.printStackTrace(logger.asPrintWriter(logger.DEBUG_MESSAGE));
+      e.printStackTrace(logger.asPrintWriter(LoggerWrapper.DEBUG_MESSAGE));
       try {
         con.setAutoCommit(true);
       }
       catch (Exception e2) {
         logger.error("EntityImages.getImage reseting transaction mode failed: " + e2.toString());
-        e2.printStackTrace(logger.asPrintWriter(logger.DEBUG_MESSAGE));
+        e2.printStackTrace(logger.asPrintWriter(LoggerWrapper.DEBUG_MESSAGE));
       }
 
       try {
@@ -221,13 +221,13 @@ public class EntityImages extends EntityUploadedMedia
     }
     catch (Throwable e) {
       logger.error("EntityImages.getIcon failed: "+e.toString());
-      e.printStackTrace(logger.asPrintWriter(logger.DEBUG_MESSAGE));
+      e.printStackTrace(logger.asPrintWriter(LoggerWrapper.DEBUG_MESSAGE));
       try {
         con.setAutoCommit(true);
       }
       catch (Throwable e2) {
         logger.error("EntityImages.getIcon reseting transaction mode failed: " + e2.toString());
-        e2.printStackTrace(logger.asPrintWriter(logger.DEBUG_MESSAGE));
+        e2.printStackTrace(logger.asPrintWriter(LoggerWrapper.DEBUG_MESSAGE));
       }
 
       try {

@@ -1,7 +1,5 @@
 package mir.util;
 
-import java.util.*;
-
 public class SQLQueryBuilder {
   private StringBuffer whereClause;
   private StringBuffer orderByClause;

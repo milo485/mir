@@ -138,11 +138,13 @@
     <copy todir="${deploy.webinf}/templates">
       <fileset dir="templates"/>
     </copy>
-
+    
+    <copy todir="${deploy.webinf}" file="source/default.properties" />
+    
     <copy todir="${deploy.classes}/bundles">
       <fileset dir="bundles"/>
     </copy>
-
+    
     <copy todir="${deploy.home}/WEB-INF/lib">
       <fileset dir="lib">
         <exclude name="ant.jar"/>

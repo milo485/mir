@@ -120,7 +120,7 @@ import freemarker.template.TemplateModelRoot;
  *    open-postings to the newswire
  *
  * @author mir-coders group
- * @version $Id: ServletModuleOpenIndy.java,v 1.59 2003/02/23 05:00:15 zapata Exp $
+ * @version $Id: ServletModuleOpenIndy.java,v 1.60 2003/02/28 18:27:08 idfx Exp $
  *
  */
 
@@ -465,7 +465,7 @@ public class ServletModuleOpenIndy extends ServletModule
       }
     }
     catch (FileHandlerException e) {
-      e.printStackTrace(logger.asPrintWriter(logger.DEBUG_MESSAGE));
+      e.printStackTrace(logger.asPrintWriter(LoggerWrapper.DEBUG_MESSAGE));
       throw new ServletModuleException("MediaException: "+ e.getMessage());
     }
     catch (IOException e) { throw new ServletModuleException("IOException: "+ e.getMessage());}

@@ -50,7 +50,6 @@ import mir.misc.FileHandler;
 import mir.misc.FileHandlerException;
 import mir.misc.FileHandlerUserException;
 import mir.misc.StringUtil;
-import mir.module.ModuleException;
 import mir.storage.Database;
 import mir.storage.StorageObjectExc;
 import mir.storage.StorageObjectFailure;
@@ -65,7 +64,7 @@ import mircoders.storage.DatabaseMediaType;
  *    appropriate media objects are set.
  *
  * @author mh
- * @version $Id: MediaRequest.java,v 1.13 2003/02/23 05:00:14 zapata Exp $
+ * @version $Id: MediaRequest.java,v 1.14 2003/02/28 18:27:08 idfx Exp $
  *
  */
 

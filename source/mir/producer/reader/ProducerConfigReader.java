@@ -31,25 +31,20 @@
 
 package  mir.producer.reader;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Stack;
 import java.util.Vector;
 
 import mir.producer.CompositeProducerNode;
 import mir.producer.ProducerFactory;
 import mir.producer.ProducerNode;
 import mir.producer.SimpleProducerVerb;
-
-import mir.util.*;
+import mir.util.XMLReader;
+import mir.util.XMLReaderTool;
 
 public class ProducerConfigReader {
   private ProducerNodeBuilderLibrary builderLibrary;

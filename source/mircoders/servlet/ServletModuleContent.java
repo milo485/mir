@@ -31,16 +31,17 @@
 
 package mircoders.servlet;
 
-import java.io.PrintWriter;
 import java.io.IOException;
-import java.util.*;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import mir.entity.EntityList;
-import mir.entity.adapter.EntityAdapter;
 import mir.entity.adapter.EntityAdapterModel;
 import mir.entity.adapter.EntityIteratorAdapter;
 import mir.log.LoggerWrapper;
@@ -50,41 +51,28 @@ import mir.servlet.ServletModule;
 import mir.servlet.ServletModuleException;
 import mir.storage.StorageObjectFailure;
 import mir.util.CachingRewindableIterator;
-import mir.util.HTMLRoutines;
-import mir.util.JDBCStringRoutines;
 import mir.util.HTTPRequestParser;
-import mir.util.URLBuilder;
+import mir.util.JDBCStringRoutines;
 import mir.util.SQLQueryBuilder;
-import mir.log.*;
-
+import mir.util.URLBuilder;
 import mircoders.entity.EntityContent;
 import mircoders.entity.EntityUsers;
 import mircoders.global.MirGlobal;
 import mircoders.module.ModuleContent;
-import mircoders.module.ModuleImages;
-import mircoders.module.ModuleSchwerpunkt;
-import mircoders.module.ModuleTopics;
 import mircoders.search.IndexUtil;
-import mircoders.storage.DatabaseArticleType;
 import mircoders.storage.DatabaseComment;
 import mircoders.storage.DatabaseContent;
 import mircoders.storage.DatabaseContentToTopics;
-import mircoders.storage.DatabaseFeature;
-import mircoders.storage.DatabaseImages;
-import mircoders.storage.DatabaseLanguage;
-import mircoders.storage.DatabaseTopics;
 
 import org.apache.lucene.index.IndexReader;
 
 import freemarker.template.SimpleHash;
-import freemarker.template.SimpleScalar;
-import freemarker.template.TemplateModelRoot;
 
 /*
  *  ServletModuleContent -
  *  deliver html for the article admin form.
  *
- * @version $Id: ServletModuleContent.java,v 1.34 2003/02/21 05:37:59 zapata Exp $
+ * @version $Id: ServletModuleContent.java,v 1.36 2003/03/02 04:36:31 zapata Exp $
  * @author rk, mir-coders
  *
  */
@@ -463,7 +451,7 @@ public class ServletModuleContent extends ServletModule
       responseData.put("thisurl" , urlBuilder.getQuery());
 
       if (count>=anOffset+nrArticlesPerPage) {
-        urlBuilder.setValue("offset", anOffset + nrArticlesPerPage);
+        urlBuilder.setValue("offset", (anOffset + nrArticlesPerPage));
         responseData.put("nexturl" , urlBuilder.getQuery());
       }
 
@@ -556,7 +544,7 @@ public class ServletModuleContent extends ServletModule
       article.update();
     }
     catch(Throwable e) {
-      e.printStackTrace(logger.asPrintWriter(logger.DEBUG_MESSAGE));
+      e.printStackTrace(logger.asPrintWriter(LoggerWrapper.DEBUG_MESSAGE));
       logger.error("ServletModuleContent.clearparent: " + e.getMessage());
 
       throw new ServletModuleException("ServletModuleContent.clearparent: " + e.getMessage());

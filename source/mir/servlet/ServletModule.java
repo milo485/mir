@@ -54,8 +54,6 @@ import mir.misc.LineFilterWriter;
 import mir.module.AbstractModule;
 import mir.module.ModuleException;
 import mir.storage.StorageObject;
-import mir.storage.StorageObjectFailure;
-
 import mir.util.*;
 
 
@@ -488,7 +486,7 @@ public abstract class ServletModule {
       return withValues;
     }
     catch (Throwable e) {
-      e.printStackTrace(logger.asPrintWriter(logger.DEBUG_MESSAGE));
+      e.printStackTrace(logger.asPrintWriter(LoggerWrapper.DEBUG_MESSAGE));
       throw new ServletModuleException(
           "ServletModule.getIntersectingValues: " + e.getMessage());
     }

@@ -63,7 +63,7 @@ import mircoders.entity.EntityImages;
  *
  * @see mir.media.MirMedia
  * @author mh
- * @version $Id: MediaHandlerImages.java,v 1.17 2003/02/23 05:00:14 zapata Exp $
+ * @version $Id: MediaHandlerImages.java,v 1.18 2003/02/28 18:27:08 idfx Exp $
  */
 
 
@@ -113,7 +113,7 @@ public abstract class MediaHandlerImages implements MirMedia
     }
     catch ( StorageObjectFailure e) {
       logger.error("MediaHandlerImages.set: "+e.getMessage());
-      e.printStackTrace(logger.asPrintWriter(logger.DEBUG_MESSAGE));
+      e.printStackTrace(logger.asPrintWriter(LoggerWrapper.DEBUG_MESSAGE));
       throw new MirMediaException(e.getMessage());
     }
   }

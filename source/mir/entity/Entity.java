@@ -59,7 +59,7 @@ import mir.storage.StorageObjectFailure;
  * Base Class of Entities
  * Interfacing TemplateHashModel and TemplateModelRoot to be freemarker compliant
  *
- * @version $Id: Entity.java,v 1.15 2003/02/23 05:00:11 zapata Exp $
+ * @version $Id: Entity.java,v 1.16 2003/02/28 18:27:07 idfx Exp $
  * @author rk
  *
  */
@@ -288,7 +288,7 @@ public class Entity implements TemplateHashModel, TemplateModelRoot
   protected void throwStorageObjectFailure(Throwable e, String wo) throws
       StorageObjectFailure {
     logger.error(e.toString() + " function: " + wo);
-    e.printStackTrace(logger.asPrintWriter(logger.DEBUG_MESSAGE));
+    e.printStackTrace(logger.asPrintWriter(LoggerWrapper.DEBUG_MESSAGE));
 
     throw new StorageObjectFailure("Storage Object Exception in entity", e);
   }

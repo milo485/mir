@@ -44,7 +44,6 @@ import mir.media.MediaHelper;
 import mir.media.MirMedia;
 import mir.misc.NumberUtils;
 import mir.storage.StorageObject;
-import mir.storage.StorageObjectExc;
 import mir.storage.StorageObjectFailure;
 import mir.log.LoggerWrapper;
 
@@ -54,7 +53,7 @@ import mircoders.storage.DatabaseUploadedMedia;
 /**
  *
  * @author mh, mir-coders group
- * @version $Id: EntityUploadedMedia.java,v 1.19 2003/02/23 05:00:13 zapata Exp $
+ * @version $Id: EntityUploadedMedia.java,v 1.20 2003/02/28 18:27:08 idfx Exp $
  */
 
 
